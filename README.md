@@ -66,10 +66,19 @@ draft-only marker still present at submission time fails verification.
 citation verification via upstream `citation-management` / `research-lookup`,
 reporting-guideline compliance (CONSORT/STROBE/PRISMA via upstream `peer-review`).
 
-**Out of scope, deferred to v2:** multi-author collaboration in git, Zotero
-round-trip via `pyzotero` (manual `refs.bib` for now), reviews / grants /
-theses, venue-specific templating, auto-submission to journal portals, LaTeX
-compile.
+**Zotero (v1):** optional dual-source-of-truth citation backend. Activate via
+`zotero.enabled: true` in `.writing/metadata.yaml`; supply credentials in
+`.env` (see `.env.example` for `ZOTERO_API_KEY` plus `ZOTERO_USER_ID` or
+`ZOTERO_GROUP_ID`). When enabled, drafting and claim-verification query
+Zotero before falling back to network DOI resolution; with
+`auto_push_new_citations: true`, network hits are pushed back to the
+configured collection. When disabled, the pipeline runs network-only via
+`citation-management` / `research-lookup`.
+
+**Out of scope, deferred to v2:** multi-author collaboration in git,
+Zotero annotation/notes round-trip, reviews / grants / theses,
+non-IMRAD formats, venue-specific templating, auto-submission to
+journal portals, LaTeX compile.
 
 ## License
 
