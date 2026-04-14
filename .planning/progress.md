@@ -10,7 +10,12 @@
 | Phase 0.5: Spec self-review | ✅ complete | - | - | - | main session | no placeholders; §3/§5 consistent |
 | Phase 1: Spec interview | ✅ complete | - | - | - | superpower-planning:spec-interview | design v2 with decisions log; install cmd verified |
 | Phase 2: Implementation planning | ✅ complete | - | - | - | writing-plans | 20 tasks in 7 groups, max 7-way parallel |
-| Phase 3: Implementation | ⏳ pending | - | - | - | — | skills + hooks + commands |
+| Phase 3a: Infrastructure (Tasks 0-4) | ✅ complete | - | - | - | direct | plugin.json + scripts + hooks + 6/6 hook smoke cases |
+| Phase 3b: Zotero v1 pivot | ✅ complete | - | - | - | direct | .gitignore + .env.example + check-zotero.sh + design.md §14 |
+| Phase 3c: 7 SKILL.md (Tasks 5-11) | ✅ complete | PASS (all 7) | PASS (all 7 via team loop) | - | team-driven: 4 impl + 2 reviewer | 1913 LOC total; 7 commits + 4 fix commits |
+| Phase 3d: 7 commands (Tasks 12-18) | ✅ complete | - | - | - | direct | thin skill wrappers |
+| Phase 3e: smoke test (Task 19) | ✅ complete | - | - | - | direct | 26/26 checks pass |
+| Phase 3f: final integration (Task 20) | ✅ complete | - | - | - | direct | v0.1.0 tag |
 
 ## Session: 2026-04-14
 
@@ -29,8 +34,29 @@
 - **Status:** ⏳ pending
 - Planned checks: placeholder scan, internal consistency, scope, ambiguity — fix inline.
 
-### Next step
-- Run `superpower-planning:spec-interview` to deepen the 5 open questions in design.md §12.
+### Phases 3a-3f: Implementation
+- **Status:** ✅ complete
+- Execution mix: direct execution for infrastructure (Tasks 0-4) and lightweight wrappers (Tasks 12-19); Team-Driven with 4 implementers + spec/quality reviewers for the 7 SKILL.md writes (Tasks 5-11).
+- Mid-flight pivot: user obtained Zotero API key; promoted Zotero integration from v2 to v1 (design.md §14). All 7 SKILL.md authored after the pivot reflect Zotero-aware responsibilities.
+- Smoke test: 26/26 checks pass (dir init, check-deps fail-message, check-zotero fail-message, 5 claim enforcement cases, 3 manifest sanity checks, 7 skill + 7 command + 4 hook file presence).
+- Deferred to v2: multi-author git workflow, Zotero annotation/notes round-trip, non-IMRAD formats (reviews / grants / theses), venue-specific templates, LaTeX compile, auto-submission.
+- Open work for next session: pilot on a real short paper to validate claim-first protocol rhythm; measure research-lookup semantic-match FP/FN on a curated citation set.
+
+### Git history
+Relevant commits (in order):
+- 2a44762 chore: scaffold plugin manifest and directory tree
+- fb7225c feat(v0.1): infrastructure (init script, dep check, claim-first hook)
+- 9a67f8f feat: promote Zotero integration to v1 (dual source of truth)
+- 6db9bed feat: submission skill
+- e7f13e6 feat: claim-verification skill
+- cfe73a3 feat: drafting skill
+- c004700 feat: main router skill
+- e16eb06 chore: implementer-4 planning artifacts for Task 11
+- bbce53e feat: outlining skill
+- 274c9a0 feat: revision skill
+- 3f2f140 feat: writing-plans skill
+- e02650f / 8673d9c / 65c9c9c / 37207eb — post-review fix commits from quality-reviewer loop
+- 796f0af feat: 7 slash commands
 
 ## Test Results
 | Test | Input | Expected | Actual | Status |
