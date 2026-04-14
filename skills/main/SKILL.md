@@ -191,7 +191,7 @@ Upstream skills this plugin relies on (call by **bare name**, no prefix):
 
 Every load-bearing paragraph in `.writing/manuscript/*.md` must carry a marker:
 
-- `<!-- claim: <id> -->` — links to an entry in `.writing/claims/section_<n>_<slug>.md` with fields `id`, `CLAIM`, `EVIDENCE`, `STATUS` ∈ {`stub`, `evidence_ready`, `verified`}.
+- `<!-- claim: <id> -->` — links to an entry in `.writing/claims/section_<NN>_<slug>.md` with fields `id`, `CLAIM`, `EVIDENCE`, `STATUS` ∈ {`stub`, `evidence_ready`, `verified`}.
 - `<!-- draft-only -->` — scratch prose that will be replaced before the next stage gate.
 
 A **PreToolUse hook** (`${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh`) blocks any Edit / Write / MultiEdit / NotebookEdit targeting `**/manuscript/*.md` when:
