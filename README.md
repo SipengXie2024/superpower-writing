@@ -1,84 +1,266 @@
 # superpower-writing
 
-**An IMRAD academic-writing lifecycle plugin for Claude Code.** Ports the
-[superpower-planning](https://github.com/SipengXie2024/superpower-planning)
-process skeleton — persistent state, stage gates, claim-first verification,
-subagent execution, review loops — to research-paper drafting. Delegates all
-domain content (IMRAD structure, reporting guidelines, citation management,
-figure generation, literature lookup) to the upstream
-[scientific-agent-skills](https://github.com/K-Dense-AI/scientific-agent-skills)
-collection.
+> Claude Code plugin. Ports the **superpower-planning** process skeleton
+> (persistent state, stage gates, claim-first verification, subagent execution,
+> review loops) to **IMRAD academic writing**. Delegates all domain content
+> (IMRAD structure, reporting guidelines, citation management, figure
+> generation, literature lookup) to the upstream
+> [scientific-agent-skills](https://github.com/K-Dense-AI/scientific-agent-skills)
+> collection.
+
+<!-- This README is written to be agent-executable. Every install step, every
+     check, and every troubleshooting recipe is a literal command you can run
+     verbatim. Expected outputs are shown under each command. -->
 
 ## Status
 
-`v0.1.0` — scaffold. First-pass implementation of the 7 core skills and 2 hooks.
-Single-author IMRAD only; multi-author and non-IMRAD formats deferred to v2.
+- **Version**: `v0.1.0`
+- **Scope**: single-author IMRAD research manuscripts
+- **Dependencies**: scientific-agent-skills (hard), Zotero API (optional)
+- **Repo**: https://github.com/SipengXie2024/superpower-writing
 
-## Prerequisites
+## TL;DR — what this plugin does
 
-This plugin has a **hard dependency** on scientific-agent-skills. If it is not
-installed, every skill will refuse to run and surface the install command.
+1. Persists your paper state in `.writing/` (outline, claims, manuscript, metadata, reviews, archive).
+2. Forces **claim-first writing**: every load-bearing paragraph in `manuscript/NN_*.md` must carry `<!-- claim: id -->` bound to a claim with `STATUS: evidence_ready` (or `<!-- draft-only -->` for exploration). A `PreToolUse` hook hard-blocks writes that violate this.
+3. Resolves citations **Zotero first → network fallback** (when Zotero is enabled). Pushes new DOIs back to your library if configured.
+4. Gates submission: claim-verification must pass, `metadata.yaml` complete, graphical abstract present, zero `draft-only` or `[NEEDS-EVIDENCE]` remaining.
+
+## Agent install checklist
+
+Run these in order. Each command prints what it did; compare to "Expected".
+
+### 0. Check prerequisites
 
 ```bash
-# 1. install uv (required by upstream scientific skills for Python deps)
-curl -LsSf https://astral.sh/uv/install.sh | sh
+which claude && claude --version      # needs Claude Code CLI
+which uv || curl -LsSf https://astral.sh/uv/install.sh | sh   # upstream skills need uv
+which gh && gh auth status             # needed only if you want to push
+python3 -c "import yaml"               # hook uses PyYAML
+```
 
-# 2. install scientific-agent-skills (agentskills.io standard)
+Expected: no command fails. If `python3 -c "import yaml"` errors, run `pip install --user pyyaml`.
+
+### 1. Install upstream scientific-agent-skills (hard dependency)
+
+```bash
 npx skills add K-Dense-AI/scientific-agent-skills
 ```
 
-## Install
+Expected: finishes without error. The plugin's `check-deps.sh` will now find `scientific-writing`, `literature-review`, `peer-review`, `citation-management`, `research-lookup`, `scientific-schematics` on disk.
+
+### 2. Install this plugin
 
 ```bash
-# from inside this repo
-claude plugin marketplace add ./
+claude plugin marketplace add /absolute/path/to/superpower-writing
 claude plugin install superpower-writing
 ```
 
-## Skill Inventory
+Or clone first:
 
-| Skill | Purpose |
-|-------|---------|
-| `main` | Router + dependency gate. Routes by current stage in `.writing/progress.md`. |
-| `outlining` | Brainstorm + IMRAD outline + claim-list generation in one chain. Produces `.writing/outline.md`, fills `.writing/metadata.yaml`. |
-| `writing-plans` | Decomposes outline into per-section/figure/table tasks with dependency graph. |
-| `drafting` | Orchestrates prose generation (serial or parallel). Enforces claim-first protocol. |
-| `claim-verification` | Pre-submission verifier: DOI resolution, abstract semantic match, numeric consistency, reporting-guideline checklist. |
-| `revision` | Unified review loop for internal co-authors and journal reviewers. |
-| `submission` | Final gate + archive to `.writing/archive/<date>/`. |
+```bash
+git clone https://github.com/SipengXie2024/superpower-writing.git ~/superpower-writing
+claude plugin marketplace add ~/superpower-writing
+claude plugin install superpower-writing
+```
 
-## Architecture
+Expected: `claude plugin list` shows `superpower-writing` as installed.
 
-See [`.planning/design.md`](./.planning/design.md) for the full design,
-[`.planning/plan.md`](./.planning/plan.md) for the implementation plan, and
-[`.planning/findings.md`](./.planning/findings.md) for accumulated decisions.
+### 3. Verify the install
 
-**Core novelty: claim-first writing protocol.** Every load-bearing paragraph in
-`.writing/manuscript/*.md` must be tagged `<!-- claim: id -->` and bound to a
-claim entry in `.writing/claims/section_*.md` whose `STATUS` is `evidence_ready`
-or `verified`. A `PreToolUse` hook blocks Edit/Write on manuscript files that
-reference stub-status claims. Early exploration uses `<!-- draft-only -->`; any
-draft-only marker still present at submission time fails verification.
+```bash
+cd /path/to/superpower-writing
+bash scripts/check-deps.sh
+```
+
+Expected (success): `[superpower-writing] deps OK (found at: <root>)`.
+
+If FAIL, the script prints a fix recipe including the exact `npx` command and the 7 candidate skill roots it searched. Follow it and re-run.
+
+### 4. (Optional) Enable Zotero integration
+
+Zotero turns on **dual source of truth**: citations are resolved from your Zotero library first, then fall back to network lookup via `research-lookup` / `citation-management`. When `auto_push_new_citations: true`, new DOIs discovered via network are pushed back to your configured collection.
+
+```bash
+cp .env.example .env
+# edit .env: set ZOTERO_API_KEY and either ZOTERO_USER_ID or ZOTERO_GROUP_ID
+# get the key at https://www.zotero.org/settings/keys
+# find your user ID by hitting https://api.zotero.org/keys/<KEY>
+
+bash scripts/check-zotero.sh
+```
+
+Expected: `[superpower-writing] Zotero OK (users/<id>)` or `(groups/<id>)`.
+
+Then in your paper's `.writing/metadata.yaml`:
+
+```yaml
+zotero:
+  enabled: true
+  collection_key: ABC123         # the 8-char key of a per-paper collection
+  auto_push_new_citations: true
+```
+
+`scripts/check-zotero.sh` is idempotent; it never echoes the API key (header-only, body discarded).
+
+### 5. Run the smoke test
+
+```bash
+bash tests/smoke.sh
+```
+
+Expected final line: `ALL SMOKE TESTS PASSED` (26 checks: dir init, dep-check failure messaging, claim enforcement stub/evidence/draft-only/untagged/non-manuscript, manifest sanity, file presence).
+
+## Agent usage — lifecycle by user intent
+
+Each row is keyed to what the **user** says. The **agent** picks the slash command.
+
+| User intent                                  | Slash command              | What happens                                                                                                                                               |
+|----------------------------------------------|----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| "Let's start a new paper on X"               | `/writing:outline X`       | Runs `outlining` skill. Initializes `.writing/`, seeds IMRAD outline, creates `claims/section_NN_*.md` stubs, fills `metadata.yaml`.                     |
+| "Draft the methods section"                  | `/writing:draft methods`   | Runs `drafting`. Subagent resolves EVIDENCE per claim (Zotero-first), advances STATUS to `evidence_ready`, only then writes tagged prose.               |
+| "Draft everything in parallel"               | `/writing:draft all`       | Same, in `team-driven` mode: one subagent per section.                                                                                                    |
+| "Here are reviewer comments" (paste or path) | `/writing:revise <path>`   | Runs `revision`. Intake → classify Major/Minor/OutOfScope/Factually-wrong → per-item response → diff → re-verify.                                         |
+| "Ready to submit"                            | `/writing:submit`          | Runs `submission`. Freeze gate (claim-verification PASS, metadata complete, graphical abstract present, zero draft-only/NEEDS-EVIDENCE), then archives.  |
+| "Check dependencies"                         | `/writing:check-deps`      | Runs `scripts/check-deps.sh`. If `zotero.enabled`, also `check-zotero.sh`.                                                                                 |
+| "Pause this paper, I need to switch"         | `/writing:stash <name>`    | Moves `.writing/` into `.writing/stash/<name>/`. Ready for a fresh paper.                                                                                 |
+| "Archive the current state"                  | `/writing:archive`         | Snapshots `.writing/` into `.writing/archive/<timestamp>/`.                                                                                               |
+
+## Stage gates
+
+```
+(dep-check) → outlining → writing-plans → drafting → [revision]* → submission
+                                    ↑                       │
+                                    └─── loop per review ───┘
+```
+
+Each gate updates `.writing/progress.md` Task Dashboard. Skipping requires explicit user override.
+
+## The claim-first protocol (v1 core invariant)
+
+Every paragraph in `.writing/manuscript/NN_<slug>.md` is tagged:
+
+```markdown
+<!-- claim: meth-c1 -->
+We enrolled 1,247 patients with T2D from NHANES cycles 2018–2023...
+```
+
+Or escapes enforcement for early exploration:
+
+```markdown
+<!-- draft-only -->
+Rough notes about what this section might say.
+```
+
+The hook `hooks/enforce-claims.sh` runs on every `Edit`/`Write`/`MultiEdit` targeting `**/manuscript/*.md` and refuses the write if any `claim: id` references a claim whose `STATUS` is not `evidence_ready` or `verified`. Exempt section stems (default): `00_abstract`, `06_references`, `07_acknowledgments`.
+
+Any `<!-- draft-only -->` marker still present when `/writing:submit` runs is a hard failure.
+
+## Zotero dual-source-of-truth (v1)
+
+When `zotero.enabled: true`, citation resolution is two-phase:
+
+1. **Zotero** via `Skill(skill="pyzotero")` — query by DOI in the configured library/collection. Hit = authoritative (you've vetted it); use Zotero's stored abstract for semantic match.
+2. **Network fallback** via `Skill(skill="citation-management")` / `Skill(skill="research-lookup")`. On hit, record `source: network` in the claim's EVIDENCE; if `auto_push_new_citations: true`, push to the configured Zotero collection and update `source: both`.
+
+Fail only if both sources miss.
+
+When `zotero.enabled: false` (default), the pipeline runs network-only.
+
+## `.writing/` layout
+
+```
+.writing/
+  outline.md                # IMRAD + per-section claim lists
+  findings.md               # research synthesis, decisions, reviewer context
+  progress.md               # Task Status Dashboard
+  metadata.yaml             # authors + preregistration + data/code availability + reporting guideline + zotero block
+  manuscript/
+    00_abstract.md          # exempt from claim enforcement
+    01_introduction.md
+    02_methods.md
+    03_results.md
+    04_discussion.md
+    05_conclusion.md
+    06_references.md        # exempt
+    07_acknowledgments.md   # exempt (optional)
+  claims/
+    section_<NN>_<slug>.md  # YAML list of {id, CLAIM, EVIDENCE[], STATUS}
+  figures/                  # via scientific-schematics
+    graphical_abstract.png  # mandatory per scientific-writing
+  reviews/
+    internal_<date>.md
+    journal_<round>.md
+  archive/                  # post-submission frozen snapshots
+  stash/<paper-name>/       # when you multiplex papers
+  verify-report.md          # produced by claim-verification
+  verify-cache.json         # DOI → {source, resolved_at} (gitignored)
+```
+
+## Troubleshooting recipes
+
+| Symptom                                         | Diagnostic                                                      | Fix                                                                                  |
+|-------------------------------------------------|-----------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| `check-deps.sh` fails                           | check message; names missing skill(s)                           | `npx skills add K-Dense-AI/scientific-agent-skills`                                  |
+| `check-zotero.sh` exits 1 "API key not set"     | `.env` missing or incomplete                                    | `cp .env.example .env` then fill in the two required fields                          |
+| `check-zotero.sh` HTTP 403                      | key lacks required scope                                        | regenerate at zotero.org/settings/keys with read+write on the library                |
+| `check-zotero.sh` HTTP 404                      | wrong `ZOTERO_USER_ID`                                          | `curl -sS https://api.zotero.org/keys/<YOUR_KEY>` → read `userID` field              |
+| Hook blocks a legitimate write                  | claim referenced but no such `id` in `claims/section_...md`     | Add the claim entry and set `STATUS: evidence_ready` after evidence is resolved      |
+| Hook blocks an exploratory paragraph            | untagged prose in a protected section                           | Either tag `<!-- draft-only -->` or write a proper `claim` entry                     |
+| `smoke.sh` fails                                | read the specific `FAIL: ...` line                              | Each check is independent; fix what's listed                                         |
+
+## Layout
+
+```
+.claude-plugin/
+  plugin.json
+  marketplace.json
+hooks/
+  hooks.json             # PreToolUse enforce-claims + SessionStart check-deps
+  enforce-claims.{sh,py} # claim-first enforcer
+  check-deps.sh          # SessionStart wrapper
+scripts/
+  init-writing-dir.sh    # bootstraps .writing/
+  check-deps.sh          # 7-root probe for upstream skills
+  check-zotero.sh        # Zotero API auth probe (never echoes key)
+commands/                # /writing:outline /writing:draft /writing:revise /writing:submit /writing:check-deps /writing:stash /writing:archive
+skills/
+  main/                  # router + dep gate (authoritative Claim-First Protocol section)
+  outlining/             # IMRAD outline + claim stubs + metadata.yaml
+  writing-plans/         # per-section/figure/table task decomposition
+  drafting/              # serial/parallel drafting + claim-first enforcement
+  claim-verification/    # 4-pass pre-submission verifier
+  revision/              # unified internal + journal review loop
+  submission/            # freeze gate + archive
+  planning-foundation/
+    templates/           # copied into .writing/ on init
+tests/
+  smoke.sh               # 26 end-to-end checks
+.planning/               # design.md, plan.md, findings.md, progress.md — the plugin's own design history
+.env.example
+.gitignore
+README.md
+```
 
 ## Scope (v1 YAGNI)
 
-**In scope:** single-author IMRAD research manuscripts, claim-first drafting,
-citation verification via upstream `citation-management` / `research-lookup`,
-reporting-guideline compliance (CONSORT/STROBE/PRISMA via upstream `peer-review`).
+**In scope**: single-author IMRAD research manuscripts, claim-first drafting, citation verification via upstream `citation-management` / `research-lookup`, reporting-guideline compliance (CONSORT/STROBE/PRISMA via upstream `peer-review`), optional Zotero dual-source-of-truth.
 
-**Zotero (v1):** optional dual-source-of-truth citation backend. Activate via
-`zotero.enabled: true` in `.writing/metadata.yaml`; supply credentials in
-`.env` (see `.env.example` for `ZOTERO_API_KEY` plus `ZOTERO_USER_ID` or
-`ZOTERO_GROUP_ID`). When enabled, drafting and claim-verification query
-Zotero before falling back to network DOI resolution; with
-`auto_push_new_citations: true`, network hits are pushed back to the
-configured collection. When disabled, the pipeline runs network-only via
-`citation-management` / `research-lookup`.
+**Out of scope, deferred to v2**: multi-author git collaboration, Zotero annotation/notes round-trip, reviews / grants / theses, non-IMRAD formats, venue-specific templating, auto-submission to journal portals, LaTeX compile.
 
-**Out of scope, deferred to v2:** multi-author collaboration in git,
-Zotero annotation/notes round-trip, reviews / grants / theses,
-non-IMRAD formats, venue-specific templating, auto-submission to
-journal portals, LaTeX compile.
+## Development
+
+```bash
+bash tests/smoke.sh       # 26 checks, should say ALL SMOKE TESTS PASSED
+
+# design history:
+cat .planning/design.md   # architectural spec (v3, includes Zotero §14)
+cat .planning/plan.md     # 20-task implementation plan
+cat .planning/findings.md # decisions log
+cat .planning/progress.md # phase-by-phase status
+```
+
+Contributions welcome. See `.planning/design.md` for the v2 roadmap.
 
 ## License
 
