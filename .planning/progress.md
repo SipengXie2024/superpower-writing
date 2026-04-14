@@ -9,7 +9,7 @@
 | Phase 0: Brainstorming (design) | ✅ complete | - | - | - | main session | `.planning/design.md` v1 |
 | Phase 0.5: Spec self-review | ✅ complete | - | - | - | main session | no placeholders; §3/§5 consistent |
 | Phase 1: Spec interview | ✅ complete | - | - | - | superpower-planning:spec-interview | design v2 with decisions log; install cmd verified |
-| Phase 2: Implementation planning | ⏳ pending | - | - | - | writing-plans | task list for scaffolding |
+| Phase 2: Implementation planning | ✅ complete | - | - | - | writing-plans | 20 tasks in 7 groups, max 7-way parallel |
 | Phase 3: Implementation | ⏳ pending | - | - | - | — | skills + hooks + commands |
 
 ## Session: 2026-04-14

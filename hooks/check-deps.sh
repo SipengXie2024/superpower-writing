@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# SessionStart hook. Runs the shared dep-check script and emits a
+# system-reminder summarizing status. Never blocks session start
+# (exit 0 always); reminder is advisory.
+
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+OUTPUT="$("$PLUGIN_ROOT/scripts/check-deps.sh" 2>&1)"
+STATUS=$?
+
+if [[ $STATUS -ne 0 ]]; then
+  cat <<EOF
+<system-reminder>
+superpower-writing dependency check FAILED.
+
+$OUTPUT
+
+Do not invoke any superpower-writing skill (main, outlining, writing-plans,
+drafting, claim-verification, revision, submission) until the missing
+dependencies are installed.
+</system-reminder>
+EOF
+else
+  cat <<EOF
+<system-reminder>
+superpower-writing deps OK. Upstream scientific-agent-skills detected.
+</system-reminder>
+EOF
+fi
+exit 0

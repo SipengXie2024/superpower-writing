@@ -1,0 +1,25 @@
+# .writing/metadata.yaml — scientific-integrity state.
+# Populated during outlining. Verified at submission gate (presence check only;
+# user owns truthfulness of each field).
+
+authors: []
+# - name: Sipeng Xie
+#   affil: Institution name
+#   orcid: 0000-0000-0000-0000
+#   coi: none
+
+preregistration:
+  registry: TODO   # OSF | ClinicalTrials.gov | null
+  url: TODO
+  deviations: []
+  # - {date: YYYY-MM-DD, description: "...", rationale: "..."}
+
+data_availability:
+  statement: TODO
+  access: TODO     # open | restricted | on-request | none
+
+code_availability:
+  url: TODO
+  license: TODO    # MIT | Apache-2.0 | GPL-3.0 | none
+
+reporting_guideline: TODO  # CONSORT | STROBE | PRISMA | ARRIVE | none
