@@ -26,19 +26,28 @@ CANDIDATE_ROOTS=(
 )
 
 found_root=""
-missing=()
+missing=("${REQUIRED[@]}")
 
-for skill in "${REQUIRED[@]}"; do
-  hit=""
-  for root in "${CANDIDATE_ROOTS[@]}"; do
-    [[ -d "$root" ]] || continue
-    if find "$root" -maxdepth 5 -type f -path "*/$skill/SKILL.md" -print -quit 2>/dev/null | grep -q .; then
-      hit="$root"
-      [[ -z "$found_root" ]] && found_root="$root"
-      break
-    fi
+# One find per root (≤7 invocations total). For each root, collect the set of
+# parent-directory names of any SKILL.md and intersect with REQUIRED. The first
+# root whose set covers ALL required skills wins.
+for root in "${CANDIDATE_ROOTS[@]}"; do
+  [[ -d "$root" ]] || continue
+  present="$(find "$root" -maxdepth 5 -type f -name SKILL.md 2>/dev/null \
+              | awk -F/ '{print $(NF-1)}' | sort -u)"
+  root_missing=()
+  for skill in "${REQUIRED[@]}"; do
+    grep -qx "$skill" <<<"$present" || root_missing+=("$skill")
   done
-  [[ -z "$hit" ]] && missing+=("$skill")
+  if (( ${#root_missing[@]} == 0 )); then
+    found_root="$root"
+    missing=()
+    break
+  fi
+  # Track the smallest-missing root so an eventual failure surfaces the best candidate.
+  if (( ${#root_missing[@]} < ${#missing[@]} )); then
+    missing=("${root_missing[@]}")
+  fi
 done
 
 if (( ${#missing[@]} > 0 )); then
