@@ -8,22 +8,20 @@ OUTPUT="$("$PLUGIN_ROOT/scripts/check-deps.sh" 2>&1)"
 STATUS=$?
 
 if [[ $STATUS -ne 0 ]]; then
-  cat <<EOF
-<system-reminder>
-superpower-writing dependency check FAILED.
+  BODY="superpower-writing dependency check FAILED.
 
 $OUTPUT
 
 Do not invoke any superpower-writing skill (main, outlining, writing-plans,
 drafting, claim-verification, revision, submission) until the missing
-dependencies are installed.
-</system-reminder>
-EOF
+dependencies are installed."
 else
-  cat <<EOF
+  BODY="superpower-writing deps OK. Upstream scientific-agent-skills detected."
+fi
+
+cat <<EOF
 <system-reminder>
-superpower-writing deps OK. Upstream scientific-agent-skills detected.
+$BODY
 </system-reminder>
 EOF
-fi
 exit 0

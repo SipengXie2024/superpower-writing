@@ -48,6 +48,7 @@ target_id="${ZOTERO_GROUP_ID:-$ZOTERO_USER_ID}"
 target_type="users"
 [[ -n "${ZOTERO_GROUP_ID:-}" ]] && target_type="groups"
 
+# Key never appears in stdout/stderr: we pass it via header and redirect body to /dev/null.
 http_code=$(curl -sS -o /dev/null -w '%{http_code}' \
   -H "Zotero-API-Key: $ZOTERO_API_KEY" \
   "https://api.zotero.org/${target_type}/${target_id}/items?limit=1" || echo "000")
