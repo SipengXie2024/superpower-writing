@@ -131,7 +131,9 @@ Rules:
 - **STATUS** is always `stub` at outlining time. It advances to `evidence_ready` only after the drafting subagent resolves each EVIDENCE item (DOI resolves, dataset is accessible, figure is drawn), and to `verified` only after `claim-verification` passes.
 - Leave placeholders like `doi: 10.xxxx/...` when the exact source is not yet known — drafting will resolve them. But don't invent DOIs.
 
-The PreToolUse hook (`${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh`) will **block** any write to `manuscript/*.md` that references a `STATUS: stub` claim. That's the point: claim files must mature before prose can reference them. Outlining produces stubs on purpose.
+> Claim-first protocol: see `superpower-writing:main` §Claim-First Protocol.
+
+Outlining produces stubs on purpose: the hook blocks prose against stubs so claim files must mature before prose can reference them.
 
 ## Step 5: Optional Zotero seeding
 

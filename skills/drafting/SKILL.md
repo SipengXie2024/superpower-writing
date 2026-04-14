@@ -11,7 +11,9 @@ Drive prose production for the manuscript. For every section in `.writing/plan.m
 
 ## Overview
 
-Drafting is the stage where claims become sentences. The hard rule is **claim-first**: no prose may cite a claim whose `STATUS` is still `stub`. The `PreToolUse` hook at `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` enforces this by blocking `Edit`/`Write`/`MultiEdit`/`NotebookEdit` against `**/manuscript/*.md` when any referenced claim is unresolved or when load-bearing paragraphs carry neither `<!-- claim: id -->` nor `<!-- draft-only -->`. Do not try to bypass the hook — resolve evidence, then write.
+Drafting is the stage where claims become sentences. The hard rule is **claim-first**: no prose may cite a claim whose `STATUS` is still `stub`. Resolve evidence, then write.
+
+> Claim-first protocol: see `superpower-writing:main` §Claim-First Protocol.
 
 Execution is delegated. This skill only shapes the per-section prompt and the bookkeeping. The actual orchestration engine is one of three `superpower-planning` skills, picked by mode:
 
@@ -96,14 +98,11 @@ You are drafting section {NN}: {slug} of the manuscript.
 - Any upstream sections already drafted in .writing/manuscript/
 
 ## Claim-first protocol (NON-NEGOTIABLE)
-A PreToolUse hook at ${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh will BLOCK
-Edit/Write/MultiEdit/NotebookEdit on .writing/manuscript/*.md if:
-  (a) any <!-- claim: id --> tag references a claim whose STATUS is still `stub`,
-  (b) the claim file for this section is missing, OR
-  (c) a load-bearing paragraph has neither <!-- claim: id --> nor <!-- draft-only -->.
-
-Do NOT fight the hook. Resolve evidence FIRST, then write. If the hook blocks
-you, read the decision JSON on stderr, fix the claim file or the prose tag, retry.
+You MUST resolve every claim's EVIDENCE (Step A) BEFORE writing any prose
+(Step B). The PreToolUse hook will block your Write tool call otherwise — see
+superpower-writing:main §Claim-First Protocol for the block rules. Do NOT
+fight the hook: read the decision JSON on stderr, fix the claim file or the
+prose tag, retry.
 
 ## Step A — Evidence resolution (required before any prose)
 For each claim in .writing/claims/section_{NN}_{slug}.md with STATUS=stub:
