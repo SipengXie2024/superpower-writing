@@ -19,7 +19,9 @@ This skill is a workflow, not an execution engine. Heavy lifting (prose edits, c
 - Post-revision verification → `Skill(skill="claim-verification")`.
 - Style polishing of response letter → upstream `Skill(skill="scientific-writing")`.
 
-The `PreToolUse` hook at `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` is still active during revision. Any newly introduced `<!-- claim: id -->` tag must correspond to a claim with `STATUS ∈ {evidence_ready, verified}` in the appropriate `claims/section_<NN>_<slug>.md` file, or the edit will be blocked. Revision-driven claim additions are first-class citizens, not second-class patches.
+The PreToolUse hook is still active during revision: any newly introduced `<!-- claim: id -->` tag must correspond to a claim with `STATUS ∈ {evidence_ready, verified}`, or the edit will be blocked. Revision-driven claim additions are first-class citizens, not second-class patches.
+
+> Claim-first protocol: see `superpower-writing:main` §Claim-First Protocol.
 
 ## When to Use
 
@@ -164,11 +166,11 @@ Now, and only now, edit manuscript files. Guidance:
 Commit per item (or per coherent group):
 
 ```bash
-git -c user.email=sipeng@local -c user.name=sipeng add \
+git add \
     .writing/manuscript/<file>.md \
     .writing/claims/<section>.md \
     .writing/reviews/<id>.md
-git -c user.email=sipeng@local -c user.name=sipeng commit \
+git commit \
   -m "revise: <review-id> item <N> — <short summary>"
 ```
 
