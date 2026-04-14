@@ -23,3 +23,11 @@ code_availability:
   license: TODO    # MIT | Apache-2.0 | GPL-3.0 | none
 
 reporting_guideline: TODO  # CONSORT | STROBE | PRISMA | ARRIVE | none
+
+# Zotero integration (optional). When enabled, claim-verification queries
+# your Zotero library first (authoritative) and falls back to online
+# DOI resolution only when Zotero has no matching item. API key lives in .env.
+zotero:
+  enabled: false
+  collection_key: ""            # per-paper collection (see ZOTERO_DEFAULT_COLLECTION fallback)
+  auto_push_new_citations: true # drafting dedupes by DOI; writes new items to collection_key

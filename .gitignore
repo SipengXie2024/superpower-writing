@@ -1,0 +1,30 @@
+# Secrets — NEVER commit
+.env
+.env.local
+.env.*.local
+.writing/secrets.local
+**/secrets.local
+
+# Writing working state
+.writing/verify-cache.json
+.writing/stash/
+# .writing/ itself IS tracked (per design.md) — only caches/stashes are ignored
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Node (pyzotero upstream uses npx; transient installs)
+node_modules/

@@ -1,6 +1,6 @@
 # superpower-writing Design
 
-**Status:** Draft v2 (post spec-interview, ready for writing-plans)
+**Status:** Draft v3 (Zotero integration promoted from v2 to v1)
 **Date:** 2026-04-14
 **Author:** @SipengXie2024 (brainstormed with Claude)
 
@@ -255,8 +255,8 @@ truthfulness of each field; superpower-writing owns the gate.
 - Non-IMRAD formats (reviews, grants, theses) — defer to v2+.
 - Auto-submission to journal portals — manual hand-off.
 - Multi-author collaboration with `.writing/` in git — v1 is single-author.
-- Zotero round-trip via `pyzotero` — v1 uses manual `.writing/refs.bib`; v2
-  revisits pull vs push vs sync.
+- Zotero annotation/notes round-trip (user highlights ↔ reviewer response) — v2.
+  v1 provides metadata/DOI read-write via upstream `pyzotero`; see §14.
 
 ## 13. Decisions Log (from spec-interview, 2026-04-14)
 
@@ -268,5 +268,61 @@ truthfulness of each field; superpower-writing owns the gate.
 | Multi-author model | Single-author v1 |
 | Scientific-integrity state | `.writing/metadata.yaml` (single file) |
 | Citation verification depth | Strict: DOI resolve + abstract semantic match via research-lookup |
-| Zotero integration | v2 only; v1 manual refs |
+| Zotero integration | Promoted to v1: Zotero library + network are dual sources of truth (§14) |
+| Secret storage | `.env` at project root, gitignored; API key via `ZOTERO_API_KEY` |
 | Install command | `npx skills add K-Dense-AI/scientific-agent-skills` (verified in upstream README) |
+
+## 14. Zotero Integration (v1)
+
+### 14.1 Credentials
+`.env` at project root (gitignored). `.env.example` checked in as template.
+Required: `ZOTERO_API_KEY`, `ZOTERO_USER_ID` or `ZOTERO_GROUP_ID`. Optional:
+`ZOTERO_DEFAULT_COLLECTION`. `scripts/check-zotero.sh` validates by hitting
+`api.zotero.org/{users|groups}/{id}/items?limit=1` and reading the HTTP code;
+never echoes the key.
+
+### 14.2 Activation
+`.writing/metadata.yaml` governs:
+```yaml
+zotero:
+  enabled: true
+  collection_key: ""             # per-paper; overrides ZOTERO_DEFAULT_COLLECTION
+  auto_push_new_citations: true  # drafting dedupes by DOI, pushes new items
+```
+Skills consult `zotero.enabled` before invoking any Zotero operation. When
+disabled, behavior reverts to network-only (v2 baseline).
+
+### 14.3 Dual source of truth
+For each citation during claim-verification:
+1. **Zotero first** — `pyzotero` query by DOI in configured library/collection.
+   Hit = authoritative (user has vetted); use Zotero's stored abstract for
+   semantic match against the claim.
+2. **Network fallback** — if Zotero miss, invoke `research-lookup` /
+   `citation-management` (Crossref, PubMed). On hit with `auto_push_new_citations: true`,
+   push the resolved item into `collection_key` (dedupe by DOI).
+3. **Fail** only if both sources miss.
+
+The EVIDENCE entry in a claim file records provenance:
+```yaml
+EVIDENCE:
+  - type: citation
+    doi: 10.xxxx/...
+    source: zotero            # zotero | network | both
+    zotero_item_key: ABCD1234 # only when source includes zotero
+```
+
+### 14.4 Per-skill responsibilities
+| Skill | Zotero responsibility |
+|-------|----------------------|
+| outlining | Optional: when `collection_key` is set, seed `claims/section_*.md` EVIDENCE stubs from that collection |
+| drafting | On new DOI discovered during evidence resolution: query Zotero first; if missed and `auto_push_new_citations: true`, push. Update EVIDENCE `source` accordingly |
+| claim-verification | Two-phase lookup per DOI (Zotero → network); enforce dedupe; cache results in `.writing/verify-cache.json` keyed by DOI with source flag |
+| submission | Generate `.writing/refs.bib` from the intersection of (Zotero `collection_key` contents) and (DOIs cited in `manuscript/*.md`). This makes Zotero the single export source |
+| main (dep gate) | If `metadata.yaml` has `zotero.enabled: true`, run `scripts/check-zotero.sh` on entry. Hard-fail if credentials missing |
+
+### 14.5 Why not fold into upstream pyzotero directly?
+Upstream `pyzotero` is a generic wrapper — it does not know about our
+claim-first protocol, metadata.yaml layout, or `refs.bib` generation convention.
+superpower-writing adds the orchestration: which collection to read, when to
+push, how to reconcile Zotero and network results under claim verification.
+All actual Zotero API calls delegate to `Skill(skill="pyzotero")`.

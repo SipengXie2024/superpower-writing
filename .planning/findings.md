@@ -27,7 +27,9 @@
 | Multi-author v1 = single-author only | YAGNI; multi-author git model deferred to v2 |
 | Scientific-integrity state = `.writing/metadata.yaml` | Single YAML captures authors+COI+preregistration+data/code availability+reporting guideline; outlining fills it, submission verifies presence |
 | Citation verification = strict (DOI resolve + semantic match) | User chose rigorous mode; calls `research-lookup`/`citation-management` for per-citation abstract check against claim |
-| Zotero integration = deferred to v2 (manual refs in v1) | User manages refs manually; keeps scope small |
+| Zotero integration = **v1** (promoted mid-development) | User obtained API key; upstream `pyzotero` skill available; dual source of truth with network fallback |
+| Secret storage = `.env` at project root, gitignored | Standard practice; `.env.example` checked in as template; `scripts/check-zotero.sh` validates without echoing the key |
+| Zotero auth smoke-check = HTTP probe to api.zotero.org | Low-cost verification without leaking key; distinguishes 403 (bad key) / 404 (wrong ID) / network error |
 
 ## Issues Encountered
 | Issue | Resolution |

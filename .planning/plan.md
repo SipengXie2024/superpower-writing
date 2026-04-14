@@ -442,6 +442,18 @@ git commit -m "feat: PreToolUse claim enforcement hook"
 
 ---
 
+### Zotero addendum (applies to Tasks 6, 8, 9, 11)
+
+Zotero integration was promoted from v2 to v1 (see design.md §14). Implementers working on outlining, drafting, claim-verification, and submission MUST:
+
+- Add a "Zotero integration" subsection to their SKILL.md describing the responsibility in design.md §14.4 for that skill.
+- Reference `Skill(skill="pyzotero")` for actual Zotero API calls (do not write Zotero client code).
+- Gate all Zotero behavior on `zotero.enabled: true` in `.writing/metadata.yaml`. When disabled, skip Zotero entirely — fall back to network.
+- For `claim-verification` specifically: implement the two-phase lookup (Zotero first, network fallback) and the `source` field semantics in the claim EVIDENCE entry.
+- For `main` SKILL.md (Task 5): include the pre-entry check that invokes `${CLAUDE_PLUGIN_ROOT}/scripts/check-zotero.sh` when `zotero.enabled` is true.
+
+`scripts/check-zotero.sh` and `.env.example` are already in place.
+
 ### Tasks 5–11: Write the seven SKILL.md files (all parallel)
 
 Each skill follows the same shape: YAML frontmatter (`name`, `description`) + body structured with Overview / When to Use / Checklist / Process / Key Principles sections, mirroring superpower-planning's patterns. Skills invoke upstream via the Skill tool by bare name (`Skill(skill="scientific-writing")` etc.) — no `plugin:` prefix because scientific-agent-skills is an Agent Skills collection, not a Claude plugin.
