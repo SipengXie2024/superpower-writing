@@ -58,7 +58,7 @@ For each `.writing/manuscript/*.md`:
 1. Parse all `<!-- claim: (\S+) -->` tags → set of referenced claim ids.
 2. Parse all `<!-- draft-only -->` markers → record as FAIL unconditionally (draft-only is a drafting escape hatch; it must be resolved before submission).
 3. Parse all `[NEEDS-EVIDENCE]` literal strings → record as FAIL.
-4. For each referenced claim id, locate the matching entry in `.writing/claims/section_<same-stem>.md`:
+4. For each referenced claim id, locate the matching entry in `.writing/claims/section_<NN>_<slug>.md`, where `<NN>_<slug>` is the manuscript file's basename without extension (e.g., manuscript `02_methods.md` pairs with claims `section_02_methods.md`):
    - **Missing entry** → FAIL: `claim '<id>' referenced in <file> but not defined in claims file`.
    - **STATUS: stub** → FAIL: `claim '<id>' still stub; drafting did not resolve EVIDENCE`.
    - **STATUS: evidence_ready** → PASS Pass 1 (it advances through Pass 2–4 to become `verified`).
