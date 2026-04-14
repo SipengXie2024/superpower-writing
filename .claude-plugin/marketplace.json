@@ -1,0 +1,13 @@
+{
+  "name": "superpower-writing",
+  "description": "Local marketplace for superpower-writing IMRAD academic-writing plugin",
+  "owner": { "name": "sipeng" },
+  "plugins": [
+    {
+      "name": "superpower-writing",
+      "description": "IMRAD academic-writing lifecycle plugin",
+      "version": "0.1.0",
+      "source": "./"
+    }
+  ]
+}
