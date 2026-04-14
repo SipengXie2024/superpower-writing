@@ -50,6 +50,21 @@ def _allow() -> None:
     sys.exit(0)
 
 
+def find_writing_root(p: Path) -> Path | None:
+    for ancestor in [p] + list(p.parents):
+        if ancestor.name == ".writing" and ancestor.is_dir():
+            return ancestor
+    return None
+
+
+def apply_edit(content: str, old: str, new: str, replace_all: bool) -> str:
+    if not old:
+        return content + new
+    if replace_all:
+        return content.replace(old, new)
+    return content.replace(old, new, 1)
+
+
 def resolve_post_content(tool_name: str, tool_input: dict, file_path: Path) -> str | None:
     """Produce the full post-edit content for the target file, or None to skip."""
     if tool_name == "Write":
@@ -62,21 +77,22 @@ def resolve_post_content(tool_name: str, tool_input: dict, file_path: Path) -> s
         return None
 
     if tool_name == "Edit":
-        old = tool_input.get("old_string", "")
-        new = tool_input.get("new_string", "")
-        if tool_input.get("replace_all"):
-            return original.replace(old, new) if old else original + new
-        return original.replace(old, new, 1) if old else original + new
+        return apply_edit(
+            original,
+            tool_input.get("old_string", ""),
+            tool_input.get("new_string", ""),
+            bool(tool_input.get("replace_all")),
+        )
 
     if tool_name == "MultiEdit":
         content = original
         for edit in tool_input.get("edits", []):
-            old = edit.get("old_string", "")
-            new = edit.get("new_string", "")
-            if edit.get("replace_all"):
-                content = content.replace(old, new) if old else content + new
-            else:
-                content = content.replace(old, new, 1) if old else content + new
+            content = apply_edit(
+                content,
+                edit.get("old_string", ""),
+                edit.get("new_string", ""),
+                bool(edit.get("replace_all")),
+            )
         return content
 
     if tool_name == "NotebookEdit":
@@ -150,9 +166,12 @@ def main() -> None:
     if content is None:
         _allow()
 
-    # Locate sibling claims file: <base>/claims/section_<stem>.md
+    # Locate sibling claims file: <.writing>/claims/section_<stem>.md
     stem = file_path.stem
-    writing_root = file_path.parent.parent
+    writing_root = find_writing_root(file_path)
+    if writing_root is None:
+        # File isn't inside a superpower-writing project; allow.
+        _allow()
     claims_path = writing_root / "claims" / f"section_{stem}.md"
 
     claim_ids = CLAIM_TAG.findall(content)
