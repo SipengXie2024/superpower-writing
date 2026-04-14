@@ -40,12 +40,16 @@ user sees every gap at once instead of whack-a-mole.
 
 Invoke `Skill(skill="claim-verification")`. Require:
 
-- The skill exits with all claims in `STATUS: verified` (or equivalent PASS).
+- The skill exits with all claims in `STATUS: verified`; any `evidence_ready`
+  claim with a pending soft-failure override from claim-verification must be
+  resolved in the verify-report first (see claim-verification/SKILL.md §semantic
+  match).
 - `.writing/verify-report.md` exists and its summary line shows zero FAIL.
 - `.writing/verify-cache.json` was written/updated within the current run.
 
-If any claim is `pending`, `failed`, or missing a verification record, abort
-and list the offending claim IDs.
+If any claim is `pending`, `failed`, `evidence_ready` with unresolved soft
+failure, or missing a verification record, abort and list the offending claim
+IDs.
 
 ### 2. metadata.yaml is complete
 
@@ -88,11 +92,11 @@ When any check fails, emit a single block like:
 ```
 Submission gate FAILED (N issues):
   [1] claim-verification: 2 claims not verified
-      - section_03_intro.md:claim-003 (pending)
-      - section_05_results.md:claim-011 (failed: DOI mismatch)
+      - 03_intro.md:claim-003 (pending)
+      - 05_results.md:claim-011 (failed: DOI mismatch)
   [2] metadata.yaml: reporting_guideline is TODO
   [3] draft-only markers: 1 remaining
-      - manuscript/section_04_methods.md:87
+      - manuscript/04_methods.md:87
 ```
 
 Do not proceed to `refs.bib` generation or archiving until every check is
@@ -109,7 +113,8 @@ When `.writing/metadata.yaml` has `zotero.enabled: true`:
 
 1. Extract every cited DOI from `.writing/manuscript/*.md`. DOIs appear as
    `<!-- cite: 10.xxxx/yyyy -->` or inline `[@doi:10.xxxx/yyyy]` — use both
-   patterns. Deduplicate.
+   patterns. These are the formats `drafting/SKILL.md` mandates in its Step B;
+   any divergence is a drafting bug, not a submission concern. Deduplicate.
 2. Read `zotero.collection_key` from `metadata.yaml`.
 3. Invoke `Skill(skill="pyzotero")` to fetch the BibTeX export for the
    intersection `(collection items) ∩ (cited DOIs)`.
