@@ -13,7 +13,7 @@ Pre-submission gate that walks every tagged claim in `.writing/manuscript/*.md` 
 
 **Iron law:** No `STATUS: verified` flip without fresh pass evidence recorded in the report.
 
-**Relation to the PreToolUse hook:** `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` already blocks prose writes against stub-status claims during drafting — drafting flips `STATUS` to `evidence_ready` when evidence is found. This skill is what flips `evidence_ready` → `verified` after the four passes succeed. Never edit `STATUS` to `verified` manually: the audit trail lives in `.writing/verify-report.md`.
+**Relation to the PreToolUse hook:** the hook (see `superpower-writing:main` §Claim-First Protocol) already blocks prose writes against stub-status claims during drafting — drafting flips `STATUS` to `evidence_ready` when evidence is found. This skill is what flips `evidence_ready` → `verified` after the four passes succeed. Never edit `STATUS` to `verified` manually: the audit trail lives in `.writing/verify-report.md`.
 
 ## When to Use
 
@@ -63,9 +63,9 @@ For each `.writing/manuscript/*.md`:
    - **STATUS: stub** → FAIL: `claim '<id>' still stub; drafting did not resolve EVIDENCE`.
    - **STATUS: evidence_ready** → PASS Pass 1 (it advances through Pass 2–4 to become `verified`).
    - **STATUS: verified** → PASS Pass 1 (already verified in prior run; Pass 2–4 may re-validate via cache).
-5. For each paragraph that neither has `<!-- claim: -->` nor `<!-- draft-only -->`: check if section is allow-listed. Default allow-list: `00_abstract.md` heading block, `06_references.md` entirely, any line starting with `#` (section headers), blank lines, table rows (lines starting with `|`), code fences. Anything else fails with: `paragraph in <file>:<line> lacks <!-- claim: id --> or <!-- draft-only --> marker`.
+5. For each paragraph that neither has `<!-- claim: -->` nor `<!-- draft-only -->`: check if section is allow-listed. The PreToolUse hook exempts these section stems from paragraph-tag enforcement: `00_abstract`, `06_references`, `07_acknowledgments`. All other `manuscript/NN_*.md` files require every load-bearing paragraph to carry `<!-- claim: id -->` or `<!-- draft-only -->`. Always-skipped within any file: lines starting with `#` (section headers), blank lines, table rows (lines starting with `|`), and code fences. Anything else fails with: `paragraph in <file>:<line> lacks <!-- claim: id --> or <!-- draft-only --> marker`.
 
-**Allow-list is configurable.** Support `.writing/verify-config.yaml` with key `allowlist_sections: [<filename>, ...]` — if present, skip paragraph-level tag check for those files. Default if absent: only `00_abstract.md`.
+**Allow-list is configurable.** Support `.writing/verify-config.yaml` with key `allowlist_sections: [<filename>, ...]` — if present, those filenames extend the hook's default exemption set for this skill's checks.
 
 ### Step 2: Pass 2 — Citation Resolution (dual source of truth)
 

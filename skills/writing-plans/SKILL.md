@@ -13,7 +13,9 @@ Convert an approved IMRAD outline into an executable task list for drafting. Inp
 
 **Save plan to:** `.writing/plan.md`
 
-**Relation to the code-side `superpower-planning:writing-plans` skill:** identical philosophy (bite-sized tasks, file-path precision, explicit parallelism groups, self-review), adapted to manuscripts. Task unit is the section/figure/table, not the source file. The TDD analog is the claim-first protocol enforced by `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` during drafting — plan steps that write prose always pair with a claim-resolution step first.
+**Relation to the code-side `superpower-planning:writing-plans` skill:** identical philosophy (bite-sized tasks, file-path precision, explicit parallelism groups, self-review), adapted to manuscripts. Task unit is the section/figure/table, not the source file. The TDD analog is the claim-first protocol enforced during drafting — plan steps that write prose always pair with a claim-resolution step first.
+
+> Claim-first protocol: see `superpower-writing:main` §Claim-First Protocol.
 
 ## When to Use
 
@@ -59,9 +61,10 @@ Before task decomposition, list the exact manuscript files the plan will write t
   04_discussion.md
   05_conclusion.md
   06_references.md
+  07_acknowledgments.md   # optional
 ```
 
-Optional sections (Supplementary, Acknowledgments, Data Availability Statement) appear only if the outline calls for them. Each `NN_slug.md` pairs 1:1 with `claims/section_NN_<slug>.md` — stems match exactly. File-structure pass output goes into the plan header so readers see the write set before tasks.
+Optional sections (Supplementary, Acknowledgments at `07_acknowledgments.md`, Data Availability Statement) appear only if the outline calls for them. Each `NN_slug.md` pairs 1:1 with `claims/section_NN_<slug>.md` — stems match exactly. File-structure pass output goes into the plan header so readers see the write set before tasks.
 
 ### Step 3: Write the plan document
 
@@ -146,8 +149,8 @@ Each section is a three-step triplet: draft, verify-claims, internal-review. Do 
 
   ```bash
   cd <project root>
-  git -c user.email=sipeng@local -c user.name=sipeng add .writing/manuscript/02_methods.md .writing/claims/section_02_methods.md
-  git -c user.email=sipeng@local -c user.name=sipeng commit -m "draft: methods section"
+  git add .writing/manuscript/02_methods.md .writing/claims/section_02_methods.md
+  git commit -m "draft: methods section"
   ```
 
 ### Task M.2: Verify Methods claims
@@ -163,8 +166,8 @@ Each section is a three-step triplet: draft, verify-claims, internal-review. Do 
 - [ ] **Step 2: Commit**
 
   ```bash
-  git -c user.email=sipeng@local -c user.name=sipeng add .writing/claims/section_02_methods.md .writing/verify-report.md
-  git -c user.email=sipeng@local -c user.name=sipeng commit -m "verify: methods claims"
+  git add .writing/claims/section_02_methods.md .writing/verify-report.md
+  git commit -m "verify: methods claims"
   ```
 
 ### Task M.3: Internal review of Methods
@@ -184,8 +187,8 @@ Each section is a three-step triplet: draft, verify-claims, internal-review. Do 
 - [ ] **Step 3: Commit review file**
 
   ```bash
-  git -c user.email=sipeng@local -c user.name=sipeng add .writing/reviews/
-  git -c user.email=sipeng@local -c user.name=sipeng commit -m "review: internal review of methods"
+  git add .writing/reviews/
+  git commit -m "review: internal review of methods"
   ```
 ````
 
@@ -217,8 +220,8 @@ For each figure listed in outline.md (plus the mandatory graphical abstract per 
 - [ ] **Step 4: Commit**
 
   ```bash
-  git -c user.email=sipeng@local -c user.name=sipeng add .writing/figures/
-  git -c user.email=sipeng@local -c user.name=sipeng commit -m "figure: fig<n> <slug>"
+  git add .writing/figures/
+  git commit -m "figure: fig<n> <slug>"
   ```
 ````
 
@@ -246,8 +249,8 @@ For each table listed in outline.md:
 - [ ] **Step 3: Commit**
 
   ```bash
-  git -c user.email=sipeng@local -c user.name=sipeng add .writing/manuscript/ .writing/tables/ .writing/claims/
-  git -c user.email=sipeng@local -c user.name=sipeng commit -m "table: tab<n> <slug>"
+  git add .writing/manuscript/ .writing/tables/ .writing/claims/
+  git commit -m "table: tab<n> <slug>"
   ```
 ````
 
@@ -358,7 +361,7 @@ Never finish the skill without presenting the three drafting modes via AskUserQu
 ## Remember
 
 - Exact file paths always (`.writing/manuscript/02_methods.md`, not "the methods file").
-- Every task includes its git commit command with `-c user.email=sipeng@local -c user.name=sipeng` — matches the plugin's committed-by convention.
+- Every task includes a plain `git commit` command — author identity comes from the user's git config, not from skill-injected overrides.
 - Bare skill names for upstream (`scientific-writing`, `scientific-schematics`, `peer-review`, `pyzotero`, `citation-management`, `research-lookup`) — never `plugin:` prefixed.
 - Plan size budget: one file, one pass. If the plan exceeds ~800 lines, split into sub-plans by IMRAD phase (e.g., `plan-part-methods.md`, `plan-part-results.md`) and reference from a top-level index.
 - `.writing/plan.md` is source of truth for drafting; status tracking lives in `.writing/progress.md`.

@@ -187,7 +187,7 @@ Upstream skills this plugin relies on (call by **bare name**, no prefix):
 | `scientific-schematics` | drafting | Graphical abstracts and schematic figures (mandatory per `scientific-writing`). |
 | `pyzotero` | drafting, claim-verification, submission | All Zotero API calls when `zotero.enabled: true`. |
 
-# Claim-First Protocol (reminder)
+# Claim-First Protocol
 
 Every load-bearing paragraph in `.writing/manuscript/*.md` must carry a marker:
 
@@ -198,7 +198,9 @@ A **PreToolUse hook** (`${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh`) blocks a
 
 - a `<!-- claim: id -->` tag references a claim with `STATUS: stub`, or
 - the claim file is missing, or
-- untagged prose lands in a protected section (default: all except `00_abstract.md`).
+- untagged load-bearing prose lands in a protected section.
+
+The hook exempts these section stems from paragraph-tag enforcement: `00_abstract`, `06_references`, `07_acknowledgments`. All other `manuscript/NN_*.md` files require every load-bearing paragraph to carry `<!-- claim: id -->` or `<!-- draft-only -->`.
 
 Drafting and claim-verification skills must be aware of this hook and surface its block reason to the user. The fix is always: resolve EVIDENCE first (via `research-lookup` / `citation-management` / Zotero lookup), bump `STATUS` to `evidence_ready`, then write prose.
 
