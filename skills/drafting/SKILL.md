@@ -159,6 +159,14 @@ Rules:
   - Cite DOIs inline using whatever style the outline + metadata.yaml dictates.
     Do NOT invent refs. If the claim's EVIDENCE has no DOI, the claim is not
     evidence_ready — go back to Step A.
+  - Each cited DOI MUST appear in the prose in one of exactly two forms:
+      * `<!-- cite: <doi> -->` as an inline HTML comment adjacent to the
+        citation site (preferred), OR
+      * `[@doi:<doi>]` as an inline token.
+    The `submission` skill parses these two forms to generate `.writing/refs.bib`.
+    Any other citation form (bare DOI URL, author-year only, numeric superscript,
+    footnote macros) will not be picked up and will break the submission gate.
+    Pick one form per manuscript and use it consistently.
   - Respect the upstream `scientific-writing` style rules: IMRAD voice, past
     tense for results, active voice where appropriate.
 
