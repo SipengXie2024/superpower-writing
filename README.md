@@ -1,10 +1,9 @@
 # superpower-writing
 
-> Claude Code plugin. Ports the **superpower-planning** process skeleton
-> (persistent state, stage gates, claim-first verification, subagent execution,
-> review loops) to **IMRAD academic writing**. Delegates all domain content
-> (IMRAD structure, reporting guidelines, citation management, figure
-> generation, literature lookup) to the upstream
+> Standalone Claude Code plugin for scientific manuscript writing. Includes its
+> own execution engines ported and adapted from superpower-planning in v0.2.0.
+> Delegates all domain content (IMRAD structure, reporting guidelines, citation
+> management, figure generation, literature lookup) to the upstream
 > [scientific-agent-skills](https://github.com/K-Dense-AI/scientific-agent-skills)
 > collection.
 
@@ -14,7 +13,7 @@
 
 ## Status
 
-- **Version**: `v0.1.2`
+- **Version**: `v0.2.0`
 - **Scope**: single-author IMRAD research manuscripts
 - **Dependencies**: scientific-agent-skills (hard), Zotero API (optional)
 - **Repo**: https://github.com/SipengXie2024/superpower-writing
@@ -221,7 +220,8 @@ hooks/
   check-deps.sh          # SessionStart wrapper
 agents/
   section-drafter.md     # implementer: IMRAD-aware drafter with claim-first + Zotero-first evidence resolution
-  manuscript-reviewer.md # reviewer: scientific writing quality (IMRAD coherence, voice, hedging, clarity)
+  manuscript-reviewer.md # reviewer: scientific writing quality (IMRAD coherence, voice, hedging, clarity, AI-trace detection)
+  spec-reviewer.md       # reviewer: outline compliance — claims present/absent/reordered vs the plan (v0.2.0)
   citation-auditor.md    # reviewer: over/under/circular/stale citation; optional deep pass in claim-verification
   rebuttal-auditor.md    # reviewer: reviewer-response letter completeness + tone + diff consistency
 scripts/
@@ -237,6 +237,18 @@ skills/
   claim-verification/    # 4-pass pre-submission verifier
   revision/              # unified internal + journal review loop
   submission/            # freeze gate + archive
+  planning-foundation/   # persistent .writing/ state + agent planning dirs (v0.2.0, inlined)
+  brainstorming/         # design-doc exploration (v0.2.0, inlined)
+  spec-interview/        # deep questioning to refine specs (v0.2.0, inlined)
+  lightweight-execute/   # small-task structured execution (v0.2.0, inlined)
+  subagent-driven/       # serial same-session execution engine (v0.2.0, inlined)
+  team-driven/           # parallel Agent Team execution engine (v0.2.0, inlined)
+  executing-plans/       # cross-session batch execution engine (v0.2.0, inlined)
+  verification/          # pre-commit verification (v0.2.0, inlined)
+  finishing-branch/      # merge/PR integration (v0.2.0, inlined)
+  stashing/              # pause/resume in-progress work (v0.2.0, inlined)
+  archiving/             # freeze completed projects (v0.2.0, inlined)
+  git-worktrees/         # isolated workspace setup (v0.2.0, inlined)
 templates/               # copied into .writing/ on init by scripts/init-writing-dir.sh
 tests/
   smoke.sh               # 26 end-to-end checks

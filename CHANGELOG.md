@@ -5,6 +5,25 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] — 2026-04-15
+
+### Breaking Changes
+
+- **No longer depends on the `superpower-planning` plugin at runtime.** Users upgrading from v0.1.x should remove the `superpower-planning` entry from their plugin list (optional — installing it alongside v0.2.0 is harmless but unnecessary).
+
+### Added
+
+- Inlined 11 execution/planning skills under `superpower-writing:*` (planning-foundation, brainstorming, spec-interview, lightweight-execute, subagent-driven, team-driven, executing-plans, stashing, archiving, verification, finishing-branch).
+- Inlined 9 supporting scripts under `scripts/`.
+- New writing-domain `spec-reviewer` agent checking outline compliance.
+- Extended `manuscript-reviewer` with AI-trace detection (over-parallelism, formulaic connectors, em-dash overuse, uniform sentence length, hedging cliché, throat-clearing).
+
+### Changed
+
+- `.planning/` references throughout ported content rewritten to `.writing/`.
+- `writing-plans` merged into a single skill; wrapper layer removed.
+- `session-start` hook no longer checks for superpower-planning; only Zotero check remains.
+
 ## [0.1.2] — 2026-04-15
 
 ### Added
@@ -121,6 +140,7 @@ Initial scaffold.
 - Auto-submission to journal portals.
 - LaTeX compile.
 
+[0.2.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.2.0
 [0.1.2]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.1.2
 [0.1.1]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.1.1
 [0.1.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.1.0
