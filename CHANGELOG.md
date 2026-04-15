@@ -13,10 +13,10 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- Inlined 11 execution/planning skills under `superpower-writing:*` (planning-foundation, brainstorming, spec-interview, lightweight-execute, subagent-driven, team-driven, executing-plans, stashing, archiving, verification, finishing-branch).
-- Inlined 9 supporting scripts under `scripts/`.
+- Inlined 12 execution/planning skills under `superpower-writing:*` (planning-foundation, brainstorming, spec-interview, lightweight-execute, subagent-driven, team-driven, executing-plans, stashing, archiving, verification, finishing-branch, git-worktrees).
+- Inlined 11 supporting scripts under `scripts/`.
 - New writing-domain `spec-reviewer` agent checking outline compliance.
-- Extended `manuscript-reviewer` with AI-trace detection (over-parallelism, formulaic connectors, em-dash overuse, uniform sentence length, hedging cliché, throat-clearing).
+- Extended `manuscript-reviewer` with AI-trace detection (over-parallelism, formulaic connectors, em-dash overuse, uniform sentence length, hedging cliché, throat-clearing, bulleted-list abuse, mirror-balancing).
 
 ### Changed
 
