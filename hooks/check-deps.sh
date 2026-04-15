@@ -2,9 +2,10 @@
 # SessionStart hook. Runs the shared dep-check script and emits a
 # system-reminder summarizing status. Never blocks session start
 # (exit 0 always); reminder is advisory.
+set -uo pipefail
 
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
-OUTPUT="$("$PLUGIN_ROOT/scripts/check-deps.sh" 2>&1)"
+OUTPUT="$("$PLUGIN_ROOT/scripts/check-deps.sh" 2>&1)" || true
 STATUS=$?
 
 if [[ $STATUS -ne 0 ]]; then

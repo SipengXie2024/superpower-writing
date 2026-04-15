@@ -11,6 +11,8 @@ This is the **spec phase** for a research paper. Output of outlining is the inpu
 2. `.writing/claims/section_<NN>_<slug>.md` — one file per manuscript section, each containing a YAML list of claim stubs that prose will later bind to.
 3. `.writing/metadata.yaml` — author, preregistration, data/code availability, reporting-guideline fields filled out.
 
+**Filename-stem contract (load-bearing).** The PreToolUse claim-first hook at `hooks/enforce-claims.py` whitelists exactly three manuscript stems — `00_abstract`, `06_references`, `07_acknowledgments` — which are exempt from claim-tag enforcement. Every other section filename MUST contain real prose tagged with `<!-- claim: id -->` or the write is blocked. If you introduce a new unnumbered section (e.g. a title page, data-availability block, supplementary front-matter), either number it inside the claim-enforced range or update `UNPROTECTED_STEMS` in `hooks/enforce-claims.py` to add the new stem. Do not rename existing stems; the hook and this skill share the same list.
+
 All three must be complete before handing off to `superpower-writing:writing-plans`. Incomplete metadata blocks the submission gate later — fix it now while context is fresh.
 
 ## When to Use

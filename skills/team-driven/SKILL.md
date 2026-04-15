@@ -1,6 +1,6 @@
 ---
 name: team-driven
-description: Use when executing implementation plans with parallel task groups or individual tasks too heavy for subagent context limits.
+description: Use when a plan has parallelism groups (2+ independent tasks that can run concurrently) or any single task heavy enough to exhaust a normal subagent's context window — drafting multiple manuscript sections at once, running lit-review + figure generation in parallel, refactoring across several files. Spawns a dedicated Agent Team with a persistent reviewer so each task gets its own context budget while the reviewer keeps global coherence. Pick this over subagent-driven when the plan's "Parallelism Map" shows >1 group.
 ---
 
 # Team-Driven Development
@@ -11,44 +11,9 @@ Execute plan by creating an Agent Team with persistent implementer teammates and
 
 **Announce at start:** "I'm using the team-driven skill to execute this plan with an Agent Team."
 
-## NON-NEGOTIABLE: Two-Stage Review Gate
+## Shared Review Protocol
 
-<EXTREMELY-IMPORTANT>
-Every task MUST pass TWO independent reviews before it can be marked complete:
-
-1. **Spec Compliance Review** — spec-reviewer teammate verifies the manuscript matches the original plan
-2. **Manuscript Quality Review** — manuscript-reviewer teammate verifies the manuscript is well-built (only after spec review passes)
-
-**A task is NOT complete until the manuscript-reviewer DMs the lead with APPROVED.**
-
-You MUST NOT:
-- Skip either reviewer for ANY reason ("task was simple", "just a config change")
-- Mark a task complete without BOTH reviewers approving
-- Start manuscript review before spec review passes
-- Proceed to the next parallelism group while any task has open review issues
-
-The Task Status Dashboard in `.writing/progress.md` has `Spec Review`, `Manuscript Review`, and `Plan Align` columns.
-A task row MUST show `PASS` in ALL THREE columns before you can set its status to `complete`.
-</EXTREMELY-IMPORTANT>
-
-## Review Loop Caps
-
-Each review stage has its own cap of **3 fix-review rounds**.
-
-**Round counting:** The initial review does not count as a round. A "round" is one fix-then-re-review cycle: initial review → DM implementer to fix → re-review (round 1) → DM fix → re-review (round 2) → DM fix → re-review (round 3) → STOP.
-
-**After 3 rounds without approval, the reviewer MUST DM the team lead to escalate.** The escalation message should include:
-
-1. What issues remain unresolved
-2. What was attempted in each round
-3. Whether the issues are getting better, worse, or stuck
-
-**The team lead then escalates to the user** with three choices:
-- **Override and approve** — accept the current state despite open issues
-- **Provide guidance** — give specific direction for a targeted fix (does NOT reset the counter)
-- **Abort the task** — stop work on this task entirely
-
-**Track round count** in the Task Status Dashboard. Use notation like `FAIL (round 2/3)` in the review columns.
+The two-stage review gate (spec then quality), the 3-round cap with escalation, the plan-anchoring rules for verbatim task extraction, the plan-alignment gate for cumulative drift, and the per-agent planning-directory convention are the same across team-driven and subagent-driven. They live in [`../planning-foundation/references/review-loop-protocol.md`](../planning-foundation/references/review-loop-protocol.md) — read it before spawning the team. This skill applies that protocol using persistent teammates: the implementer DMs the spec-reviewer directly, the lead activates the manuscript-reviewer after spec passes, and the plan-alignment gate runs after each parallelism group rather than once at the end.
 
 ## When to Use
 
@@ -146,17 +111,6 @@ digraph process {
     "More groups?" -> "Shutdown team, use finishing-branch" [label="no"];
 }
 ```
-
-## Plan Anchoring: How to Extract Tasks
-
-When extracting tasks from `plan.md` to send to implementer teammates:
-
-1. **Copy verbatim** — Use the exact text from `plan.md`, do not paraphrase or summarize
-2. **Include the section reference** — Tell the implementer which section header in `plan.md` contains this task (e.g., `### Task 3: Recovery modes`)
-3. **Include cross-task constraints** — If `plan.md` or `design.md` has global constraints (shared interfaces, naming conventions, performance requirements), include them
-4. **Pass plan file paths** — Always mention that `.writing/plan.md` and `.writing/design.md` are available for cross-reference
-
-**Why:** The lead's extraction is the #1 source of plan drift. Verbatim copying + plan references let implementers and reviewers independently verify against the source of truth.
 
 ## Step-by-Step
 
@@ -260,19 +214,7 @@ As teammates complete tasks, the lead orchestrates the two-stage review flow:
 
 ### Step 5.5: Plan Alignment Gate (After Each Parallelism Group)
 
-After ALL tasks in a parallelism group are reviewed and approved:
-
-1. **Re-read `.writing/plan.md`** — refresh original requirements in context
-2. **For each completed task in this group**, verify:
-   - Does the implementation match the plan (not just what was extracted)?
-   - Were cross-task constraints respected (shared interfaces, naming, etc.)?
-3. **Update `Plan Align` column** in the Task Status Dashboard
-4. **If significant drift detected**, escalate to user BEFORE starting the next group:
-   - Describe what drifted and why
-   - Propose corrective action
-   - Let user decide whether to fix or accept
-
-**This gate catches cumulative drift that per-task reviews miss.** Only proceed to the next parallelism group after this check passes.
+Run the plan-alignment gate from the shared review-loop protocol before starting the next group. Team-driven runs this gate after every parallelism group (not just at the end) because drift is cheaper to correct between groups. Only proceed to the next group after the gate passes.
 
 ### Step 6: Shutdown
 
@@ -282,21 +224,6 @@ After all tasks complete:
 2. Send shutdown requests to all teammates
 3. **REQUIRED SUB-SKILL:** Use superpower-writing:finishing-branch
 
-## Per-Agent Planning Directories
-
-Each **persistent teammate** maintains a single planning directory across all tasks:
-
-```bash
-mkdir -p .writing/agents/implementer-1/
-mkdir -p .writing/agents/implementer-2/
-mkdir -p .writing/agents/spec-reviewer/
-mkdir -p .writing/agents/manuscript-reviewer/
-```
-
-Implementers update the same `findings.md` and `progress.md` as they work on successive tasks. This keeps context continuous rather than fragmented across per-task folders.
-
-**Note:** Subagent-driven follows the same convention — one directory per role (e.g., `implementer/`), reused across tasks. Do NOT create per-task directories like `implementer-task-N/`.
-
 ## Prompt Templates
 
 - `./implementer-teammate-prompt.md` — Initial prompt for spawning implementer teammates
@@ -305,65 +232,7 @@ Implementers update the same `findings.md` and `progress.md` as they work on suc
 
 ## Example Workflow
 
-```
-You: I'm using Team-Driven Development to execute this plan.
-
-[Read plan: .writing/plan.md]
-[Identify groups: Group A (Tasks 1,2,3), Group B (Tasks 4,5), Group C (Task 6)]
-[MAX_PARALLEL = 3]
-
-[TeamCreate: "plan-execution"]
-[Spawn: implementer-1, implementer-2, implementer-3, spec-reviewer, manuscript-reviewer]
-[Create all 6 tasks via TaskCreate with group dependencies]
-
-=== Group A (parallel) ===
-
-[Assign Task 1 → implementer-1, Task 2 → implementer-2, Task 3 → implementer-3]
-[Send full task text to each implementer]
-
-[implementer-1 working on Task 1...]
-[implementer-2 working on Task 2...]
-[implementer-3 working on Task 3...]
-
-implementer-2 → spec-reviewer: "Task 2 done. [report]"
-spec-reviewer → implementer-2: "Missing error handling for edge case X (spec requires it)"
-implementer-2: fixes issue
-implementer-2 → spec-reviewer: "Fixed. [updated report]"
-spec-reviewer → lead: "Task 2 spec review passed"
-lead → manuscript-reviewer: "Please review Task 2 for manuscript quality"
-manuscript-reviewer → lead: "Task 2 manuscript review passed"
-
-implementer-1 → spec-reviewer: "Task 1 done. [report]"
-spec-reviewer → lead: "Task 1 spec review passed"
-lead → manuscript-reviewer: "Please review Task 1 for manuscript quality"
-manuscript-reviewer → implementer-1: "Magic number on line 42, extract constant"
-implementer-1: fixes
-implementer-1 → manuscript-reviewer: "Fixed."
-manuscript-reviewer → lead: "Task 1 manuscript review passed"
-
-implementer-3 → spec-reviewer: "Task 3 done. [report]"
-spec-reviewer → lead: "Task 3 spec review passed"
-lead → manuscript-reviewer: "Please review Task 3 for manuscript quality"
-manuscript-reviewer → lead: "Task 3 manuscript review passed"
-
-[Lead: aggregate findings, update progress.md, unblock Group B]
-
-=== Group B (parallel, after A) ===
-
-[Assign Task 4 → implementer-1, Task 5 → implementer-2]
-[implementer-3 is idle — can be shut down or held for Group C]
-
-... same pattern ...
-
-=== Group C ===
-
-[Assign Task 6 → implementer-1]
-... spec-reviewer approves, manuscript-reviewer approves ...
-
-[All tasks complete]
-[Shutdown team]
-[Use finishing-branch skill]
-```
+A worked example across three parallelism groups with a three-implementer fixed pool, including one spec-review fail-and-fix and one manuscript-review fail-and-fix, lives in [`references/example-session.md`](references/example-session.md). Read it when you need to see how the digraph above maps to actual team messages.
 
 ## vs Subagent-Driven
 

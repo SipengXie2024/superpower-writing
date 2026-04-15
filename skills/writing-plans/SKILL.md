@@ -161,148 +161,9 @@ Use this exact header template:
 <three options via AskUserQuestion>
 ```
 
-### Step 5: Per-section task template (repeat for each IMRAD section)
+### Steps 5-7: Per-section / per-figure / per-table task templates
 
-Each section is a three-step triplet: draft, verify-claims, internal-review. Do NOT write prose in the plan itself — the plan enumerates tasks; drafting writes prose. Use this exact template per section:
-
-````markdown
-### Task M.1: Draft Methods
-
-**Files:**
-- Read: `.writing/outline.md` §Methods, `.writing/claims/section_02_methods.md`, `.writing/metadata.yaml`
-- Write: `.writing/manuscript/02_methods.md`
-
-**Preconditions:**
-- Every claim in `claims/section_02_methods.md` is STATUS=evidence_ready (drafting flips stub → evidence_ready; PreToolUse hook blocks writes otherwise).
-
-- [ ] **Step 1: Resolve evidence for each stub claim**
-
-  For each claim in `claims/section_02_methods.md` with `STATUS: stub`:
-  - For `type: citation` EVIDENCE → call `Skill(skill="citation-management")` then `Skill(skill="research-lookup")` (Zotero-first if `metadata.yaml zotero.enabled: true` — call `Skill(skill="pyzotero")` first).
-  - For `type: dataset` → confirm the dataset identifier resolves (e.g., open the referenced URL/DOI).
-  - For `type: figure` or `type: table` → confirm the artifact is scheduled in a figure/table task in this plan.
-  - Flip STATUS to `evidence_ready` once every EVIDENCE entry is resolved.
-
-- [ ] **Step 2: Draft prose via scientific-writing**
-
-  Invoke `Skill(skill="scientific-writing")` with:
-  - section: Methods
-  - outline excerpt: <copy from outline.md>
-  - claims: <load claims/section_02_methods.md>
-  - metadata: `.writing/metadata.yaml`
-
-  Each load-bearing paragraph MUST be prefixed with `<!-- claim: <id> -->` matching a claim id. Exploratory text uses `<!-- draft-only -->`. The PreToolUse hook will block the Write tool if a paragraph references a stub-status claim.
-
-- [ ] **Step 3: Commit**
-
-  ```bash
-  cd <project root>
-  git add .writing/manuscript/02_methods.md .writing/claims/section_02_methods.md
-  git commit -m "draft: methods section"
-  ```
-
-### Task M.2: Verify Methods claims
-
-**Files:**
-- Read: `.writing/manuscript/02_methods.md`, `.writing/claims/section_02_methods.md`
-- Write: `.writing/verify-report.md` (append section), update `STATUS` in claims file.
-
-- [ ] **Step 1: Invoke `Skill(skill="claim-verification")` scoped to Methods**
-
-  Run the four-pass verifier on Methods only (completeness, citation resolution dual source, numeric/table consistency, reporting-guideline subset). On all-pass, flip eligible claims `evidence_ready` → `verified`.
-
-- [ ] **Step 2: Commit**
-
-  ```bash
-  git add .writing/claims/section_02_methods.md .writing/verify-report.md
-  git commit -m "verify: methods claims"
-  ```
-
-### Task M.3: Internal review of Methods
-
-**Files:**
-- Read: `.writing/manuscript/02_methods.md`, `.writing/verify-report.md`
-- Write: `.writing/reviews/internal_methods_<date>.md`
-
-- [ ] **Step 1: Invoke `Skill(skill="peer-review")` as co-author reviewer**
-
-  Prompt the skill to produce Major/Minor/OutOfScope comments against Methods prose. Store the output under `.writing/reviews/internal_methods_<ISO-date>.md`.
-
-- [ ] **Step 2: If review raises Major issues, route to `revision` skill**
-
-  `revision` handles intake → classify → respond-per-item → apply-diff → re-verify. This skill does NOT apply diffs itself.
-
-- [ ] **Step 3: Commit review file**
-
-  ```bash
-  git add .writing/reviews/
-  git commit -m "review: internal review of methods"
-  ```
-
-> **Note:** Log unexpected discoveries, technical decisions, and drafting insights to `.writing/findings.md` after each task.
-````
-
-Repeat the triplet (draft / verify / review) for each section: Introduction (I), Methods (M), Results (R), Discussion (D), Conclusion (C), Abstract (A). Numbering scheme: `<letter>.1` draft, `<letter>.2` verify, `<letter>.3` review.
-
-### Step 6: Figure tasks
-
-For each figure listed in outline.md (plus the mandatory graphical abstract per upstream `scientific-writing`):
-
-````markdown
-### Task F<n>: Figure <n> — <short name>
-
-**Files:**
-- Read: `.writing/outline.md` §Figures, relevant `claims/*.md` entries of `type: figure`
-- Write: `.writing/figures/fig<n>_<slug>.svg` (or `.png`) + `.writing/figures/fig<n>_<slug>_caption.md`
-
-- [ ] **Step 1: Delegate generation to `Skill(skill="scientific-schematics")`**
-
-  Provide: figure spec from outline, data reference from claims, required style (e.g., journal target format), and requested output format (SVG for schematics, PNG for data plots).
-
-- [ ] **Step 2: Write caption to `fig<n>_<slug>_caption.md`**
-
-  Caption is plain Markdown; it will be inlined into the relevant manuscript section via `![Fig n. ...](../figures/fig<n>_<slug>.svg)` when drafting runs.
-
-- [ ] **Step 3: Update matching claims to reference the generated asset**
-
-  For every claim with `type: figure` and `ref: fig<n>_<slug>`, confirm the artifact now exists on disk. This allows Pass 2d of claim-verification to succeed.
-
-- [ ] **Step 4: Commit**
-
-  ```bash
-  git add .writing/figures/
-  git commit -m "figure: fig<n> <slug>"
-  ```
-````
-
-The graphical abstract is mandatory — always emit a Task F0 for it regardless of outline.
-
-### Step 7: Table tasks
-
-For each table listed in outline.md:
-
-````markdown
-### Task T<n>: Table <n> — <short name>
-
-**Files:**
-- Read: source data (dataset id or analysis script output referenced by outline.md)
-- Write: Markdown table embedded in the owning section file (e.g., `.writing/manuscript/03_results.md`) or a standalone `.writing/tables/tab<n>_<slug>.md` included via transclusion.
-
-- [ ] **Step 1: Build the table**
-
-  Prefer embedding Markdown pipe tables directly in the owning section. Only break out to `tables/tab<n>_<slug>.md` when the table exceeds ~40 rows or is reused across sections.
-
-- [ ] **Step 2: Ensure every numeric cell appears in a claim or a footnote**
-
-  Numbers in tables are the ground-truth pool for Pass 3 of claim-verification. If a table cell introduces a new number not attested in a claim, either: (a) add a new claim stub to the matching `claims/section_*.md`, or (b) footnote the cell with its source.
-
-- [ ] **Step 3: Commit**
-
-  ```bash
-  git add .writing/manuscript/ .writing/tables/ .writing/claims/
-  git commit -m "table: tab<n> <slug>"
-  ```
-````
+Every section, figure, and table in the outline becomes a task (or task triplet) in the plan. The exact Markdown templates — per-section `draft / verify / internal-review` triplet, per-figure F<n> task, per-table T<n> task — live in [`references/task-templates.md`](references/task-templates.md). Read that file when generating the Tasks block of `.writing/plan.md`; copy the templates verbatim, substituting the IMRAD section letter (I/M/R/D/C/A) and numbering. The graphical abstract always gets a Task F0 even when the outline does not explicitly list it.
 
 ### Step 8: Dependency table
 
@@ -384,15 +245,13 @@ After writing the complete plan, review it yourself with fresh eyes. This is a c
 
 If any check fails, fix inline. No need to re-review — just fix and move on. If a spec requirement has no task, add the task.
 
-### Placeholder Ban
-
-Every step must contain the actual content a drafter needs. These are **plan failures** — never write them:
-- "TBD", "TODO", "implement later", "fill in details", "draft later".
-- "Add appropriate citations" / "add evidence" / "handle edge cases".
-- "Write the Methods prose" (without naming the exact claims file, section of outline.md, and target manuscript path).
-- "Similar to Task N" (repeat the pattern — the drafter may be reading tasks out of order).
-- Steps that describe what to do without showing how (for evidence-resolution steps, list the exact claim ids and resolution mechanism — Zotero, DOI lookup, manuscript re-check).
-- References to claims, figures, or tables not defined in any task or in `claims/section_*.md`.
+**Placeholder ban (part of the self-review):** every step must contain the actual content a drafter needs. Reject and rewrite any of the following on sight — they are plan failures:
+- "TBD", "TODO", "implement later", "fill in details", "draft later"
+- "Add appropriate citations" / "add evidence" / "handle edge cases"
+- "Write the Methods prose" without naming the exact claims file, outline section, and target manuscript path
+- "Similar to Task N" — repeat the pattern, since the drafter may be reading tasks out of order
+- Steps that describe what to do without showing how (for evidence-resolution steps, list the exact claim ids and resolution mechanism: Zotero, DOI lookup, manuscript re-check)
+- References to claims, figures, or tables not defined in any task or in `claims/section_*.md`
 
 ### Step 12: Hand-off via AskUserQuestion
 

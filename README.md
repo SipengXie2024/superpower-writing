@@ -229,7 +229,7 @@ scripts/
   check-deps.sh          # 7-root probe for upstream skills
   check-zotero.sh        # Zotero API auth probe (never echoes key)
 commands/                # /writing:outline /writing:draft /writing:revise /writing:submit /writing:check-deps /writing:stash /writing:archive
-skills/
+skills/                  # 7 writing-domain + 12 execution/planning = 19 skills total
   main/                  # router + dep gate (authoritative Claim-First Protocol section)
   outlining/             # IMRAD outline + claim stubs + metadata.yaml
   writing-plans/         # per-section/figure/table task decomposition

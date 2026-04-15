@@ -1,6 +1,6 @@
 ---
 name: planning-foundation
-description: Use when starting complex multi-step tasks, research projects, or any task requiring >5 tool calls. Foundation layer inherited by all other skills — provides persistent .writing/ directory as working memory on disk.
+description: Use whenever a task will span more than 5 tool calls, multiple sessions, or risks hitting context-window limits — writing a paper, multi-file refactor, long research thread, anything where losing mid-task state would hurt. Creates a persistent .writing/ directory that acts as working memory on disk, so findings, decisions, and progress survive context resets. Every other superpower-writing skill assumes this directory exists; initialize it first. Trigger even when the user doesn't explicitly ask for "planning".
 ---
 
 # Planning Foundation

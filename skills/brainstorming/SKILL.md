@@ -99,30 +99,7 @@ digraph brainstorming {
 
 **The terminal state is invoking writing-plans.** The allowed intermediate skills before writing-plans are: `spec-interview` (to refine the design) and `git-worktrees` (to isolate work). Do NOT invoke any implementation skill.
 
-## The Process
-
-**Understanding the idea:**
-- Check out the current project state first (files, docs, recent commits)
-- Before asking detailed questions, check whether the project is too large for a single spec
-- If the request covers multiple independent subsystems, decompose it first and brainstorm only the first sub-project through the normal flow
-- Ask **one question at a time** per `AskUserQuestion` call
-- Prefer multiple choice options when possible, but open-ended is fine too
-- Focus on purpose, constraints, success criteria
-
-**Exploring approaches:**
-- Propose 2-3 different approaches with trade-offs via `AskUserQuestion`
-- Lead with your recommended option and explain why
-- Include trade-off descriptions in each option
-
-**Presenting the design:**
-- Once you understand what you're building, present the design
-- Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced
-- Use `AskUserQuestion` after each section to confirm it looks right
-- Cover architecture, components, data flow, error handling, testing
-- Design for **clear boundaries and isolated responsibilities**
-- Prefer smaller, focused files over large do-everything files
-- If a file has grown unwieldy, include a split in the design when it directly serves the current task
-- **Evidence-first design:** Every design decision (architecture choice, performance assumption, complexity trade-off, interface contract) should be backed by evidence — benchmarks, data, reference implementations, or reasoned analysis. When evidence is not yet available, mark the decision with `[NEEDS-EVIDENCE]` inline and continue. Do NOT block design progress to gather evidence, but do NOT silently assume either.
+The checklist steps above and the digraph are the canonical description of the flow; every bullet in the checklist maps 1:1 to a node in the digraph. Clarifications on specific steps (design scaling, evidence markers, spec self-review) live in the Key Principles section and the "After the Design" subsection below — consult them when a step's intent is unclear.
 
 ## After the Design
 
