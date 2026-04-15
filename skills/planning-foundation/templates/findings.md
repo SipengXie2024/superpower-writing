@@ -19,10 +19,6 @@
 ## Resources
 -
 
-## Debugging Findings
-
-## Code Review Findings
-
 ---
 *Update this file after every 2 view/browser/search operations*
 *This prevents visual information from being lost*
