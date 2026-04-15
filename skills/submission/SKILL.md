@@ -28,7 +28,7 @@ is low; the cost of submitting an unverified manuscript is high.
 - `/submit` or `/archive` slash commands are invoked
 - Pre-submission freeze before a collaborator hand-off
 
-Do NOT use for mid-draft snapshots — use `superpower-planning:stashing` for
+Do NOT use for mid-draft snapshots — use `superpower-writing:stashing` for
 those. Submission archives are append-only, one-way.
 
 ## Checklist (all must pass; block on any failure)

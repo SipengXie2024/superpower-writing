@@ -51,7 +51,7 @@ Before any IMRAD structure, lock down:
 
 Write these three into `.writing/findings.md` under the Requirements section.
 
-If the idea is still exploratory, stop and route to `superpower-planning:brainstorming` first. Outlining assumes the contribution is already decided; brainstorming is where it gets decided. Don't force a half-formed idea through IMRAD — it produces a fake outline that masks missing thinking.
+If the idea is still exploratory, stop and route to `superpower-writing:brainstorming` first. Outlining assumes the contribution is already decided; brainstorming is where it gets decided. Don't force a half-formed idea through IMRAD — it produces a fake outline that masks missing thinking.
 
 ## Step 2: Iterative literature retrieval
 
@@ -204,7 +204,7 @@ Ask the user for any field you cannot infer. Do not fabricate author names, ORCI
 
 ## Step 7: Self-review
 
-Before handing off, spec-review the outline against three checks (mirrors `superpower-planning:writing-plans` self-review pattern):
+Before handing off, spec-review the outline against three checks (mirrors `superpower-writing:writing-plans` self-review pattern):
 
 1. **Placeholder scan** — grep outline.md and claims/*.md for `TODO`, `xxxx`, `[NEEDS-EVIDENCE]`. Any hit that is not an intentional evidence placeholder (e.g., `doi: 10.xxxx/...`) must be resolved or explicitly annotated with `[NEEDS-EVIDENCE]` plus rationale.
 

@@ -171,7 +171,7 @@ For each claim where ALL four passes PASS (n/a counts as PASS for Pass 4 when gu
 
 ### Step 7: Record Verification Evidence
 
-Per superpower-planning's verification discipline, if `.planning/` or `.writing/` exists, append a row to the Verification Evidence table in `.writing/progress.md`:
+Per `superpower-writing:verification` discipline, if `.writing/` exists, append a row to the Verification Evidence table in `.writing/progress.md`:
 
 ```
 | <timestamp> | claim-verification | .writing/verify-report.md | <pass/fail> | <N> claims verified, <M> failures |

@@ -295,4 +295,4 @@ Voice rules (delegate polishing to `Skill(skill="scientific-writing")` for the f
 - Upstream `scientific-writing` — response-letter voice / style polishing.
 - Upstream `research-lookup`, `citation-management`, `pyzotero` — new-claim evidence resolution.
 - Hook `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` — still enforces claim-first during revision edits.
-- Style references from `superpower-planning`: `receiving-review` (systematic intake-classify-respond pattern) and `debugging` (reproduce-isolate-fix-verify discipline, re-applied to reviewer feedback).
+- Revision follows an intake-classify-respond pattern for reviewer feedback: read each comment verbatim, classify it (agree / negotiate / reject with reason), and respond in the order the reviewer raised it — never silently drop a comment. For each reported defect, apply a reproduce-isolate-fix-verify discipline: reproduce the reviewer's reading of the problem passage, isolate the exact claim or sentence at fault, fix it, then re-read the surrounding paragraph to confirm the fix reads coherently and does not introduce a new gap.
