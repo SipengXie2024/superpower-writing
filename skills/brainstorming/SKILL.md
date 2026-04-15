@@ -12,7 +12,7 @@ Help turn ideas into fully formed designs and specs through natural collaborativ
 Start by understanding the current project context, then ask questions to refine the idea. Once you understand what you're building, present the design and get user approval.
 
 <EXTREMELY-IMPORTANT>
-Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
+Do NOT invoke any implementation skill, draft any section, scaffold any manuscript, or take any execution action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
 </EXTREMELY-IMPORTANT>
 
 ## Anti-Pattern: "This Is Too Simple To Need A Design"
