@@ -99,6 +99,11 @@ for h in enforce-claims.sh enforce-claims.py check-deps.sh hooks.json; do
     && pass "hooks/$h" \
     || fail "missing hooks/$h"
 done
+for a in section-drafter manuscript-reviewer citation-auditor rebuttal-auditor; do
+  [[ -f "$PLUGIN_ROOT/agents/$a.md" ]] \
+    && pass "agents/$a.md" \
+    || fail "missing agents/$a.md"
+done
 
 echo ""
 echo "ALL SMOKE TESTS PASSED"

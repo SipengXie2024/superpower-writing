@@ -77,11 +77,11 @@ Recommend by heuristic:
 
 Then hand off:
 
-- serial → `Skill(skill="superpower-planning:subagent-driven")`
-- parallel → `Skill(skill="superpower-planning:team-driven")`
-- session-handoff → `Skill(skill="superpower-planning:executing-plans")`
+- serial → `Skill(skill="superpower-planning:subagent-driven")` with implementer subagent type `superpower-writing:section-drafter`, spec-reviewer `superpower-planning:spec-reviewer`, and quality reviewer `superpower-writing:manuscript-reviewer` (writing-quality lens, not generic code quality).
+- parallel → `Skill(skill="superpower-planning:team-driven")` spawning one `superpower-writing:section-drafter` per independent section plus one shared `superpower-writing:manuscript-reviewer`. Keep `superpower-planning:spec-reviewer` for plan alignment.
+- session-handoff → `Skill(skill="superpower-planning:executing-plans")` (same agent types, separate session).
 
-Inject the section prompt template (next section) into whatever implementer-prompt those skills dispatch, along with the `.writing/plan.md` task text verbatim.
+The `section-drafter` agent file at `agents/section-drafter.md` already encodes the claim-first protocol and the Zotero-first evidence resolution flow; the per-section prompt (next section) layers the specific section details on top of that baseline. Inject `.writing/plan.md` task text verbatim.
 
 ### 2. Per-section subagent prompt template
 

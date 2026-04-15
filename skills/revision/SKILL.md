@@ -53,6 +53,7 @@ Per-review checklist (before closing the round):
 - [ ] Manuscript edits committed; claim files updated in the same commit when claims were added or removed.
 - [ ] `claim-verification` has run against the post-revision manuscript and passed.
 - [ ] For external reviews: `.writing/reviews/<id>.response-letter.md` produced.
+- [ ] For external reviews: `superpower-writing:rebuttal-auditor` has audited the response letter + manuscript diff and reported no unresolved `Critical` findings. Advisory-level findings acknowledged in the letter or explicitly dismissed.
 - [ ] `.writing/progress.md` Task Dashboard has a `Reviewer Cycle` entry updated for each affected section.
 
 ## Process
@@ -200,7 +201,14 @@ If verification passes:
 
 1. Set the review's `status: closed` in the frontmatter.
 2. Update `.writing/progress.md` `Reviewer Cycle` entries: append `PASS` for affected sections, set `Citation Check` back to `pass`.
-3. For external reviews: produce the response letter (next section).
+3. For external reviews: produce the response letter (next section), then invoke the rebuttal audit gate:
+
+   ```
+   Task(subagent_type="superpower-writing:rebuttal-auditor",
+        prompt="Audit .writing/reviews/<id>.response-letter.md against .writing/reviews/<id>.md and the git diff of .writing/manuscript/ since <intake-sha>. Report Critical / Important / Minor.")
+   ```
+
+   Critical findings block the round from closing — fix and re-audit (max 2 rounds). Important/Minor findings are surfaced to the user but do not block.
 
 If verification fails:
 

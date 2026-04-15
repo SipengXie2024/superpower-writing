@@ -98,7 +98,11 @@ Once an abstract is in hand (from Zotero or network):
 1. Compute abstract hash and store in `.writing/verify-cache.json` keyed by DOI: `{source, resolved_at, abstract_hash, abstract_excerpt}`.
 2. Perform an LLM-based semantic match: does the abstract plausibly support the CLAIM text? Use a strict rubric: the claim must not contradict the abstract; the abstract's findings/methods must overlap with the claim's substantive content.
 3. **Match PASS:** record PASS in report with excerpt of supporting abstract sentence.
-4. **Match FAIL:** record FAIL with reason (e.g., "abstract describes mouse model; claim is about human cohort"). This is a soft failure — surface to user for manual review rather than auto-rejecting (semantic match has known FP/FN issues; see design.md §11). User confirms or overrides in report before submission proceeds.
+4. **Match FAIL:** record FAIL with reason (e.g., "abstract describes mouse model; claim is about human cohort"). This is a soft failure — surface to user for manual review rather than auto-rejecting (semantic match has known FP/FN issues). User confirms or overrides in report before submission proceeds.
+
+#### 2e. Optional deep pass — `citation-auditor` agent
+
+When the user requests a deep audit (`--deep` flag, or when submission gate is imminent), dispatch the `superpower-writing:citation-auditor` agent in a fresh context with the full manuscript and `.writing/verify-cache.json`. The agent adds six judgment layers Pass 2 does not: over-citation, under-citation, circular/self-citation, staleness, relevance drift (abstract supports claim but not *this* claim), and seminal-work omission. Its findings are advisory — they merge into `verify-report.md` under an "Advisory" block, and the user decides whether to act on each item before submission.
 
 #### 2d. Non-citation EVIDENCE
 

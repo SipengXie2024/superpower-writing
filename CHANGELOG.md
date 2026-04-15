@@ -5,6 +5,35 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.2] — 2026-04-15
+
+### Added
+- Four writing-specific subagents in `agents/`:
+  - `section-drafter` — IMRAD-aware implementer. Resolves evidence (Zotero first,
+    network fallback) before writing any tagged paragraph; obeys the claim-first
+    PreToolUse hook. Used by `drafting` skill in serial and parallel modes.
+  - `manuscript-reviewer` — writing-quality reviewer. Checks IMRAD coherence,
+    voice/tense discipline, hedging calibration, claim-to-evidence distance,
+    clarity. Stays out of mechanical citation and reporting-guideline lanes.
+  - `citation-auditor` — optional deep pass inside `claim-verification`. Flags
+    over-citation, under-citation, circular/self-citation, staleness,
+    relevance drift, and seminal-work omissions.
+  - `rebuttal-auditor` — final gate inside `revision`. Audits the
+    reviewer-response letter for per-item completeness, tone calibration,
+    false concessions, classification sanity, and consistency with the
+    manuscript diff.
+
+### Changed
+- `skills/drafting/SKILL.md` now names `section-drafter` (implementer) and
+  `manuscript-reviewer` (quality reviewer) as the subagent types dispatched by
+  the underlying `superpower-planning:subagent-driven` / `team-driven` engines.
+  `superpower-planning:spec-reviewer` remains for plan alignment.
+- `skills/claim-verification/SKILL.md` adds an optional §2e "deep pass" that
+  dispatches `citation-auditor` on request.
+- `skills/revision/SKILL.md` Step 5 now gates external-review rounds on
+  `rebuttal-auditor` passing; Critical findings block round closure.
+- `tests/smoke.sh` audits the four new agent files.
+
 ## [0.1.1] — 2026-04-15
 
 ### Added
@@ -92,5 +121,6 @@ Initial scaffold.
 - Auto-submission to journal portals.
 - LaTeX compile.
 
+[0.1.2]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.1.2
 [0.1.1]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.1.1
 [0.1.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.1.0

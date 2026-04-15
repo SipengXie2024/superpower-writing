@@ -14,7 +14,7 @@
 
 ## Status
 
-- **Version**: `v0.1.1`
+- **Version**: `v0.1.2`
 - **Scope**: single-author IMRAD research manuscripts
 - **Dependencies**: scientific-agent-skills (hard), Zotero API (optional)
 - **Repo**: https://github.com/SipengXie2024/superpower-writing
@@ -219,6 +219,11 @@ hooks/
   hooks.json             # PreToolUse enforce-claims + SessionStart check-deps
   enforce-claims.{sh,py} # claim-first enforcer
   check-deps.sh          # SessionStart wrapper
+agents/
+  section-drafter.md     # implementer: IMRAD-aware drafter with claim-first + Zotero-first evidence resolution
+  manuscript-reviewer.md # reviewer: scientific writing quality (IMRAD coherence, voice, hedging, clarity)
+  citation-auditor.md    # reviewer: over/under/circular/stale citation; optional deep pass in claim-verification
+  rebuttal-auditor.md    # reviewer: reviewer-response letter completeness + tone + diff consistency
 scripts/
   init-writing-dir.sh    # bootstraps .writing/
   check-deps.sh          # 7-root probe for upstream skills
