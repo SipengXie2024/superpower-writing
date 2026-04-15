@@ -126,7 +126,7 @@ ATTEMPT 1 FAILED: Escalate to User
   -> Align on direction BEFORE proceeding
 
 AFTER ALIGNMENT (based on user's judgment):
-  -> Bug           → use systematic debugging skill
+  -> Bug           → reproduce, isolate, fix, verify (inline discipline)
   -> Plan gap      → update plan with user
   -> Environment   → fix environment
   -> Architecture  → broader rethink with user
@@ -211,9 +211,6 @@ The orchestrator aggregates agent findings into top-level `.writing/findings.md`
 **Project detection:**
 - `scripts/detect-base-branch.sh` — Detect main/master/develop
 - `scripts/detect-test-command.sh` — Detect project test command
-
-**Other:**
-- `scripts/session-catchup.py` — Recover context from previous session (manual utility, requires Python)
 
 ## Anti-Patterns
 

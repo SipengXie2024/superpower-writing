@@ -20,10 +20,8 @@
 -
 
 ## Debugging Findings
-<!-- Added by debugging skill -->
 
 ## Code Review Findings
-<!-- Added by requesting-review skill -->
 
 ---
 *Update this file after every 2 view/browser/search operations*
