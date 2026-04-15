@@ -6,7 +6,7 @@ set -euo pipefail
 
 TARGET="${1:-.writing}"
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
-TEMPLATE_DIR="$PLUGIN_ROOT/skills/planning-foundation/templates"
+TEMPLATE_DIR="$PLUGIN_ROOT/templates"
 
 if [[ -d "$TARGET" ]]; then
   echo "$TARGET already exists; refusing to overwrite." >&2

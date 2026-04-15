@@ -14,7 +14,7 @@
 
 ## Status
 
-- **Version**: `v0.1.0`
+- **Version**: `v0.1.1`
 - **Scope**: single-author IMRAD research manuscripts
 - **Dependencies**: scientific-agent-skills (hard), Zotero API (optional)
 - **Repo**: https://github.com/SipengXie2024/superpower-writing
@@ -109,7 +109,7 @@ zotero:
 bash tests/smoke.sh
 ```
 
-Expected final line: `ALL SMOKE TESTS PASSED` (26 checks: dir init, dep-check failure messaging, claim enforcement stub/evidence/draft-only/untagged/non-manuscript, manifest sanity, file presence).
+Expected final line: `ALL SMOKE TESTS PASSED`. The test emits ~35 PASS lines across six sections: `.writing/` init, dep-check failure messaging, Zotero-creds failure messaging, five claim-enforcement cases (stub blocks, evidence_ready allows, draft-only allows, untagged blocks, non-manuscript allows), manifest JSON sanity (plugin.json / marketplace.json / hooks.json), and file-presence audit (7 skills + 7 commands + 4 hook files).
 
 ## Agent usage — lifecycle by user intent
 
@@ -152,7 +152,7 @@ Or escapes enforcement for early exploration:
 Rough notes about what this section might say.
 ```
 
-The hook `hooks/enforce-claims.sh` runs on every `Edit`/`Write`/`MultiEdit` targeting `**/manuscript/*.md` and refuses the write if any `claim: id` references a claim whose `STATUS` is not `evidence_ready` or `verified`. Exempt section stems (default): `00_abstract`, `06_references`, `07_acknowledgments`.
+The hook `hooks/enforce-claims.sh` runs on every `Edit`/`Write`/`MultiEdit` targeting `**/manuscript/*.md` and refuses the write if any `claim: id` references a claim whose `STATUS` is not `evidence_ready` or `verified`. **Exemption is by exact filename stem** — only files named `00_abstract.md`, `06_references.md`, or `07_acknowledgments.md` bypass paragraph-tag enforcement. Any other stem (including variants like `abstract.md` or `08_appendix.md`) must tag every load-bearing paragraph.
 
 Any `<!-- draft-only -->` marker still present when `/writing:submit` runs is a hard failure.
 
@@ -232,8 +232,7 @@ skills/
   claim-verification/    # 4-pass pre-submission verifier
   revision/              # unified internal + journal review loop
   submission/            # freeze gate + archive
-  planning-foundation/
-    templates/           # copied into .writing/ on init
+templates/               # copied into .writing/ on init by scripts/init-writing-dir.sh
 tests/
   smoke.sh               # 26 end-to-end checks
 .planning/               # design.md, plan.md, findings.md, progress.md — the plugin's own design history
@@ -251,7 +250,7 @@ README.md
 ## Development
 
 ```bash
-bash tests/smoke.sh       # 26 checks, should say ALL SMOKE TESTS PASSED
+bash tests/smoke.sh       # ~35 PASS lines across 6 sections, ending in ALL SMOKE TESTS PASSED
 
 # design history:
 cat .planning/design.md   # architectural spec (v3, includes Zotero §14)

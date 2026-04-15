@@ -6,7 +6,7 @@
     {
       "name": "superpower-writing",
       "description": "IMRAD academic-writing lifecycle plugin",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "source": "./"
     }
   ]

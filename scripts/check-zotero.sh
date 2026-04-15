@@ -43,6 +43,38 @@ EOF
   exit 1
 fi
 
+# First confirm the upstream `pyzotero` skill is installed — all Zotero-aware
+# SKILL.md files call `Skill(skill="pyzotero")` unconditionally when
+# zotero.enabled is true.
+pyzotero_found=""
+for root in \
+  "$HOME/.claude/skills" \
+  "$HOME/.claude/plugins/cache" \
+  "$HOME/.cursor/skills" \
+  "$HOME/.config/claude-code/skills" \
+  "$HOME/.codex/skills" \
+  "$HOME/Library/Application Support/Claude/skills" \
+  "/usr/local/share/claude/skills"; do
+  [[ -d "$root" ]] || continue
+  if find "$root" -maxdepth 5 -type f -path "*/pyzotero/SKILL.md" -print -quit 2>/dev/null | grep -q .; then
+    pyzotero_found="$root"
+    break
+  fi
+done
+
+if [[ -z "$pyzotero_found" ]]; then
+  cat >&2 <<EOF
+[superpower-writing] Zotero integration requires the upstream 'pyzotero' skill.
+
+It is part of scientific-agent-skills (K-Dense-AI). Install with:
+
+    npx skills add K-Dense-AI/scientific-agent-skills
+
+Or disable Zotero: set zotero.enabled: false in .writing/metadata.yaml.
+EOF
+  exit 1
+fi
+
 # Sanity check by hitting a low-cost Zotero API endpoint. Don't print the response body.
 target_id="${ZOTERO_GROUP_ID:-$ZOTERO_USER_ID}"
 target_type="users"
@@ -55,7 +87,7 @@ http_code=$(curl -sS -o /dev/null -w '%{http_code}' \
 
 case "$http_code" in
   200)
-    echo "[superpower-writing] Zotero OK (${target_type}/${target_id})"
+    echo "[superpower-writing] Zotero OK (${target_type}/${target_id}; pyzotero at ${pyzotero_found})"
     exit 0
     ;;
   403)

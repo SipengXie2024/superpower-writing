@@ -71,5 +71,19 @@ EOF
   exit 1
 fi
 
-echo "[superpower-writing] deps OK (found at: $found_root)"
+# The PreToolUse hook (hooks/enforce-claims.py) requires PyYAML. Probe it so
+# users find out at SessionStart rather than at first Edit.
+if ! python3 -c "import yaml" 2>/dev/null; then
+  cat >&2 <<EOF
+[superpower-writing] Dependency check FAILED.
+
+Upstream skills OK, but PyYAML is missing. The PreToolUse hook parses YAML
+claim files and will block every manuscript write until you install it:
+
+    pip install --user pyyaml
+EOF
+  exit 1
+fi
+
+echo "[superpower-writing] deps OK (skills at $found_root; PyYAML present)"
 exit 0
