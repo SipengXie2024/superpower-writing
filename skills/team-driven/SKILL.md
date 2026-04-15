@@ -16,8 +16,8 @@ Execute plan by creating an Agent Team with persistent implementer teammates and
 <EXTREMELY-IMPORTANT>
 Every task MUST pass TWO independent reviews before it can be marked complete:
 
-1. **Spec Compliance Review** — spec-reviewer teammate verifies code matches the original plan
-2. **Code Manuscript Review** — manuscript-reviewer teammate verifies code is well-built (only after spec review passes)
+1. **Spec Compliance Review** — spec-reviewer teammate verifies the manuscript matches the original plan
+2. **Manuscript Quality Review** — manuscript-reviewer teammate verifies the manuscript is well-built (only after spec review passes)
 
 **A task is NOT complete until the manuscript-reviewer DMs the lead with APPROVED.**
 
@@ -85,13 +85,13 @@ Team Lead (you, current session)
 ├── implementer-2 (teammate)     ──→ Task B ──┤── parallel
 ├── implementer-N (teammate)     ──→ Task C ─┘
 ├── spec-reviewer (teammate)     ──→ spec compliance review
-└── manuscript-reviewer (teammate)  ──→ code manuscript review
+└── manuscript-reviewer (teammate)  ──→ manuscript quality review
 ```
 
 - **Team lead:** Reads plan, creates tasks, assigns work, orchestrates review handoffs, aggregates findings, updates progress.md
 - **Implementers:** Persistent teammates, each works on assigned tasks, DMs spec-reviewer when done
-- **Spec-reviewer:** Verifies code matches the original plan. DMs implementer for spec fixes, DMs lead when spec passes.
-- **Manuscript-reviewer:** Verifies code is well-built. Activated by lead after spec passes. DMs implementer for quality fixes, DMs lead when approved.
+- **Spec-reviewer:** Verifies the manuscript matches the original plan. DMs implementer for spec fixes, DMs lead when spec passes.
+- **Manuscript-reviewer:** Verifies the manuscript is well-built. Activated by lead after spec passes. DMs implementer for quality fixes, DMs lead when approved.
 
 ## The Process
 

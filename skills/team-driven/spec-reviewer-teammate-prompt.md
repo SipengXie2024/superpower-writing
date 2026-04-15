@@ -43,15 +43,15 @@ Task tool (superpower-writing:spec-reviewer):
 
     ### Step 1: Read the Original Plan
 
-    Before reviewing any code:
+    Before reviewing any manuscript:
     1. Read `.writing/plan.md` — find the section for this task
     2. Read `.writing/design.md` if it exists — note architectural constraints
     3. Compare the plan's requirements with what the implementer says they were asked to do
     4. If there's a discrepancy, note it — this is "plan drift" from the lead's extraction
 
-    ### Step 2: Read the Code and Verify
+    ### Step 2: Read the Manuscript and Verify
 
-    **Do NOT trust the implementer's report.** Read the actual code. Verify against
+    **Do NOT trust the implementer's report.** Read the actual manuscript. Verify against
     the ORIGINAL plan:
 
     **Missing requirements:**
@@ -112,8 +112,8 @@ Task tool (superpower-writing:spec-reviewer):
     ## Important
 
     - **Read the original plan yourself** — do NOT rely on the task description alone
-    - **Do NOT trust implementer reports** — always read the actual code
-    - **Be specific** — "line 42 in foo.ts has..." not "code needs improvement"
+    - **Do NOT trust implementer reports** — always read the actual manuscript
+    - **Be specific** — "line 42 in section-3.md has..." not "manuscript needs improvement"
     - **Don't over-request** — only flag real spec violations, not style preferences
     - **Re-review after fixes** — verify the fix actually works
     - **Your scope is spec compliance ONLY** — do NOT review manuscript quality (naming, patterns, etc.)

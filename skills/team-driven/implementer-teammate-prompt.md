@@ -44,7 +44,7 @@ Task tool (general-purpose):
        - Read `{CLAUDE_PLUGIN_ROOT}/skills/planning-foundation/templates/findings.md` → write to `{AGENT_PLANNING_DIR}/findings.md`
        - Read `{CLAUDE_PLUGIN_ROOT}/skills/planning-foundation/templates/progress.md` → write to `{AGENT_PLANNING_DIR}/progress.md`
 
-    **You MUST have `findings.md` and `progress.md` in your planning dir before writing any code. Do NOT create other files like `notes.md` — only use `findings.md` and `progress.md`.**
+    **You MUST have `findings.md` and `progress.md` in your planning dir before writing any prose. Do NOT create other files like `notes.md` — only use `findings.md` and `progress.md`.**
     Only initialize once — for subsequent tasks, keep updating the same files.
 
     ## Communication Protocol
