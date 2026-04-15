@@ -1,9 +1,17 @@
 {
   "name": "superpower-writing",
   "description": "IMRAD academic-writing lifecycle plugin. Brings persistent state, stage gates, claim-first verification, subagent execution, and review loops to research-paper drafting. Depends on scientific-agent-skills (agentskills.io) for domain content.",
-  "version": "0.2.0",
-  "author": { "name": "sipeng" },
+  "version": "0.2.1",
+  "author": {
+    "name": "sipeng"
+  },
   "repository": "https://github.com/SipengXie2024/superpower-writing",
   "license": "MIT",
-  "keywords": ["skills", "academic-writing", "imrad", "claim-first", "scientific-agent-skills"]
+  "keywords": [
+    "skills",
+    "academic-writing",
+    "imrad",
+    "claim-first",
+    "scientific-agent-skills"
+  ]
 }
