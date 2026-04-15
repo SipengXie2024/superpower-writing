@@ -5,7 +5,7 @@ description: Orchestrates prose drafting section-by-section, in serial (subagent
 
 # Drafting
 
-Drive prose production for the manuscript. For every section in `.writing/plan.md`, resolve evidence for every claim first, then write `<!-- claim: id -->`-tagged paragraphs. Delegate the execution engine to `superpower-planning`; this skill owns the writing-specific prompt template, the Zotero-aware evidence loop, and the graphical abstract dispatch.
+Drive prose production for the manuscript. For every section in `.writing/plan.md`, resolve evidence for every claim first, then write `<!-- claim: id -->`-tagged paragraphs. This skill owns the writing-specific prompt template, the Zotero-aware evidence loop, and the graphical abstract dispatch; execution is handled by the local `superpower-writing:{subagent-driven, team-driven, executing-plans}` engines.
 
 **Announce at start:** "I'm using the drafting skill to produce manuscript prose."
 
@@ -15,7 +15,7 @@ Drafting is the stage where claims become sentences. The hard rule is **claim-fi
 
 > Claim-first protocol: see `superpower-writing:main` §Claim-First Protocol.
 
-Execution is delegated. This skill only shapes the per-section prompt and the bookkeeping. The actual orchestration engine is one of three `superpower-planning` skills, picked by mode:
+This skill only shapes the per-section prompt and the bookkeeping. The orchestration engine is one of three local `superpower-writing` skills, picked by mode:
 
 - **serial** → `subagent-driven` (one implementer per section + spec review + quality review)
 - **parallel** → `team-driven` (Agent Team with dedicated reviewer, multiple sections in flight)
@@ -77,9 +77,9 @@ Recommend by heuristic:
 
 Then hand off:
 
-- serial → `Skill(skill="superpower-planning:subagent-driven")` with implementer subagent type `superpower-writing:section-drafter`, spec-reviewer `superpower-planning:spec-reviewer`, and quality reviewer `superpower-writing:manuscript-reviewer` (writing-quality lens, not generic code quality).
-- parallel → `Skill(skill="superpower-planning:team-driven")` spawning one `superpower-writing:section-drafter` per independent section plus one shared `superpower-writing:manuscript-reviewer`. Keep `superpower-planning:spec-reviewer` for plan alignment.
-- session-handoff → `Skill(skill="superpower-planning:executing-plans")` (same agent types, separate session).
+- serial → `Skill(skill="superpower-writing:subagent-driven")` with implementer subagent type `superpower-writing:section-drafter`, spec-reviewer `superpower-writing:spec-reviewer`, and manuscript reviewer `superpower-writing:manuscript-reviewer` (writing-quality lens).
+- parallel → `Skill(skill="superpower-writing:team-driven")` spawning one `superpower-writing:section-drafter` per independent section plus one shared `superpower-writing:manuscript-reviewer`. Keep `superpower-writing:spec-reviewer` for plan alignment.
+- session-handoff → `Skill(skill="superpower-writing:executing-plans")` (same agent types, separate session).
 
 The `section-drafter` agent file at `agents/section-drafter.md` already encodes the claim-first protocol and the Zotero-first evidence resolution flow; the per-section prompt (next section) layers the specific section details on top of that baseline. Inject `.writing/plan.md` task text verbatim.
 
@@ -239,7 +239,7 @@ The `main` skill runs `${CLAUDE_PLUGIN_ROOT}/scripts/check-zotero.sh` on entry w
 
 **Claim-first, always.** Evidence before prose is the central discipline of this plugin. The hook is the backstop, not the workflow — the workflow is Step A of the template. If drafting ever feels "fast" because a subagent skipped Step A, the hook will stop it and you will redo the work. Do it right the first time.
 
-**Delegate execution; own the prompt.** The actual parallelism, review gates, and session management are `superpower-planning` concerns. What this skill contributes is the per-section template above. Keep that template authoritative; tweak wording, not structure, when refining.
+**Own the prompt; invoke execution by name.** This skill owns the per-section prompt template and the claim-first bookkeeping. Execution (parallelism, review gates, session management) is handled by the local `superpower-writing:{subagent-driven, team-driven, executing-plans}` engines, which this skill invokes by name.
 
 **Zotero miss is not a failure.** A DOI absent from the user's Zotero library just means the user has not yet vetted it. Network fallback is normal and expected. The only failure mode is "no credible source anywhere", which must be escalated.
 
@@ -254,7 +254,7 @@ The `main` skill runs `${CLAUDE_PLUGIN_ROOT}/scripts/check-zotero.sh` on entry w
 - `superpower-writing:writing-plans` — produces `.writing/plan.md`; drafting reads it verbatim.
 - `superpower-writing:claim-verification` — downstream; consumes `.writing/manuscript/*.md` and confirms every claim tag.
 - `superpower-writing:revision` — downstream; called when reviews come back.
-- `superpower-planning:subagent-driven` / `team-driven` / `executing-plans` — the actual execution engines.
+- `superpower-writing:subagent-driven` / `team-driven` / `executing-plans` — the actual execution engines.
 - Upstream `scientific-writing` — voice and structure rules.
 - Upstream `scientific-schematics` — graphical abstract + schematics.
 - Upstream `research-lookup`, `citation-management`, `pyzotero` — evidence resolution.
