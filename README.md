@@ -235,7 +235,7 @@ skills/
 templates/               # copied into .writing/ on init by scripts/init-writing-dir.sh
 tests/
   smoke.sh               # 26 end-to-end checks
-.planning/               # design.md, plan.md, findings.md, progress.md — the plugin's own design history
+CHANGELOG.md             # user-facing release notes
 .env.example
 .gitignore
 README.md
@@ -251,15 +251,10 @@ README.md
 
 ```bash
 bash tests/smoke.sh       # ~35 PASS lines across 6 sections, ending in ALL SMOKE TESTS PASSED
-
-# design history:
-cat .planning/design.md   # architectural spec (v3, includes Zotero §14)
-cat .planning/plan.md     # 20-task implementation plan
-cat .planning/findings.md # decisions log
-cat .planning/progress.md # phase-by-phase status
+cat CHANGELOG.md          # release notes
 ```
 
-Contributions welcome. See `.planning/design.md` for the v2 roadmap.
+Contributions welcome. See [CHANGELOG.md](./CHANGELOG.md) "Known limitations" for the v2 roadmap.
 
 ## License
 

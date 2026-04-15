@@ -8,7 +8,10 @@
 # Writing working state
 .writing/verify-cache.json
 .writing/stash/
-# .writing/ itself IS tracked (per design.md) — only caches/stashes are ignored
+# .writing/ itself IS tracked — only caches/stashes are ignored
+
+# Plugin-internal design history (kept locally, not published)
+.planning/
 
 # Python
 __pycache__/
