@@ -5,7 +5,7 @@ description: Use when executing implementation plans with independent tasks in t
 
 # Subagent-Driven Development
 
-Execute plan by dispatching one new subagent invocation per task, with two-stage review after each: spec compliance review first, then code quality review. Each subagent gets its own planning directory for structured knowledge capture.
+Execute plan by dispatching one new subagent invocation per task, with two-stage review after each: spec compliance review first, then manuscript review. Each subagent gets its own planning directory for structured knowledge capture.
 
 **Core principle:** One new subagent invocation per task + per-agent planning dir + two-stage review (spec then quality) = high quality, fast iteration
 
@@ -17,7 +17,7 @@ Execute plan by dispatching one new subagent invocation per task, with two-stage
 Every task MUST pass TWO independent reviews before it can be marked complete:
 
 1. **Spec Compliance Review** — Dispatch `./spec-reviewer-prompt.md` subagent
-2. **Code Quality Review** — Dispatch `./manuscript-reviewer-prompt.md` subagent (only after spec review passes)
+2. **Manuscript Review** — Dispatch `./manuscript-reviewer-prompt.md` subagent (only after spec review passes)
 
 A task is NOT complete until BOTH reviews return APPROVED. No exceptions — not for "simple" tasks, config changes, or thorough self-reviews.
 
@@ -26,7 +26,7 @@ The Task Status Dashboard in `.writing/progress.md` has `Spec Review`, `Quality 
 
 ## Review Loop Caps
 
-Each review loop (spec compliance and code quality) is capped at **3 fix-review rounds** per task.
+Each review loop (spec compliance and manuscript quality) is capped at **3 fix-review rounds** per task.
 
 **Round counting:** The initial review does not count as a round. A "round" is one fix-then-re-review cycle: initial review → fix → re-review (round 1) → fix → re-review (round 2) → fix → re-review (round 3) → STOP.
 
@@ -65,7 +65,7 @@ digraph when_to_use {
 - Same session (no context switch)
 - One new subagent invocation per task (no context pollution)
 - Per-agent planning directories (structured knowledge capture)
-- Two-stage review after each task: spec compliance first, then code quality
+- Two-stage review after each task: spec compliance first, then manuscript quality
 - Faster iteration (no human-in-loop between tasks)
 
 ## Plan Anchoring: How to Extract Tasks
@@ -95,8 +95,8 @@ digraph process {
         "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [shape=box];
         "Spec reviewer subagent confirms code matches spec?" [shape=diamond];
         "Implementer subagent fixes spec gaps" [shape=box];
-        "Dispatch code quality reviewer subagent (./manuscript-reviewer-prompt.md)" [shape=box];
-        "Code quality reviewer subagent approves?" [shape=diamond];
+        "Dispatch manuscript reviewer subagent (./manuscript-reviewer-prompt.md)" [shape=box];
+        "Manuscript reviewer subagent approves?" [shape=diamond];
         "Implementer subagent fixes quality issues" [shape=box];
         "Aggregate agent findings into top-level .writing/" [shape=box style=filled fillcolor=lightyellow];
         "Mark task complete via TaskUpdate" [shape=box];
@@ -104,7 +104,7 @@ digraph process {
 
     "Read plan, extract all tasks with full text, note context, create tasks via TaskCreate" [shape=box];
     "More tasks remain?" [shape=diamond];
-    "Dispatch final code reviewer subagent for entire implementation" [shape=box];
+    "Dispatch final manuscript reviewer subagent for entire implementation" [shape=box];
     "Use superpower-writing:finishing-branch" [shape=box style=filled fillcolor=lightgreen];
 
     "Read plan, extract all tasks with full text, note context, create tasks via TaskCreate" -> "Create agent planning dir (if not exists)";
@@ -117,17 +117,17 @@ digraph process {
     "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" -> "Spec reviewer subagent confirms code matches spec?";
     "Spec reviewer subagent confirms code matches spec?" -> "Implementer subagent fixes spec gaps" [label="no"];
     "Implementer subagent fixes spec gaps" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [label="re-review\n(max 3 rounds)"];
-    "Spec reviewer subagent confirms code matches spec?" -> "Dispatch code quality reviewer subagent (./manuscript-reviewer-prompt.md)" [label="yes"];
-    "Dispatch code quality reviewer subagent (./manuscript-reviewer-prompt.md)" -> "Code quality reviewer subagent approves?";
-    "Code quality reviewer subagent approves?" -> "Implementer subagent fixes quality issues" [label="no"];
-    "Implementer subagent fixes quality issues" -> "Dispatch code quality reviewer subagent (./manuscript-reviewer-prompt.md)" [label="re-review\n(max 3 rounds)"];
-    "Code quality reviewer subagent approves?" -> "Aggregate agent findings into top-level .writing/" [label="yes"];
+    "Spec reviewer subagent confirms code matches spec?" -> "Dispatch manuscript reviewer subagent (./manuscript-reviewer-prompt.md)" [label="yes"];
+    "Dispatch manuscript reviewer subagent (./manuscript-reviewer-prompt.md)" -> "Manuscript reviewer subagent approves?";
+    "Manuscript reviewer subagent approves?" -> "Implementer subagent fixes quality issues" [label="no"];
+    "Implementer subagent fixes quality issues" -> "Dispatch manuscript reviewer subagent (./manuscript-reviewer-prompt.md)" [label="re-review\n(max 3 rounds)"];
+    "Manuscript reviewer subagent approves?" -> "Aggregate agent findings into top-level .writing/" [label="yes"];
     "Aggregate agent findings into top-level .writing/" -> "Mark task complete via TaskUpdate";
     "Mark task complete via TaskUpdate" -> "More tasks remain?";
     "More tasks remain?" -> "Create agent planning dir (if not exists)" [label="yes - next task"];
     "More tasks remain?" -> "Plan Alignment Gate: re-read plan.md, verify all tasks match original plan" [label="no"];
-    "Plan Alignment Gate: re-read plan.md, verify all tasks match original plan" -> "Dispatch final code reviewer subagent for entire implementation";
-    "Dispatch final code reviewer subagent for entire implementation" -> "Use superpower-writing:finishing-branch";
+    "Plan Alignment Gate: re-read plan.md, verify all tasks match original plan" -> "Dispatch final manuscript reviewer subagent for entire implementation";
+    "Dispatch final manuscript reviewer subagent for entire implementation" -> "Use superpower-writing:finishing-branch";
 }
 ```
 
@@ -190,7 +190,7 @@ Example aggregation:
 
 - `./implementer-prompt.md` - Dispatch implementer subagent (includes planning dir injection)
 - `./spec-reviewer-prompt.md` - Dispatch spec compliance reviewer subagent
-- `./manuscript-reviewer-prompt.md` - Dispatch code quality reviewer subagent
+- `./manuscript-reviewer-prompt.md` - Dispatch manuscript reviewer subagent
 
 ## Example Workflow
 
@@ -221,8 +221,8 @@ Implementer: "Got it. Implementing now..."
 [Dispatch spec compliance reviewer with its own planning dir]
 Spec reviewer: Spec compliant - all requirements met, nothing extra
 
-[Get git SHAs, dispatch code quality reviewer]
-Code reviewer: Strengths: Good test coverage, clean. Issues: None. Approved.
+[Get git SHAs, dispatch manuscript reviewer]
+Manuscript reviewer: Strengths: Good test coverage, clean. Issues: None. Approved.
 
 [Aggregate: read agent findings, append to .writing/findings.md and progress.md]
 [Mark Task 1 complete]
@@ -250,14 +250,14 @@ Implementer: Removed --json flag, added progress reporting
 [Spec reviewer reviews again]
 Spec reviewer: Spec compliant now
 
-[Dispatch code quality reviewer]
-Code reviewer: Strengths: Solid. Issues (Important): Magic number (100)
+[Dispatch manuscript reviewer]
+Manuscript reviewer: Strengths: Solid. Issues (Important): Magic number (100)
 
 [Implementer fixes]
 Implementer: Extracted PROGRESS_INTERVAL constant
 
-[Code reviewer reviews again]
-Code reviewer: Approved
+[Manuscript reviewer reviews again]
+Manuscript reviewer: Approved
 
 [Aggregate agent findings into .writing/]
 [Mark Task 2 complete]
@@ -265,7 +265,7 @@ Code reviewer: Approved
 ...
 
 [After all tasks]
-[Dispatch final code-reviewer]
+[Dispatch final manuscript reviewer]
 Final reviewer: All requirements met, ready to merge
 
 Done!
@@ -294,10 +294,10 @@ Done!
 
 **Quality gates:**
 - Self-review catches issues before handoff
-- Two-stage review: spec compliance, then code quality
+- Two-stage review: spec compliance, then manuscript quality
 - Review loops ensure fixes actually work
 - Spec compliance prevents over/under-building
-- Code quality ensures implementation is well-built
+- Manuscript quality ensures implementation is well-built
 - Aggregation preserves findings for future tasks
 
 **Cost:**
@@ -308,7 +308,7 @@ Done!
 
 ## Plan Alignment Gate
 
-After ALL tasks complete and BEFORE the final code review, perform a plan alignment check:
+After ALL tasks complete and BEFORE the final manuscript review, perform a plan alignment check:
 
 1. **Re-read `.writing/plan.md`** completely — refresh the original requirements in context
 2. **Re-read `.writing/design.md`** if it exists — refresh architectural constraints
@@ -319,7 +319,7 @@ After ALL tasks complete and BEFORE the final code review, perform a plan alignm
 4. **Record results** in `.writing/progress.md`:
    - Update the `Plan Align` column in the Task Status Dashboard
    - If drift is detected: log it in `.writing/findings.md` with specific details
-5. **If significant drift is detected**, escalate to the user BEFORE the final code review:
+5. **If significant drift is detected**, escalate to the user BEFORE the final manuscript review:
    - Describe what drifted and why
    - Propose corrective action
    - Let the user decide whether to fix or accept
@@ -336,7 +336,7 @@ After ALL tasks complete and BEFORE the final code review, perform a plan alignm
 - Skip scene-setting context (subagent needs to understand where task fits)
 - Ignore subagent questions (answer before letting them proceed)
 - Accept "close enough" on spec compliance (reviewer found issues = not done)
-- Start code quality review before spec compliance passes (wrong order)
+- Start manuscript review before spec compliance passes (wrong order)
 - Skip planning dir creation or aggregation step (knowledge gets lost)
 
 **If subagent asks questions:**

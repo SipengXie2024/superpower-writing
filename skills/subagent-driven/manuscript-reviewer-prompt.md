@@ -1,6 +1,6 @@
-# Code Quality Reviewer Prompt Template
+# Manuscript Reviewer Prompt Template
 
-Use this template when dispatching a code quality reviewer subagent.
+Use this template when dispatching a manuscript reviewer subagent.
 
 **Purpose:** Verify implementation is well-built (clean, tested, maintainable)
 
@@ -8,7 +8,7 @@ Use this template when dispatching a code quality reviewer subagent.
 
 ```
 Task tool (superpower-writing:manuscript-reviewer):
-  Use template at requesting-review/code-reviewer.md
+  Review the implementation for manuscript quality (clean structure, claim-verified, maintainable).
 
   WHAT_WAS_IMPLEMENTED: [from implementer's report]
   PLAN_OR_REQUIREMENTS: Task N from [plan-file]
@@ -36,4 +36,4 @@ Task tool (superpower-writing:manuscript-reviewer):
   Minor issues alone should not block approval.
 ```
 
-**Code reviewer returns:** Strengths, Issues (Critical/Important/Minor), Assessment
+**Manuscript reviewer returns:** Strengths, Issues (Critical/Important/Minor), Assessment
