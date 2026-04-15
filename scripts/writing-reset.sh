@@ -30,7 +30,7 @@ if [ -d "${PLANNING_DIR}/agents" ]; then
     echo "[writing-reset] Removed .writing/agents/"
 fi
 
-# Recreate canonical files from templates
-"${SCRIPT_DIR}/init-writing-dir.sh" "$PROJECT_ROOT"
+# Recreate canonical files from templates (init takes the .writing/ target dir)
+"${SCRIPT_DIR}/init-writing-dir.sh" "$PLANNING_DIR"
 
 echo "[writing-reset] .writing/ reset to clean state (archive/ and stash/ preserved)"
