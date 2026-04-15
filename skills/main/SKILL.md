@@ -25,7 +25,7 @@ Then perform the dep check and `.writing/` detection below before doing anything
 
 - Local (this plugin): `Skill(skill="superpower-writing:drafting")` — prefixed.
 - Upstream (Agent Skills standard): `Skill(skill="scientific-writing")` — bare, no prefix. These were installed via `npx skills add K-Dense-AI/scientific-agent-skills`, not as a Claude plugin.
-- superpower-planning execution engines: `Skill(skill="superpower-planning:subagent-driven")` etc. — prefixed as normal.
+- Local execution engines: `Skill(skill="superpower-writing:subagent-driven")`, `Skill(skill="superpower-writing:team-driven")`, `Skill(skill="superpower-writing:executing-plans")` — prefixed as normal. These ship with this plugin; no sibling-plugin dependency.
 
 # Dependency Gate (HARD)
 
@@ -125,7 +125,7 @@ When the user starts a non-trivial writing task (multi-section paper, multi-day 
 
 **Option 2: Lightweight Execution** — Fast structured execution with `.writing/` tracking but no spec-interview or review loops. Best for short communications, commentaries, or a 2-3 section note where the claims are already clear.
 
-**Option 3: Structured Brainstorming** — Full pipeline: `superpower-planning:brainstorming` (design doc) → `superpower-planning:spec-interview` (refinement) → `superpower-writing:outlining` (IMRAD structure + claims). Best for a new research manuscript, complex methods, multi-study papers, or when the narrative arc is still unclear.
+**Option 3: Structured Brainstorming** — Full pipeline: `superpower-writing:brainstorming` (design doc) → `superpower-writing:spec-interview` (refinement) → `superpower-writing:outlining` (IMRAD structure + claims). Best for a new research manuscript, complex methods, multi-study papers, or when the narrative arc is still unclear.
 
 **Option 4: Stash Current Work** — Pause an in-progress paper safely; move `.writing/` (except `archive/`) into `.writing/stash/<paper-name>/`. Best when switching to a different paper, awaiting co-author input, or waiting on external data.
 
@@ -134,28 +134,28 @@ When the user starts a non-trivial writing task (multi-section paper, multi-day 
 - User explicitly asks for one mode ("let's brainstorm", "/outline") → honor it.
 - Already mid-brainstorm or mid-outline → continue the current flow.
 
-**After Plan Mode completes:** If the approved plan reveals complex work (3+ sections, figures, multi-round lit review), suggest transitioning to `superpower-planning:writing-plans` for a formal decomposition plan. Plan-mode output feeds the plan — reference it, don't re-derive.
+**After Plan Mode completes:** If the approved plan reveals complex work (3+ sections, figures, multi-round lit review), suggest transitioning to `superpower-writing:writing-plans` for a formal decomposition plan. Plan-mode output feeds the plan — reference it, don't re-derive.
 
-**When Lightweight Execution is chosen:** invoke `superpower-planning:lightweight-execute`. That skill handles `.planning/` init, checklist, implementation, and verification. For writing specifically, bolt on `superpower-writing:drafting` when prose writes begin (so the claim-first hook fires).
+**When Lightweight Execution is chosen:** invoke `superpower-writing:lightweight-execute`. That skill handles `.writing/` init, checklist, implementation, and verification. For writing specifically, bolt on `superpower-writing:drafting` when prose writes begin (so the claim-first hook fires).
 
 # Execution Routing
 
 When the user says "execute the plan", "start drafting", "write the paper", "implement the sections", do NOT directly invoke a single execution skill. Instead:
 
-1. If no plan exists at `.writing/plan.md`, invoke `superpower-writing:writing-plans` (which itself delegates to `superpower-planning:writing-plans` for the planning mechanics).
+1. If no plan exists at `.writing/plan.md`, invoke `superpower-writing:writing-plans` — it produces `.writing/plan.md` directly (no further delegation; the writing-domain skill now owns the planning mechanics).
 2. If a plan exists, present the execution strategy via `AskUserQuestion`:
 
-   - **Subagent-Driven (this session, sequential)** → `superpower-planning:subagent-driven`. One subagent per section, 2-stage review between sections. Best for short-to-medium papers where context load is manageable and you want tight quality control between sections.
-   - **Team-Driven (this session, parallel)** → `superpower-planning:team-driven`. Agent Team with parallel section writers + dedicated reviewer. Best for long papers with many independent sections (Methods sub-blocks, multi-experiment Results) where time is the constraint.
-   - **Parallel Session (separate session)** → `superpower-planning:executing-plans`. Batch execution with manual checkpoints in a fresh session. Best when you want human review between batches or will resume across days.
+   - **Subagent-Driven (this session, sequential)** → `superpower-writing:subagent-driven`. One subagent per section, 2-stage review between sections. Best for short-to-medium papers where context load is manageable and you want tight quality control between sections.
+   - **Team-Driven (this session, parallel)** → `superpower-writing:team-driven`. Agent Team with parallel section writers + dedicated reviewer. Best for long papers with many independent sections (Methods sub-blocks, multi-experiment Results) where time is the constraint.
+   - **Parallel Session (separate session)** → `superpower-writing:executing-plans`. Batch execution with manual checkpoints in a fresh session. Best when you want human review between batches or will resume across days.
 
 3. Recommend based on paper shape: high parallelism + heavy lit search per section → Team-Driven. Short note, tight prose control → Subagent-Driven. Multi-day timeline, manual checkpoints → Parallel Session.
 
-**Why we delegate to superpower-planning execution engines:** this plugin provides writing-specific *content* skills (outlining, drafting, claim-verification, revision, submission). The execution machinery — subagent orchestration, team coordination, session handoff — is already solved by superpower-planning. Re-implementing would be YAGNI and would drift out of sync. Drafting subagents still invoke `superpower-writing:drafting` as their per-task skill, but the orchestration layer is superpower-planning's.
+Execution engines live locally under `superpower-writing:{subagent-driven,team-driven,executing-plans}`. Drafting subagents invoke `superpower-writing:drafting` as their per-task skill; the local execution engine handles subagent orchestration, team coordination, and session handoff.
 
 # Stash / Resume Routing
 
-- **Stash current paper:** when the user says pause / set aside / switch papers / come back later → move everything except `.writing/archive/` into `.writing/stash/<paper-name>/`. Use `superpower-planning:stashing` for the mechanics; the `<paper-name>` label should match `metadata.yaml` `title` (slugified) or the user-provided name.
+- **Stash current paper:** when the user says pause / set aside / switch papers / come back later → move everything except `.writing/archive/` into `.writing/stash/<paper-name>/`. Use `superpower-writing:stashing` for the mechanics; the `<paper-name>` label should match `metadata.yaml` `title` (slugified) or the user-provided name.
 
 - **Resume a stashed paper:** when the user says resume / continue / pick up <paper>, move `.writing/stash/<paper-name>/*` back into `.writing/` (keeping any existing `archive/`). Run a **stale-findings check** before routing further: re-read `findings.md`, cross-check DOIs in claims against current Zotero/network state, flag any citations that have been retracted or updated since stash.
 
