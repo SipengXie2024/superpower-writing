@@ -197,7 +197,6 @@ The orchestrator aggregates agent findings into top-level `.writing/findings.md`
 - `scripts/init-writing-dir.sh` — Initialize `.writing/` with findings.md and progress.md
 - `scripts/writing-reset.sh` — Reset active state, preserve archive/ and stash/
 - `scripts/check-writing-state.sh` — Check state: missing | empty | active | complete
-- `scripts/check-complete.sh` — Verify all tasks complete
 - `scripts/snapshot-save.sh` — Copy active project files to a target directory (shared by stash/archive)
 
 **Stash/archive:**
@@ -212,10 +211,8 @@ The orchestrator aggregates agent findings into top-level `.writing/findings.md`
 **Project detection:**
 - `scripts/detect-base-branch.sh` — Detect main/master/develop
 - `scripts/detect-test-command.sh` — Detect project test command
-- `scripts/detect-project-setup.sh` — Detect and run project setup
 
 **Other:**
-- `scripts/release.sh` — Version bump, tag, GitHub Release
 - `scripts/session-catchup.py` — Recover context from previous session (manual utility, requires Python)
 
 ## Anti-Patterns
