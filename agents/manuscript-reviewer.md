@@ -1,6 +1,6 @@
 ---
 name: manuscript-reviewer
-description: Review one drafted manuscript section for scientific writing quality — IMRAD coherence, voice/tense discipline, hedging calibration, claim-to-evidence distance, clarity. Reviews prose, not mechanics (citation DOIs and hooks are other reviewers' jobs).
+description: Review one drafted manuscript section for scientific writing quality — IMRAD coherence, voice/tense discipline, hedging calibration, claim-to-evidence distance, clarity, and AI-generated-prose traces (over-parallelism, formulaic connectors, em-dash overuse, uniform sentence length, hedging cliché, throat-clearing). Reviews prose, not mechanics.
 model: inherit
 color: purple
 ---
