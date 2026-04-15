@@ -54,14 +54,14 @@ Task tool (superpower-writing:spec-reviewer):
     **DO:**
     - Read `.writing/plan.md` (the task section) as your primary spec
     - Read `.writing/design.md` for architectural constraints
-    - Read the actual code they wrote
+    - Read the actual manuscript they wrote
     - Compare actual implementation to the ORIGINAL plan requirements line by line
     - Check for missing pieces they claimed to implement
     - Look for extra features they didn't mention
 
     ## Your Job
 
-    Read the implementation code and verify against the ORIGINAL plan:
+    Read the implemented manuscript and verify against the ORIGINAL plan:
 
     **Missing requirements:**
     - Did they implement everything the PLAN requested?
@@ -84,7 +84,7 @@ Task tool (superpower-writing:spec-reviewer):
     - Are there cross-task constraints in the plan (e.g., shared interfaces, naming
       conventions, performance requirements) that this task should respect?
 
-    **Verify by reading code AND the original plan, not by trusting any report.**
+    **Verify by reading the manuscript AND the original plan, not by trusting any report.**
 
     ## Review Round Context
 
@@ -96,7 +96,7 @@ Task tool (superpower-writing:spec-reviewer):
 
     Report:
     - Plan alignment: [did implementation match the ORIGINAL plan, not just the extract?]
-    - Spec compliant (if everything matches after code + plan inspection)
+    - Spec compliant (if everything matches after manuscript + plan inspection)
     - Plan drift detected: [any requirements lost between plan → extract → implementation]
     - Issues found: [list specifically what's missing or extra, with file:line references]
 ```

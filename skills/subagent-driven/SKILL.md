@@ -93,7 +93,7 @@ digraph process {
         "Answer questions, provide context" [shape=box];
         "Implementer subagent implements, tests, commits, self-reviews" [shape=box];
         "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [shape=box];
-        "Spec reviewer subagent confirms code matches spec?" [shape=diamond];
+        "Spec reviewer subagent confirms manuscript matches spec?" [shape=diamond];
         "Implementer subagent fixes spec gaps" [shape=box];
         "Dispatch manuscript reviewer subagent (./manuscript-reviewer-prompt.md)" [shape=box];
         "Manuscript reviewer subagent approves?" [shape=diamond];
@@ -114,10 +114,10 @@ digraph process {
     "Answer questions, provide context" -> "Dispatch implementer subagent (./implementer-prompt.md)";
     "Implementer subagent asks questions?" -> "Implementer subagent implements, tests, commits, self-reviews" [label="no"];
     "Implementer subagent implements, tests, commits, self-reviews" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)";
-    "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" -> "Spec reviewer subagent confirms code matches spec?";
-    "Spec reviewer subagent confirms code matches spec?" -> "Implementer subagent fixes spec gaps" [label="no"];
+    "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" -> "Spec reviewer subagent confirms manuscript matches spec?";
+    "Spec reviewer subagent confirms manuscript matches spec?" -> "Implementer subagent fixes spec gaps" [label="no"];
     "Implementer subagent fixes spec gaps" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [label="re-review\n(max 3 rounds)"];
-    "Spec reviewer subagent confirms code matches spec?" -> "Dispatch manuscript reviewer subagent (./manuscript-reviewer-prompt.md)" [label="yes"];
+    "Spec reviewer subagent confirms manuscript matches spec?" -> "Dispatch manuscript reviewer subagent (./manuscript-reviewer-prompt.md)" [label="yes"];
     "Dispatch manuscript reviewer subagent (./manuscript-reviewer-prompt.md)" -> "Manuscript reviewer subagent approves?";
     "Manuscript reviewer subagent approves?" -> "Implementer subagent fixes quality issues" [label="no"];
     "Implementer subagent fixes quality issues" -> "Dispatch manuscript reviewer subagent (./manuscript-reviewer-prompt.md)" [label="re-review\n(max 3 rounds)"];
