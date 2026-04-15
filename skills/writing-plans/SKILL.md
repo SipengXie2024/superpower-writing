@@ -9,11 +9,13 @@ description: Decomposes an approved outline into executable per-section/per-figu
 
 Convert an approved IMRAD outline into an executable task list for drafting. Input: `.writing/outline.md` (structure + key claims), `.writing/metadata.yaml` (reporting guideline + Zotero config), `.writing/claims/section_*.md` (stub claims per section). Output: `.writing/plan.md` — the single source of truth for drafting. The plan enumerates per-section prose tasks, per-figure generation tasks, per-table assembly tasks, an explicit dependency table, and a Parallelism Groups analysis that the drafting skill consumes when the user picks serial vs parallel mode.
 
+Write comprehensive plans assuming the drafter has zero context for the paper's argument and questionable taste. Document everything they need: which files to read and write for each task, which claims back each paragraph, how to verify. Bite-sized tasks. Claim-first. Frequent commits.
+
 **Announce at start:** "I'm using the writing-plans skill to decompose the outline into an executable plan."
 
-**Save plan to:** `.writing/plan.md`
+**Context:** Optionally runs in a dedicated worktree (user chooses during brainstorming).
 
-**Relation to the code-side `superpower-planning:writing-plans` skill:** identical philosophy (bite-sized tasks, file-path precision, explicit parallelism groups, self-review), adapted to manuscripts. Task unit is the section/figure/table, not the source file. The TDD analog is the claim-first protocol enforced during drafting — plan steps that write prose always pair with a claim-resolution step first.
+**Save plan to:** `.writing/plan.md`
 
 > Claim-first protocol: see `superpower-writing:main` §Claim-First Protocol.
 
@@ -25,6 +27,21 @@ Convert an approved IMRAD outline into an executable task list for drafting. Inp
 
 Do NOT invoke this skill before outlining completes. A missing or TODO-laden outline means the plan has nothing to bind to — abort and route back to `outlining`.
 
+## Scope Check
+
+If the outline covers multiple independent papers (e.g., a methods paper plus an applications paper sharing one outline doc), stop and suggest splitting it into separate plans — one per paper. Each plan should produce a submission-ready manuscript on its own.
+
+## Historical Archive Check
+
+Before writing the plan, check for relevant historical archives:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/scripts/archive-search.sh "<keyword>"
+```
+
+1. If relevant archives are found, read the full archive directory (especially `summary.md`, `findings.md`) and incorporate relevant lessons into the plan.
+2. If none are relevant or no archives exist, skip silently.
+
 ## Checklist
 
 - [ ] Preconditions verified: `.writing/outline.md`, `.writing/metadata.yaml` (no TODO), `claims/section_*.md` all exist
@@ -34,8 +51,20 @@ Do NOT invoke this skill before outlining completes. A missing or TODO-laden out
 - [ ] Per-table tasks written
 - [ ] Dependency table written (Methods → Results; Intro ↔ Discussion loose coupling; Abstract last)
 - [ ] Parallelism Groups analysis written
+- [ ] Evidence Gap Summary written (if outline carries `[NEEDS-EVIDENCE]` markers)
 - [ ] Self-review run inline (spec coverage, placeholder scan, type consistency, evidence gaps)
 - [ ] Hand-off to `drafting` skill via AskUserQuestion (serial vs parallel vs separate-session)
+
+## Bite-Sized Task Granularity
+
+**Each step is one action (2-5 minutes):**
+- "Resolve evidence for each stub claim in section_02_methods.md" — step
+- "Flip each resolved claim STATUS: stub → evidence_ready" — step
+- "Invoke scientific-writing with outline excerpt + claims + metadata" — step
+- "Prefix each load-bearing paragraph with `<!-- claim: <id> -->`" — step
+- "Commit" — step
+
+The claim-first protocol is the writing-domain analog of test-first: each draft task's Step 1 is *always* "resolve claim evidence"; the Write tool call only appears after evidence is ready. The PreToolUse enforcement hook at `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` blocks writes against stub-status claims at the harness level, so a plan that sequences writes ahead of evidence resolution will fail at execution time — preempt that here.
 
 ## Process
 
@@ -66,14 +95,28 @@ Before task decomposition, list the exact manuscript files the plan will write t
 
 Optional sections (Supplementary, Acknowledgments at `07_acknowledgments.md`, Data Availability Statement) appear only if the outline calls for them. Each `NN_slug.md` pairs 1:1 with `claims/section_NN_<slug>.md` — stems match exactly. File-structure pass output goes into the plan header so readers see the write set before tasks.
 
-### Step 3: Write the plan document
+Design units with clear boundaries. Each file should have one clear responsibility. Prefer smaller, focused files over large files that do too much. Split by responsibility (a section is a claim set + prose), not by technical layer.
+
+### Step 3: Auto-create `.writing/`
+
+When writing a plan, **automatically create** the `.writing/` directory if it does not already exist:
+
+```bash
+${CLAUDE_PLUGIN_ROOT}/scripts/init-writing-dir.sh
+```
+
+This creates `progress.md`, `findings.md`, `metadata.yaml`, `outline.md`, and the `manuscript/`, `claims/`, `figures/`, `reviews/`, `archive/` subdirs.
+
+> **Note:** The plan in `.writing/plan.md` is the single source of truth for plan content. Execution status is tracked via the Task Status Dashboard in `progress.md`.
+
+### Step 4: Write the plan document
 
 Use this exact header template:
 
 ```markdown
 # <Paper working title> — Writing Plan
 
-> **For Claude:** Execute this plan via the drafting skill using the mode chosen in Execution Handoff (serial or parallel).
+> **For Claude:** Execute this plan via the drafting skill using the mode chosen during Execution Handoff (see end of plan).
 > Writing dir: .writing/
 
 **Goal:** Draft a submission-ready IMRAD manuscript covering <one-sentence paper thesis from outline.md>.
@@ -104,6 +147,11 @@ Use this exact header template:
 
 ---
 
+## Evidence Gap Summary
+<table — only if outline carries [NEEDS-EVIDENCE] markers>
+
+---
+
 ## Self-Review
 <inline checklist>
 
@@ -113,7 +161,7 @@ Use this exact header template:
 <three options via AskUserQuestion>
 ```
 
-### Step 4: Per-section task template (repeat for each IMRAD section)
+### Step 5: Per-section task template (repeat for each IMRAD section)
 
 Each section is a three-step triplet: draft, verify-claims, internal-review. Do NOT write prose in the plan itself — the plan enumerates tasks; drafting writes prose. Use this exact template per section:
 
@@ -190,11 +238,13 @@ Each section is a three-step triplet: draft, verify-claims, internal-review. Do 
   git add .writing/reviews/
   git commit -m "review: internal review of methods"
   ```
+
+> **Note:** Log unexpected discoveries, technical decisions, and drafting insights to `.writing/findings.md` after each task.
 ````
 
 Repeat the triplet (draft / verify / review) for each section: Introduction (I), Methods (M), Results (R), Discussion (D), Conclusion (C), Abstract (A). Numbering scheme: `<letter>.1` draft, `<letter>.2` verify, `<letter>.3` review.
 
-### Step 5: Figure tasks
+### Step 6: Figure tasks
 
 For each figure listed in outline.md (plus the mandatory graphical abstract per upstream `scientific-writing`):
 
@@ -227,7 +277,7 @@ For each figure listed in outline.md (plus the mandatory graphical abstract per 
 
 The graphical abstract is mandatory — always emit a Task F0 for it regardless of outline.
 
-### Step 6: Table tasks
+### Step 7: Table tasks
 
 For each table listed in outline.md:
 
@@ -254,7 +304,7 @@ For each table listed in outline.md:
   ```
 ````
 
-### Step 7: Dependency table
+### Step 8: Dependency table
 
 Write this table in the plan. It encodes which tasks block which, mirroring the IMRAD causal chain:
 
@@ -275,9 +325,9 @@ Write this table in the plan. It encodes which tasks block which, mirroring the 
 
 The `I.1 → D.1` edge is marked "shadow dependency" because Introduction and Discussion can be drafted concurrently in parallel mode — but the user should expect a pass-two edit of Introduction after Discussion lands, since Introduction sets up loops that Discussion closes.
 
-### Step 8: Parallelism Groups
+### Step 9: Parallelism Groups
 
-After the dependency table, write an explicit parallelism analysis. Drafting mode selection hinges on this.
+Every plan MUST include a parallelism analysis after the dependency table. Identify which tasks can run in parallel (no shared files, no shared claim sets, no sequential dependencies) and group them:
 
 ```markdown
 ## Parallelism Groups
@@ -294,33 +344,84 @@ After the dependency table, write an explicit parallelism analysis. Drafting mod
 ```
 
 **Tips for maximizing parallelism:**
+- Split work along section boundaries (each task touches a different manuscript file and a different claims file).
 - Introduction and Methods share no claim overlap → always parallel.
 - Figures can run in parallel with Results *only* if the figures do not depend on yet-to-be-written Results interpretation; outline.md should have pre-computed whether each figure is data-driven (parallelizable) or interpretation-driven (serial after R.1).
 - Verify-claims and internal-review are per-section independent.
+- Extract shared evidence-resolution steps into an early serial task only when the same citation set feeds multiple sections.
 
-### Step 9: Self-Review (inline)
+The parallelism score helps the user choose the right execution mode in the hand-off step.
 
-Run these checks before calling the plan done. Fix issues inline, no re-review.
+### Step 10: Evidence Gap Summary
+
+Before self-review, scan `.writing/outline.md` and `.writing/design.md` (if present) for all `[NEEDS-EVIDENCE]` markers. For each one:
+
+1. **Classify timing:** before drafting (blocking) / during drafting / after first pass.
+2. **Define what's needed:** cohort size confirmation, missing reference, analysis re-run, dataset access, etc.
+3. **Assign to a task:** "before drafting" items become prerequisite tasks (numbered Task 0.x) in the plan; others are noted inline in the relevant task.
+
+Include an **Evidence Gap Summary** section in the plan:
+
+````markdown
+## Evidence Gap Summary
+
+| # | Decision | Evidence Needed | Timing | Task |
+|---|----------|-----------------|--------|------|
+| 1 | Effect size for primary outcome | Re-run analysis with updated cohort | Before drafting | Task 0.1 |
+| 2 | Reference for novel assay protocol | Locate or request from collaborator | During drafting | Task M.1 |
+````
+
+If no `[NEEDS-EVIDENCE]` markers exist in outline or design, skip this section silently.
+
+### Step 11: Self-Review (inline)
+
+After writing the complete plan, review it yourself with fresh eyes. This is a checklist you run inline — not a subagent dispatch.
 
 1. **Spec coverage:** Does every section listed in `.writing/outline.md` have a draft / verify / review triplet? Does every figure in the outline have a matching F<n> task? Does every table? Does the graphical abstract have a task? List gaps and fix.
-2. **Placeholder scan:** No `TBD`, `TODO`, `add appropriate X`, `similar to task Y`, or `fill in details`. Every task names exact files it reads and writes.
-3. **Type consistency:** The claim ids used in the prose-drafting steps must match the ids declared in `claims/section_*.md` files produced by outlining. Section numbering (`02_methods`) must match across the plan.
-4. **Evidence gaps:** If `.writing/outline.md` carries `[NEEDS-EVIDENCE]` markers (e.g., a specific cohort size still to confirm), write an Evidence Gap Summary table: decision, evidence needed, timing, owning task.
+2. **Placeholder scan:** No `TBD`, `TODO`, `add appropriate X`, `similar to task Y`, or `fill in details`. Every task names exact files it reads and writes. No "similar to Task N" back-references — repeat the pattern, since the drafter may be reading tasks out of order.
+3. **Type consistency:** The claim ids used in the prose-drafting steps must match the ids declared in `claims/section_*.md` files produced by outlining. Section numbering (`02_methods`) must match across the plan. A claim id referenced as `METH-3` in Task M.1 but as `methods-3` in Task M.2 is a bug.
+4. **Evidence gaps:** Are `[NEEDS-EVIDENCE]` items from outline/design tracked and properly timed in the Evidence Gap Summary?
 
-If any check fails, fix inline. Do not emit a plan with known gaps.
+If any check fails, fix inline. No need to re-review — just fix and move on. If a spec requirement has no task, add the task.
 
-### Step 10: Hand-off via AskUserQuestion
+## No Placeholders
 
-Present exactly three options for execution. Recommend based on parallelism score but never omit options.
+Every step must contain the actual content a drafter needs. These are **plan failures** — never write them:
+- "TBD", "TODO", "implement later", "fill in details", "draft later".
+- "Add appropriate citations" / "add evidence" / "handle edge cases".
+- "Write the Methods prose" (without naming the exact claims file, section of outline.md, and target manuscript path).
+- "Similar to Task N" (repeat the pattern — the drafter may be reading tasks out of order).
+- Steps that describe what to do without showing how (for evidence-resolution steps, list the exact claim ids and resolution mechanism — Zotero, DOI lookup, manuscript re-check).
+- References to claims, figures, or tables not defined in any task or in `claims/section_*.md`.
 
-- **Option 1: Serial / Subagent-Driven drafting** — one subagent per section, two-stage review (spec + quality) inline. Best for short papers (≤4 sections with prose) or when sections share heavy context. Invokes `Skill(skill="drafting")` with `mode: serial`.
-- **Option 2: Parallel / Team-Driven drafting** — Agent Team spawns N section drafters plus a dedicated reviewer. Best when parallelism score is high and sections are loosely coupled. Invokes `Skill(skill="drafting")` with `mode: parallel`.
-- **Option 3: Separate-session drafting** — open a new session in this working directory, invoke `Skill(skill="drafting")` there with `mode: session-handoff`. Best when the user wants manual per-section checkpoints.
+### Step 12: Hand-off via AskUserQuestion
 
-**Recommendation logic:**
-- Parallelism score ≥ 60% AND section count ≥ 5 → recommend Parallel.
-- Section count ≤ 3 → recommend Serial.
-- User explicitly wants checkpoints → recommend Separate-session.
+After saving the plan and completing the self-review, you MUST present exactly three options using `AskUserQuestion`. Do NOT omit, replace, or invent options. All three MUST always be shown regardless of your analysis.
+
+Present exactly three drafting-mode options:
+
+- **Option 1: Subagent-Driven drafting (this session, sequential)** — one subagent per section, two-stage review (spec + manuscript) inline. Best for short papers (≤4 sections with prose) or when sections share heavy context. Invokes `Skill(skill="drafting")` with `mode: serial` and delegates per-task execution to `superpower-writing:subagent-driven`.
+- **Option 2: Team-Driven drafting (this session, parallel)** — Agent Team spawns N section drafters plus a dedicated reviewer. Best when parallelism score is high and sections are loosely coupled. Also prevents context-limit crashes on long papers. Invokes `Skill(skill="drafting")` with `mode: parallel` and delegates execution to `superpower-writing:team-driven`.
+- **Option 3: Separate-session drafting (new session, batched)** — open a new session in this working directory, invoke `Skill(skill="drafting")` there with `mode: session-handoff`. Best when the user wants manual per-section checkpoints. The new session uses `superpower-writing:executing-plans` to batch-execute with review gates.
+
+**Recommendation logic** (add "(Recommended)" to the best option's label, but never remove options):
+- Parallelism score ≥ 60% AND section count ≥ 5 → recommend Team-Driven.
+- Section count ≤ 3 OR tightly coupled claim sets → recommend Subagent-Driven.
+- User explicitly wants manual checkpoints → recommend Separate-session.
+
+**If Subagent-Driven chosen:**
+- **REQUIRED SUB-SKILL:** Use `superpower-writing:subagent-driven`.
+- Stay in this session.
+- One new subagent invocation per section + manuscript review.
+
+**If Team-Driven chosen:**
+- **REQUIRED SUB-SKILL:** Use `superpower-writing:team-driven`.
+- Stay in this session.
+- Agent Team with parallel section drafters + dedicated reviewer.
+
+**If Separate-session chosen:**
+- Guide the user to open a new session in this working directory.
+- **REQUIRED SUB-SKILL:** New session uses `superpower-writing:executing-plans`.
 
 After user choice, invoke `Skill(skill="drafting")` with the selected mode and the path to `.writing/plan.md`.
 
@@ -328,9 +429,9 @@ After user choice, invoke `Skill(skill="drafting")` with the selected mode and t
 
 ### Task unit is the artifact, not the file
 
-Code plans think in files. Writing plans think in sections/figures/tables — each is a research artifact with its own verification contract. A single section task still touches a single file, but the Why of the task is the artifact (this argument, this figure, this claim set), not the file path.
+Writing plans think in sections, figures, and tables — each is a research artifact with its own verification contract. A single section task still touches a single file, but the Why of the task is the artifact (this argument, this figure, this claim set), not the file path. Planning by artifact keeps claim integrity visible; planning by file alone lets load-bearing evidence slip through.
 
-### Claim-first is the TDD analog — bake it in
+### Claim-first is the test-first analog — bake it in
 
 Every draft task's Step 1 must be "resolve claim evidence" before Step 2 "write prose". The PreToolUse hook enforces this at the harness level, but a good plan preempts it by sequencing evidence resolution ahead of the Write tool call. A plan that lists Step 1 as "write Methods prose" will be blocked by the hook and the user will blame the plan, not their skipped evidence work.
 
@@ -350,9 +451,9 @@ This skill is a planner. It never invokes `scientific-writing` itself. Every pro
 
 Introduction and Discussion reference each other thematically — Intro opens loops, Discussion closes them. In serial mode, always draft I → M → R → D → A. In parallel mode, allow I and D to start concurrently but expect a pass-two Intro edit after Discussion lands. Plans in parallel mode must schedule this edit as an explicit R.4 / I.4 touch-up task.
 
-### Separate `.planning/` from `.writing/`
+### `.writing/` is the canonical persistent-state directory
 
-This plan lives at `.writing/plan.md`, NOT `.planning/plan.md`. `.planning/` (if present) belongs to superpower-planning's code-side work. `.writing/` is the single persistent-state directory for this plugin. Keep them separated — a paper project may sit inside a code project and both must coexist.
+This plan lives at `.writing/plan.md`. The plugin keeps all persistent per-project state under `.writing/` — manuscripts, claims, figures, reviews, progress, findings, archive, stash. Do not write plans or status to any other location.
 
 ### Hand-off is mandatory
 
@@ -361,7 +462,12 @@ Never finish the skill without presenting the three drafting modes via AskUserQu
 ## Remember
 
 - Exact file paths always (`.writing/manuscript/02_methods.md`, not "the methods file").
+- Complete content in every step — no placeholders (see "No Placeholders" section).
+- Exact commands with expected output (bash snippets for init and commit steps; claim id lists for evidence-resolution steps).
 - Every task includes a plain `git commit` command — author identity comes from the user's git config, not from skill-injected overrides.
-- Bare skill names for upstream (`scientific-writing`, `scientific-schematics`, `peer-review`, `pyzotero`, `citation-management`, `research-lookup`) — never `plugin:` prefixed.
+- Bare skill names for upstream prose-production skills (`scientific-writing`, `scientific-schematics`, `peer-review`, `pyzotero`, `citation-management`, `research-lookup`) — never `plugin:` prefixed. Local execution-engine references use the `superpower-writing:` prefix.
+- Every task reminds: "Log discoveries, decisions, and insights to `.writing/findings.md`".
+- Always include the parallelism groups analysis.
+- Lock file boundaries and responsibilities before task decomposition.
 - Plan size budget: one file, one pass. If the plan exceeds ~800 lines, split into sub-plans by IMRAD phase (e.g., `plan-part-methods.md`, `plan-part-results.md`) and reference from a top-level index.
 - `.writing/plan.md` is source of truth for drafting; status tracking lives in `.writing/progress.md`.
