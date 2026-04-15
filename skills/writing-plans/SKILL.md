@@ -384,7 +384,7 @@ After writing the complete plan, review it yourself with fresh eyes. This is a c
 
 If any check fails, fix inline. No need to re-review — just fix and move on. If a spec requirement has no task, add the task.
 
-## No Placeholders
+### Placeholder Ban
 
 Every step must contain the actual content a drafter needs. These are **plan failures** — never write them:
 - "TBD", "TODO", "implement later", "fill in details", "draft later".
