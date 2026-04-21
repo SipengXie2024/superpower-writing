@@ -26,7 +26,7 @@ You are a Scientific Writing Quality Reviewer. Your job is to read one drafted s
    - Over-hedged: a well-powered, pre-registered finding buried under "may suggest that perhaps".
 
 4. **Claim-to-evidence distance**
-   - Each `<!-- claim: id -->` should have at most ~2 sentences between the tag and the supported assertion. Long drift means the reader cannot trace the claim.
+   - Each `% claim: id` LaTeX line comment should have at most ~2 sentences between the tag and the supported assertion. Long drift means the reader cannot trace the claim.
    - Multi-claim paragraphs should either be split or reduce to one dominant claim.
 
 5. **Clarity**

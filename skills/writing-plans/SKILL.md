@@ -61,7 +61,7 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/archive-search.sh "<keyword>"
 - "Resolve evidence for each stub claim in section_02_methods.md" — step
 - "Flip each resolved claim STATUS: stub → evidence_ready" — step
 - "Invoke scientific-writing with outline excerpt + claims + metadata" — step
-- "Prefix each load-bearing paragraph with `<!-- claim: <id> -->`" — step
+- "Precede each load-bearing paragraph with a `% claim: <id>` LaTeX line comment" — step
 - "Commit" — step
 
 The claim-first protocol is the writing-domain analog of test-first: each draft task's Step 1 is *always* "resolve claim evidence"; the Write tool call only appears after evidence is ready. The PreToolUse enforcement hook at `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` blocks writes against stub-status claims at the harness level, so a plan that sequences writes ahead of evidence resolution will fail at execution time — preempt that here.
@@ -128,7 +128,7 @@ Use this exact header template:
 ---
 
 ## File Write Set
-<bulleted list of manuscript/*.md and figures/*.svg|png the plan produces>
+<bulleted list of manuscript/*.tex and figures/*.pdf (or *.eps / *.svg) the plan produces>
 
 ---
 
@@ -320,7 +320,7 @@ Never finish the skill without presenting the three drafting modes via AskUserQu
 
 ## Remember
 
-- Exact file paths always (`.writing/manuscript/02_methods.md`, not "the methods file").
+- Exact file paths always (`.writing/manuscript/03_methods.tex`, not "the methods file").
 - Complete content in every step — no placeholders (see "No Placeholders" section).
 - Exact commands with expected output (bash snippets for init and commit steps; claim id lists for evidence-resolution steps).
 - Every task includes a plain `git commit` command — author identity comes from the user's git config, not from skill-injected overrides.

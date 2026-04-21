@@ -5,7 +5,7 @@ description: Orchestrates prose drafting section-by-section, in serial (subagent
 
 # Drafting
 
-Drive prose production for the manuscript. For every section in `.writing/plan.md`, resolve evidence for every claim first, then write `<!-- claim: id -->`-tagged paragraphs. This skill owns the writing-specific prompt template, the Zotero-aware evidence loop, and the graphical abstract dispatch; execution is handled by the local `superpower-writing:{subagent-driven, team-driven, executing-plans}` engines.
+Drive prose production for the LaTeX manuscript. For every section in `.writing/plan.md`, resolve evidence for every claim first, then write `% claim: id`-tagged paragraphs (LaTeX line comments) in `manuscript/*.tex`. This skill owns the writing-specific prompt template, the Zotero-aware evidence loop, and the graphical abstract dispatch; execution is handled by the local `superpower-writing:{subagent-driven, team-driven, executing-plans}` engines.
 
 **Announce at start:** "I'm using the drafting skill to produce manuscript prose."
 
@@ -47,7 +47,7 @@ Before dispatching any section:
 Per section, before marking complete:
 
 - [ ] Every claim id referenced in the prose resolves to `STATUS ∈ {evidence_ready, verified}` in its claims file.
-- [ ] Every load-bearing paragraph carries `<!-- claim: id -->`; drafting notes use `<!-- draft-only -->`.
+- [ ] Every load-bearing paragraph carries `% claim: id`; drafting notes use `% draft-only` (both are LaTeX line comments at column 0).
 - [ ] PreToolUse hook did not block any write (visible as exit-2 JSON from `enforce-claims.sh`).
 - [ ] `.writing/progress.md` Task Dashboard row updated (Status, Claim Verification, Citation Check).
 
@@ -85,9 +85,24 @@ The `section-drafter` agent file at `agents/section-drafter.md` already encodes 
 
 ### 2. Per-section subagent prompt template
 
-Every drafter subagent receives the same prompt body, customized only with section number, slug, and the verbatim task text from `.writing/plan.md`. The template is the core contribution of this skill — copy it into the dispatch prompt exactly, including the claim-first warnings (they are what makes the PreToolUse hook survivable).
+Every drafter subagent receives the same prompt body, customized with the section number, slug, the verbatim task text from `.writing/plan.md`, and — when a matching file exists — the section-specific writing standard. The template is the core contribution of this skill; copy it into the dispatch prompt exactly, including the claim-first warnings and the section-standard block (they are what makes the PreToolUse hook and the structural self-review survivable).
 
-Read the full template at [`references/section-drafter-prompt.md`](references/section-drafter-prompt.md) and inject the verbatim task text where marked. The orchestrator (serial / parallel / session-handoff) layers its review gates on top of this body without modifying Steps A–C.
+Read the full template at [`references/section-drafter-prompt.md`](references/section-drafter-prompt.md) and resolve its two placeholders before dispatch:
+
+- `{INSERTED}` → verbatim task text from `.writing/plan.md §Task-{NN}`.
+- `{SECTION_STANDARD}` → resolved via **two-level fallback (slug-ending match)** against [`references/section-standards/`](references/section-standards/):
+
+  1. **Exact-stem match.** Try `section-standards/<NN>_<slug>.md`. Used when the paper's stem number matches a standards file's canonical slot (e.g., default-layout CS paper's `02_background` → `02_background.md`).
+  2. **Slug-ending scan.** If (1) misses, scan `section-standards/` for any file whose name ends in `_<slug>.md`. Exactly one match → use it. Multiple matches → abort with configuration error. Examples: `03_background` (motivation opted in, background shifted) → `02_background.md`; `02_related_work` (early placement) → `07_related_work.md`; `02_motivation` (opt-in position) → `08_motivation.md`.
+  3. **No match.** Substitute the single line:
+
+     ```
+     No section-specific standard applies; use general IMRAD conventions from scientific-writing.
+     ```
+
+  The canonical filenames in `section-standards/` are `00_abstract.md`, `01_introduction.md`, `02_background.md`, `03_methods.md`, `04_results.md`, `05_discussion.md`, `06_conclusion.md`, `07_related_work.md`, `08_motivation.md`. See [`references/section-standards/README.md`](references/section-standards/README.md) for the full contract.
+
+The orchestrator (serial / parallel / session-handoff) layers its review gates on top of this body without modifying Steps A–C. Section standards are data injected into the prompt, not another gate in the pipeline — every engine resolves them the same way.
 
 ### 3. Graphical abstract and schematics
 
@@ -105,7 +120,7 @@ Upstream `scientific-writing` mandates at least one graphical abstract plus at l
 
 - For additional schematics referenced in Methods or Results:
 
-  One `scientific-schematics` invocation per figure. The prose paragraph that introduces the figure still needs a `<!-- claim: id -->` tag pointing at whatever claim the figure supports (usually a mechanism or pipeline claim). The figure file itself goes to `.writing/figures/<slug>.png` and is not subject to the PreToolUse hook (the matcher only covers `manuscript/*.md`).
+  One `scientific-schematics` invocation per figure. The prose paragraph that introduces the figure still needs a `% claim: id` tag pointing at whatever claim the figure supports (usually a mechanism or pipeline claim). The figure file itself goes to `.writing/figures/<slug>.pdf` (LaTeX prefers PDF/EPS vector formats) and is not subject to the PreToolUse hook (the matcher only covers `manuscript/*.tex`).
 
 ### 4. Progress tracking after each section
 
@@ -134,6 +149,8 @@ The Zotero-first / network-fallback / optional auto-push flow is fully specified
 
 **Own the prompt; invoke execution by name.** This skill owns the per-section prompt template and the claim-first bookkeeping. Execution (parallelism, review gates, session management) is handled by the local `superpower-writing:{subagent-driven, team-driven, executing-plans}` engines, which this skill invokes by name.
 
+**Section standards refine, never contradict.** The files under `references/section-standards/` prescribe section-specific skeletons (BPMRC for abstracts, and whatever conventions get added for introductions, methods, etc.). They are loaded verbatim into the drafter prompt so every section that has a standard gets the same treatment. When a standard and the outline disagree, the drafter escalates rather than silently picking one — drift between outline and draft is a structural bug, not a judgment call. Adding a new standard is a `section-standards/<stem>.md` file plus, optionally, an outline-level reference in the outlining skill; no orchestrator change is needed.
+
 **Zotero miss is not a failure.** A DOI absent from the user's Zotero library just means the user has not yet vetted it. Network fallback is normal and expected. The only failure mode is "no credible source anywhere", which must be escalated.
 
 **Graphical abstract is a first-class task.** Upstream requires one. Do not skip it, and do not inline its generation into a prose section — route it through `scientific-schematics` as its own task.
@@ -145,7 +162,7 @@ The Zotero-first / network-fallback / optional auto-push flow is fully specified
 ## Integration
 
 - `superpower-writing:writing-plans` — produces `.writing/plan.md`; drafting reads it verbatim.
-- `superpower-writing:claim-verification` — downstream; consumes `.writing/manuscript/*.md` and confirms every claim tag.
+- `superpower-writing:claim-verification` — downstream; consumes `.writing/manuscript/*.tex` and confirms every claim tag.
 - `superpower-writing:revision` — downstream; called when reviews come back.
 - `superpower-writing:subagent-driven` / `team-driven` / `executing-plans` — the actual execution engines.
 - Upstream `scientific-writing` — voice and structure rules.

@@ -36,7 +36,7 @@ You are a Citation Auditor. You review how a manuscript uses its citations — t
 
 ## Data you load
 
-- All `<!-- claim: id -->` tagged paragraphs in `.writing/manuscript/*.md`.
+- All `% claim: id` tagged paragraphs in `.writing/manuscript/*.tex` (LaTeX line comments).
 - Corresponding claims YAML from `.writing/claims/section_*.md` with EVIDENCE entries.
 - `.writing/verify-cache.json` for abstracts already resolved by claim-verification.
 - When metadata.yaml has `zotero.enabled: true`, also cross-check against the configured Zotero collection — flag claims whose cited DOIs are absent from the curated collection as "potentially not-yet-read by the author".

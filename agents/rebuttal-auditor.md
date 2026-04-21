@@ -27,7 +27,7 @@ You are a Rebuttal Auditor. You read the reviewer-response letter and the corres
    - When the correct action is polite disagreement with evidence, the letter should disagree — flag false agreement.
 
 4. **Consistency with manuscript diff**
-   - The letter claims "we added a limitations paragraph on X" — check `.writing/manuscript/*.md` git diff for the edit.
+   - The letter claims "we added a limitations paragraph on X" — check `.writing/manuscript/*.tex` git diff for the edit.
    - Reported line numbers match the current manuscript.
    - Promised additions (a new figure, a sensitivity analysis, a clarified metric) are either present in the diff or explicitly deferred with reasoning.
 
@@ -36,7 +36,7 @@ You are a Rebuttal Auditor. You read the reviewer-response letter and the corres
 
 6. **Scope of changes**
    - Responses that quietly rewrite sections beyond what the reviewer asked for (scope creep that editors notice).
-   - Unannounced claim STATUS changes or new `<!-- claim -->` tags without corresponding `claims/section_*.md` entries.
+   - Unannounced claim STATUS changes or new `% claim` tags (LaTeX line comments) without corresponding `claims/section_*.md` entries.
 
 ## Data you load
 

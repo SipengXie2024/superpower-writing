@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# End-to-end smoke test for superpower-writing scaffold.
+# End-to-end smoke test for superpower-writing scaffold (LaTeX).
 # Exercises: dir init, dep check (permissive re: missing upstream), claim
 # enforcement allow/block paths, Zotero check, file-presence audit.
 
@@ -36,9 +36,9 @@ echo "== 3. check-zotero.sh (no env) =="
   && fail "check-zotero should fail without creds" \
   || pass "check-zotero fails without creds as expected"
 
-echo "== 4. claim enforcement =="
+echo "== 4. claim enforcement (LaTeX) =="
 mkdir -p .writing/manuscript .writing/claims
-cat >.writing/claims/section_02_methods.md <<'EOF'
+cat >.writing/claims/section_03_methods.md <<'EOF'
 - id: meth-c1
   CLAIM: test
   EVIDENCE: []
@@ -51,32 +51,52 @@ payload_write() {
 }
 
 echo "   4a. stub claim -> expect block"
-out=$(payload_write "$WORK/.writing/manuscript/02_methods.md" "<!-- claim: meth-c1 -->\\nprose" \
+out=$(payload_write "$WORK/.writing/manuscript/03_methods.tex" "% claim: meth-c1\\nprose" \
       | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh" || true)
 echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
   && pass "stub blocks" || fail "stub did not block: $out"
 
 echo "   4b. evidence_ready -> allow"
-sed -i.bak 's/STATUS: stub/STATUS: evidence_ready/' .writing/claims/section_02_methods.md
-out=$(payload_write "$WORK/.writing/manuscript/02_methods.md" "<!-- claim: meth-c1 -->\\nprose" \
+sed -i.bak 's/STATUS: stub/STATUS: evidence_ready/' .writing/claims/section_03_methods.md
+out=$(payload_write "$WORK/.writing/manuscript/03_methods.tex" "% claim: meth-c1\\nprose" \
       | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
 [[ -z "$out" ]] && pass "evidence_ready allows" || fail "evidence_ready emitted output: $out"
 
 echo "   4c. draft-only -> allow"
-out=$(payload_write "$WORK/.writing/manuscript/02_methods.md" "<!-- draft-only -->\\nrough" \
+out=$(payload_write "$WORK/.writing/manuscript/03_methods.tex" "% draft-only\\nrough" \
       | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
 [[ -z "$out" ]] && pass "draft-only allows" || fail "draft-only emitted output: $out"
 
-echo "   4d. untagged prose -> block"
-out=$(payload_write "$WORK/.writing/manuscript/02_methods.md" "unmarked prose" \
+echo "   4d. untagged prose in protected stem -> block"
+out=$(payload_write "$WORK/.writing/manuscript/03_methods.tex" "unmarked prose" \
       | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh" || true)
 echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
-  && pass "untagged blocks" || fail "untagged did not block: $out"
+  && pass "untagged prose blocks" || fail "untagged did not block: $out"
 
 echo "   4e. non-manuscript path -> allow"
-out=$(payload_write "/tmp/other.md" "anything" \
+out=$(payload_write "/tmp/other.tex" "anything" \
       | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
 [[ -z "$out" ]] && pass "non-manuscript allows" || fail "non-manuscript emitted: $out"
+
+echo "   4f. .md manuscript file -> allow (markdown no longer enforced)"
+out=$(payload_write "$WORK/.writing/manuscript/03_methods.md" "anything at all" \
+      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
+[[ -z "$out" ]] && pass "markdown bypass" || fail ".md file triggered hook: $out"
+
+echo "   4g. 00_abstract untagged -> allow (unprotected slug)"
+out=$(payload_write "$WORK/.writing/manuscript/00_abstract.tex" "Background sentence. Method sentence." \
+      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
+[[ -z "$out" ]] && pass "abstract unprotected" || fail "abstract blocked: $out"
+
+echo "   4h. 09_references untagged -> allow (unprotected slug via slug-ending match)"
+out=$(payload_write "$WORK/.writing/manuscript/09_references.tex" "\\\\bibliography{refs}" \
+      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
+[[ -z "$out" ]] && pass "references unprotected (slug-ending match)" || fail "references blocked: $out"
+
+echo "   4i. LaTeX structural line only -> allow"
+out=$(payload_write "$WORK/.writing/manuscript/03_methods.tex" "\\\\section{Methods}" \
+      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
+[[ -z "$out" ]] && pass "structural LaTeX line allows" || fail "structural line blocked: $out"
 
 echo "== 5. plugin manifest sanity =="
 python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/plugin.json'))" && pass "plugin.json valid"
@@ -103,6 +123,13 @@ for a in section-drafter manuscript-reviewer citation-auditor rebuttal-auditor; 
   [[ -f "$PLUGIN_ROOT/agents/$a.md" ]] \
     && pass "agents/$a.md" \
     || fail "missing agents/$a.md"
+done
+
+echo "== 7. section-standards presence =="
+for std in 00_abstract 01_introduction 02_background 03_methods 04_results 05_discussion 06_conclusion 07_related_work 08_motivation; do
+  [[ -f "$PLUGIN_ROOT/skills/drafting/references/section-standards/$std.md" ]] \
+    && pass "section-standards/$std.md" \
+    || fail "missing section-standards/$std.md"
 done
 
 echo ""

@@ -13,12 +13,12 @@ You compare actual prose against `.writing/outline.md` and the matching `.writin
 ## What you check (outline-compliance lens)
 
 1. **Claim coverage**
-   - Every `key_claim` listed in `.writing/outline.md` for this section must appear in the draft, tagged with a `<!-- claim: <id> -->` comment matching the id used in `claims/section_*.md`.
+   - Every `key_claim` listed in `.writing/outline.md` for this section must appear in the draft, tagged with a `% claim: <id>` LaTeX line comment matching the id used in `claims/section_*.md`.
    - A claim declared in the outline but absent (no matching tag anywhere in the drafted section) is a Critical issue.
 
 2. **Scope creep (new claims)**
-   - A `<!-- claim: <id> -->` tag in the draft whose id is NOT present in `claims/section_*.md` is an orphan claim — the drafter has introduced scope not agreed during outlining. Flag as Critical.
-   - A substantive new assertion in prose that is NOT wrapped in any claim tag and is NOT flagged as `<!-- draft-only -->` is also scope creep. Flag as Important.
+   - A `% claim: <id>` tag in the draft whose id is NOT present in `claims/section_*.md` is an orphan claim — the drafter has introduced scope not agreed during outlining. Flag as Critical.
+   - A substantive new assertion in prose that is NOT wrapped in any claim tag and is NOT flagged as `% draft-only` is also scope creep. Flag as Important.
 
 3. **Argument order**
    - The outline's planned order for this section (the sequence in which `key_claims` appear in `outline.md §<Section>`) defines the argument flow. The drafted section must preserve that order unless `.writing/findings.md` contains an explicit rationale entry documenting the reorder decision (look for a `## Reorder: <section>` heading or equivalent under the section's §Technical Decisions block).
@@ -42,8 +42,8 @@ Staying in your lane avoids review thrash and duplicate rounds.
 
 ## Inputs you will be given
 
-- Path to the drafted section file (e.g., `.writing/manuscript/02_methods.md`).
-- Path to the matching claims file (e.g., `.writing/claims/section_02_methods.md`).
+- Path to the drafted section file (e.g., `.writing/manuscript/03_methods.tex`).
+- Path to the matching claims file (e.g., `.writing/claims/section_03_methods.md`).
 - Path to the outline file (`.writing/outline.md`) and the section-name anchor within it (e.g., `§Methods`).
 - Optionally, path to `.writing/findings.md` when argument-order questions require rationale checks.
 

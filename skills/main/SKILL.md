@@ -77,7 +77,7 @@ Check for `.writing/` in the project root.
   ${CLAUDE_PLUGIN_ROOT}/scripts/init-writing-dir.sh
   ```
 
-  This creates `outline.md`, `findings.md`, `progress.md`, `metadata.yaml`, and subdirs `manuscript/ claims/ figures/ reviews/ archive/`.
+  This creates `outline.md`, `findings.md`, `progress.md`, `metadata.yaml`, `main.tex`, `refs.bib`, and subdirs `manuscript/ claims/ figures/ reviews/ archive/`.
 
 - **Present:** read `.writing/progress.md` and `.writing/findings.md` to recover context before routing. Run `git diff --stat` to see manuscript changes since the last session.
 
@@ -91,7 +91,8 @@ When `.writing/` already exists at session start:
 2. Read `.writing/findings.md` — lit synthesis, prior decisions, reviewer context.
 3. Read `.writing/metadata.yaml` — authors, preregistration, data/code availability, reporting guideline, Zotero config.
 4. `git diff --stat -- .writing/` to see what changed since last session.
-5. Update planning files with any newly recovered context, then route based on the stage below.
+5. **Foot-gun check:** run `find .writing/manuscript -maxdepth 1 -name '*.md' -type f` — any `.md` file under `manuscript/` is a drafting mistake (the hook only enforces `.tex`). Warn the user and suggest renaming to `.tex` before continuing; do NOT silently proceed, since unenforced drafts accumulate unresolved claims.
+6. Update planning files with any newly recovered context, then route based on the stage below.
 
 # Stage Gate Routing
 
@@ -110,10 +111,10 @@ Each stage writes a dashboard row to `.writing/progress.md`. Route by inspecting
 | No dashboard yet, `outline.md` empty | outline + claims stubs | `superpower-writing:outlining` |
 | Outline present, `metadata.yaml` still has TODOs | metadata completeness | `superpower-writing:outlining` (complete metadata before advancing) |
 | Outline + metadata complete, no `plan.md` | per-section/figure plan | `superpower-writing:writing-plans` |
-| `plan.md` present, `manuscript/*.md` empty or partial | prose | `superpower-writing:drafting` |
+| `plan.md` present, `manuscript/*.tex` empty or partial | prose | `superpower-writing:drafting` |
 | Draft complete, no `verify-report.md` or report has failures | evidence audit | `superpower-writing:claim-verification` |
 | Reviews present in `.writing/reviews/`, unaddressed | review response | `superpower-writing:revision` |
-| All sections verified, metadata complete, no unresolved `[NEEDS-EVIDENCE]` or `<!-- draft-only -->` | submission gate | `superpower-writing:submission` |
+| All sections verified, metadata complete, no unresolved `[NEEDS-EVIDENCE]` or `% draft-only` | submission gate | `superpower-writing:submission` |
 
 Skipping a gate (e.g., jumping from outline directly to drafting without writing-plans) requires explicit user override, surfaced as a warning.
 
@@ -171,7 +172,7 @@ Skills in this plugin (all invoked as `superpower-writing:<name>`):
 | `superpower-writing:outlining` | Idea → IMRAD outline + per-section claim stubs + populated `metadata.yaml`. Combines design-exploration and spec-writing. |
 | `superpower-writing:writing-plans` | Approved outline → executable per-section/per-figure/per-table task plan with dependency graph. Writes `.writing/plan.md`. |
 | `superpower-writing:drafting` | Section-by-section prose writing in serial or parallel mode. Enforces claim-first protocol: each section subagent resolves EVIDENCE via `research-lookup` / `citation-management` **before** writing tagged prose. |
-| `superpower-writing:claim-verification` | Pre-submission auditor. Walks every `<!-- claim: id -->` tag, resolves DOIs (Zotero first, network fallback), runs semantic match against abstracts, checks numeric/table consistency, blocks on any `[NEEDS-EVIDENCE]` or `draft-only` marker. |
+| `superpower-writing:claim-verification` | Pre-submission auditor. Walks every `% claim: id` LaTeX line comment, confirms `\cite{}` citekeys resolve against `.writing/refs.bib`, runs semantic match against abstracts, checks numeric/table consistency, blocks on any `[NEEDS-EVIDENCE]` or `draft-only` marker. |
 | `superpower-writing:revision` | Unified review-loop handler for internal co-author and external journal reviewer comments. Classify → respond → apply diff → re-verify. |
 | `superpower-writing:submission` | Final gate: verifies all claims PASS, metadata complete, graphical abstract present, no draft-only tags. Freezes a copy to `.writing/archive/<date>/`. |
 
@@ -189,18 +190,20 @@ Upstream skills this plugin relies on (call by **bare name**, no prefix):
 
 # Claim-First Protocol
 
-Every load-bearing paragraph in `.writing/manuscript/*.md` must carry a marker:
+Every load-bearing paragraph in `.writing/manuscript/*.tex` must carry a LaTeX line-comment marker at column 0 (allowing leading whitespace):
 
-- `<!-- claim: <id> -->` — links to an entry in `.writing/claims/section_<NN>_<slug>.md` with fields `id`, `CLAIM`, `EVIDENCE`, `STATUS` ∈ {`stub`, `evidence_ready`, `verified`}.
-- `<!-- draft-only -->` — scratch prose that will be replaced before the next stage gate.
+- `% claim: <id>` — links to an entry in `.writing/claims/section_<NN>_<slug>.md` with fields `id`, `CLAIM`, `EVIDENCE`, `STATUS` ∈ {`stub`, `evidence_ready`, `verified`}.
+- `% draft-only` — scratch prose that will be replaced before the next stage gate.
 
-A **PreToolUse hook** (`${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh`) blocks any Edit / Write / MultiEdit / NotebookEdit targeting `**/manuscript/*.md` when:
+A **PreToolUse hook** (`${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh`) blocks any Edit / Write / MultiEdit / NotebookEdit targeting `**/manuscript/*.tex` when:
 
-- a `<!-- claim: id -->` tag references a claim with `STATUS: stub`, or
+- a `% claim: id` tag references a claim with `STATUS: stub`, or
 - the claim file is missing, or
 - untagged load-bearing prose lands in a protected section.
 
-The hook exempts these section stems from paragraph-tag enforcement: `00_abstract`, `06_references`, `07_acknowledgments`. All other `manuscript/NN_*.md` files require every load-bearing paragraph to carry `<!-- claim: id -->` or `<!-- draft-only -->`.
+The hook exempts any section stem whose slug is in `UNPROTECTED_SLUGS` (`abstract`, `references`, `acknowledgments`) from paragraph-tag enforcement. Slug match is by slug-ending: `00_abstract` matches `_abstract`; `09_references` matches `_references`; `10_acknowledgments` matches `_acknowledgments`. All other `manuscript/NN_*.tex` files require every load-bearing paragraph to carry `% claim: id` or `% draft-only`.
+
+Markdown manuscript files (`.md` under `manuscript/`) are NOT intercepted — the plugin operates on LaTeX only. If a `.md` slips into `manuscript/`, it falls through unenforced; convert to `.tex` before the submission gate.
 
 Drafting and claim-verification skills must be aware of this hook and surface its block reason to the user. The fix is always: resolve EVIDENCE first (via `research-lookup` / `citation-management` / Zotero lookup), bump `STATUS` to `evidence_ready`, then write prose.
 

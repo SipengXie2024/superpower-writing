@@ -137,23 +137,23 @@ Each gate updates `.writing/progress.md` Task Dashboard. Skipping requires expli
 
 ## The claim-first protocol (v1 core invariant)
 
-Every paragraph in `.writing/manuscript/NN_<slug>.md` is tagged:
+Every paragraph in `.writing/manuscript/NN_<slug>.tex` is tagged with a LaTeX line comment at column 0:
 
-```markdown
-<!-- claim: meth-c1 -->
-We enrolled 1,247 patients with T2D from NHANES cycles 2018–2023...
+```latex
+% claim: meth-c1
+We enrolled 1,247 patients with T2D from NHANES cycles 2018--2023...
 ```
 
 Or escapes enforcement for early exploration:
 
-```markdown
-<!-- draft-only -->
+```latex
+% draft-only
 Rough notes about what this section might say.
 ```
 
-The hook `hooks/enforce-claims.sh` runs on every `Edit`/`Write`/`MultiEdit` targeting `**/manuscript/*.md` and refuses the write if any `claim: id` references a claim whose `STATUS` is not `evidence_ready` or `verified`. **Exemption is by exact filename stem** — only files named `00_abstract.md`, `06_references.md`, or `07_acknowledgments.md` bypass paragraph-tag enforcement. Any other stem (including variants like `abstract.md` or `08_appendix.md`) must tag every load-bearing paragraph.
+The hook `hooks/enforce-claims.sh` runs on every `Edit`/`Write`/`MultiEdit` targeting `**/manuscript/*.tex` and refuses the write if any `% claim: id` references a claim whose `STATUS` is not `evidence_ready` or `verified`. **Exemption is by slug-ending** — any file whose stem ends in `_abstract`, `_references`, or `_acknowledgments` bypasses paragraph-tag enforcement (so `00_abstract.tex`, `09_references.tex`, `10_acknowledgments.tex` all work). Any other stem (including new additions like `11_appendix.tex`) must tag every load-bearing paragraph. `.md` files under `manuscript/` are not intercepted — the plugin operates on LaTeX only.
 
-Any `<!-- draft-only -->` marker still present when `/writing:submit` runs is a hard failure.
+Any `% draft-only` marker still present when `/writing:submit` runs is a hard failure.
 
 ## Zotero dual-source-of-truth (v1)
 

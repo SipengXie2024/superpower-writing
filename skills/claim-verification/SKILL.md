@@ -1,13 +1,13 @@
 ---
 name: claim-verification
-description: Pre-submission verifier. Walks every <!-- claim: id --> in manuscript/*.md, confirms DOI resolution via citation-management, runs semantic match against research-lookup abstracts, checks numeric/table consistency, fails if any [NEEDS-EVIDENCE] or draft-only markers remain. Use at submission gate or on demand.
+description: Pre-submission verifier. Walks every % claim tag in LaTeX manuscript/*.tex, confirms \cite{} citekeys resolve against .writing/refs.bib (exported from Zotero), runs semantic match against research-lookup abstracts, checks numeric/table consistency, fails if any [NEEDS-EVIDENCE] or draft-only markers remain. Use at submission gate or on demand.
 ---
 
 # Claim Verification
 
 ## Overview
 
-Pre-submission gate that walks every tagged claim in `.writing/manuscript/*.md` and proves it supportable. Four sequential passes: completeness, citation resolution (dual source of truth via Zotero + network), numeric/table consistency, and reporting-guideline checklist. Outputs `.writing/verify-report.md` per-claim PASS/FAIL and caches resolved DOIs in `.writing/verify-cache.json`.
+Pre-submission gate that walks every tagged claim in `.writing/manuscript/*.tex` and proves it supportable. Four sequential passes: completeness, citation resolution (dual source of truth via Zotero + network), numeric/table consistency, and reporting-guideline checklist. Outputs `.writing/verify-report.md` per-claim PASS/FAIL and caches resolved DOIs in `.writing/verify-cache.json`.
 
 **Core principle:** Evidence before claims, always. Violating the letter of this rule is violating the spirit.
 
@@ -47,23 +47,23 @@ Before running any pass:
 1. Confirm `.writing/` exists. If not, abort with instruction to run outlining/drafting first.
 2. Read `.writing/metadata.yaml`. Fail if any top-level key is `TODO` (except the v1 YAGNI list: multi-author fields). Fail fast — verification is pointless against incomplete metadata.
 3. Read `.writing/verify-cache.json` if present; treat as read-through cache keyed by DOI. Cache entries expire never within a session; user must manually delete to force re-resolution.
-4. List all `.writing/manuscript/*.md` files and their paired `.writing/claims/section_*.md` files.
+4. List all `.writing/manuscript/*.tex` files and their paired `.writing/claims/section_*.md` files.
 
 ### Step 1: Pass 1 — Claim Completeness
 
 Goal: every load-bearing paragraph is tagged and backed.
 
-For each `.writing/manuscript/*.md`:
+For each `.writing/manuscript/*.tex`:
 
-1. Parse all `<!-- claim: (\S+) -->` tags → set of referenced claim ids.
-2. Parse all `<!-- draft-only -->` markers → record as FAIL unconditionally (draft-only is a drafting escape hatch; it must be resolved before submission).
+1. Parse all `^\s*%\s*claim:\s*(\S+)` tags (LaTeX line comments) → set of referenced claim ids.
+2. Parse all `^\s*%\s*draft-only` markers → record as FAIL unconditionally (draft-only is a drafting escape hatch; it must be resolved before submission).
 3. Parse all `[NEEDS-EVIDENCE]` literal strings → record as FAIL.
-4. For each referenced claim id, locate the matching entry in `.writing/claims/section_<NN>_<slug>.md`, where `<NN>_<slug>` is the manuscript file's basename without extension (e.g., manuscript `02_methods.md` pairs with claims `section_02_methods.md`):
+4. For each referenced claim id, locate the matching entry in `.writing/claims/section_<NN>_<slug>.md`, where `<NN>_<slug>` is the manuscript file's basename without extension (e.g., manuscript `03_methods.tex` pairs with claims `section_03_methods.md`):
    - **Missing entry** → FAIL: `claim '<id>' referenced in <file> but not defined in claims file`.
    - **STATUS: stub** → FAIL: `claim '<id>' still stub; drafting did not resolve EVIDENCE`.
    - **STATUS: evidence_ready** → PASS Pass 1 (it advances through Pass 2–4 to become `verified`).
    - **STATUS: verified** → PASS Pass 1 (already verified in prior run; Pass 2–4 may re-validate via cache).
-5. For each paragraph that neither has `<!-- claim: -->` nor `<!-- draft-only -->`: check if section is allow-listed. The PreToolUse hook exempts these section stems from paragraph-tag enforcement: `00_abstract`, `06_references`, `07_acknowledgments`. All other `manuscript/NN_*.md` files require every load-bearing paragraph to carry `<!-- claim: id -->` or `<!-- draft-only -->`. Always-skipped within any file: lines starting with `#` (section headers), blank lines, table rows (lines starting with `|`), and code fences. Anything else fails with: `paragraph in <file>:<line> lacks <!-- claim: id --> or <!-- draft-only --> marker`.
+5. For each paragraph that neither has `% claim:` nor `% draft-only`: check if section is allow-listed. The PreToolUse hook exempts any stem ending in `_<slug>` for slug ∈ `UNPROTECTED_SLUGS` (`abstract`, `references`, `acknowledgments`) from paragraph-tag enforcement. All other `manuscript/NN_*.tex` files require every load-bearing paragraph to carry `% claim: id` or `% draft-only`. Always-skipped within any file: LaTeX line comments (lines starting with `%`), blank lines, structural LaTeX commands (lines starting with `\section`, `\subsection`, `\begin`, `\end`, `\label`, `\caption`, etc. — the full list is in `hooks/enforce-claims.py` `STRUCTURAL_LATEX_CMDS`). Anything else fails with: `paragraph in <file>:<line> lacks % claim: id or % draft-only marker`.
 
 **Allow-list is configurable.** Support `.writing/verify-config.yaml` with key `allowlist_sections: [<filename>, ...]` — if present, those filenames extend the hook's default exemption set for this skill's checks.
 
@@ -112,15 +112,15 @@ For EVIDENCE entries with `type: dataset`, `type: figure`, `type: table`, etc.: 
 
 Purpose: catch copy-paste drift between prose and tables.
 
-1. For each `.writing/manuscript/*.md`, extract candidate numeric tokens via regex. Default pattern:
+1. For each `.writing/manuscript/*.tex`, extract candidate numeric tokens via regex. Default pattern:
    ```
    \b(?:n\s*=\s*)?(?:\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*(?:%|‰|p\s*[=<]\s*\d|\(\d+\.\d+[-–]\d+\.\d+\)|M|K)?
    ```
    Capture `n=`, percentages, p-values, confidence intervals, plain counts.
-2. Build a ground-truth number pool from all tables (Markdown `|` rows) across manuscript/*.md and all figure captions (paragraphs following a `![...](figures/...)` line).
+2. Build a ground-truth number pool from all tables (LaTeX `tabular` rows — cells separated by `&`, rows terminated by `\\`) across manuscript/*.tex and all figure captions (`\caption{...}` inside `figure` environments).
 3. For each prose number, confirm it appears verbatim in the ground-truth pool. FAIL otherwise.
 4. Support `.writing/verify-config.yaml` `numeric_overrides: [<number>, ...]` for narrative numbers that are not table-backed (e.g., round references like "a 2018 cohort"). Numbers in this list skip the check.
-5. Per-claim attribution: a FAIL on number `1,247` inside a paragraph tagged `<!-- claim: meth-c1 -->` attaches to claim `meth-c1` in the report.
+5. Per-claim attribution: a FAIL on number `1,247` inside a paragraph tagged `% claim: meth-c1` attaches to claim `meth-c1` in the report.
 
 ### Step 4: Pass 4 — Reporting-Guideline Checklist
 
@@ -157,7 +157,7 @@ Write `.writing/verify-report.md` with exact structure:
 ## Document-Level Failures
 (draft-only markers, [NEEDS-EVIDENCE] strings, reporting-guideline failures)
 
-- <file>:<line>: `<!-- draft-only -->` still present
+- <file>:<line>: `% draft-only` still present
 - <guideline> item 7 FAIL: population flow diagram missing
 ```
 
@@ -201,7 +201,7 @@ The submission gate depends on `metadata.yaml` being complete. If claim-verifica
 
 ### Never auto-edit the manuscript
 
-This skill reads `.writing/manuscript/*.md` and writes `.writing/claims/*.md` STATUS fields and the report. It does not touch manuscript prose. Manuscript changes go through drafting or revision, which pass the PreToolUse hook's claim gate.
+This skill reads `.writing/manuscript/*.tex` and writes `.writing/claims/*.md` STATUS fields and the report. It does not touch manuscript prose. Manuscript changes go through drafting or revision, which pass the PreToolUse hook's claim gate.
 
 ### Report is the audit trail
 

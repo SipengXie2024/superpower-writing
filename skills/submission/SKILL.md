@@ -1,6 +1,6 @@
 ---
 name: submission
-description: Final gate before journal submission. Verifies claim-verification PASS, metadata.yaml complete, graphical abstract present, no draft-only tags remain, no [NEEDS-EVIDENCE] unresolved, then freezes a copy to .writing/archive/<date>/. Use when the user declares the paper ready to submit.
+description: Final gate before journal submission (LaTeX). Verifies claim-verification PASS, metadata.yaml complete, graphical abstract present, no `% draft-only` tags remain, no [NEEDS-EVIDENCE] unresolved, exports .writing/refs.bib from Zotero, compiles main.tex via latexmk, then freezes a copy to .writing/archive/<date>/. Use when the user declares the paper ready to submit.
 ---
 
 # Submission Gate
@@ -72,9 +72,9 @@ with instructions to place the file. If multiple, abort and ask the user to
 pick one (different formats of the same figure are fine — flag only when the
 basenames differ in intent).
 
-### 4. No `<!-- draft-only -->` markers remain
+### 4. No `% draft-only` markers remain
 
-Grep all `.writing/manuscript/*.md` (recursively) for `<!-- draft-only -->`.
+Grep all `.writing/manuscript/*.tex` (recursively) for `^\s*%\s*draft-only\b`.
 Any hit aborts with file:line list. Draft-only markers are scaffolding and
 must be resolved (either filled in with evidence-backed content or deleted)
 before submission.
@@ -85,6 +85,23 @@ Grep `.writing/` recursively for `[NEEDS-EVIDENCE]`. Any hit aborts with
 file:line list. This includes `claims/`, `manuscript/`, `findings.md`,
 `outline.md`, `metadata.yaml`, and anywhere else the string could hide.
 
+### 6. LaTeX compile test passes
+
+After `refs.bib` is generated (below), compile `.writing/main.tex` with
+`latexmk -pdf -interaction=nonstopmode main.tex` (run inside `.writing/`).
+Require:
+
+- Non-zero `main.pdf` is produced.
+- No "undefined references" warnings in the log (grep
+  `main.log` for `LaTeX Warning: Citation .* undefined` or `There were
+  undefined references` — both abort).
+- No "undefined control sequence" errors (unresolved \foo commands).
+
+If `latexmk` or `pdflatex` is not installed, skip this check with a warning;
+the user must run the compile manually before submitting. Do NOT proceed to
+archiving without either a successful compile or an explicit user override
+recorded in `.writing/findings.md`.
+
 ### Reporting checklist output
 
 When any check fails, emit a single block like:
@@ -92,56 +109,80 @@ When any check fails, emit a single block like:
 ```
 Submission gate FAILED (N issues):
   [1] claim-verification: 2 claims not verified
-      - 03_intro.md:claim-003 (pending)
-      - 05_results.md:claim-011 (failed: DOI mismatch)
+      - 03_methods.tex:claim-003 (pending)
+      - 04_results.tex:claim-011 (failed: DOI mismatch)
   [2] metadata.yaml: reporting_guideline is TODO
   [3] draft-only markers: 1 remaining
-      - manuscript/04_methods.md:87
+      - manuscript/03_methods.tex:87
+  [4] latex compile: 2 undefined references
+      - main.log:1047: Citation 'smith2019novel' undefined
 ```
 
-Do not proceed to `refs.bib` generation or archiving until every check is
-green.
+Do not proceed to archiving until every check is green.
 
-## refs.bib Generation
+## refs.bib Generation (Zotero export)
 
-Runs after the checklist passes, before archiving. See design.md §14.4 for
-the submission row of the Zotero responsibility table.
+Runs between checklist items 5 and 6 (i.e., after semantic / draft-only /
+[NEEDS-EVIDENCE] checks pass; before the LaTeX compile test). Requires
+`zotero.enabled: true` in `.writing/metadata.yaml` — the plugin is
+Zotero-first for bib management. If Zotero is disabled, abort with instructions
+to enable it and populate the collection.
 
-### Zotero-enabled path
+### Zotero export flow
 
-When `.writing/metadata.yaml` has `zotero.enabled: true`:
+1. **Collect citekeys from manuscript.** Grep all `.writing/manuscript/*.tex`
+   for `\cite{...}` (including the variants `\citep{}`, `\citet{}` if
+   natbib is used). Expand comma-separated arguments:
+     ```
+     grep -oE '\\cite(p|t)?\{[^}]+\}' .writing/manuscript/*.tex \
+       | sed 's/.*{\([^}]*\)}/\1/' \
+       | tr ',' '\n' \
+       | sed 's/^ *//;s/ *$//' \
+       | sort -u
+     ```
+   Deduplicate into a master list of citekeys. This is the exact set the
+   final `refs.bib` must cover.
 
-1. Extract every cited DOI from `.writing/manuscript/*.md`. DOIs appear as
-   `<!-- cite: 10.xxxx/yyyy -->` or inline `[@doi:10.xxxx/yyyy]` — use both
-   patterns. These are the formats `drafting/SKILL.md` mandates in its Step B;
-   any divergence is a drafting bug, not a submission concern. Deduplicate.
-2. Read `zotero.collection_key` from `metadata.yaml`.
-3. Invoke `Skill(skill="pyzotero")` to fetch the BibTeX export for the
-   intersection `(collection items) ∩ (cited DOIs)`.
-4. Write the result to `.writing/refs.bib`.
-5. If any cited DOI is missing from the Zotero collection, abort with the
-   list. The user must add them to Zotero (or re-run `drafting`/
-   `claim-verification` which auto-push new citations when
-   `auto_push_new_citations: true`) before submission. Do not silently fall
-   back to network here — submission is the one place we want Zotero to be
-   authoritative.
+2. **Read Zotero config.** Load `zotero.collection_key` from
+   `metadata.yaml`. If empty, use the `$ZOTERO_DEFAULT_COLLECTION` env-var
+   fallback.
 
-### Zotero-disabled (degraded) path
+3. **Export the collection.** Invoke `Skill(skill="pyzotero")` with a
+   request to export the collection to BibTeX. The underlying pyzotero
+   call is `zot.collection_items(collection_key, format='bibtex')` — the
+   response is a UTF-8 BibTeX string containing every item in the
+   collection. If Better BibTeX is installed server-side, the citekey field
+   on each entry is stable; otherwise pyzotero generates keys from
+   `AuthorYear` templates. Write the full export to `.writing/refs.bib`,
+   overwriting any prior contents.
 
-When `zotero.enabled: false` or the block is absent:
+4. **Verify coverage.** For every citekey in the master list (step 1),
+   confirm it appears as an entry key in `.writing/refs.bib`:
+     ```
+     awk -F'[{,]' '/^@/{print $2}' .writing/refs.bib | sort -u \
+       > /tmp/bib_keys.txt
+     comm -23 <(printf '%s\n' "${CITEKEYS[@]}" | sort -u) /tmp/bib_keys.txt
+     ```
+   Any missing citekey is a HARD FAILURE — the manuscript cites something
+   Zotero does not know about. Abort with the list and instruct the user:
+   (a) add the missing items to the Zotero collection, or (b) re-run
+   `drafting` / `claim-verification` with `zotero.auto_push_new_citations:
+   true` so newly-discovered citations get pushed back into Zotero
+   automatically. Do NOT fall back to network DOI resolution here —
+   submission is the one place Zotero is authoritative.
 
-1. Walk every `.writing/claims/*.md` and collect `EVIDENCE` entries of
-   `type: citation`.
-2. Assemble a BibTeX entry for each unique DOI using the cached metadata
-   from `.writing/verify-cache.json` (authors, title, journal, year, DOI).
-3. Write to `.writing/refs.bib`. Entry key: the DOI with non-alnum replaced
-   by `_` (e.g., `10_1038_s41586_024_01234_5`).
-4. Warn the user that `refs.bib` was built from EVIDENCE entries directly —
-   degraded mode. Recommend enabling Zotero for future papers.
+5. **Prune (optional).** The full collection export may contain entries
+   not cited in this manuscript. For submission to venues that reject
+   bibliographies with unused entries, write a pruned refs.bib containing
+   only the subset of entries whose citekey is in the master list. This
+   is opt-in via `metadata.yaml` `submission.prune_unused_bib: true`; the
+   default is to keep the full export (LaTeX silently ignores unused
+   entries and some venues prefer a complete bibliography).
 
-In both paths, the output must be a single valid BibTeX file at
-`.writing/refs.bib`. Overwrite any existing copy; the archive will preserve
-history.
+### Output
+
+A single valid BibTeX file at `.writing/refs.bib`. Overwrite any existing
+copy; the archive will preserve prior versions.
 
 ## Archive Procedure
 
@@ -162,7 +203,9 @@ If `${ARCHIVE_DIR}` already exists (unlikely — minute resolution), append
 
 Copy the following into `${ARCHIVE_DIR}/`:
 
-- `manuscript/` (recursive)
+- `manuscript/` (recursive, LaTeX sources)
+- `main.tex` (top-level LaTeX document)
+- `main.pdf` (compiled output from checklist item 6)
 - `claims/` (recursive)
 - `figures/` (recursive, includes the graphical abstract)
 - `metadata.yaml`
@@ -196,12 +239,14 @@ Create `${ARCHIVE_DIR}/README.md` summarizing the frozen state:
 
 ## Contents
 
-- manuscript/ — final IMRAD sections
-- claims/ — evidence records for every <!-- claim: id --> in manuscript/
+- manuscript/ — final LaTeX IMRAD sections (.tex files)
+- main.tex — top-level LaTeX document pulling sections via \input{}
+- main.pdf — compiled output (from latexmk compile test)
+- claims/ — evidence records for every `% claim: id` in manuscript/
 - figures/ — including graphical_abstract.*
 - metadata.yaml — author, COI, preregistration, data/code availability
 - outline.md — structural plan
-- refs.bib — BibTeX export (<N> entries, source: zotero|evidence)
+- refs.bib — BibTeX export from Zotero collection (<N> entries)
 - verify-report.md — claim-verification output at freeze time
 - verify-cache.json — DOI/abstract cache
 
@@ -273,9 +318,13 @@ This skill is one of four Zotero-aware skills (design.md §14.4). Its
 responsibility is `refs.bib` generation — see the refs.bib Generation section
 above. In short:
 
-- Gate all Zotero calls on `metadata.yaml → zotero.enabled`.
-- When enabled, Zotero is authoritative for `refs.bib` — any cited DOI not
-  present in the configured collection is a hard failure.
+- **Zotero is required**, not optional. The plugin is Zotero-first for bib
+  management (this was a deliberate design choice — see CHANGELOG). If
+  `metadata.yaml → zotero.enabled` is false, abort submission with
+  instructions to enable it.
+- Zotero is authoritative for `refs.bib` — any citekey cited in the
+  manuscript but missing from the configured Zotero collection is a hard
+  failure.
 - Do not fall back to network here; the fallback path is
   `claim-verification`'s responsibility during authoring, not the submission
   gate's.
@@ -310,9 +359,9 @@ fallback string and continue. Do not block archiving on missing git.
 - **Fail loud, fail once.** Collect every checklist failure before returning;
   do not stop at the first red flag and force the user into a ping-pong fix
   loop.
-- **Zotero is authoritative at submission.** Any DOI cited in the manuscript
-  that is not in the configured collection is a gap the user must close —
-  don't paper over it.
+- **Zotero is authoritative at submission.** Any `\cite{citekey}` in the
+  manuscript whose key is not in the configured collection is a gap the user
+  must close — don't paper over it.
 - **Archives are immutable.** Once `.writing/archive/<date>/` is written, it
   is never edited. Re-submission creates a new archive; prior ones stand as
   the historical record.

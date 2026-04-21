@@ -19,7 +19,7 @@ This skill is a workflow, not an execution engine. Heavy lifting (prose edits, c
 - Post-revision verification → `Skill(skill="claim-verification")`.
 - Style polishing of response letter → upstream `Skill(skill="scientific-writing")`.
 
-The PreToolUse hook is still active during revision: any newly introduced `<!-- claim: id -->` tag must correspond to a claim with `STATUS ∈ {evidence_ready, verified}`, or the edit will be blocked. Revision-driven claim additions are first-class citizens, not second-class patches.
+The PreToolUse hook is still active during revision: any newly introduced `% claim: id` tag must correspond to a claim with `STATUS ∈ {evidence_ready, verified}`, or the edit will be blocked. Revision-driven claim additions are first-class citizens, not second-class patches.
 
 > Claim-first protocol: see `superpower-writing:main` §Claim-First Protocol.
 
@@ -98,7 +98,7 @@ status: open  # open | in-progress | closed
 # Applied diffs
 
 ## Item 1
-commit: <sha>  files: manuscript/03_results.md  claims: claims/section_03_results.md
+commit: <sha>  files: manuscript/03_results.tex  claims: claims/section_03_results.md
 ...
 ```
 
@@ -148,7 +148,7 @@ Draft format:
 Classification: Major
 Reviewer concern: <one-sentence paraphrase>
 Action: <what changed, why, with evidence refs>
-Manuscript ref: manuscript/03_results.md:L42-L57 (post-revision)
+Manuscript ref: manuscript/03_results.tex:L42-L57 (post-revision)
 Claim changes: claims/section_03_results.md — added claim `res-c7` (STATUS=evidence_ready via pyzotero item ABCD1234); updated `res-c3` EVIDENCE with new abstract.
 ```
 
@@ -160,15 +160,15 @@ Now, and only now, edit manuscript files. Guidance:
 
 - Edit one item at a time. Batch edits across items only when they touch disjoint line ranges.
 - If the item is Major AND adds or removes a claim, the commit MUST include both the manuscript file and the `claims/section_<NN>_<slug>.md` file. Splitting these into separate commits breaks the claim graph and confuses `claim-verification`.
-- Update `<!-- claim: id -->` tags to match the new claim ids. Never leave a tag pointing at a removed claim.
-- If a paragraph becomes a draft-state scratchpad during mid-revision editing, tag it `<!-- draft-only -->` temporarily; remove the tag before closing the round.
+- Update `% claim: id` tags to match the new claim ids. Never leave a tag pointing at a removed claim.
+- If a paragraph becomes a draft-state scratchpad during mid-revision editing, tag it `% draft-only` temporarily; remove the tag before closing the round.
 - If the hook blocks a write: the error JSON will name the offending claim. Resolve the underlying cause (missing claim entry, stub STATUS, untagged paragraph) and retry. Do not disable the hook.
 
 Commit per item (or per coherent group):
 
 ```bash
 git add \
-    .writing/manuscript/<file>.md \
+    .writing/manuscript/<file>.tex \
     .writing/claims/<section>.md \
     .writing/reviews/<id>.md
 git commit \
@@ -191,7 +191,7 @@ Do not mark the round closed on your own authority. Invoke:
 Skill(skill="claim-verification")
 ```
 
-Let `claim-verification` walk every `<!-- claim: id -->` in post-revision prose, re-resolve DOIs, re-run semantic matches on any touched claim, and re-check numeric/table consistency if Major items changed results. The expected outcome is:
+Let `claim-verification` walk every `% claim: id` in post-revision prose, re-resolve `\cite{}` citekeys against refs.bib, re-run semantic matches on any touched claim, and re-check numeric/table consistency if Major items changed results. The expected outcome is:
 
 - All touched claims: `PASS`.
 - Any untouched but previously-verified claims: still `PASS` (a previous `verify-cache.json` hit is acceptable).

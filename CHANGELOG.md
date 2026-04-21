@@ -5,6 +5,42 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] — 2026-04-21
+
+### Breaking Changes
+
+- **Manuscript format migrated from Markdown to LaTeX.** All `.writing/manuscript/*.md` files are now `.writing/manuscript/*.tex`. The claim-first `PreToolUse` hook matches `**/manuscript/*.tex` only; markdown manuscripts under `manuscript/` pass through unenforced. A SessionStart recovery check warns users who accidentally create `.md` files in `manuscript/`.
+- **Claim and draft tags changed to LaTeX line comments at column 0.** `<!-- claim: id -->` → `% claim: id`; `<!-- draft-only -->` → `% draft-only`. Same for every structural tag (`% bpmrc: B`, `% cars: T`, `% background: D`, etc.).
+- **Citations use `\cite{citekey}` exclusively.** The old `<!-- cite: doi -->` and `[@doi:...]` inline forms are removed. Citekeys are sourced from the configured Zotero collection at drafting time.
+- **`submission` skill requires `zotero.enabled: true`.** The legacy "scrape DOIs from markdown, fetch intersection from Zotero" flow is replaced with a Zotero-collection-to-`refs.bib` export, followed by verification that every `\cite{}` key in the manuscript is covered. Zotero-disabled mode now aborts at the submission gate.
+- **Hook's `UNPROTECTED_STEMS` → `UNPROTECTED_SLUGS` (slug-ending match).** Any stem ending in `_abstract`, `_references`, or `_acknowledgments` is exempt — so `00_abstract.tex`, `09_references.tex`, `10_acknowledgments.tex` all work regardless of numeric prefix.
+
+### Added
+
+- **Section-standards framework** under `skills/drafting/references/section-standards/` with 9 canonical "八股" files (BPMRC / CARS / DNPL / OFCA / RSRT / ILFS / RSF / ThematicGroup / SFR) plus a README. Files use a uniform `NN_slug.md` naming convention. Each standards file specifies Framework / Role-of-each-element / Outline-bullet-requirement / Draft-requirement / Style-rules / Common-failure-modes for one section.
+  - `00_abstract.md` (BPMRC): Background-Problem-Method-Result-Conclusion, 5 bullets fixed.
+  - `01_introduction.md` (CARS): Swales Territory-Niche-Occupy 3-move model, 4–7 bullets.
+  - `02_background.md` (DNPL): Domain-Notation-Prior-Limitation, 4–6 bullets.
+  - `03_methods.md` (OFCA+I): Overview-Formalization-Core-Analysis with optional Implementation, 4–10 bullets.
+  - `04_results.md` (RSRT): Research-Questions-Setup-Per-RQ-Results-Takeaways, 7–15 bullets, RQ-R 1-to-1 correspondence.
+  - `05_discussion.md` (ILFS): Interpretation-Limitations-Future-Significance, 4–8 bullets.
+  - `06_conclusion.md` (RSF): Restate-Summary-Forward-look, exactly 3 bullets, ≤250 words.
+  - `07_related_work.md` (ThematicGroup): thematic clustering with per-group contrast sentence, 2–4 bullets.
+  - `08_motivation.md` (SFR, opt-in): Scenario-Failure-Requirements, 3–6 bullets; explicit opt-in gate for systems/architecture/security venues.
+- **Two-level fallback match rule (slug-ending scan).** Orchestrator resolves a manuscript stem to its standards file by exact `NN_slug.md` match, falling back to `*_slug.md` scan over `section-standards/`. Supports flexible positioning: Background at §2 or §3, Related Work §2 or late, Motivation opt-in §2.
+- **`{SECTION_STANDARD}` placeholder in `section-drafter-prompt.md`.** Orchestrator inlines the matched standards file verbatim into the per-section subagent prompt. Standards impose structural tags, paragraph counts, ordering, and length budgets; drafter self-review greps for conformance in Step C.
+- **Cross-section coordination rules.** When `§Motivation` is opted in, `§Introduction` compresses CARS M2 `[N]` bullets to exactly 1 to avoid duplication. When `§Conclusion` merges into `§Discussion`, RSF `[F]` is dropped to avoid duplicating ILFS `[F]`. Both are enforced in `outlining` Step 7 self-review.
+- **`init-writing-dir.sh` generates a LaTeX skeleton**: `main.tex` (generic `\documentclass{article}` + standard preamble with `amsmath` / `graphicx` / `booktabs` / `algorithm` / `hyperref` / `natbib`), empty `refs.bib`, and `.gitignore` entries for LaTeX build artifacts (`*.aux` / `*.log` / `*.bbl` / `*.blg` / `*.pdf` / etc).
+- **`latexmk` compile gate in submission.** New checklist item 6 runs `latexmk -pdf -interaction=nonstopmode main.tex` and greps `main.log` for undefined references / undefined control sequences. Graceful skip with warning when `latexmk` / `pdflatex` is not installed.
+
+### Changed
+
+- **`hooks/enforce-claims.py` rewritten for LaTeX.** Matcher switched from `*.md` to `*.tex`; comment regex from `<!-- claim: id -->` to `^\s*%\s*claim:\s*(\S+)`; new `STRUCTURAL_LATEX_CMDS` whitelist (`\section`, `\subsection`, `\begin`, `\end`, `\label`, `\caption`, etc.) so structural LaTeX lines don't count as load-bearing prose.
+- **`outlining` Step 3 bullet-count table extended to 12 rows** (CS and medical variants split for Methods / Results / Discussion / Conclusion; Background / Motivation / Related Work added as CS-specific).
+- **`outlining` Step 7 self-review has 9 new grep rules**, one per section standard: BPMRC 5-bullet check, CARS T→N→O strict ordering, DNPL D→N→P→L, OFCA O+C required, RSRT `[RQ]` count == `[R]` count, ILFS I→L→F→S, RSF exactly 3 bullets, ThematicGroup differentiator-clause check, SFR S→F→R with exactly one Scenario.
+- **`submission` skill's refs.bib generation** replaced with a `pyzotero` collection export step that covers every `\cite{}` citekey in the manuscript; multiple-match or missing-citekey failures surface by file:line.
+- **Smoke test suite extended** to 9 claim-enforcement cases (LaTeX paths, `% claim` tag, `% draft-only`, untagged-prose block, `.md` bypass, `_abstract` unprotected, `_references` slug-ending unprotected, LaTeX structural line allow, non-manuscript allow) plus section-standards presence check.
+
 ## [0.2.0] — 2026-04-15
 
 ### Breaking Changes

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PreToolUse hook enforcing claim-first writing protocol.
+"""PreToolUse hook enforcing claim-first writing protocol (LaTeX).
 
 Reads Claude Code PreToolUse JSON on stdin, writes decision JSON on stdout.
 
@@ -9,11 +9,14 @@ Contract:
 - Output (block): {"decision": "block", "reason": "..."}, exit 2
 
 Rules:
-1. Only intercept Edit/Write/MultiEdit/NotebookEdit on **/manuscript/*.md.
-2. The post-edit content must satisfy: every paragraph either has a
-   <!-- claim: id --> tag whose claim STATUS is evidence_ready or verified,
-   OR a <!-- draft-only --> tag.
+1. Only intercept Edit/Write/MultiEdit/NotebookEdit on **/manuscript/*.tex.
+2. The post-edit content must satisfy: every load-bearing line either has a
+   `% claim: id` tag whose claim STATUS is evidence_ready or verified,
+   OR a `% draft-only` tag.
 3. Claims live in a sibling claims/section_<stem>.md file.
+4. Sections whose stem is or ends in `_<slug>` for slug in UNPROTECTED_SLUGS
+   (abstract, references, acknowledgments) are exempt from paragraph-tag
+   enforcement (boilerplate / auto-generated).
 """
 
 from __future__ import annotations
@@ -34,11 +37,31 @@ except ImportError:
 
 
 WRITE_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
-CLAIM_TAG = re.compile(r"<!--\s*claim:\s*(\S+?)\s*-->")
-DRAFT_ONLY_TAG = re.compile(r"<!--\s*draft-only\s*-->")
+
+# LaTeX line-comment tags: `% claim: id` or `% draft-only`. Must be at start of
+# line (possibly after leading whitespace). Captures claim id as first \S+ token.
+CLAIM_TAG = re.compile(r"(?m)^\s*%\s*claim:\s*(\S+)")
+DRAFT_ONLY_TAG = re.compile(r"(?m)^\s*%\s*draft-only\b")
+
 ALLOWED_STATUSES = {"evidence_ready", "verified"}
-# Sections where untagged prose is OK (light-content boilerplate).
-UNPROTECTED_STEMS = {"00_abstract", "06_references", "07_acknowledgments"}
+
+# Slugs whose sections are exempt from paragraph-tag enforcement. Matched by
+# slug-ending against the file stem: `00_abstract` ends in `_abstract` (matches);
+# `09_references` ends in `_references` (matches); `03_methods` does not end in
+# any unprotected slug (does not match; must carry tags).
+UNPROTECTED_SLUGS = frozenset({"abstract", "references", "acknowledgments"})
+
+# LaTeX structural commands that do not count as "load-bearing prose" on their
+# own. Lines starting with one of these commands are treated as scaffolding.
+STRUCTURAL_LATEX_CMDS = frozenset({
+    "section", "subsection", "subsubsection", "paragraph", "subparagraph",
+    "chapter", "part", "begin", "end", "label", "caption",
+    "bibliography", "bibliographystyle", "printbibliography",
+    "usepackage", "documentclass", "input", "include",
+    "title", "author", "date", "maketitle", "tableofcontents",
+    "listoffigures", "listoftables", "newpage", "clearpage",
+})
+STRUCTURAL_LATEX_LINE = re.compile(r"^\s*\\(\w+)\b")
 
 
 def _block(reason: str) -> None:
@@ -70,7 +93,6 @@ def resolve_post_content(tool_name: str, tool_input: dict, file_path: Path) -> s
     if tool_name == "Write":
         return tool_input.get("content", "")
 
-    # Edit / MultiEdit operate on existing files.
     try:
         original = file_path.read_text(encoding="utf-8") if file_path.exists() else ""
     except OSError:
@@ -96,8 +118,6 @@ def resolve_post_content(tool_name: str, tool_input: dict, file_path: Path) -> s
         return content
 
     if tool_name == "NotebookEdit":
-        # Notebooks bundle cells; we don't enforce claim tags on notebooks.
-        # Pass through — notebooks are rarely used for manuscript prose.
         return None
 
     return None
@@ -127,16 +147,25 @@ def load_claims(claims_path: Path) -> dict[str, str] | None:
 
 
 def content_has_real_prose(content: str) -> bool:
-    """True if content contains any non-whitespace, non-comment line."""
+    """True if content contains any non-whitespace, non-comment, non-structural line."""
     for raw in content.splitlines():
         line = raw.strip()
         if not line:
             continue
-        if line.startswith("<!--") and line.endswith("-->"):
+        if line.startswith("%"):
             continue
-        if line.startswith("#"):  # markdown headers are allowed anywhere
+        m = STRUCTURAL_LATEX_LINE.match(line)
+        if m and m.group(1) in STRUCTURAL_LATEX_CMDS:
             continue
         return True
+    return False
+
+
+def stem_is_unprotected(stem: str) -> bool:
+    """True if the file stem represents a boilerplate section exempt from tagging."""
+    for slug in UNPROTECTED_SLUGS:
+        if stem == slug or stem.endswith(f"_{slug}"):
+            return True
     return False
 
 
@@ -158,43 +187,37 @@ def main() -> None:
 
     file_path = Path(raw_path).resolve()
 
-    # Match any file under a manuscript/ directory at any depth ending in .md.
-    if "manuscript" not in file_path.parts or file_path.suffix.lower() != ".md":
+    # Match any file under a manuscript/ directory at any depth ending in .tex.
+    if "manuscript" not in file_path.parts or file_path.suffix.lower() != ".tex":
         _allow()
 
     content = resolve_post_content(tool_name, tool_input, file_path)
     if content is None:
         _allow()
 
-    # Locate sibling claims file: <.writing>/claims/section_<stem>.md
     stem = file_path.stem
     writing_root = find_writing_root(file_path)
     if writing_root is None:
-        # File isn't inside a superpower-writing project; allow.
         _allow()
     claims_path = writing_root / "claims" / f"section_{stem}.md"
 
     claim_ids = CLAIM_TAG.findall(content)
     has_draft_only = bool(DRAFT_ONLY_TAG.search(content))
 
-    # If only draft-only or only comments/headers, allow.
     if not claim_ids and has_draft_only:
         _allow()
 
-    # Untagged prose in a protected section -> block.
     if not claim_ids and content_has_real_prose(content):
-        if stem in UNPROTECTED_STEMS:
+        if stem_is_unprotected(stem):
             _allow()
         _block(
             f"every load-bearing paragraph in {file_path.name} must be tagged "
-            f"<!-- claim: id --> or <!-- draft-only -->"
+            f"`% claim: id` or `% draft-only` (LaTeX line comments at column 0)"
         )
 
-    # No prose at all -> allow.
     if not claim_ids:
         _allow()
 
-    # Claim tags exist -> claims file must too.
     claims = load_claims(claims_path)
     if claims is None:
         _block(f"claim file {claims_path} is missing but {file_path.name} references claims")

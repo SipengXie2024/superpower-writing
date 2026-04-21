@@ -10,15 +10,15 @@ Do NOT write prose in the plan itself — the plan enumerates tasks; drafting wr
 ### Task M.1: Draft Methods
 
 **Files:**
-- Read: `.writing/outline.md` §Methods, `.writing/claims/section_02_methods.md`, `.writing/metadata.yaml`
-- Write: `.writing/manuscript/02_methods.md`
+- Read: `.writing/outline.md` §Methods, `.writing/claims/section_03_methods.md`, `.writing/metadata.yaml`
+- Write: `.writing/manuscript/03_methods.tex`
 
 **Preconditions:**
-- Every claim in `claims/section_02_methods.md` is STATUS=evidence_ready (drafting flips stub → evidence_ready; PreToolUse hook blocks writes otherwise).
+- Every claim in `claims/section_03_methods.md` is STATUS=evidence_ready (drafting flips stub → evidence_ready; PreToolUse hook blocks writes otherwise).
 
 - [ ] **Step 1: Resolve evidence for each stub claim**
 
-  For each claim in `claims/section_02_methods.md` with `STATUS: stub`:
+  For each claim in `claims/section_03_methods.md` with `STATUS: stub`:
   - For `type: citation` EVIDENCE → call `Skill(skill="citation-management")` then `Skill(skill="research-lookup")` (Zotero-first if `metadata.yaml zotero.enabled: true` — call `Skill(skill="pyzotero")` first).
   - For `type: dataset` → confirm the dataset identifier resolves (e.g., open the referenced URL/DOI).
   - For `type: figure` or `type: table` → confirm the artifact is scheduled in a figure/table task in this plan.
@@ -29,23 +29,23 @@ Do NOT write prose in the plan itself — the plan enumerates tasks; drafting wr
   Invoke `Skill(skill="scientific-writing")` with:
   - section: Methods
   - outline excerpt: <copy from outline.md>
-  - claims: <load claims/section_02_methods.md>
+  - claims: <load claims/section_03_methods.md>
   - metadata: `.writing/metadata.yaml`
 
-  Each load-bearing paragraph MUST be prefixed with `<!-- claim: <id> -->` matching a claim id. Exploratory text uses `<!-- draft-only -->`. The PreToolUse hook will block the Write tool if a paragraph references a stub-status claim.
+  Each load-bearing paragraph MUST be preceded by a `% claim: <id>` LaTeX line comment matching a claim id. Exploratory text uses `% draft-only`. The PreToolUse hook will block the Write tool if a paragraph references a stub-status claim.
 
 - [ ] **Step 3: Commit**
 
   ```bash
   cd <project root>
-  git add .writing/manuscript/02_methods.md .writing/claims/section_02_methods.md
+  git add .writing/manuscript/03_methods.tex .writing/claims/section_03_methods.md
   git commit -m "draft: methods section"
   ```
 
 ### Task M.2: Verify Methods claims
 
 **Files:**
-- Read: `.writing/manuscript/02_methods.md`, `.writing/claims/section_02_methods.md`
+- Read: `.writing/manuscript/03_methods.tex`, `.writing/claims/section_03_methods.md`
 - Write: `.writing/verify-report.md` (append section), update `STATUS` in claims file.
 
 - [ ] **Step 1: Invoke `Skill(skill="claim-verification")` scoped to Methods**
@@ -55,14 +55,14 @@ Do NOT write prose in the plan itself — the plan enumerates tasks; drafting wr
 - [ ] **Step 2: Commit**
 
   ```bash
-  git add .writing/claims/section_02_methods.md .writing/verify-report.md
+  git add .writing/claims/section_03_methods.md .writing/verify-report.md
   git commit -m "verify: methods claims"
   ```
 
 ### Task M.3: Internal review of Methods
 
 **Files:**
-- Read: `.writing/manuscript/02_methods.md`, `.writing/verify-report.md`
+- Read: `.writing/manuscript/03_methods.tex`, `.writing/verify-report.md`
 - Write: `.writing/reviews/internal_methods_<date>.md`
 
 - [ ] **Step 1: Invoke `Skill(skill="peer-review")` as co-author reviewer**
@@ -125,11 +125,11 @@ For each table listed in outline.md:
 
 **Files:**
 - Read: source data (dataset id or analysis script output referenced by outline.md)
-- Write: Markdown table embedded in the owning section file (e.g., `.writing/manuscript/03_results.md`) or a standalone `.writing/tables/tab<n>_<slug>.md` included via transclusion.
+- Write: LaTeX `table` + `tabular` environment embedded in the owning section file (e.g., `.writing/manuscript/04_results.tex`) or a standalone `.writing/tables/tab<n>_<slug>.tex` included via `\input{}`.
 
 - [ ] **Step 1: Build the table**
 
-  Prefer embedding Markdown pipe tables directly in the owning section. Only break out to `tables/tab<n>_<slug>.md` when the table exceeds ~40 rows or is reused across sections.
+  Prefer embedding `\begin{tabular}` directly in the owning section with `booktabs` rules (`\toprule`, `\midrule`, `\bottomrule`). Only break out to `tables/tab<n>_<slug>.tex` when the table exceeds ~40 rows or is reused across sections.
 
 - [ ] **Step 2: Ensure every numeric cell appears in a claim or a footnote**
 
