@@ -13,7 +13,7 @@
 
 ## Status
 
-- **Version**: `v0.2.0`
+- **Version**: `v0.4.0`
 - **Scope**: single-author IMRAD research manuscripts
 - **Dependencies**: scientific-agent-skills (hard), Zotero API (optional)
 - **Repo**: https://github.com/SipengXie2024/superpower-writing

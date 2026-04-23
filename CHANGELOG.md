@@ -5,6 +5,29 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] — 2026-04-23
+
+### Breaking
+
+- Replaced the `pyzotero` skill dependency (upstream `scientific-agent-skills`) with the standalone `zotero-mcp` MCP server, registered via a plugin-level `.mcp.json`. Users must install the binary: `uv tool install zotero-mcp` (or `pipx install zotero-mcp`).
+- Renamed Zotero environment variables to match zotero-mcp:
+  - `ZOTERO_USER_ID` → `ZOTERO_LIBRARY_ID` (with `ZOTERO_LIBRARY_TYPE=user`)
+  - `ZOTERO_GROUP_ID` → `ZOTERO_LIBRARY_ID` (with `ZOTERO_LIBRARY_TYPE=group`)
+- Removed `ZOTERO_DEFAULT_COLLECTION` env var. Per-paper collection scoping continues via `.writing/metadata.yaml` `zotero.collection_key`.
+
+### Changed
+
+- `scripts/check-zotero.sh` now validates the new env-var names, probes the Web API via curl, and confirms the `zotero-mcp` binary is on PATH. The upstream pyzotero-skill lookup is gone.
+- All `Skill(skill="pyzotero")` call sites (in `agents/section-drafter.md`, `agents/citation-auditor.md`, `skills/drafting/`, `skills/outlining/`, `skills/claim-verification/`, `skills/revision/`, `skills/submission/`, `skills/writing-plans/`, `skills/main/`) now name MCP tools directly (`zotero_search_items`, `zotero_get_item_metadata`, `zotero_add_by_doi`, `zotero_get_collection_items`).
+- `skills/submission/` BibTeX export is now a per-item loop: `zotero_get_collection_items` → `zotero_get_item_metadata(format="bibtex")`. Better BibTeX citekeys continue to flow through when installed on the user's Zotero.
+
+### Migration
+
+1. Install the MCP server: `uv tool install zotero-mcp`.
+2. Update your `.env` to use `ZOTERO_LIBRARY_ID` + `ZOTERO_LIBRARY_TYPE` in place of `ZOTERO_USER_ID`/`ZOTERO_GROUP_ID`.
+3. Export those vars in the shell that launches Claude Code (the plugin's `.mcp.json` passes them through to `zotero-mcp`).
+4. Uninstall or stop depending on `scientific-agent-skills/pyzotero` if you no longer need it.
+
 ## [0.3.0] — 2026-04-21
 
 ### Breaking Changes
