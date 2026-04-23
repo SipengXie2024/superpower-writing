@@ -17,6 +17,10 @@ Rules:
 4. Sections whose stem is or ends in `_<slug>` for slug in UNPROTECTED_SLUGS
    (abstract, references, acknowledgments) are exempt from paragraph-tag
    enforcement (boilerplate / auto-generated).
+5. Sections whose stem is or ends in `_<slug>` for slug in CITATION_FREE_SLUGS
+   (abstract) must not contain LaTeX citation commands (`\cite`, `\citep`,
+   `\citet`, `\nocite`, `\parencite`, etc.) or `% claim:` tags. Abstracts are
+   self-contained summaries; the body carries the references.
 """
 
 from __future__ import annotations
@@ -50,6 +54,19 @@ ALLOWED_STATUSES = {"evidence_ready", "verified"}
 # `09_references` ends in `_references` (matches); `03_methods` does not end in
 # any unprotected slug (does not match; must carry tags).
 UNPROTECTED_SLUGS = frozenset({"abstract", "references", "acknowledgments"})
+
+# Slugs whose sections MUST NOT contain citations or claim tags. Matched by
+# slug-ending like UNPROTECTED_SLUGS. Convention: the abstract is a
+# self-contained summary of the paper's own findings; citations belong in the
+# body sections. References legitimately contain bib commands and
+# acknowledgments legitimately may cite grants, so they are NOT in this set.
+CITATION_FREE_SLUGS = frozenset({"abstract"})
+
+# Any LaTeX command whose name contains "cite" — matches \cite, \cites,
+# \citep, \citet, \citeauthor, \citeyear, \citealt, \citealp, \nocite,
+# \parencite, \textcite, \autocite, \footcite, etc. Word-boundary suffix
+# avoids matching command names that merely start the same prefix.
+CITE_COMMAND = re.compile(r"\\[a-zA-Z]*cite[a-zA-Z]*\b")
 
 # LaTeX structural commands that do not count as "load-bearing prose" on their
 # own. Lines starting with one of these commands are treated as scaffolding.
@@ -169,6 +186,14 @@ def stem_is_unprotected(stem: str) -> bool:
     return False
 
 
+def stem_is_citation_free(stem: str) -> bool:
+    """True if the file stem names a section that must not carry citations."""
+    for slug in CITATION_FREE_SLUGS:
+        if stem == slug or stem.endswith(f"_{slug}"):
+            return True
+    return False
+
+
 def main() -> None:
     try:
         payload = json.load(sys.stdin)
@@ -200,6 +225,25 @@ def main() -> None:
     if writing_root is None:
         _allow()
     claims_path = writing_root / "claims" / f"section_{stem}.md"
+
+    # Citation-free sections (abstract): block any LaTeX citation command or
+    # claim tag. The abstract restates the paper's own findings; citations
+    # live in the body. Runs before the claim-tag checks below so the user
+    # gets the more specific error message.
+    if stem_is_citation_free(stem):
+        cite_match = CITE_COMMAND.search(content)
+        if cite_match:
+            _block(
+                f"{file_path.name} must not contain citations; found "
+                f"`{cite_match.group(0)}` (abstract is citation-free; move "
+                f"references to a body section)"
+            )
+        if CLAIM_TAG.search(content):
+            _block(
+                f"{file_path.name} must not contain `% claim: id` tags; "
+                f"abstract sections have no claim file by contract "
+                f"(see outlining/SKILL.md §Filename-stem contract)"
+            )
 
     claim_ids = CLAIM_TAG.findall(content)
     has_draft_only = bool(DRAFT_ONLY_TAG.search(content))

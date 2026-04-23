@@ -98,6 +98,40 @@ out=$(payload_write "$WORK/.writing/manuscript/03_methods.tex" "\\\\section{Meth
       | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
 [[ -z "$out" ]] && pass "structural LaTeX line allows" || fail "structural line blocked: $out"
 
+echo "   4j. abstract + \\\\cite{} -> block"
+out=$(payload_write "$WORK/.writing/manuscript/00_abstract.tex" \
+      "Background sentence \\\\cite{smith2019}." \
+      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh" || true)
+echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
+  && pass "abstract \\cite{} blocks" || fail "abstract \\cite{} did not block: $out"
+
+echo "   4k. abstract + \\\\citep{} -> block"
+out=$(payload_write "$WORK/.writing/manuscript/00_abstract.tex" \
+      "Problem text \\\\citep{chen2020}." \
+      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh" || true)
+echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
+  && pass "abstract \\citep{} blocks" || fail "abstract \\citep{} did not block: $out"
+
+echo "   4l. abstract + \\\\parencite{} -> block"
+out=$(payload_write "$WORK/.writing/manuscript/00_abstract.tex" \
+      "Prior work \\\\parencite{zhang2021}." \
+      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh" || true)
+echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
+  && pass "abstract \\parencite{} blocks" || fail "abstract \\parencite{} did not block: $out"
+
+echo "   4m. abstract + % claim: -> block"
+out=$(payload_write "$WORK/.writing/manuscript/00_abstract.tex" \
+      "% claim: abs-c1\\nprose" \
+      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh" || true)
+echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
+  && pass "abstract claim-tag blocks" || fail "abstract claim-tag did not block: $out"
+
+echo "   4n. abstract with BPMRC tags but no citation -> allow"
+out=$(payload_write "$WORK/.writing/manuscript/00_abstract.tex" \
+      "% bpmrc: B\\nBackground prose. % bpmrc: P\\nProblem prose." \
+      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
+[[ -z "$out" ]] && pass "abstract BPMRC-only allows" || fail "abstract BPMRC-only blocked: $out"
+
 echo "== 5. plugin manifest sanity =="
 python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/plugin.json'))" && pass "plugin.json valid"
 python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/marketplace.json'))" && pass "marketplace.json valid"

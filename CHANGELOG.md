@@ -5,6 +5,51 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.3.2] — 2026-04-23
+
+### Added
+
+- **Abstract is citation-free (enforced).** `hooks/enforce-claims.py` gains a
+  new `CITATION_FREE_SLUGS = {"abstract"}` set matched by slug-ending against
+  the manuscript file stem. Writes to any `*_abstract.tex` (e.g.
+  `00_abstract.tex`) are blocked when the content contains any LaTeX citation
+  command — matched by regex `\\[a-zA-Z]*cite[a-zA-Z]*\b`, which covers
+  `\cite`, `\citep`, `\citet`, `\nocite`, `\parencite`, `\textcite`,
+  `\autocite`, `\footcite`, `\citeauthor`, `\citeyear`, `\citealt`,
+  `\citealp`, and any other `\*cite*` variant. A `% claim: id` tag in the
+  abstract is also blocked since the abstract has no claims file. BPMRC
+  structural tags (`% bpmrc: B`, `% bpmrc: P`, etc.) are unaffected —
+  they are not citations or claim tags.
+- `claim-verification` Pass 1 step 6 greps abstract files for citation
+  commands and `% claim:` tags; any hit surfaces as a FAIL.
+- `submission` checklist gains item 5b — abstract citation-free grep —
+  duplicated from the hook so the gate catches files edited outside Claude.
+- `tests/smoke.sh` gains five new LaTeX abstract cases (4j–4n): abstract
+  `\cite{}` blocks, abstract `\citep{}` blocks, abstract `\parencite{}`
+  blocks, abstract `% claim:` blocks, abstract with BPMRC tags but no
+  citations allows.
+
+### Changed
+
+- `skills/main/SKILL.md` Claim-First Protocol gains a "Citation Placement
+  Rule" section documenting the abstract-citation-free enforcement and the
+  body-section citation requirement (`\cite{citekey}` resolvable against
+  `.writing/refs.bib`).
+- `skills/outlining/SKILL.md` filename-stem contract gains an "Abstract is
+  citation-free (load-bearing)" paragraph clarifying that BPMRC structural
+  tags survive the rule and that no `claims/section_00_abstract.md` file
+  should be created.
+- `skills/drafting/references/section-drafter-prompt.md` adds Step
+  A-special for abstract drafting: skip Step A, do not emit any `\*cite*`
+  command or `% claim:` tag, keep BPMRC structural tags.
+
+### Migration notes
+
+Existing manuscripts with `\cite{}` in the abstract will be blocked on the
+next edit. Move those citations into the body sections that support the
+claim (usually Introduction or Discussion) and rewrite the abstract as
+plain prose.
+
 ## [0.3.0] — 2026-04-21
 
 ### Breaking Changes
@@ -176,6 +221,9 @@ Initial scaffold.
 - Auto-submission to journal portals.
 - LaTeX compile.
 
+[0.3.2]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.3.2
+[0.3.1]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.3.1
+[0.3.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.3.0
 [0.2.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.2.0
 [0.1.2]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.1.2
 [0.1.1]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.1.1

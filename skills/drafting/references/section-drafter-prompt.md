@@ -95,6 +95,23 @@ For each claim in .writing/claims/section_{NN}_{slug}.md with STATUS=stub:
 Only AFTER every claim for this section is STATUS ∈ {evidence_ready, verified}
 may you proceed to Step B.
 
+## Step A-special — Abstract exception (only when {slug} ends in `abstract`)
+Abstract sections are citation-free and have no claims file:
+  - Skip Step A entirely. Do NOT open
+    `.writing/claims/section_{NN}_{slug}.md` — it does not exist by contract.
+  - Do NOT emit any `\cite{...}`, `\citep{...}`, `\citet{...}`, `\nocite{...}`,
+    `\parencite{...}`, `\textcite{...}`, `\autocite{...}`, `\footcite{...}`,
+    or any `\*cite*` LaTeX command in the abstract. The PreToolUse hook's
+    `CITATION_FREE_SLUGS` rule will block the write otherwise.
+  - Do NOT emit `% claim: id` tags in the abstract. The hook rejects them.
+  - You MUST still emit BPMRC structural tags (`% bpmrc: B`, `% bpmrc: P`,
+    `% bpmrc: M`, `% bpmrc: R`, `% bpmrc: C`) per the section standard.
+    Those are not citations or claim tags; the hook allows them.
+  - Write the abstract as plain prose restating the body sections' findings
+    in your own words. If a specific number or phrase anchors the claim,
+    carry it over without any citation — the body is where the evidence
+    already lives.
+
 ## Step B — Prose (LaTeX)
 Write .writing/manuscript/{NN}_{slug}.tex.
 

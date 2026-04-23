@@ -13,6 +13,8 @@ This is the **spec phase** for a research paper. Output of outlining is the inpu
 
 **Filename-stem contract (load-bearing).** The PreToolUse claim-first hook at `hooks/enforce-claims.py` matches slug-ending: any manuscript file whose stem ends in `_<slug>` for slug ∈ `UNPROTECTED_SLUGS` (`abstract`, `references`, `acknowledgments`) is exempt from claim-tag enforcement. Concretely `00_abstract.tex`, `09_references.tex`, and `10_acknowledgments.tex` all pass through without paragraph tags. Every other section filename MUST contain real prose tagged with `% claim: id` or the write is blocked. If you introduce a new unnumbered section (e.g. a data-availability block) whose content should be exempt, add its slug to `UNPROTECTED_SLUGS` in `hooks/enforce-claims.py`. The hook only intercepts `.tex` files; `.md` files under `manuscript/` pass through unenforced.
 
+**Abstract is citation-free (load-bearing).** Any stem ending in `_abstract` additionally belongs to `CITATION_FREE_SLUGS` in the hook. Writes to such files that contain any LaTeX citation command (`\cite{}`, `\citep{}`, `\citet{}`, `\nocite{}`, `\parencite{}`, or any `\*cite*` variant) or a `% claim: id` tag are blocked. The abstract summarizes the paper's own claims in prose; it cites nothing. BPMRC structural tags (`% bpmrc: B`, `% bpmrc: P`, etc.) are still required — they are not citations. Do NOT create a `claims/section_00_abstract.md` file; drafting would try to bind abstract paragraphs to it and the hook would reject those writes.
+
 All three must be complete before handing off to `superpower-writing:writing-plans`. Incomplete metadata blocks the submission gate later — fix it now while context is fresh.
 
 ## When to Use
