@@ -144,17 +144,27 @@ to enable it and populate the collection.
    final `refs.bib` must cover.
 
 2. **Read Zotero config.** Load `zotero.collection_key` from
-   `metadata.yaml`. If empty, use the `$ZOTERO_DEFAULT_COLLECTION` env-var
-   fallback.
+   `metadata.yaml`. If empty, abort — submission requires an explicit
+   `collection_key` in metadata so the export scope is reproducible.
 
-3. **Export the collection.** Invoke `Skill(skill="pyzotero")` with a
-   request to export the collection to BibTeX. The underlying pyzotero
-   call is `zot.collection_items(collection_key, format='bibtex')` — the
-   response is a UTF-8 BibTeX string containing every item in the
-   collection. If Better BibTeX is installed server-side, the citekey field
-   on each entry is stable; otherwise pyzotero generates keys from
-   `AuthorYear` templates. Write the full export to `.writing/refs.bib`,
-   overwriting any prior contents.
+3. **Export the collection to BibTeX.**
+   a. Call the `zotero_get_collection_items` MCP tool (from the `zotero`
+      server in `.mcp.json`) with:
+         collection_key = <metadata.yaml zotero.collection_key>
+         limit          = 100
+      Paginate with the `start` parameter until all items are retrieved.
+   b. For each returned item, call
+      `zotero_get_item_metadata(item_key=<data.key>, format="bibtex")`
+      and append the returned BibTeX fragment to `refs.bib`.
+   c. If Better BibTeX is installed on the user's Zotero and a stable
+      citekey is present in the item's extra field, it appears in the
+      exported BibTeX automatically. Otherwise zotero-mcp falls back
+      to algorithmic keys from author+year+title; these keys are NOT
+      stable across exports — warn in `.writing/findings.md`.
+   d. Cross-check: every `\cite{<key>}` in the manuscript must resolve
+      against `refs.bib`. Use `grep -oE '\\\\cite\\{[^}]+\\}' <tex files>`
+      to enumerate cite keys, then grep each against `refs.bib`.
+      Multiple-match or missing-citekey failures surface by file:line.
 
 4. **Verify coverage.** For every citekey in the master list (step 1),
    confirm it appears as an entry key in `.writing/refs.bib`:
@@ -328,7 +338,7 @@ above. In short:
 - Do not fall back to network here; the fallback path is
   `claim-verification`'s responsibility during authoring, not the submission
   gate's.
-- Delegate actual API calls to `Skill(skill="pyzotero")`.
+- Delegate actual API calls to the `zotero-mcp` MCP server registered in `.mcp.json`.
 
 ## Edge Cases
 
