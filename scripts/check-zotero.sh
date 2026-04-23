@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Verify Zotero API credentials are available. Called by skills that touch
-# Zotero only when `.writing/metadata.yaml` has `zotero.enabled: true`.
+# Verify Zotero Web API credentials and the zotero-mcp binary are
+# available. Called by skills only when `.writing/metadata.yaml` has
+# `zotero.enabled: true`.
 #
 # Never prints secret values. Exit 1 on missing/invalid config.
 
 set -euo pipefail
 
-# Load .env from current project root if present (without echoing).
 if [[ -f .env ]]; then
   set -a
   # shellcheck disable=SC1091
@@ -16,26 +16,25 @@ fi
 
 errors=()
 
-if [[ -z "${ZOTERO_API_KEY:-}" ]]; then
-  errors+=("ZOTERO_API_KEY is not set")
-fi
+[[ -z "${ZOTERO_API_KEY:-}" ]]     && errors+=("ZOTERO_API_KEY is not set")
+[[ -z "${ZOTERO_LIBRARY_ID:-}" ]]  && errors+=("ZOTERO_LIBRARY_ID is not set")
 
-if [[ -z "${ZOTERO_USER_ID:-}" && -z "${ZOTERO_GROUP_ID:-}" ]]; then
-  errors+=("neither ZOTERO_USER_ID nor ZOTERO_GROUP_ID is set (need one)")
-fi
+lib_type="${ZOTERO_LIBRARY_TYPE:-user}"
+case "$lib_type" in
+  user|group) ;;
+  *) errors+=("ZOTERO_LIBRARY_TYPE must be 'user' or 'group' (got: $lib_type)") ;;
+esac
 
 if (( ${#errors[@]} > 0 )); then
-  cat >&2 <<EOF
-[superpower-writing] Zotero credentials missing:
-EOF
+  echo "[superpower-writing] Zotero credentials missing/invalid:" >&2
   for e in "${errors[@]}"; do echo "  - $e" >&2; done
-  cat >&2 <<EOF
+  cat >&2 <<'EOF'
 
 Setup:
   1. cp .env.example .env
-  2. Fill in ZOTERO_API_KEY and ZOTERO_USER_ID (or ZOTERO_GROUP_ID).
-     Key from: https://www.zotero.org/settings/keys
-  3. Ensure .env is in .gitignore (default).
+  2. Fill ZOTERO_API_KEY, ZOTERO_LIBRARY_ID, ZOTERO_LIBRARY_TYPE (user|group)
+     API key: https://www.zotero.org/settings/keys
+  3. export them in the shell that launches Claude Code (or source .env there).
 
 To disable Zotero integration entirely, set zotero.enabled: false in
 .writing/metadata.yaml.
@@ -43,51 +42,30 @@ EOF
   exit 1
 fi
 
-# First confirm the upstream `pyzotero` skill is installed — all Zotero-aware
-# SKILL.md files call `Skill(skill="pyzotero")` unconditionally when
-# zotero.enabled is true.
-pyzotero_found=""
-for root in \
-  "$HOME/.claude/skills" \
-  "$HOME/.claude/plugins/cache" \
-  "$HOME/.cursor/skills" \
-  "$HOME/.config/claude-code/skills" \
-  "$HOME/.codex/skills" \
-  "$HOME/Library/Application Support/Claude/skills" \
-  "/usr/local/share/claude/skills"; do
-  [[ -d "$root" ]] || continue
-  if find "$root" -maxdepth 5 -type f -path "*/pyzotero/SKILL.md" -print -quit 2>/dev/null | grep -q .; then
-    pyzotero_found="$root"
-    break
-  fi
-done
+# Verify the zotero-mcp binary is on PATH. Plugin-level .mcp.json invokes it
+# by name, so if it's missing the MCP server will never start.
+if ! command -v zotero-mcp >/dev/null 2>&1; then
+  cat >&2 <<'EOF'
+[superpower-writing] zotero-mcp binary not found on PATH.
 
-if [[ -z "$pyzotero_found" ]]; then
-  cat >&2 <<EOF
-[superpower-writing] Zotero integration requires the upstream 'pyzotero' skill.
+Install it with one of:
+    uv tool install zotero-mcp
+    pipx install zotero-mcp
+    pip install zotero-mcp
 
-It is part of scientific-agent-skills (K-Dense-AI). Install with:
-
-    npx skills add K-Dense-AI/scientific-agent-skills
-
-Or disable Zotero: set zotero.enabled: false in .writing/metadata.yaml.
+Requires Python 3.10+.
 EOF
   exit 1
 fi
 
-# Sanity check by hitting a low-cost Zotero API endpoint. Don't print the response body.
-target_id="${ZOTERO_GROUP_ID:-$ZOTERO_USER_ID}"
-target_type="users"
-[[ -n "${ZOTERO_GROUP_ID:-}" ]] && target_type="groups"
-
-# Key never appears in stdout/stderr: we pass it via header and redirect body to /dev/null.
+# Probe the Web API. Key never appears in stdout/stderr.
 http_code=$(curl -sS -o /dev/null -w '%{http_code}' \
   -H "Zotero-API-Key: $ZOTERO_API_KEY" \
-  "https://api.zotero.org/${target_type}/${target_id}/items?limit=1" || echo "000")
+  "https://api.zotero.org/${lib_type}s/${ZOTERO_LIBRARY_ID}/items?limit=1" || echo "000")
 
 case "$http_code" in
   200)
-    echo "[superpower-writing] Zotero OK (${target_type}/${target_id}; pyzotero at ${pyzotero_found})"
+    echo "[superpower-writing] Zotero OK (${lib_type}s/${ZOTERO_LIBRARY_ID}; zotero-mcp: $(command -v zotero-mcp))"
     exit 0
     ;;
   403)
@@ -95,7 +73,7 @@ case "$http_code" in
     exit 1
     ;;
   404)
-    echo "[superpower-writing] Zotero library not found (HTTP 404). Check ZOTERO_USER_ID / ZOTERO_GROUP_ID." >&2
+    echo "[superpower-writing] Zotero library not found (HTTP 404). Check ZOTERO_LIBRARY_ID and ZOTERO_LIBRARY_TYPE." >&2
     exit 1
     ;;
   *)
