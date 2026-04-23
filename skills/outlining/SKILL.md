@@ -275,11 +275,15 @@ zotero:
 
 If both conditions hold, seed `EVIDENCE` `citation` entries from the pre-curated collection. The user has already vetted these references, so they are safe starting points.
 
-```
-Skill(skill="pyzotero")
-```
+Call the `zotero_get_collection_items` MCP tool (from the `zotero` server
+in `.mcp.json`) with:
 
-Use it to list items in `collection_key`. For each item with a DOI and an abstract that plausibly supports a claim, add a pre-filled EVIDENCE entry with `source: zotero` and `zotero_item_key: <key>`:
+    collection_key = <metadata.yaml zotero.collection_key>
+    limit          = 100   # paginate with `start` if the collection is larger
+
+For each returned item whose `data.DOI` is non-empty and whose
+`data.abstractNote` plausibly supports a draft claim, add a pre-filled
+EVIDENCE entry with `source: zotero` and `zotero_item_key: <data.key>`:
 
 ```yaml
 - id: intro-c2
@@ -292,7 +296,7 @@ Use it to list items in `collection_key`. For each item with a DOI and an abstra
   STATUS: stub
 ```
 
-Skip this step silently when `zotero.enabled` is unset or false, or when `collection_key` is empty. Drafting will still query Zotero per-claim; outlining only seeds obvious matches to save work later.
+Skip this step silently when `zotero.enabled` is unset or false, or when `collection_key` is empty. Drafting will still query Zotero per-claim via `zotero_search_items`; outlining only seeds obvious matches to save work later.
 
 Never push new items to Zotero during outlining — that's a drafting concern (see `drafting` SKILL.md).
 
