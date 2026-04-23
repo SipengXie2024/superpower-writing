@@ -167,5 +167,6 @@ The Zotero-first / network-fallback / optional auto-push flow is fully specified
 - `superpower-writing:subagent-driven` / `team-driven` / `executing-plans` — the actual execution engines.
 - Upstream `scientific-writing` — voice and structure rules.
 - Upstream `scientific-schematics` — graphical abstract + schematics.
-- Upstream `research-lookup`, `citation-management`, `pyzotero` — evidence resolution.
+- Upstream `research-lookup`, `citation-management` — evidence resolution (network).
+- Plugin-level `.mcp.json` `zotero` server — Zotero Web API tools (`zotero_search_items`, `zotero_get_item_metadata`, `zotero_add_by_doi`, `zotero_get_collection_items`).
 - Hook `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` — PreToolUse enforcement of the claim-first protocol.

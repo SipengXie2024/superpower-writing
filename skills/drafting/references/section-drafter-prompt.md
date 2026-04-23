@@ -51,44 +51,34 @@ prose tag, retry.
 For each claim in .writing/claims/section_{NN}_{slug}.md with STATUS=stub:
 
   A.1 Check .writing/metadata.yaml for `zotero.enabled`.
-
   A.2 If zotero.enabled is true:
-        Skill(skill="pyzotero")
-        Query by DOI (or title fallback) in the configured collection.
-        On HIT:
-          - Record in the claim's EVIDENCE entry:
-              source: zotero
-              zotero_item_key: <key>
-              doi: <doi>
-              citekey: <BibTeX citekey from Zotero item; use 'citationKey'
-                        field if Better BibTeX is installed, else fall back
-                        to the item key prefixed with "zot:">
-              abstract: <from Zotero>
-          - Set STATUS: evidence_ready.
-          - Skip to next claim.
-        On MISS: continue to A.3.
-
+        Call the `zotero_search_items` MCP tool (provided by the `zotero`
+        server in `.mcp.json`) with:
+            query = <DOI>
+            qmode = "everything"
+        Then filter the returned items to those whose `data.collections`
+        includes `collection_key`. On a single filtered hit:
+            - Call `zotero_get_item_metadata(item_key=<key>)` to fetch
+              the stored abstract.
+            - Record in the EVIDENCE entry:
+                source: zotero
+                zotero_item_key: <key>
+            - Advance claim STATUS to `evidence_ready`.
+        Empty-filter or ambiguous-match is treated as a miss; fall through
+        to A.3.
   A.3 Zotero miss, or zotero.enabled is false:
-        Skill(skill="research-lookup")       # semantic search / abstracts
-        Skill(skill="citation-management")   # DOI/Crossref/PubMed normalization
-        On HIT:
-          - Record EVIDENCE with source: network, doi, abstract, authors, year.
-          - Set STATUS: evidence_ready.
+        Invoke Skill(skill="research-lookup") / Skill(skill="citation-management")
+        to resolve. On network hit:
           - If zotero.enabled AND metadata.yaml's zotero.auto_push_new_citations
             is true:
-              Skill(skill="pyzotero")  # push the new item into the configured
-                                        # collection; capture the returned item
-                                        # key AND citekey; update source → both,
-                                        # zotero_item_key, citekey fields.
+              Call `zotero_add_by_doi(doi=<DOI>, collection_key=<key>)` from
+              the `zotero` MCP server. The tool dedups by DOI. Record in the
+              EVIDENCE entry:
+                source: both
+                zotero_item_key: <returned key>
+                citekey: <returned citekey if present, else leave blank>
           - Else (zotero disabled or auto_push off):
-              Generate a provisional citekey from AuthorYear (e.g.,
-              `smith2019novel`). Record it in the claim's citekey field and
-              note `source: network` so submission knows to resolve it later.
-        On MISS (no reliable source):
-          - Mark the EVIDENCE entry with a `[NEEDS-EVIDENCE]` annotation and
-            leave STATUS=stub.
-          - Do NOT write prose referencing this claim yet. Surface this to the
-            orchestrator so the user can supply a source or scope the claim out.
+              source: network only.
 
   A.4 Save the updated claims file. Do NOT edit manuscript/*.tex yet.
 
