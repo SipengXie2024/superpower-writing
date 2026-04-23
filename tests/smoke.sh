@@ -31,7 +31,7 @@ bash "$PLUGIN_ROOT/scripts/check-deps.sh" &>/dev/null \
   || pass "deps missing (expected in CI; message surfaced)"
 
 echo "== 3. check-zotero.sh (no env) =="
-(unset ZOTERO_API_KEY ZOTERO_USER_ID ZOTERO_GROUP_ID
+(unset ZOTERO_API_KEY ZOTERO_LIBRARY_ID ZOTERO_LIBRARY_TYPE
  bash "$PLUGIN_ROOT/scripts/check-zotero.sh" &>/dev/null) \
   && fail "check-zotero should fail without creds" \
   || pass "check-zotero fails without creds as expected"
