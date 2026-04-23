@@ -324,7 +324,7 @@ Never finish the skill without presenting the three drafting modes via AskUserQu
 - Complete content in every step — no placeholders (see "No Placeholders" section).
 - Exact commands with expected output (bash snippets for init and commit steps; claim id lists for evidence-resolution steps).
 - Every task includes a plain `git commit` command — author identity comes from the user's git config, not from skill-injected overrides.
-- Bare skill names for upstream prose-production skills (`scientific-writing`, `scientific-schematics`, `peer-review`, `pyzotero`, `citation-management`, `research-lookup`) — never `plugin:` prefixed. Local execution-engine references use the `superpower-writing:` prefix.
+- Bare skill names for upstream prose-production skills (`scientific-writing`, `scientific-schematics`, `peer-review`, `citation-management`, `research-lookup`) — never `plugin:` prefixed. Zotero access goes through the `zotero-mcp` MCP server (tools: `zotero_search_items` etc.), registered in the plugin's `.mcp.json` — not through a skill. Local execution-engine references use the `superpower-writing:` prefix.
 - Every task reminds: "Log discoveries, decisions, and insights to `.writing/findings.md`".
 - Always include the parallelism groups analysis.
 - Lock file boundaries and responsibilities before task decomposition.

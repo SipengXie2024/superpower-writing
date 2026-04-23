@@ -19,7 +19,7 @@ Do NOT write prose in the plan itself — the plan enumerates tasks; drafting wr
 - [ ] **Step 1: Resolve evidence for each stub claim**
 
   For each claim in `claims/section_03_methods.md` with `STATUS: stub`:
-  - For `type: citation` EVIDENCE → call `Skill(skill="citation-management")` then `Skill(skill="research-lookup")` (Zotero-first if `metadata.yaml zotero.enabled: true` — call `Skill(skill="pyzotero")` first).
+  - For `type: citation` EVIDENCE → Zotero-first when `metadata.yaml zotero.enabled: true`: call the `zotero_search_items` MCP tool with `query=<DOI>` (filter by `data.collections` containing `collection_key`). On a miss, call `Skill(skill="citation-management")` then `Skill(skill="research-lookup")`.
   - For `type: dataset` → confirm the dataset identifier resolves (e.g., open the referenced URL/DOI).
   - For `type: figure` or `type: table` → confirm the artifact is scheduled in a figure/table task in this plan.
   - Flip STATUS to `evidence_ready` once every EVIDENCE entry is resolved.
