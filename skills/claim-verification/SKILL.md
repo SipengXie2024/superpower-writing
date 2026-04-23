@@ -76,9 +76,10 @@ For each claim that passed Pass 1 with `type: citation` EVIDENCE entries:
 #### 2a. Zotero-first lookup (if enabled)
 
 1. Read `metadata.yaml`. If `zotero.enabled: true`:
-   - Run `${CLAUDE_PLUGIN_ROOT}/scripts/check-zotero.sh` once per session to confirm credentials. Cache result in `.writing/findings.md` as `zotero_verified_at: <ts>`.
-   - For each citation DOI, invoke `Skill(skill="pyzotero")` with a query by DOI scoped to `zotero.collection_key` (or the full library if the key is unset).
-   - **Zotero hit:** retrieve the item's stored abstract. Record `source: zotero`, `zotero_item_key: <key>` in the claim EVIDENCE entry. Proceed to 2c (semantic match).
+   - Run `${CLAUDE_PLUGIN_ROOT}/scripts/check-zotero.sh` once per session to confirm credentials and the `zotero-mcp` binary. Cache result in `.writing/findings.md` as `zotero_verified_at: <ts>`.
+   - For each citation DOI, call the `zotero_search_items` MCP tool (from the `zotero` server in `.mcp.json`) with `query=<DOI>`, `qmode="everything"`. If `zotero.collection_key` is set, filter results to items whose `data.collections` array contains that key; otherwise keep all hits.
+   - **Zotero hit** (exactly one filtered match): call `zotero_get_item_metadata(item_key=<key>)` to retrieve the stored abstract. Record `source: zotero`, `zotero_item_key: <key>` in the claim EVIDENCE entry. Proceed to 2c (semantic match).
+   - **Ambiguous** (multiple filtered matches for one DOI): log to `.writing/findings.md` under "Issues" and treat as a miss.
    - **Zotero miss:** proceed to 2b.
 2. If `zotero.enabled: false` or `zotero` section absent: skip directly to 2b.
 
@@ -88,7 +89,7 @@ For each claim that passed Pass 1 with `type: citation` EVIDENCE entries:
 2. On cache miss / mismatch, invoke `Skill(skill="citation-management")` with the DOI. This resolves the DOI against Crossref and returns canonical metadata.
 3. On failure or ambiguity, invoke `Skill(skill="research-lookup")` with the DOI and the CLAIM text. research-lookup queries Crossref/PubMed and returns abstract + metadata.
 4. **Network hit:** record `source: network` in the claim EVIDENCE entry.
-5. **`auto_push_new_citations: true` behavior:** if Zotero is enabled AND auto_push is true AND network (not Zotero) returned the hit, push the resolved item to `zotero.collection_key` via `Skill(skill="pyzotero")` (dedupe by DOI — pyzotero handles this). Update EVIDENCE `source` to `both` and add `zotero_item_key`.
+5. **`auto_push_new_citations: true` behavior:** if Zotero is enabled AND auto_push is true AND network (not Zotero) returned the hit, push the resolved item to `zotero.collection_key` by calling `zotero_add_by_doi(doi=<DOI>, collection_key=<key>)` from the `zotero` MCP server. The tool dedupes by DOI internally. Update EVIDENCE `source` to `both` and record the returned item key as `zotero_item_key`.
 6. **Network miss AND Zotero miss:** FAIL: `DOI <doi> for claim '<id>' unresolvable via Zotero or Crossref/PubMed`.
 
 #### 2c. Semantic match
@@ -213,7 +214,7 @@ This skill invokes these upstream skills by bare name via the Skill tool (no `pl
 
 | Skill | Invocation point | Expected I/O |
 |-------|------------------|--------------|
-| `pyzotero` | Pass 2a, 2b push-back | Query by DOI in collection; return item abstract + key. Push new item with dedupe by DOI. |
+| `zotero-mcp` (MCP) | Pass 2a, §5 push-back | `zotero_search_items` + `zotero_get_item_metadata` for query-by-DOI; `zotero_add_by_doi` for dedup-aware push. Registered in `.mcp.json`. |
 | `citation-management` | Pass 2b primary | Resolve DOI → canonical Crossref record. |
 | `research-lookup` | Pass 2b fallback / semantic match | DOI → abstract; optionally compare abstract ↔ claim text. |
 | `peer-review` | Pass 4 | Input: checklist name + manuscript dir. Output: per-item PASS/FAIL. |
