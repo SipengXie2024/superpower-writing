@@ -15,7 +15,7 @@ Revision is where reviewer feedback becomes manuscript changes without silently 
 
 This skill is a workflow, not an execution engine. Heavy lifting (prose edits, claim re-resolution) is delegated:
 
-- Evidence for new or changed claims → `Skill(skill="research-lookup")` / `Skill(skill="citation-management")` / `Skill(skill="pyzotero")` when `zotero.enabled`.
+- Evidence for new or changed claims → `Skill(skill="research-lookup")` / `Skill(skill="citation-management")`; when `zotero.enabled`, also the `zotero-mcp` MCP tools (`zotero_search_items`, `zotero_get_item_metadata`, `zotero_add_by_doi`) from the `zotero` server in `.mcp.json`.
 - Post-revision verification → `Skill(skill="claim-verification")`.
 - Style polishing of response letter → upstream `Skill(skill="scientific-writing")`.
 
@@ -149,10 +149,10 @@ Classification: Major
 Reviewer concern: <one-sentence paraphrase>
 Action: <what changed, why, with evidence refs>
 Manuscript ref: manuscript/03_results.tex:L42-L57 (post-revision)
-Claim changes: claims/section_03_results.md — added claim `res-c7` (STATUS=evidence_ready via pyzotero item ABCD1234); updated `res-c3` EVIDENCE with new abstract.
+Claim changes: claims/section_03_results.md — added claim `res-c7` (STATUS=evidence_ready via zotero-mcp item ABCD1234); updated `res-c3` EVIDENCE with new abstract.
 ```
 
-If the item is Major and requires new claims, resolve evidence BEFORE writing any prose — same claim-first protocol as the `drafting` skill. Invoke `research-lookup` / `citation-management`, or `pyzotero` when `zotero.enabled`. If Zotero misses and `auto_push_new_citations: true`, push the new DOI back and record `source: both`. Do not proceed to Step 4 until every new claim id has `STATUS ∈ {evidence_ready, verified}`.
+If the item is Major and requires new claims, resolve evidence BEFORE writing any prose — same claim-first protocol as the `drafting` skill. Invoke `research-lookup` / `citation-management`, and when `zotero.enabled` call the `zotero-mcp` tools (`zotero_search_items` for lookup; `zotero_add_by_doi` for push-back). If Zotero misses and `auto_push_new_citations: true`, push the new DOI back and record `source: both`. Do not proceed to Step 4 until every new claim id has `STATUS ∈ {evidence_ready, verified}`.
 
 ### Step 4 — Apply-diff
 
@@ -293,6 +293,7 @@ Voice rules (delegate polishing to `Skill(skill="scientific-writing")` for the f
 - `superpower-writing:claim-verification` — Step 5 gate; consumes manuscript + claims, emits pass/fail.
 - `superpower-writing:submission` — downstream; archives every `.writing/reviews/<id>.md` into `.writing/archive/<date>/`.
 - Upstream `scientific-writing` — response-letter voice / style polishing.
-- Upstream `research-lookup`, `citation-management`, `pyzotero` — new-claim evidence resolution.
+- Upstream `research-lookup`, `citation-management` — new-claim evidence resolution (network).
+- Plugin-level `.mcp.json` `zotero` server — Zotero Web API tools for lookup and push-back.
 - Hook `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` — still enforces claim-first during revision edits.
 - Revision follows an intake-classify-respond pattern for reviewer feedback: read each comment verbatim, classify it (agree / negotiate / reject with reason), and respond in the order the reviewer raised it — never silently drop a comment. For each reported defect, apply a reproduce-isolate-fix-verify discipline: reproduce the reviewer's reading of the problem passage, isolate the exact claim or sentence at fault, fix it, then re-read the surrounding paragraph to confirm the fix reads coherently and does not introduce a new gap.
