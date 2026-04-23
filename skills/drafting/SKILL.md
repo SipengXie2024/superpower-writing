@@ -159,6 +159,8 @@ The Zotero-first / network-fallback / optional auto-push flow is fully specified
 
 **Do not fight the hook.** If `enforce-claims.sh` blocks a write, the hook is telling you the claim-first protocol was violated. Resolve the underlying cause (missing claim entry, stub STATUS, untagged paragraph). Never propose disabling the hook or bypassing it with a sneaky `MultiEdit`.
 
+**Locked-term renames are not prose edits.** If the user or a sub-agent proposes renaming a term that is already locked in `.writing/progress.md` naming decisions, in `.writing/outline.md` bullet labels, or in prior drafted prose across multiple manuscript files, do NOT silently apply the edit. Delegate to `Skill(skill="superpower-writing:revision")` Step 2.5 (locked-term rename impact scan) even when no formal review round is in progress. The drafting skill handles prose within an agreed spec; renames cross the prose/spec boundary and need an audit of which files mention the old term and an explicit findings.md entry so the planning-file audit trail survives the rename. Applying a locked-term rename as if it were a single-file edit silently desynchronizes the manuscript from its naming history.
+
 ## Integration
 
 - `superpower-writing:writing-plans` — produces `.writing/plan.md`; drafting reads it verbatim.

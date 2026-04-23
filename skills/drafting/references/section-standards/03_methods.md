@@ -161,6 +161,7 @@ Rules:
 - **Figure conventions.** §Methods typically contains 1 pipeline figure (in §Overview) and occasionally 1–2 additional schematics for complex subcomponents. Avoid figure-dumping; each figure must be referenced in text.
 - **Citations:** sparse compared to §Background and §Related Work. Cite only (a) foundational primitives the core uses (e.g., Transformer attention in an ML paper builds on Vaswani 2017); (b) prior algorithms the proof analysis compares against; (c) baselines explicitly extended or modified. If a citation belongs in §Background or §Related Work, move it there.
 - **Reproducibility language.** When specifying hyperparameters or hardware in §I, be concrete and absolute: "batch size 256, AdamW with learning rate 3e-4, weight decay 0.01, 50 epochs on 8× A100 80GB" — not "standard hyperparameters" or "modern GPUs". Reviewers who want to reproduce need exact numbers.
+- **First-use term discipline (carries in from §Introduction).** Any term emphasized with `\emph{...}` for the first time in §Methods must carry an operational gloss in the same sentence or the next. If the term is already defined formally in §Background §N or §Methods §F, a one-clause reminder ("\emph{dispatch mode} --- how each op selects a kernel") is still worth the extra line, since readers skim and a naked term without a local gloss forces a back-reference. Do NOT name a term and defer its definition to a later paragraph under the same section; keep gloss and name adjacent.
 
 ## Common failure modes
 

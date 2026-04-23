@@ -133,6 +133,56 @@ After classification:
 - OutOfScope → skip Step 4; write a response-only entry for Step 3 and proceed to re-verification with no manuscript change.
 - Factually-wrong → write a response for Step 3; Step 4 is optional (only to clarify prose that misled the reviewer).
 
+### Step 2.5 — Locked-term rename impact scan
+
+Before any item that proposes renaming a project-level locked term — i.e., a name already recorded as a naming decision in `.writing/progress.md`, a label or bullet heading in `.writing/outline.md`, or a term that already appears in two or more `.writing/manuscript/*.tex` files — run this scan. Locked-term renames arrive both as reviewer requests ("rename X to Y for clarity") and as mid-draft author decisions; in both cases they cross the prose/spec boundary and must NOT be applied as single-file edits.
+
+1. Locate every occurrence of the old term across manuscript, claims, and planning files:
+
+   ```bash
+   grep -rn --include='*.tex' --include='*.md' \
+       -E '\b<old-term>\b' .writing/ | tee /tmp/rename-impact.txt
+   ```
+
+   Include `.writing/outline.md`, `.writing/plan.md`, `.writing/progress.md`, `.writing/findings.md`, every `.writing/manuscript/*.tex`, and every `.writing/claims/section_*.md`.
+
+2. Surface the full file list to the user via `AskUserQuestion` BEFORE any edit:
+
+   ```
+   Question: Rename locked term "<old>" to "<new>"? This touches N files.
+   Header:   "Locked-term rename"
+   Options:
+     - Label:       "Proceed, sync all files"
+       Description: "Rename across all N files listed, and add a naming-decision entry under §Technical Decisions in .writing/findings.md to preserve the audit trail."
+     - Label:       "Scope to this item only"
+       Description: "Rename only in the file(s) the current review item touches; flag the cross-file inconsistency in progress.md and defer the rest."
+     - Label:       "Revert"
+       Description: "Keep the locked term; reject the reviewer's rename or withdraw the author's proposal."
+   ```
+
+3. On "Proceed, sync all files", write a single entry under §Technical Decisions in `.writing/findings.md`:
+
+   ```markdown
+   ## Naming: <old> -> <new>
+   Date: <ISO-8601>
+   Files touched: <bullet list from /tmp/rename-impact.txt>
+   Reason: <user-provided one-liner>
+   Prior lock: <progress.md line ref OR outline.md line ref>
+   Review item: <review-id>#<item-N>, or "author-proposed" if no review
+   ```
+
+   This entry is what preserves the audit trail that the raw rename would otherwise destroy. Subsequent cross-file sync edits proceed as normal per-item diffs in Step 4.
+
+4. On "Scope to this item only", add a one-line warning row to `.writing/progress.md`:
+
+   ```
+   | <date> | naming-drift | <old> renamed to <new> in <file(s)> only; N other files still use <old> | unresolved |
+   ```
+
+   Future verification runs will flag the drift as a FAIL until resolved.
+
+Rename drift is a structural bug, not a prose edit. Never apply a locked-term rename silently. If this step is skipped on a Major item whose root cause is a rename, the per-item response in Step 3 cannot honestly claim consistency, and claim-verification (Step 5) will expose the drift but without the planning-file context that would have made the fix cheap.
+
 ### Step 3 — Per-item response draft
 
 For each item, draft a response entry under `# Responses / ## Item <N>` with three parts:

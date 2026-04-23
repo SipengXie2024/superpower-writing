@@ -89,7 +89,8 @@ A well-balanced abstract gives Method and Result the most real estate; Backgroun
 - **No undefined abbreviations** on first occurrence. The abstract is standalone; readers cannot be expected to have read the glossary.
 - **No figure/table/equation references** ("Figure 2 shows..." belongs in the body).
 - **Declare study registration** (trial ID, PROSPERO ID, OSF preregistration ID) at the end of the Method paragraph if `metadata.yaml` `preregistration.registry` is non-null.
-- **Numbers MUST carry units, comparators, and uncertainty.** "Accuracy improved by 10" is not a verifiable result; "Accuracy improved from 78.2% to 88.5% (+10.3 pp; 95% CI 8.1–12.5, p < 0.001)" is.
+- **Three-layer numeric discipline (Abstract layer).** The Abstract is the headline layer. Report effect size as **percent change or relative ratio only**; do NOT carry absolute counts alongside percent changes (e.g., write "-41.5%", not "19,130 to 11,189 (-41.5%)"). Uncertainty (CI, p-value, SD) MAY accompany the headline percent if it fits in one clause; otherwise defer to §Results. The full absolute breakdown belongs in §Results. §Introduction is the direction-only layer (write "an order-of-magnitude reduction", not a specific percent). This three-layer split prevents reviewers from cross-checking three copies of the same number and finding drift between them.
+- **Numbers MUST carry units, comparators, and uncertainty where one clause permits.** "Accuracy improved by 10" is not a verifiable result; "Accuracy improved by +10.3 pp (95% CI 8.1–12.5, p < 0.001)" is. Consistent with the three-layer rule above, prefer percent-change or relative-ratio forms in the abstract; push absolute baseline-to-new pairs down to §Results.
 
 ## Common failure modes
 
