@@ -80,11 +80,17 @@ If FAIL, the script prints a fix recipe including the exact `npx` command and th
 
 Zotero turns on **dual source of truth**: citations are resolved from your Zotero library first, then fall back to network lookup via `research-lookup` / `citation-management`. When `auto_push_new_citations: true`, new DOIs discovered via network are pushed back to your configured collection.
 
+- Install the `zotero-mcp` MCP server: `uv tool install zotero-mcp` (or `pipx install zotero-mcp`). The plugin registers it via `.mcp.json` and spawns it over stdio at session start.
+
 ```bash
 cp .env.example .env
-# edit .env: set ZOTERO_API_KEY and either ZOTERO_USER_ID or ZOTERO_GROUP_ID
+# edit .env: set ZOTERO_API_KEY, ZOTERO_LIBRARY_ID, ZOTERO_LIBRARY_TYPE (user|group)
 # get the key at https://www.zotero.org/settings/keys
-# find your user ID by hitting https://api.zotero.org/keys/<KEY>
+# find your library ID by hitting https://api.zotero.org/keys/<KEY>
+
+# export the three vars in the shell that launches Claude Code, so .mcp.json
+# can pass them through to zotero-mcp:
+export ZOTERO_API_KEY=...  ZOTERO_LIBRARY_ID=...  ZOTERO_LIBRARY_TYPE=user
 
 bash scripts/check-zotero.sh
 ```
@@ -159,7 +165,7 @@ Any `% draft-only` marker still present when `/writing:submit` runs is a hard fa
 
 When `zotero.enabled: true`, citation resolution is two-phase:
 
-1. **Zotero** via `Skill(skill="pyzotero")` — query by DOI in the configured library/collection. Hit = authoritative (you've vetted it); use Zotero's stored abstract for semantic match.
+1. **Zotero** via the `zotero-mcp` MCP server (tools: `zotero_search_items`, `zotero_get_item_metadata`) — query by DOI in the configured library/collection. Hit = authoritative (you've vetted it); use Zotero's stored abstract for semantic match.
 2. **Network fallback** via `Skill(skill="citation-management")` / `Skill(skill="research-lookup")`. On hit, record `source: network` in the claim's EVIDENCE; if `auto_push_new_citations: true`, push to the configured Zotero collection and update `source: both`.
 
 Fail only if both sources miss.
@@ -203,7 +209,7 @@ When `zotero.enabled: false` (default), the pipeline runs network-only.
 | `check-deps.sh` fails                           | check message; names missing skill(s)                           | `npx skills add K-Dense-AI/scientific-agent-skills`                                  |
 | `check-zotero.sh` exits 1 "API key not set"     | `.env` missing or incomplete                                    | `cp .env.example .env` then fill in the two required fields                          |
 | `check-zotero.sh` HTTP 403                      | key lacks required scope                                        | regenerate at zotero.org/settings/keys with read+write on the library                |
-| `check-zotero.sh` HTTP 404                      | wrong `ZOTERO_USER_ID`                                          | `curl -sS https://api.zotero.org/keys/<YOUR_KEY>` → read `userID` field              |
+| `check-zotero.sh` HTTP 404                      | wrong `ZOTERO_LIBRARY_ID` or `ZOTERO_LIBRARY_TYPE`              | `curl -sS https://api.zotero.org/keys/<YOUR_KEY>` → read `userID` field (use that as `ZOTERO_LIBRARY_ID` with `ZOTERO_LIBRARY_TYPE=user`) |
 | Hook blocks a legitimate write                  | claim referenced but no such `id` in `claims/section_...md`     | Add the claim entry and set `STATUS: evidence_ready` after evidence is resolved      |
 | Hook blocks an exploratory paragraph            | untagged prose in a protected section                           | Either tag `<!-- draft-only -->` or write a proper `claim` entry                     |
 | `smoke.sh` fails                                | read the specific `FAIL: ...` line                              | Each check is independent; fix what's listed                                         |
