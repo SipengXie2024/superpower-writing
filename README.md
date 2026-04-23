@@ -80,7 +80,7 @@ If FAIL, the script prints a fix recipe including the exact `npx` command and th
 
 Zotero turns on **dual source of truth**: citations are resolved from your Zotero library first, then fall back to network lookup via `research-lookup` / `citation-management`. When `auto_push_new_citations: true`, new DOIs discovered via network are pushed back to your configured collection.
 
-- Install the `zotero-mcp` MCP server: `uv tool install zotero-mcp` (or `pipx install zotero-mcp`). The plugin registers it via `.mcp.json` and spawns it over stdio at session start.
+- Install the `zotero-mcp-server` MCP server: `uv tool install "zotero-mcp-server[semantic,scite]"` (or `pipx install "zotero-mcp-server[semantic,scite]"`). The `[semantic]` extra enables AI-powered similarity search across your library; `[scite]` adds citation-intelligence tallies and retraction alerts. The `zotero-mcp` binary installed by this package is what `.mcp.json` spawns over stdio at session start. (Note: on PyPI the package was renamed from `zotero-mcp` to `zotero-mcp-server`; the old `zotero-mcp` package is v0.1.6 and ships only 3 tools — make sure you install the new name.)
 
 ```bash
 cp .env.example .env
