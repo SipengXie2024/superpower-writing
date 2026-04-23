@@ -63,7 +63,7 @@ If `.writing/metadata.yaml` exists and parses with `zotero.enabled: true`, **als
 ${CLAUDE_PLUGIN_ROOT}/scripts/check-zotero.sh
 ```
 
-This verifies `ZOTERO_API_KEY` and `ZOTERO_USER_ID`/`ZOTERO_GROUP_ID` are set (from `.env`) and that the Zotero API responds. **Hard-fail on non-zero exit** — do not fall back to network-only silently. If the user wants to disable Zotero, have them set `zotero.enabled: false` in `.writing/metadata.yaml`.
+This verifies `ZOTERO_API_KEY`, `ZOTERO_LIBRARY_ID`, and `ZOTERO_LIBRARY_TYPE` are set (from `.env` or the launching shell), that the `zotero-mcp` binary is on PATH, and that the Zotero Web API responds. **Hard-fail on non-zero exit** — do not fall back to network-only silently. If the user wants to disable Zotero, have them set `zotero.enabled: false` in `.writing/metadata.yaml`.
 
 If `metadata.yaml` is absent or `zotero.enabled` is unset/false, skip this step.
 
@@ -186,7 +186,7 @@ Upstream skills this plugin relies on (call by **bare name**, no prefix):
 | `citation-management` | drafting, claim-verification, submission | Citation formatting, DOI resolution, bibliography assembly. |
 | `peer-review` | claim-verification, revision | Reporting-guideline checklists (CONSORT / STROBE / PRISMA). |
 | `scientific-schematics` | drafting | Graphical abstracts and schematic figures (mandatory per `scientific-writing`). |
-| `pyzotero` | drafting, claim-verification, submission | All Zotero API calls when `zotero.enabled: true`. |
+| `zotero-mcp` (MCP) | drafting, claim-verification, outlining, submission, revision | All Zotero Web API calls when `zotero.enabled: true`. Registered in `.mcp.json`; tools exposed as `zotero_search_items`, `zotero_get_item_metadata`, `zotero_add_by_doi`, `zotero_get_collection_items`. |
 
 # Claim-First Protocol
 
