@@ -170,5 +170,5 @@ The Zotero-first / network-fallback / optional auto-push flow is fully specified
 - Upstream `scientific-writing` — voice and structure rules.
 - Upstream `scientific-schematics` — graphical abstract + schematics.
 - Upstream `research-lookup`, `citation-management` — evidence resolution (network).
-- Plugin-level `.mcp.json` `zotero` server — Zotero Web API tools (`zotero_search_items`, `zotero_get_item_metadata`, `zotero_add_by_doi`, `zotero_get_collection_items`).
+- Plugin-level `.mcp.json` `zotero` server — Zotero Web API tools. Search: `zotero_search_items` (DOI / title lookup), `zotero_semantic_search` (AI similarity search with paragraph-level matching over PDF fulltext). Read: `zotero_get_item_metadata` (markdown or BibTeX), `zotero_get_item_fulltext` (server-side PDF text — use sparingly, often 70K+ chars; prefer `zotero_semantic_search` to find relevant chunks first). Write: `zotero_add_by_doi` (auto-fetches metadata + open-access PDF). Collection nav: `zotero_get_collections`, `zotero_get_collection_items`.
 - Hook `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` — PreToolUse enforcement of the claim-first protocol.

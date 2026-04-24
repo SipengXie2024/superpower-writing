@@ -80,7 +80,8 @@ For each claim that passed Pass 1 with `type: citation` EVIDENCE entries:
    - For each citation DOI, call the `zotero_search_items` MCP tool (from the `zotero` server in `.mcp.json`) with `query=<DOI>`, `qmode="everything"`. If `zotero.collection_key` is set, filter results to items whose `data.collections` array contains that key; otherwise keep all hits.
    - **Zotero hit** (exactly one filtered match): call `zotero_get_item_metadata(item_key=<key>)` to retrieve the stored abstract. Record `source: zotero`, `zotero_item_key: <key>` in the claim EVIDENCE entry. Proceed to 2c (semantic match).
    - **Ambiguous** (multiple filtered matches for one DOI): log to `.writing/findings.md` under "Issues" and treat as a miss.
-   - **Zotero miss:** proceed to 2b.
+   - **Zotero DOI miss, semantic fallback:** before giving up on Zotero, call `zotero_semantic_search(query=<CLAIM text>, limit=5)`. When the library has been indexed with fulltext (has_fulltext=True chunks), this matches claim content against paper paragraphs, not just titles/abstracts — catching cases where the DOI in your bibliography is slightly off (preprint vs publisher, pre-print server vs final version) but the paper is actually in the library. For each hit whose `similarity_score >= 0.45`, call `zotero_get_item_metadata(item_key=<key>)` and verify by DOI / title match. Exactly one high-confidence match → treat as Zotero hit with `source: zotero-semantic`, `zotero_item_key: <key>`, `match_score: <float>`. Otherwise proceed to 2b.
+   - **Zotero miss (DOI + semantic):** proceed to 2b.
 2. If `zotero.enabled: false` or `zotero` section absent: skip directly to 2b.
 
 #### 2b. Network fallback
@@ -100,6 +101,7 @@ Once an abstract is in hand (from Zotero or network):
 2. Perform an LLM-based semantic match: does the abstract plausibly support the CLAIM text? Use a strict rubric: the claim must not contradict the abstract; the abstract's findings/methods must overlap with the claim's substantive content.
 3. **Match PASS:** record PASS in report with excerpt of supporting abstract sentence.
 4. **Match FAIL:** record FAIL with reason (e.g., "abstract describes mouse model; claim is about human cohort"). This is a soft failure — surface to user for manual review rather than auto-rejecting (semantic match has known FP/FN issues). User confirms or overrides in report before submission proceeds.
+5. **Abstract ambiguous, body lookup:** if the abstract neither clearly supports nor contradicts the claim AND `source: zotero*`, call `zotero_semantic_search(query=<CLAIM text>, filters={"parent_item_key": <key>}, limit=3)` to surface the three most-relevant chunks from the paper body. Re-run the semantic match against those chunks' `matched_text`. Only escalate to fetching full body via `zotero_get_item_fulltext(item_key=<key>)` if the chunk-level check remains ambiguous — fulltext returns the whole paper (often 70K+ chars) and must be read with narrow grep / offset-limit windows, not loaded wholesale into context.
 
 #### 2e. Optional deep pass — `citation-auditor` agent
 
@@ -214,7 +216,7 @@ This skill invokes these upstream skills by bare name via the Skill tool (no `pl
 
 | Skill | Invocation point | Expected I/O |
 |-------|------------------|--------------|
-| `zotero-mcp` (MCP) | Pass 2a, §5 push-back | `zotero_search_items` + `zotero_get_item_metadata` for query-by-DOI; `zotero_add_by_doi` for dedup-aware push. Registered in `.mcp.json`. |
+| `zotero-mcp` (MCP) | Pass 2a, 2c body lookup, §5 push-back | `zotero_search_items` + `zotero_get_item_metadata` for query-by-DOI; `zotero_semantic_search` for claim-text similarity fallback (catches DOI-mismatched items and finds paragraph-level support when the abstract is ambiguous); `zotero_get_item_fulltext` for narrow passage reads when chunks alone are insufficient; `zotero_add_by_doi` for dedup-aware push. Registered in `.mcp.json`. |
 | `citation-management` | Pass 2b primary | Resolve DOI → canonical Crossref record. |
 | `research-lookup` | Pass 2b fallback / semantic match | DOI → abstract; optionally compare abstract ↔ claim text. |
 | `peer-review` | Pass 4 | Input: checklist name + manuscript dir. Output: per-item PASS/FAIL. |

@@ -165,7 +165,7 @@ Any `% draft-only` marker still present when `/writing:submit` runs is a hard fa
 
 When `zotero.enabled: true`, citation resolution is two-phase:
 
-1. **Zotero** via the `zotero-mcp` MCP server (tools: `zotero_search_items`, `zotero_get_item_metadata`) — query by DOI in the configured library/collection. Hit = authoritative (you've vetted it); use Zotero's stored abstract for semantic match.
+1. **Zotero** via the `zotero-mcp` MCP server — query by DOI with `zotero_search_items`, fall back to `zotero_semantic_search` (paragraph-level similarity over PDF fulltext when indexed) when DOI match fails. Retrieve with `zotero_get_item_metadata` (markdown / BibTeX) or `zotero_get_item_fulltext` when a specific passage must be read. Hit = authoritative (you've vetted it).
 2. **Network fallback** via `Skill(skill="citation-management")` / `Skill(skill="research-lookup")`. On hit, record `source: network` in the claim's EVIDENCE; if `auto_push_new_citations: true`, push to the configured Zotero collection and update `source: both`.
 
 Fail only if both sources miss.

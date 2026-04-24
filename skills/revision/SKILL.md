@@ -15,7 +15,7 @@ Revision is where reviewer feedback becomes manuscript changes without silently 
 
 This skill is a workflow, not an execution engine. Heavy lifting (prose edits, claim re-resolution) is delegated:
 
-- Evidence for new or changed claims → `Skill(skill="research-lookup")` / `Skill(skill="citation-management")`; when `zotero.enabled`, also the `zotero-mcp` MCP tools (`zotero_search_items`, `zotero_get_item_metadata`, `zotero_add_by_doi`) from the `zotero` server in `.mcp.json`.
+- Evidence for new or changed claims → `Skill(skill="research-lookup")` / `Skill(skill="citation-management")`; when `zotero.enabled`, also the `zotero-mcp` MCP tools from the `zotero` server in `.mcp.json`: `zotero_search_items` for DOI / title lookup, `zotero_semantic_search` as a fallback when DOI lookup misses (paragraph-level similarity over indexed fulltext), `zotero_get_item_metadata` for markdown / BibTeX, `zotero_get_item_fulltext` when the abstract is ambiguous and a body passage is needed, `zotero_add_by_doi` for push-back.
 - Post-revision verification → `Skill(skill="claim-verification")`.
 - Style polishing of response letter → upstream `Skill(skill="scientific-writing")`.
 

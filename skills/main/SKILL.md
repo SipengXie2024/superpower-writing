@@ -186,7 +186,7 @@ Upstream skills this plugin relies on (call by **bare name**, no prefix):
 | `citation-management` | drafting, claim-verification, submission | Citation formatting, DOI resolution, bibliography assembly. |
 | `peer-review` | claim-verification, revision | Reporting-guideline checklists (CONSORT / STROBE / PRISMA). |
 | `scientific-schematics` | drafting | Graphical abstracts and schematic figures (mandatory per `scientific-writing`). |
-| `zotero-mcp` (MCP) | drafting, claim-verification, outlining, submission, revision | All Zotero Web API calls when `zotero.enabled: true`. Registered in `.mcp.json`; tools exposed as `zotero_search_items`, `zotero_get_item_metadata`, `zotero_add_by_doi`, `zotero_get_collection_items`. |
+| `zotero-mcp` (MCP) | drafting, claim-verification, outlining, submission, revision | All Zotero calls when `zotero.enabled: true`. Registered in `.mcp.json`. Core tools: `zotero_search_items` (DOI / title / author lookup), `zotero_get_item_metadata` (markdown or BibTeX export), `zotero_get_item_fulltext` (server-side extracted PDF text, web-API mode supported), `zotero_semantic_search` (AI similarity search over the chunked library — paragraph-level matches when paper bodies are indexed), `zotero_advanced_search`, `zotero_get_collections` / `zotero_get_collection_items`, `zotero_add_by_doi` (auto-fetches metadata + open-access PDF). Scite citation intelligence via `scite_enrich_item` / `scite_enrich_search` / `scite_check_retractions`. |
 
 # Claim-First Protocol
 
