@@ -5,6 +5,43 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- **Style cautions for section intros and argumentative prose.** New
+  reference file `skills/drafting/references/style-cautions.md` codifies
+  five patterns that slip past outline compliance and prose-quality
+  review: (1) overview paragraph discipline (no mechanism spoilers, no
+  prominence labels on peer subsections, sweep peers on every fix);
+  (2) section responsibility discipline — numbers in systems-paper
+  Design sections that depend on system definitions belong in Results;
+  (3) no dataset pre-hedging (`on X dataset`, `in our workload`) in
+  thesis sentences outside numbers-first subsections and the external-
+  validity block; (4) section intros foreground claims, not roadmaps
+  (no `The remaining subsections discuss X, Y, Z`); (5) forward-
+  reference discipline — a section's intro must not use terms defined
+  later in the same section.
+- `skills/drafting/SKILL.md` gains a §Style cautions scaffold that
+  summarizes each rule and points at the reference.
+- `skills/drafting/references/section-drafter-prompt.md` Step B now
+  instructs drafter subagents to load the reference file and run its
+  five scans before emitting section intros, overview paragraphs,
+  thesis sentences, or contribution-list bullets — prevention at
+  drafting time, not only detection at review time.
+- `agents/manuscript-reviewer.md` gains item 7 "Systems-paper
+  argumentative structure" flagging all four lessons + overview
+  paragraph failures at review time.
+- `agents/spec-reviewer.md` gains item 5 "Argumentative-structure
+  compliance" with the same check set, framed around outline-scope
+  compliance rather than prose quality. Item 4 (IMRAD-boundary)
+  also extends with a systems-paper sub-bullet: numeric claims in
+  Design that depend on the system's own definitions are
+  Design → Results boundary violations.
+- Both reviewer agents carry a cross-reference to
+  `skills/drafting/references/style-cautions.md` so canonical wording
+  stays in sync.
+
 ## [0.5.0] — 2026-04-24
 
 ### Added

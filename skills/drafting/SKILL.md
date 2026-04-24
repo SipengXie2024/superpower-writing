@@ -164,6 +164,18 @@ The Zotero-first / network-fallback / optional auto-push flow is fully specified
 
 **Define terms before they flow across sections.** When `.writing/glossary.md` is present, the companion `enforce-terms.sh` hook blocks writes that use a term in a section before the section declared as its definition site. The fix is the same shape as the claim protocol: add or update the glossary entry, move the `% define: <id>` to the right section, or reorder sections so the term lands before its first use. `% use: <id>` is an **opt-in** annotation — you only tag the uses you want the hook to verify. An untagged occurrence of the term is not checked, so this remains a lightweight discipline rather than a universal requirement.
 
+## Style cautions for section intros and argumentative prose
+
+Five patterns slip past outline compliance and prose-quality review because they look locally fluent but corrupt the paper's structure or invite reviewer attacks. The canonical rules, verbatim before/after example, and scanning checks live at [`references/style-cautions.md`](references/style-cautions.md); the drafter prompt template loads that file at write time, and both reviewer agents paraphrase it with added severity and flagging context — keep the three wordings in sync when any rule changes (see the reference's "Loaded by" block).
+
+At a glance:
+
+- **Overview paragraph discipline** — for opening paragraphs that preview their own subsections. No mechanism spoilers, no prominence labels on peer subsections (`central insight`, `extension`, etc.), sweep peer items on every fix.
+- **Section responsibility discipline** — each IMRAD section has a narrow job; numbers must not drift across boundaries. Placement test: "could a third party independent of our system compute this from the raw data alone?" Yes → ground/workload; no → results.
+- **No dataset pre-hedging in argumentative prose** — `on X dataset` or `in our workload` inside thesis sentences pre-narrows the claim. Allowed only where numbers are first reported and in the discussion's external-validity block.
+- **Section intros foreground claims, not roadmaps** — replace `The remaining subsections discuss X, Y, Z` with a claim-first thesis; subsection pointers become parenthetical `\S\ref{...}`. Reference file has the verbatim before/after.
+- **Forward-reference discipline in intros** — a section's intro must not use technical terms defined only later in the same section.
+
 ## Integration
 
 - `superpower-writing:writing-plans` — produces `.writing/plan.md`; drafting reads it verbatim.

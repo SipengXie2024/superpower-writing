@@ -1,6 +1,6 @@
 ---
 name: spec-reviewer
-description: Review a drafted section against the confirmed outline — flag claims that deviate from outline scope, missing claims, added claims, reordered arguments, or IMRAD-boundary violations introduced during drafting.
+description: Review a drafted section against the confirmed outline — flag claims that deviate from outline scope, missing claims, added claims, reordered arguments, IMRAD-boundary violations introduced during drafting (including systems-paper Design → Results numeric drift), and argumentative-structure compliance (dataset pre-hedging in theses, roadmap-style section intros, forward-referenced terms in intros, overview-paragraph discipline).
 model: opus
 color: blue
 ---
@@ -28,7 +28,14 @@ You compare actual prose against `.writing/outline.md` and the matching `.writin
    - Results prose interpreting findings rather than stating them.
    - Discussion prose restating Results rather than interpreting them.
    - Abstract claims not attested by any sectioned claim.
+   - Systems-paper boundary: numeric claims placed in the Design section that depend on the system's own definitions (e.g., a percentage computed over a variant/invariant split that the mechanism itself defines) are Design → Results boundary violations. Important severity; suggest moving the number to §Results with a `\S\ref{sec:results}` forward-pointer from §Design.
    - These are *structural* boundary violations — outline compliance demands each section do only its outlined job. Prose-quality judgments about voice, hedging, or clarity are out of scope here; flag those only when they cross the IMRAD boundary, not when they merely read awkwardly.
+
+5. **Argumentative-structure compliance** (applies to systems/engineering papers with thesis-driven section intros; canonical rules in `skills/drafting/references/style-cautions.md` — keep wording in sync when updating)
+   - **Dataset pre-hedging in theses.** Flag any thesis sentence, claim sentence, section intro, or contribution-list bullet that annotates its assertion with the dataset name ("on X dataset", "in our workload", "on Base mainnet") outside the subsection where numbers are first reported and outside the discussion's external-validity block. Outline.md declares the claim's scope as the whole system; pre-hedging silently narrows that declared scope. Important severity; fix by stripping the dataset qualifier. (Anchor on the structural fact — the outline's scope declaration — rather than on prose judgment, which manuscript-reviewer owns.)
+   - **Roadmap-style section intros.** Flag section intros that read "The remaining subsections discuss X, Y, Z", "We now discuss X, Y, Z", or "§X measures, §Y shows, §Z demonstrates". These deviate from the thesis-driven intro expectation encoded in `references/section-standards/*.md` and in the outline's per-section `key_claims`. Important severity; the intro should foreground the section's claim, not its table of contents.
+   - **Forward-referenced terms in section intros.** Flag any intro paragraph of §N that uses a term which §N.k (k ≥ 1) formally introduces via `\emph{...}` or a definition later in the same section. This is a structural ordering violation: the outline's ordering for §N promises the term is available only from §N.k onward. Critical severity if the forward-referenced term is itself a `key_claim` anchor in the outline; Important otherwise.
+   - **Overview paragraphs previewing subsections.** Flag three structural compliance failures in opening paragraphs that preview their own subsections: (a) the overview names a mechanism or defined term that its own subsection formally introduces (mechanism spoiler — same failure class as the forward-reference check above, promoted to overview granularity); (b) the overview attaches prominence labels — overselling ("central insight", "key contribution", "novel") or underselling ("extension", "auxiliary", "not the main focus") — to individual subsections, which re-ranks peers against the outline's parallel ordering; (c) a revision pass fixed one peer item but left the mirror failure on another peer item, yielding inconsistent labels or partial spoiler removal within one paragraph. Important severity; these corrupt the outline's implicit "peer subsections are parallel" contract. When any one is flagged, re-inspect every peer item in the paragraph before finalizing the review.
 
 ## What you do NOT check
 

@@ -105,6 +105,14 @@ Abstract sections are citation-free and have no claims file:
 ## Step B — Prose (LaTeX)
 Write .writing/manuscript/{NN}_{slug}.tex.
 
+Before writing this section's intro, overview paragraph, thesis sentence,
+or contribution-list bullet, read
+${CLAUDE_PLUGIN_ROOT}/skills/drafting/references/style-cautions.md §How to
+apply at drafting time. Run its five scans (overview, placement, dataset
+pre-hedge, roadmap, forward-reference) against your intended prose and
+resolve each flag before emitting the paragraph. These cautions are
+additive to the Structure rules and LaTeX syntax rules below.
+
 Structure rules:
   - Every load-bearing paragraph MUST carry a LaTeX line-comment tag on its
     own line at column 0 (allowing leading whitespace):
