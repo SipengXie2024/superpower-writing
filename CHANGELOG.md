@@ -5,28 +5,81 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [0.4.0] — 2026-04-23
+## [0.4.0] — 2026-04-24
 
 ### Breaking
 
-- Replaced the `pyzotero` skill dependency (upstream `scientific-agent-skills`) with the standalone `zotero-mcp` MCP server, registered via a plugin-level `.mcp.json`. Users must install the binary: `uv tool install zotero-mcp` (or `pipx install zotero-mcp`).
+- Replaced the `pyzotero` skill dependency (upstream `scientific-agent-skills`) with the standalone `zotero-mcp-server` MCP server, registered via a plugin-level `.mcp.json`. Users must install the binary: `uv tool install "zotero-mcp-server[semantic,scite]"` (or `pipx install "zotero-mcp-server[semantic,scite]"`).
 - Renamed Zotero environment variables to match zotero-mcp:
   - `ZOTERO_USER_ID` → `ZOTERO_LIBRARY_ID` (with `ZOTERO_LIBRARY_TYPE=user`)
   - `ZOTERO_GROUP_ID` → `ZOTERO_LIBRARY_ID` (with `ZOTERO_LIBRARY_TYPE=group`)
 - Removed `ZOTERO_DEFAULT_COLLECTION` env var. Per-paper collection scoping continues via `.writing/metadata.yaml` `zotero.collection_key`.
 
+### Fixed
+
+- `README.md` install command and `.mcp.json` args were broken: the earlier instruction `uv tool install zotero-mcp` installed the old, archived PyPI package `zotero-mcp` (v0.1.6, only 3 tools) instead of the renamed-upstream `zotero-mcp-server` (v0.3.0, 20+ tools). `.mcp.json` also used top-level `--transport stdio` which the new subcommand-style CLI rejects; correct invocation is `["serve", "--transport", "stdio"]`. Without these fixes, every downstream Zotero tool call named by our skills would have resolved to "tool does not exist".
+
 ### Changed
 
 - `scripts/check-zotero.sh` now validates the new env-var names, probes the Web API via curl, and confirms the `zotero-mcp` binary is on PATH. The upstream pyzotero-skill lookup is gone.
-- All `Skill(skill="pyzotero")` call sites (in `agents/section-drafter.md`, `agents/citation-auditor.md`, `skills/drafting/`, `skills/outlining/`, `skills/claim-verification/`, `skills/revision/`, `skills/submission/`, `skills/writing-plans/`, `skills/main/`) now name MCP tools directly (`zotero_search_items`, `zotero_get_item_metadata`, `zotero_add_by_doi`, `zotero_get_collection_items`).
+- All `Skill(skill="pyzotero")` call sites (in `agents/section-drafter.md`, `agents/citation-auditor.md`, `skills/drafting/`, `skills/outlining/`, `skills/claim-verification/`, `skills/revision/`, `skills/submission/`, `skills/writing-plans/`, `skills/main/`) now name MCP tools directly.
 - `skills/submission/` BibTeX export is now a per-item loop: `zotero_get_collection_items` → `zotero_get_item_metadata(format="bibtex")`. Better BibTeX citekeys continue to flow through when installed on the user's Zotero.
+- Skill and agent docs updated to expose the full `zotero-mcp-server` tool surface:
+  - `zotero_semantic_search` added as a Zotero-side fallback in `skills/claim-verification/SKILL.md` Pass 2a (catches preprint-vs-publisher DOI mismatches by matching claim text against paper paragraphs) and in Pass 2c (parent-filtered search to surface the three most-relevant chunks before escalating to a 70K-char fulltext read). Same fallback mirrored into `agents/section-drafter.md` and `skills/revision/SKILL.md` for new-claim evidence resolution.
+  - `zotero_get_item_fulltext` called out as a heavy operation to be narrowly-read, not loaded wholesale into context.
+  - `skills/main/SKILL.md` and `skills/drafting/SKILL.md` tool inventories expanded to include semantic search, advanced search, and Scite citation intelligence (`scite_enrich_item`, `scite_check_retractions`).
 
 ### Migration
 
-1. Install the MCP server: `uv tool install zotero-mcp`.
+1. Install the MCP server: `uv tool install "zotero-mcp-server[semantic,scite]"`.
 2. Update your `.env` to use `ZOTERO_LIBRARY_ID` + `ZOTERO_LIBRARY_TYPE` in place of `ZOTERO_USER_ID`/`ZOTERO_GROUP_ID`.
 3. Export those vars in the shell that launches Claude Code (the plugin's `.mcp.json` passes them through to `zotero-mcp`).
 4. Uninstall or stop depending on `scientific-agent-skills/pyzotero` if you no longer need it.
+
+## [0.3.2] — 2026-04-23
+
+### Added
+
+- **Abstract is citation-free (enforced).** `hooks/enforce-claims.py` gains a
+  new `CITATION_FREE_SLUGS = {"abstract"}` set matched by slug-ending against
+  the manuscript file stem. Writes to any `*_abstract.tex` (e.g.
+  `00_abstract.tex`) are blocked when the content contains any LaTeX citation
+  command — matched by regex `\\[a-zA-Z]*cite[a-zA-Z]*\b`, which covers
+  `\cite`, `\citep`, `\citet`, `\nocite`, `\parencite`, `\textcite`,
+  `\autocite`, `\footcite`, `\citeauthor`, `\citeyear`, `\citealt`,
+  `\citealp`, and any other `\*cite*` variant. A `% claim: id` tag in the
+  abstract is also blocked since the abstract has no claims file. BPMRC
+  structural tags (`% bpmrc: B`, `% bpmrc: P`, etc.) are unaffected —
+  they are not citations or claim tags.
+- `claim-verification` Pass 1 step 6 greps abstract files for citation
+  commands and `% claim:` tags; any hit surfaces as a FAIL.
+- `submission` checklist gains item 5b — abstract citation-free grep —
+  duplicated from the hook so the gate catches files edited outside Claude.
+- `tests/smoke.sh` gains five new LaTeX abstract cases (4j–4n): abstract
+  `\cite{}` blocks, abstract `\citep{}` blocks, abstract `\parencite{}`
+  blocks, abstract `% claim:` blocks, abstract with BPMRC tags but no
+  citations allows.
+
+### Changed
+
+- `skills/main/SKILL.md` Claim-First Protocol gains a "Citation Placement
+  Rule" section documenting the abstract-citation-free enforcement and the
+  body-section citation requirement (`\cite{citekey}` resolvable against
+  `.writing/refs.bib`).
+- `skills/outlining/SKILL.md` filename-stem contract gains an "Abstract is
+  citation-free (load-bearing)" paragraph clarifying that BPMRC structural
+  tags survive the rule and that no `claims/section_00_abstract.md` file
+  should be created.
+- `skills/drafting/references/section-drafter-prompt.md` adds Step
+  A-special for abstract drafting: skip Step A, do not emit any `\*cite*`
+  command or `% claim:` tag, keep BPMRC structural tags.
+
+### Migration notes
+
+Existing manuscripts with `\cite{}` in the abstract will be blocked on the
+next edit. Move those citations into the body sections that support the
+claim (usually Introduction or Discussion) and rewrite the abstract as
+plain prose.
 
 ## [0.3.0] — 2026-04-21
 
@@ -199,6 +252,9 @@ Initial scaffold.
 - Auto-submission to journal portals.
 - LaTeX compile.
 
+[0.3.2]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.3.2
+[0.3.1]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.3.1
+[0.3.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.3.0
 [0.2.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.2.0
 [0.1.2]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.1.2
 [0.1.1]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.1.1

@@ -205,6 +205,10 @@ The hook exempts any section stem whose slug is in `UNPROTECTED_SLUGS` (`abstrac
 
 Markdown manuscript files (`.md` under `manuscript/`) are NOT intercepted — the plugin operates on LaTeX only. If a `.md` slips into `manuscript/`, it falls through unenforced; convert to `.tex` before the submission gate.
 
+## Citation Placement Rule
+
+The abstract is **citation-free**. `CITATION_FREE_SLUGS = {"abstract"}` in the hook — any stem ending in `_abstract` (e.g. `00_abstract.tex`) is blocked when the write contains any LaTeX citation command (`\cite`, `\citep`, `\citet`, `\nocite`, `\parencite`, `\textcite`, `\autocite`, `\footcite`, `\citeauthor`, `\citeyear`, `\citealt`, `\citealp`, or any `\*cite*` variant) or a `% claim: id` tag. The abstract is a self-contained summary of the paper's own findings; references belong in the body. Every body section (`01_introduction.tex`, `02_background.tex`, `03_methods.tex`, `04_results.tex`, `05_discussion.tex`, etc.) MUST back every load-bearing claim with a `\cite{citekey}` whose citekey resolves against `.writing/refs.bib`; missing citations surface as FAILs in `claim-verification` Pass 2 and block `submission`.
+
 Drafting and claim-verification skills must be aware of this hook and surface its block reason to the user. The fix is always: resolve EVIDENCE first (via `research-lookup` / `citation-management` / Zotero lookup), bump `STATUS` to `evidence_ready`, then write prose.
 
 # User Instructions

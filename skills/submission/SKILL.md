@@ -85,6 +85,20 @@ Grep `.writing/` recursively for `[NEEDS-EVIDENCE]`. Any hit aborts with
 file:line list. This includes `claims/`, `manuscript/`, `findings.md`,
 `outline.md`, `metadata.yaml`, and anywhere else the string could hide.
 
+### 5b. Abstract is citation-free
+
+For every `.writing/manuscript/*.tex` whose stem ends in `_abstract`
+(slug-ending match, e.g. `00_abstract.tex`), grep for any LaTeX citation
+command (pattern `\\[a-zA-Z]*cite[a-zA-Z]*` — covers `\cite`, `\citep`,
+`\citet`, `\nocite`, `\parencite`, `\textcite`, `\autocite`, `\footcite`,
+`\citeauthor`, `\citeyear`, and every other `\*cite*` variant) and for
+`^\s*%\s*claim:`. Any hit aborts with file:line list. The abstract must
+summarize the paper's own findings without citing sources; the body sections
+carry every reference. This mirrors the PreToolUse hook's
+`CITATION_FREE_SLUGS` rule and runs independently at the submission gate
+in case the hook was bypassed during editing (manual file copy, external
+editor, etc.).
+
 ### 6. LaTeX compile test passes
 
 After `refs.bib` is generated (below), compile `.writing/main.tex` with
