@@ -132,6 +132,86 @@ out=$(payload_write "$WORK/.writing/manuscript/00_abstract.tex" \
       | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
 [[ -z "$out" ]] && pass "abstract BPMRC-only allows" || fail "abstract BPMRC-only blocked: $out"
 
+echo "== 4.5 term enforcement (LaTeX, opt-in via glossary.md) =="
+
+echo "   4.5a. no glossary -> allow arbitrary term tags"
+# Clean slate: no glossary present, sections carry % use: tags that would
+# otherwise fail. Enforce-terms must be a no-op.
+rm -f .writing/glossary.md
+cat >.writing/claims/section_02_background.md <<'EOF'
+- id: bg-c1
+  CLAIM: test
+  EVIDENCE: []
+  STATUS: evidence_ready
+EOF
+out=$(payload_write "$WORK/.writing/manuscript/02_background.tex" \
+      "% claim: bg-c1\\n% use: skeleton-family\\nprose" \
+      | bash "$PLUGIN_ROOT/hooks/enforce-terms.sh")
+[[ -z "$out" ]] && pass "no-glossary allows" || fail "no-glossary emitted: $out"
+
+# Write a minimal glossary and rerun cases against it.
+cat >.writing/glossary.md <<'EOF'
+- id: skeleton-family
+  term: skeleton family
+  definition: Structurally identical contracts differing only in bounded constants.
+  defined_in: 02_background
+EOF
+
+echo "   4.5b. % use: unknown-id -> block"
+out=$(payload_write "$WORK/.writing/manuscript/02_background.tex" \
+      "% claim: bg-c1\\n% use: unknown-term\\nprose" \
+      | bash "$PLUGIN_ROOT/hooks/enforce-terms.sh" || true)
+echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
+  && pass "unknown term id blocks" || fail "unknown term id did not block: $out"
+
+echo "   4.5c. % define: in wrong section -> block"
+cat >.writing/claims/section_03_methods.md <<'EOF'
+- id: meth-c1
+  CLAIM: test
+  EVIDENCE: []
+  STATUS: evidence_ready
+EOF
+out=$(payload_write "$WORK/.writing/manuscript/03_methods.tex" \
+      "% claim: meth-c1\\n% define: skeleton-family\\nprose" \
+      | bash "$PLUGIN_ROOT/hooks/enforce-terms.sh" || true)
+echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
+  && pass "wrong-section define blocks" || fail "wrong-section define did not block: $out"
+
+echo "   4.5d. % define: in correct section -> allow"
+out=$(payload_write "$WORK/.writing/manuscript/02_background.tex" \
+      "% claim: bg-c1\\n% define: skeleton-family\\nprose" \
+      | bash "$PLUGIN_ROOT/hooks/enforce-terms.sh")
+[[ -z "$out" ]] && pass "correct-section define allows" || fail "correct-section define emitted: $out"
+
+echo "   4.5e. % use: in later section than define -> allow"
+out=$(payload_write "$WORK/.writing/manuscript/03_methods.tex" \
+      "% claim: meth-c1\\n% use: skeleton-family\\nprose" \
+      | bash "$PLUGIN_ROOT/hooks/enforce-terms.sh")
+[[ -z "$out" ]] && pass "later-section use allows" || fail "later-section use emitted: $out"
+
+echo "   4.5f. % use: in earlier section than define -> block"
+# Define term in 05_discussion; use it in 02_background (earlier).
+cat >.writing/glossary.md <<'EOF'
+- id: late-term
+  term: late term
+  definition: A term introduced late in the paper.
+  defined_in: 05_discussion
+EOF
+out=$(payload_write "$WORK/.writing/manuscript/02_background.tex" \
+      "% claim: bg-c1\\n% use: late-term\\nprose" \
+      | bash "$PLUGIN_ROOT/hooks/enforce-terms.sh" || true)
+echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
+  && pass "use-before-define blocks" || fail "use-before-define did not block: $out"
+
+echo "   4.5g. % use: in abstract (exempt) -> allow"
+out=$(payload_write "$WORK/.writing/manuscript/00_abstract.tex" \
+      "% use: late-term\\nProse mentioning the term." \
+      | bash "$PLUGIN_ROOT/hooks/enforce-terms.sh")
+[[ -z "$out" ]] && pass "abstract exempt from term ordering" || fail "abstract was blocked: $out"
+
+# Cleanup glossary so subsequent tests are unaffected.
+rm -f .writing/glossary.md
+
 echo "== 5. plugin manifest sanity =="
 python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/plugin.json'))" && pass "plugin.json valid"
 python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/marketplace.json'))" && pass "marketplace.json valid"
@@ -148,7 +228,7 @@ for cmd in outline draft revise submit check-deps stash archive; do
     && pass "commands/$cmd.md" \
     || fail "missing commands/$cmd.md"
 done
-for h in enforce-claims.sh enforce-claims.py check-deps.sh hooks.json; do
+for h in enforce-claims.sh enforce-claims.py enforce-terms.sh enforce-terms.py check-deps.sh hooks.json; do
   [[ -f "$PLUGIN_ROOT/hooks/$h" ]] \
     && pass "hooks/$h" \
     || fail "missing hooks/$h"

@@ -48,7 +48,8 @@ Per section, before marking complete:
 
 - [ ] Every claim id referenced in the prose resolves to `STATUS ∈ {evidence_ready, verified}` in its claims file.
 - [ ] Every load-bearing paragraph carries `% claim: id`; drafting notes use `% draft-only` (both are LaTeX line comments at column 0).
-- [ ] PreToolUse hook did not block any write (visible as exit-2 JSON from `enforce-claims.sh`).
+- [ ] If `.writing/glossary.md` exists: the first introduction of every glossary term is tagged `% define: <id>` in the section matching `defined_in`; subsequent uses in other sections that should be ordering-checked are tagged `% use: <id>`.
+- [ ] PreToolUse hook did not block any write (visible as exit-2 JSON from `enforce-claims.sh` or `enforce-terms.sh`).
 - [ ] `.writing/progress.md` Task Dashboard row updated (Status, Claim Verification, Citation Check).
 
 ## Process
@@ -161,6 +162,8 @@ The Zotero-first / network-fallback / optional auto-push flow is fully specified
 
 **Locked-term renames are not prose edits.** If the user or a sub-agent proposes renaming a term that is already locked in `.writing/progress.md` naming decisions, in `.writing/outline.md` bullet labels, or in prior drafted prose across multiple manuscript files, do NOT silently apply the edit. Delegate to `Skill(skill="superpower-writing:revision")` Step 2.5 (locked-term rename impact scan) even when no formal review round is in progress. The drafting skill handles prose within an agreed spec; renames cross the prose/spec boundary and need an audit of which files mention the old term and an explicit findings.md entry so the planning-file audit trail survives the rename. Applying a locked-term rename as if it were a single-file edit silently desynchronizes the manuscript from its naming history.
 
+**Define terms before they flow across sections.** When `.writing/glossary.md` is present, the companion `enforce-terms.sh` hook blocks writes that use a term in a section before the section declared as its definition site. The fix is the same shape as the claim protocol: add or update the glossary entry, move the `% define: <id>` to the right section, or reorder sections so the term lands before its first use. `% use: <id>` is an **opt-in** annotation — you only tag the uses you want the hook to verify. An untagged occurrence of the term is not checked, so this remains a lightweight discipline rather than a universal requirement.
+
 ## Integration
 
 - `superpower-writing:writing-plans` — produces `.writing/plan.md`; drafting reads it verbatim.
@@ -172,3 +175,4 @@ The Zotero-first / network-fallback / optional auto-push flow is fully specified
 - Upstream `research-lookup`, `citation-management` — evidence resolution (network).
 - Plugin-level `.mcp.json` `zotero` server — Zotero Web API tools. Search: `zotero_search_items` (DOI / title lookup), `zotero_semantic_search` (AI similarity search with paragraph-level matching over PDF fulltext). Read: `zotero_get_item_metadata` (markdown or BibTeX), `zotero_get_item_fulltext` (server-side PDF text — use sparingly, often 70K+ chars; prefer `zotero_semantic_search` to find relevant chunks first). Write: `zotero_add_by_doi` (auto-fetches metadata + open-access PDF). Collection nav: `zotero_get_collections`, `zotero_get_collection_items`.
 - Hook `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` — PreToolUse enforcement of the claim-first protocol.
+- Hook `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-terms.sh` — opt-in PreToolUse enforcement of term-definition-before-use ordering. Activates when `.writing/glossary.md` is present.

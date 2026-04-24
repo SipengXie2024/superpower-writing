@@ -15,6 +15,8 @@ Pre-submission gate that walks every tagged claim in `.writing/manuscript/*.tex`
 
 **Relation to the PreToolUse hook:** the hook (see `superpower-writing:main` §Claim-First Protocol) already blocks prose writes against stub-status claims during drafting — drafting flips `STATUS` to `evidence_ready` when evidence is found. This skill is what flips `evidence_ready` → `verified` after the four passes succeed. Never edit `STATUS` to `verified` manually: the audit trail lives in `.writing/verify-report.md`.
 
+**Optional term-ordering hook.** If the project opted into `.writing/glossary.md`, a companion hook at `hooks/enforce-terms.sh` already blocked any write where a `% define:` tag landed in the wrong section or a `% use:` tag referenced a term whose `defined_in` sits later in the paper. This verification skill does **not** re-run those checks; they are edit-time invariants, not submission-gate invariants. If you suspect a term ordering drifted after manual edits outside Claude, sweep manually with `grep -n '% \(define\|use\):' .writing/manuscript/*.tex` and cross-reference `.writing/glossary.md`.
+
 ## When to Use
 
 - User declares paper ready to submit (always run before `submission` skill).

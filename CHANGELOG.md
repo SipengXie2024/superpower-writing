@@ -5,6 +5,39 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.5.0] — 2026-04-24
+
+### Added
+
+- **Term-definition-before-use protocol (opt-in).** New PreToolUse hook
+  `hooks/enforce-terms.sh` (Python implementation at
+  `hooks/enforce-terms.py`) enforces that load-bearing terminology is
+  defined before it is used. The hook is a no-op unless
+  `.writing/glossary.md` exists — drop-in `templates/glossary.md` to
+  activate. The glossary is a YAML list with entries `{id, term,
+  definition, defined_in: <section_stem>}`. Once active:
+  - `% define: <id>` must appear in the file whose stem equals
+    `glossary[id].defined_in`, else block.
+  - `% use: <id>` must appear in a section whose numeric prefix is ≥
+    the define section (numeric-prefix compare), else block. Abstracts
+    and `*_references` / `*_acknowledgments` sections are fully exempt
+    because abstracts legitimately reference terms the body defines
+    later.
+  - Within a single file, the first `% define:` must precede the first
+    `% use:` for the same id.
+- `templates/glossary.md` ships a commented YAML skeleton with one
+  example entry and documents the tag/ordering contract.
+- `skills/outlining/SKILL.md`, `skills/drafting/SKILL.md`, and
+  `skills/claim-verification/SKILL.md` pick up paragraphs describing
+  the opt-in protocol and how it relates to the existing claim-first
+  hook.
+- `hooks/hooks.json` PreToolUse matcher now dispatches to both
+  `enforce-claims.sh` and `enforce-terms.sh`; they run independently
+  on the same Edit/Write/MultiEdit/NotebookEdit events.
+- `tests/smoke.sh` gains a §4.5 block with seven term-enforcement
+  cases (no glossary, unknown id, wrong-section define, right-section
+  define, later-section use, earlier-section use, abstract exempt).
+
 ## [0.4.0] — 2026-04-24
 
 ### Breaking
