@@ -26,7 +26,7 @@ The orchestrator takes the manuscript file's **stem** (e.g., `02_background` fro
 
 1. **Exact-stem match**: look for `section-standards/<NN>_<slug>.md` — used when the paper's stem number coincides with the canonical slot (e.g., a no-motivation CS paper with `manuscript/02_background.tex` matches `section-standards/02_background.md` directly).
 2. **Slug-ending scan**: if step 1 misses, scan `section-standards/` for any file whose name ends in `_<slug>.md`. Exactly one such file → use it. Zero matches → step 3. **Multiple matches** → abort with a configuration error (should never happen given the canonical-one-per-slug convention; indicates accidental duplicate).
-3. **No match**: substitute `No section-specific standard applies; use general IMRAD conventions from scientific-writing.` as `{SECTION_STANDARD}`.
+3. **No match**: substitute `No section-specific standard applies; use general IMRAD conventions from writing-principles.md.` as `{SECTION_STANDARD}`.
 
 Practical outcomes (manuscript `.tex` stem → matched standards `.md` file):
 
@@ -42,7 +42,7 @@ Renaming a file in this directory (e.g., creating a paper-specific `section-stan
 
 1. **Outlining** — `superpower-writing:outlining` Step 3 applies the match rule above for each section and, if a file is found, reads it before drafting outline bullets for that section. The standards file dictates bullet structure, labels, and count. Bullets must pass the outline-level checks in the standards file before the outline is considered complete.
 
-2. **Drafting** — `superpower-writing:drafting` orchestrator applies the same match rule when assembling the per-section `section-drafter` subagent prompt. The file content is inlined into the `{SECTION_STANDARD}` placeholder in `section-drafter-prompt.md`. If neither the exact-stem nor slug-ending match finds a file, `{SECTION_STANDARD}` is replaced with `No section-specific standard applies; use general IMRAD conventions from scientific-writing.`
+2. **Drafting** — `superpower-writing:drafting` orchestrator applies the same match rule when assembling the per-section `section-drafter` subagent prompt. The file content is inlined into the `{SECTION_STANDARD}` placeholder in `section-drafter-prompt.md`. If neither the exact-stem nor slug-ending match finds a file, `{SECTION_STANDARD}` is replaced with `No section-specific standard applies; use general IMRAD conventions from writing-principles.md.`
 
 3. **Self-review** — Step C of the drafter template re-reads the same resolved standards file and greps the draft for the required structural tags (e.g., `% bpmrc: B`, `% cars: T`, `% background: D`). A missing tag blocks the section from being marked `drafted`.
 
@@ -73,6 +73,6 @@ The orchestrator does not parse this frontmatter today, but keeping it stable fu
 
 ## Why this directory exists
 
-Upstream `scientific-writing` specifies IMRAD voice and style at the whole-paper level. It does NOT prescribe the internal skeleton of each section. Different venues and subfields prefer different skeletons: structured abstracts with BPMRC vs. narrative abstracts; CARS-model introductions vs. funnel introductions; single-paragraph vs. multi-paragraph methods.
+The plugin's `writing-principles.md` reference specifies IMRAD voice and style at the whole-paper level. It does NOT prescribe the internal skeleton of each section. Different venues and subfields prefer different skeletons: structured abstracts with BPMRC vs. narrative abstracts; CARS-model introductions vs. funnel introductions; single-paragraph vs. multi-paragraph methods.
 
 Rather than baking one opinionated skeleton into the drafting prompt, this directory lets us plug in the right skeleton per section. Add files here as the plugin learns new conventions; existing papers are unaffected because only sections with a matching standards file get constrained.

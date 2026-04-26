@@ -15,9 +15,9 @@ Revision is where reviewer feedback becomes manuscript changes without silently 
 
 This skill is a workflow, not an execution engine. Heavy lifting (prose edits, claim re-resolution) is delegated:
 
-- Evidence for new or changed claims → `Skill(skill="research-lookup")` / `Skill(skill="citation-management")`; when `zotero.enabled`, also the `zotero-mcp` MCP tools from the `zotero` server in `.mcp.json`: `zotero_search_items` for DOI / title lookup, `zotero_semantic_search` as a fallback when DOI lookup misses (paragraph-level similarity over indexed fulltext), `zotero_get_item_metadata` for markdown / BibTeX, `zotero_get_item_fulltext` when the abstract is ambiguous and a body passage is needed, `zotero_add_by_doi` for push-back.
-- Post-revision verification → `Skill(skill="claim-verification")`.
-- Style polishing of response letter → upstream `Skill(skill="scientific-writing")`.
+- Evidence for new or changed claims → `Skill(skill="superpower-writing:research-lookup")` / `Skill(skill="superpower-writing:citation-management")`; when `zotero.enabled`, also the `zotero-mcp` MCP tools from the `zotero` server in `.mcp.json`: `zotero_search_items` for DOI / title lookup, `zotero_semantic_search` as a fallback when DOI lookup misses (paragraph-level similarity over indexed fulltext), `zotero_get_item_metadata` for markdown / BibTeX, `zotero_get_item_fulltext` when the abstract is ambiguous and a body passage is needed, `zotero_add_by_doi` for push-back.
+- Post-revision verification → `Skill(skill="superpower-writing:claim-verification")`.
+- Style polishing of response letter → consult `skills/drafting/references/writing-principles.md` and `skills/drafting/references/style-cautions.md`; for venue-tuned voice, see `skills/submission/references/venue-styles.md`.
 
 The PreToolUse hook is still active during revision: any newly introduced `% claim: id` tag must correspond to a claim with `STATUS ∈ {evidence_ready, verified}`, or the edit will be blocked. Revision-driven claim additions are first-class citizens, not second-class patches.
 
@@ -35,7 +35,7 @@ Do NOT invoke for:
 
 - Pre-draft edits (use `drafting`).
 - First-time claim resolution on fresh prose (use `drafting` + `claim-verification`).
-- Pure copy-edit passes with no intellectual content changes — those can be handled by the upstream `scientific-writing` skill directly.
+- Pure copy-edit passes with no intellectual content changes — those can be handled by consulting `skills/drafting/references/writing-principles.md` and `skills/drafting/references/style-cautions.md` directly.
 
 ## Checklist
 
@@ -238,7 +238,7 @@ After all items are applied, update `.writing/progress.md`:
 Do not mark the round closed on your own authority. Invoke:
 
 ```
-Skill(skill="claim-verification")
+Skill(skill="superpower-writing:claim-verification")
 ```
 
 Let `claim-verification` walk every `% claim: id` in post-revision prose, re-resolve `\cite{}` citekeys against refs.bib, re-run semantic matches on any touched claim, and re-check numeric/table consistency if Major items changed results. The expected outcome is:
@@ -312,7 +312,7 @@ Sincerely,
 <author list>
 ```
 
-Voice rules (delegate polishing to `Skill(skill="scientific-writing")` for the final pass):
+Voice rules (for the final pass, consult `skills/drafting/references/writing-principles.md` and `skills/drafting/references/style-cautions.md`; for venue-tuned voice, see `skills/submission/references/venue-styles.md`):
 
 - Never argue; acknowledge first, then explain.
 - Always cite manuscript line ranges for changes.
@@ -342,7 +342,7 @@ Voice rules (delegate polishing to `Skill(skill="scientific-writing")` for the f
 - `superpower-writing:drafting` — upstream producer of the prose being revised.
 - `superpower-writing:claim-verification` — Step 5 gate; consumes manuscript + claims, emits pass/fail.
 - `superpower-writing:submission` — downstream; archives every `.writing/reviews/<id>.md` into `.writing/archive/<date>/`.
-- Upstream `scientific-writing` — response-letter voice / style polishing.
+- Plugin-local `writing-principles.md` and `style-cautions.md` — response-letter voice / style polishing.
 - Upstream `research-lookup`, `citation-management` — new-claim evidence resolution (network).
 - Plugin-level `.mcp.json` `zotero` server — Zotero Web API tools for lookup and push-back.
 - Hook `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` — still enforces claim-first during revision edits.

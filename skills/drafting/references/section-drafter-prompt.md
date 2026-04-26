@@ -8,7 +8,7 @@ The orchestrator (`subagent-driven` / `team-driven` / `executing-plans`) wraps t
 - `{SECTION_STANDARD}` — resolved via two-level fallback (slug-ending match):
   1. try `references/section-standards/{NN}_{slug}.md` (exact-stem match — hits when the manuscript's stem number equals the standards file's canonical slot);
   2. if step 1 misses, scan `references/section-standards/` for any file whose name ends in `_{slug}.md`; exactly one match → use it; multiple → abort with configuration error (indicates a duplicate standards file);
-  3. if both miss, substitute `No section-specific standard applies; use general IMRAD conventions from scientific-writing.`
+  3. if both miss, substitute `No section-specific standard applies; use general IMRAD conventions from writing-principles.md.`
 
   Canonical filenames: `00_abstract.md`, `01_introduction.md`, `02_background.md`, `03_methods.md`, `04_results.md`, `05_discussion.md`, `06_conclusion.md`, `07_related_work.md`, `08_motivation.md`. Examples of slug-ending resolution: `03_background` → `02_background.md`; `02_related_work` → `07_related_work.md`; `02_motivation` → `08_motivation.md`. See `references/section-standards/README.md` for the complete contract.
 
@@ -67,7 +67,7 @@ For each claim in .writing/claims/section_{NN}_{slug}.md with STATUS=stub:
         Empty-filter or ambiguous-match is treated as a miss; fall through
         to A.3.
   A.3 Zotero miss, or zotero.enabled is false:
-        Invoke Skill(skill="research-lookup") / Skill(skill="citation-management")
+        Invoke Skill(skill="superpower-writing:research-lookup") / Skill(skill="superpower-writing:citation-management")
         to resolve. On network hit:
           - If zotero.enabled AND metadata.yaml's zotero.auto_push_new_citations
             is true:
@@ -132,7 +132,7 @@ Structure rules:
     not evidence_ready — go back to Step A.
   - Multiple citations at the same site: `\cite{smith2019,chen2020,zhang2021}`
     (comma-separated inside a single \cite{}), NOT three separate \cite{}s.
-  - Respect the upstream `scientific-writing` style rules: IMRAD voice, past
+  - Respect the style rules from `writing-principles.md`: IMRAD voice, past
     tense for results, active voice where appropriate.
   - Respect the section standard supplied above:
       * Match the required paragraph count and ordering exactly.
@@ -144,7 +144,7 @@ Structure rules:
           % claim: abs-b1
           <paragraph prose>
       * Honor the standard's tense/voice/length rules; they refine — never
-        contradict — the upstream scientific-writing rules.
+        contradict — the writing-principles.md rules.
       * If the standard's tags appear in a section stem that is claim-enforced
         (anything whose slug is NOT `abstract` / `references` /
         `acknowledgments`), each paragraph still needs either `% claim: id`

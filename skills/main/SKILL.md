@@ -6,7 +6,7 @@ description: Router and dependency gate for superpower-writing. Loaded at sessio
 <EXTREMELY-IMPORTANT>
 If there is even a 1% chance a writing skill applies to your task, you MUST invoke it. No exceptions, no rationalizations.
 
-This plugin is orchestration-only. All domain content (literature search, citation formatting, peer-review checklists, figure rendering) comes from the upstream `scientific-agent-skills` collection (K-Dense-AI). Upstream skills are invoked by **bare name** via the Skill tool — e.g. `Skill(skill="scientific-writing")`, **never** with a plugin prefix.
+This plugin is self-contained. Domain content (writing principles, figures/tables, citation styles, venue styles) lives in plugin-local reference files under `skills/drafting/references/` and `skills/submission/references/`. Skills that were previously upstream (`research-lookup`, `citation-management`, `literature-review`, `scientific-schematics`, `peer-review`) now ship as plugin-local skills invoked with the `superpower-writing:` prefix — e.g. `Skill(skill="superpower-writing:research-lookup")`.
 </EXTREMELY-IMPORTANT>
 
 ## Announce on Entry
@@ -24,7 +24,7 @@ Then perform the dep check and `.writing/` detection below before doing anything
 **Upstream vs local naming:**
 
 - Local (this plugin): `Skill(skill="superpower-writing:drafting")` — prefixed.
-- Upstream (Agent Skills standard): `Skill(skill="scientific-writing")` — bare, no prefix. These were installed via `npx skills add K-Dense-AI/scientific-agent-skills`, not as a Claude plugin.
+- Plugin-local domain skills: `Skill(skill="superpower-writing:research-lookup")`, `Skill(skill="superpower-writing:citation-management")`, etc. — prefixed with `superpower-writing:`. These ship with this plugin.
 - Local execution engines: `Skill(skill="superpower-writing:subagent-driven")`, `Skill(skill="superpower-writing:team-driven")`, `Skill(skill="superpower-writing:executing-plans")` — prefixed as normal. These ship with this plugin; no sibling-plugin dependency.
 
 # Dependency Gate (HARD)
@@ -39,7 +39,7 @@ Run:
 ${CLAUDE_PLUGIN_ROOT}/scripts/check-deps.sh
 ```
 
-This probes standard Agent Skills install locations for: `scientific-writing`, `literature-review`, `peer-review`, `citation-management`, `research-lookup`, `scientific-schematics`.
+This probes standard Agent Skills install locations for: `literature-review`, `peer-review`, `citation-management`, `research-lookup`, `scientific-schematics`. These skills are now bundled under the plugin's own `skills/` directory.
 
 **On non-zero exit:** refuse all subsequent superpower-writing skill invocations. Surface the install command verbatim to the user:
 
@@ -176,16 +176,15 @@ Skills in this plugin (all invoked as `superpower-writing:<name>`):
 | `superpower-writing:revision` | Unified review-loop handler for internal co-author and external journal reviewer comments. Classify → respond → apply diff → re-verify. |
 | `superpower-writing:submission` | Final gate: verifies all claims PASS, metadata complete, graphical abstract present, no draft-only tags. Freezes a copy to `.writing/archive/<date>/`. |
 
-Upstream skills this plugin relies on (call by **bare name**, no prefix):
+Plugin-local domain skills (invoked with `superpower-writing:` prefix):
 
-| Upstream skill | Used by | Purpose |
-|----------------|---------|---------|
-| `scientific-writing` | drafting, revision | Prose style, IMRAD conventions, graphical-abstract requirement. |
+| Skill | Used by | Purpose |
+|-------|---------|---------|
 | `literature-review` | outlining, drafting, claim-verification | Structured lit synthesis. |
 | `research-lookup` | drafting, claim-verification | Paper/abstract retrieval for evidence resolution. |
 | `citation-management` | drafting, claim-verification, submission | Citation formatting, DOI resolution, bibliography assembly. |
 | `peer-review` | claim-verification, revision | Reporting-guideline checklists (CONSORT / STROBE / PRISMA). |
-| `scientific-schematics` | drafting | Graphical abstracts and schematic figures (mandatory per `scientific-writing`). |
+| `scientific-schematics` | drafting | Graphical abstracts and schematic figures. |
 | `zotero-mcp` (MCP) | drafting, claim-verification, outlining, submission, revision | All Zotero calls when `zotero.enabled: true`. Registered in `.mcp.json`. Core tools: `zotero_search_items` (DOI / title / author lookup), `zotero_get_item_metadata` (markdown or BibTeX export), `zotero_get_item_fulltext` (server-side extracted PDF text, web-API mode supported), `zotero_semantic_search` (AI similarity search over the chunked library — paragraph-level matches when paper bodies are indexed), `zotero_advanced_search`, `zotero_get_collections` / `zotero_get_collection_items`, `zotero_add_by_doi` (auto-fetches metadata + open-access PDF). Scite citation intelligence via `scite_enrich_item` / `scite_enrich_search` / `scite_check_retractions`. |
 
 # Claim-First Protocol
@@ -218,5 +217,5 @@ Instructions say WHAT, not HOW. "Add a methods paragraph" or "tighten the abstra
 1. Dep gate (check-deps + check-zotero when enabled).
 2. `.writing/` recovery or init.
 3. Stage-appropriate routing per the table above.
-4. Upstream skills for domain content, local skills for orchestration.
+4. Plugin-local skills for domain content and orchestration.
 5. Claim-first protocol enforced by the PreToolUse hook — don't try to bypass it.

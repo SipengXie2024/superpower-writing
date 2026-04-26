@@ -133,16 +133,21 @@ An optional trailing `% cars: O` paragraph may be added to describe paper organi
 ## Style rules
 
 - **Tense:**
-  - M1 centrality / generalization: present tense for established facts ("Type 2 diabetes is the leading cause of adult blindness").
-  - M1 prior work: simple past ("Smith et al. measured…") or present perfect for cumulative findings ("Multiple studies have shown…").
+  - M1 centrality / generalization: present tense for established knowledge and general truths ("Transformer models dominate NLP benchmarks").
+  - M1 prior work: simple past for specific prior studies and their findings ("Smith et al. measured…") or present perfect for cumulative findings ("Multiple studies have shown…").
   - M2 gap-indication: present perfect for unresolved state ("No prior work has addressed…"); simple present for contradictions ("These results conflict").
   - M3 purpose + findings: simple past for what was done in this study ("We conducted a cohort study of 1,247 patients"), simple present for generalizable claims ("The approach generalizes to any…").
-- **Voice:** active voice wherever possible, matching upstream `scientific-writing`. First-person plural ("we") is standard for empirical sciences; some humanities-adjacent venues prefer passive or impersonal.
+- **Voice:** active voice wherever possible, matching the conventions in `writing-principles.md`. First-person plural ("we") is standard for empirical sciences; some humanities-adjacent venues prefer passive or impersonal.
 - **Citations are expected** — unlike the abstract, the introduction is citation-dense, especially M1 and M2. Every factual claim about the field and every statement about prior work needs a citation. Use `\cite{citekey}` (standard LaTeX); group multiple cites in one site as `\cite{a,b,c}`.
 - **No results numbers that do not appear in Results.** Reviewers check; pre-announcing a number that does not reappear in Results erodes trust.
 - **Three-layer numeric discipline (Introduction layer).** §Introduction refers to results by direction, not magnitude --- "an order-of-magnitude reduction", "a substantial speed-up", "near-linear scaling", "eliminating the dominant bottleneck". Specific percents and absolute counts live in §Abstract (percent-only) and §Results (full breakdown); repeating them here triples the reviewer's consistency-check surface and multiplies the drift risk under revision.
 - **First-use term discipline.** The first time the paper names a load-bearing technical term, introduce it with `\emph{term}` and, in the same sentence or the next, a one-clause operational gloss that tells the reader what the term means well enough to read the next paragraph. Do NOT name a term and defer its definition to a later section. Pattern: ``\emph{X} --- <one-line operational gloss>.'' The formal definition may still live in §Background §N or §Methods §F; the gloss pays down the cognitive debt until the reader gets there, so the rest of §Introduction reads without a forward-reference hole.
 - **Figure / table references allowed**, but only to teasers that will reappear in the body. If you reference Figure 1 in the introduction, Figure 1 had better be the paper's conceptual / pipeline figure.
+- **Paragraph transitions between Moves.** The T-to-N transition is the most important seam in the paper. The first sentence of the first `[N]` paragraph must name both the T-side subjects whose mismatch forms the gap. Do NOT open with a demonstrative anaphor ("This gap...") --- the reader has not yet identified which T-strand is meant.
+- **Opening-hook discipline.** Do not start with a vacuous generality ("Since the dawn of computing...") or a textbook definition ("A database is a structured collection of data..."). Open with a specific, concrete claim that signals the paper's stakes.
+- **Length discipline.** Target 400--800 words for most venues. Introductions over 1,000 words have usually leaked into literature-review territory; move that material to §Related Work.
+- **Citation density.** M1 and M2 are citation-dense (every factual claim needs a reference); M3 is citation-sparse (your own contribution needs no citation). If M3 has more citations than M2, the contribution is under-developed relative to the literature review.
+- **Contribution-count norm.** For CS/ML venues, 3--5 contributions is the sweet spot. Fewer than 3 suggests under-scoping; more than 5 suggests over-claiming or fragmentation. Merge weak contributions into stronger parent claims.
 
 ## Common failure modes
 
@@ -153,3 +158,16 @@ An optional trailing `% cars: O` paragraph may be added to describe paper organi
 - **Buried thesis.** The paper's central claim does not appear until paragraph 5. M3 should open with purpose ("This paper investigates…" or "We propose…"); do not make the reader hunt.
 - **Related-work creep.** M1 + M2 grow to 60%+ of the introduction, squeezing M3 into one rushed paragraph. Rebalance — move related-work detail to §Related Work and use the freed space for M3.
 - **Abstract echo in §Introduction first paragraph.** The first paragraph of §Introduction repeats Abstract-B's opening sentence structure and enumerates the same related systems with the same connectors. Symptom: a reader who has already read the abstract gets no new signal from the first 100 words of the body, and reviewers score the paper "context-light". Fix: assume the reader has already absorbed the abstract. §Introduction T1 starts one level deeper — technical stakes, mechanism detail, or methodology exposition — and treats the abstract's context as given, not restated. Opening the first T paragraph with a verbatim or near-verbatim copy of Abstract-B's first sentence is a hard fail; rewrite from a different angle (e.g., abstract frames "what", introduction frames "how" or "why-now").
+
+### Key questions to answer
+
+Every introduction must let the reader answer these six questions after a single read-through. If any answer is missing, the CARS skeleton is incomplete:
+
+1. **What is the problem?** Name the concrete task or challenge in one sentence.
+2. **Why does it matter?** State the practical or theoretical consequence of leaving the problem unsolved.
+3. **What has been tried?** Summarize the dominant existing approach(es) and cite the canonical references.
+4. **What is the gap?** Identify the specific limitation, contradiction, or open question that prior work leaves unaddressed.
+5. **What do we contribute?** List the paper's contributions in a form the reader can verify against the body (preferably a numbered list for CS venues).
+6. **How is this paper organized?** Briefly map the remaining sections so the reader can navigate.
+
+Questions 1--3 map to M1 (Territory), question 4 maps to M2 (Niche), and questions 5--6 map to M3 (Occupy).

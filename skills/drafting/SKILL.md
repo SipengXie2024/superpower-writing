@@ -42,7 +42,7 @@ Before dispatching any section:
 - [ ] `.writing/claims/section_<NN>_<slug>.md` exists for every section listed.
 - [ ] `.writing/metadata.yaml` has been read; note `zotero.enabled` and `zotero.auto_push_new_citations`.
 - [ ] `.writing/manuscript/` directory exists (created by `init-writing-dir.sh`).
-- [ ] Graphical-abstract slot is tracked in `.writing/progress.md` (required by upstream `scientific-writing`).
+- [ ] Graphical-abstract slot is tracked in `.writing/progress.md` (required by the writing conventions in `skills/drafting/references/writing-principles.md`).
 
 Per section, before marking complete:
 
@@ -98,7 +98,7 @@ Read the full template at [`references/section-drafter-prompt.md`](references/se
   3. **No match.** Substitute the single line:
 
      ```
-     No section-specific standard applies; use general IMRAD conventions from scientific-writing.
+     No section-specific standard applies; use general IMRAD conventions from writing-principles.md.
      ```
 
   The canonical filenames in `section-standards/` are `00_abstract.md`, `01_introduction.md`, `02_background.md`, `03_methods.md`, `04_results.md`, `05_discussion.md`, `06_conclusion.md`, `07_related_work.md`, `08_motivation.md`. See [`references/section-standards/README.md`](references/section-standards/README.md) for the full contract.
@@ -107,12 +107,12 @@ The orchestrator (serial / parallel / session-handoff) layers its review gates o
 
 ### 3. Graphical abstract and schematics
 
-Upstream `scientific-writing` mandates at least one graphical abstract plus at least one schematic figure. Do not attempt to draw these with prose tools.
+The writing conventions mandate at least one graphical abstract plus at least one schematic figure (see `skills/drafting/references/writing-principles.md`). Do not attempt to draw these with prose tools.
 
 - For the graphical abstract:
 
   ```
-  Skill(skill="scientific-schematics")
+  Skill(skill="superpower-writing:scientific-schematics")
   Output: .writing/figures/graphical_abstract.png
   Caption: write into .writing/figures/graphical_abstract.md (caption only)
   ```
@@ -154,7 +154,7 @@ The Zotero-first / network-fallback / optional auto-push flow is fully specified
 
 **Zotero miss is not a failure.** A DOI absent from the user's Zotero library just means the user has not yet vetted it. Network fallback is normal and expected. The only failure mode is "no credible source anywhere", which must be escalated.
 
-**Graphical abstract is a first-class task.** Upstream requires one. Do not skip it, and do not inline its generation into a prose section — route it through `scientific-schematics` as its own task.
+**Graphical abstract is a first-class task.** The writing conventions require one. Do not skip it, and do not inline its generation into a prose section — route it through `superpower-writing:scientific-schematics` as its own task.
 
 **Progress dashboard is the handoff contract.** `claim-verification` and `revision` read `.writing/progress.md` to know what has been drafted, verified, or reviewed. A section is not "drafted" until its row is updated and committed.
 
@@ -182,9 +182,9 @@ At a glance:
 - `superpower-writing:claim-verification` — downstream; consumes `.writing/manuscript/*.tex` and confirms every claim tag.
 - `superpower-writing:revision` — downstream; called when reviews come back.
 - `superpower-writing:subagent-driven` / `team-driven` / `executing-plans` — the actual execution engines.
-- Upstream `scientific-writing` — voice and structure rules.
-- Upstream `scientific-schematics` — graphical abstract + schematics.
-- Upstream `research-lookup`, `citation-management` — evidence resolution (network).
+- Plugin-local `writing-principles.md` — voice and structure rules.
+- Plugin-local `superpower-writing:scientific-schematics` — graphical abstract + schematics.
+- Plugin-local `superpower-writing:research-lookup`, `superpower-writing:citation-management` — evidence resolution (network).
 - Plugin-level `.mcp.json` `zotero` server — Zotero Web API tools. Search: `zotero_search_items` (DOI / title lookup), `zotero_semantic_search` (AI similarity search with paragraph-level matching over PDF fulltext). Read: `zotero_get_item_metadata` (markdown or BibTeX), `zotero_get_item_fulltext` (server-side PDF text — use sparingly, often 70K+ chars; prefer `zotero_semantic_search` to find relevant chunks first). Write: `zotero_add_by_doi` (auto-fetches metadata + open-access PDF). Collection nav: `zotero_get_collections`, `zotero_get_collection_items`.
 - Hook `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` — PreToolUse enforcement of the claim-first protocol.
 - Hook `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-terms.sh` — opt-in PreToolUse enforcement of term-definition-before-use ordering. Activates when `.writing/glossary.md` is present.

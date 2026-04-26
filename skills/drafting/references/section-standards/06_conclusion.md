@@ -107,10 +107,7 @@ Rules:
 
 ## Style rules
 
-- **Tense:**
-  - R: simple past for what the paper did ("We proposed X"); simple present for what X is ("X is a framework for …").
-  - S: simple past for reported results ("X achieved 85% accuracy on ImageNet"); simple present for generalizable findings ("X matches the performance of baselines at lower computational cost").
-  - F: simple present for horizon statements ("This opens …"); simple future for longer-horizon projection ("Future extensions will enable …").
+- **Tense:** mostly present tense. R: simple past for what the paper did ("We proposed X") or simple present for what X is ("X is a framework for…"). S: simple past for reported results ("X achieved 85% accuracy on ImageNet") or simple present for generalizable findings ("X matches baseline performance at lower computational cost"). F: simple present for horizon statements ("This opens…"); simple future only for the Future work direction ("Future extensions will enable…").
 - **Voice:** active voice. First-person plural ("we proposed", "we envision") is standard.
 - **Tone:** confident but bounded. The Conclusion is the paper's parting word — it may speak with quiet conviction about what was demonstrated. Avoid both under-selling ("this paper makes modest progress toward …") and over-selling ("this work revolutionizes …").
 - **Paraphrase the Abstract.** Compare §Conclusion sentences against the Abstract's M and R paragraphs; reword to avoid verbatim overlap. Reviewers who read Abstract and Conclusion back-to-back notice copy-paste.
@@ -127,3 +124,28 @@ Rules:
 - **Missing `[F]` in standalone Conclusion.** The Conclusion ends after `[S]` with no closing gesture. Symptom: the paper trails off. Fix: add a one-sentence `[F]` unless the paper uses merged "§Discussion and Conclusion" form (in which case §Discussion `[F]` carries the forward-look and this file's `[F]` is intentionally dropped).
 - **Overclaiming significance.** `[S]` or `[F]` makes claims beyond what §Results supports ("X is the definitive solution to …"). Symptom: reviewers flag as overclaim; fairness scores drop. Fix: bound claims by §Results; use "achieves", "matches", "reduces" — not "solves", "revolutionizes", "dominates".
 - **Stacked hedges.** "This work may potentially enable some applications in future …". Symptom: the Conclusion reads as uncertain about its own contribution. Fix: pick one hedge verb and commit ("This enables X" / "This may enable X" — not both).
+
+### Purpose and placement
+
+The Conclusion provides a concise summary of key findings and their significance. It may be a separate section or the final paragraph of §Discussion; check venue requirements. At most 1--2 paragraphs. Do NOT introduce new information, new citations, or new arguments here --- if a claim is important enough to state in §Conclusion, it must have appeared earlier.
+
+What NOT to introduce in §Conclusion:
+
+- New citations not present in the body.
+- New numbers not reported in §Results.
+- New arguments or technical claims not made in §Methods or §Discussion.
+- Acknowledgments, data-availability statements, or author contributions (those belong in their own sections).
+
+Example:
+
+> This work introduces Sparse-fold Attention, a memory-efficient inference mechanism for large language models. Sparse-fold reduces GPU memory consumption by 60% during inference while maintaining within-1% accuracy on standard benchmarks. These results suggest that structured sparsity is a viable path toward deploying transformer models on resource-constrained hardware, opening the door to efficient on-device inference.
+
+Note how the example restates the contribution (R), names the headline result with a number (S), and closes with a forward-look that gestures at a concrete enabled application (F) --- without introducing anything not already established in the body.
+
+### Conclusion vs. Abstract
+
+The Conclusion and the Abstract cover overlapping ground but serve different readers. The Abstract is the recruiter: a reader scanning search results decides whether to read the paper based on the Abstract alone. The Conclusion is the closer: a reader who has finished the body wants a crisp summary to carry away. Write the Abstract to hook; write the Conclusion to consolidate. Never copy text between them --- paraphrase with different emphasis and structure.
+
+### When to omit the Conclusion
+
+Short workshop papers (4 pages), extended abstracts, and some venue formats (NeurIPS/ICML merged Discussion-and-Conclusion) may omit a standalone §Conclusion. In those cases, let §Discussion's `[S]` Significance paragraph serve as the closing statement. Do not force a standalone §Conclusion if the page budget makes it feel redundant.

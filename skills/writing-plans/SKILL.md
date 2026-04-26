@@ -60,7 +60,7 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/archive-search.sh "<keyword>"
 **Each step is one action (2-5 minutes):**
 - "Resolve evidence for each stub claim in section_02_methods.md" — step
 - "Flip each resolved claim STATUS: stub → evidence_ready" — step
-- "Invoke scientific-writing with outline excerpt + claims + metadata" — step
+- "Draft prose for section, reading writing-principles.md and style-cautions.md for guidance" — step
 - "Precede each load-bearing paragraph with a `% claim: <id>` LaTeX line comment" — step
 - "Commit" — step
 
@@ -121,7 +121,7 @@ Use this exact header template:
 
 **Goal:** Draft a submission-ready IMRAD manuscript covering <one-sentence paper thesis from outline.md>.
 
-**Architecture:** Section-per-file under `.writing/manuscript/`, claim-first drafting enforced by PreToolUse hook `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh`, figures delegated to `scientific-schematics`, citations resolved through the Zotero→network dual source of truth configured in `metadata.yaml`.
+**Architecture:** Section-per-file under `.writing/manuscript/`, claim-first drafting enforced by PreToolUse hook `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh`, figures delegated to `superpower-writing:scientific-schematics`, citations resolved through the Zotero→network dual source of truth configured in `metadata.yaml`.
 
 **Reporting guideline:** <CONSORT | STROBE | PRISMA | ARRIVE | none> (from metadata.yaml).
 
@@ -259,9 +259,9 @@ After saving the plan and completing the self-review, you MUST present exactly t
 
 Present exactly three drafting-mode options:
 
-- **Option 1: Subagent-Driven drafting (this session, sequential)** — one subagent per section, two-stage review (spec + manuscript) inline. Best for short papers (≤4 sections with prose) or when sections share heavy context. Invokes `Skill(skill="drafting")` with `mode: serial` and delegates per-task execution to `superpower-writing:subagent-driven`.
-- **Option 2: Team-Driven drafting (this session, parallel)** — Agent Team spawns N section drafters plus a dedicated reviewer. Best when parallelism score is high and sections are loosely coupled. Also prevents context-limit crashes on long papers. Invokes `Skill(skill="drafting")` with `mode: parallel` and delegates execution to `superpower-writing:team-driven`.
-- **Option 3: Separate-session drafting (new session, batched)** — open a new session in this working directory, invoke `Skill(skill="drafting")` there with `mode: session-handoff`. Best when the user wants manual per-section checkpoints. The new session uses `superpower-writing:executing-plans` to batch-execute with review gates.
+- **Option 1: Subagent-Driven drafting (this session, sequential)** — one subagent per section, two-stage review (spec + manuscript) inline. Best for short papers (≤4 sections with prose) or when sections share heavy context. Invokes `Skill(skill="superpower-writing:drafting")` with `mode: serial` and delegates per-task execution to `superpower-writing:subagent-driven`.
+- **Option 2: Team-Driven drafting (this session, parallel)** — Agent Team spawns N section drafters plus a dedicated reviewer. Best when parallelism score is high and sections are loosely coupled. Also prevents context-limit crashes on long papers. Invokes `Skill(skill="superpower-writing:drafting")` with `mode: parallel` and delegates execution to `superpower-writing:team-driven`.
+- **Option 3: Separate-session drafting (new session, batched)** — open a new session in this working directory, invoke `Skill(skill="superpower-writing:drafting")` there with `mode: session-handoff`. Best when the user wants manual per-section checkpoints. The new session uses `superpower-writing:executing-plans` to batch-execute with review gates.
 
 **Recommendation logic** (add "(Recommended)" to the best option's label, but never remove options):
 - Parallelism score ≥ 60% AND section count ≥ 5 → recommend Team-Driven.
@@ -282,7 +282,7 @@ Present exactly three drafting-mode options:
 - Guide the user to open a new session in this working directory.
 - **REQUIRED SUB-SKILL:** New session uses `superpower-writing:executing-plans`.
 
-After user choice, invoke `Skill(skill="drafting")` with the selected mode and the path to `.writing/plan.md`.
+After user choice, invoke `Skill(skill="superpower-writing:drafting")` with the selected mode and the path to `.writing/plan.md`.
 
 ## Key Principles
 
@@ -304,7 +304,7 @@ Do not inflate parallelism by declaring tasks parallel that really share context
 
 ### The plan does not write prose
 
-This skill is a planner. It never invokes `scientific-writing` itself. Every prose-writing Step appears in a task that `drafting` will execute later. Keep the separation clean: plans are orchestration, drafting is production.
+This skill is a planner. It never drafts prose itself. Every prose-writing Step appears in a task that `drafting` will execute later. Keep the separation clean: plans are orchestration, drafting is production.
 
 ### Shadow dependencies (I ↔ D) are loose, not hard
 
@@ -324,7 +324,7 @@ Never finish the skill without presenting the three drafting modes via AskUserQu
 - Complete content in every step — no placeholders (see "No Placeholders" section).
 - Exact commands with expected output (bash snippets for init and commit steps; claim id lists for evidence-resolution steps).
 - Every task includes a plain `git commit` command — author identity comes from the user's git config, not from skill-injected overrides.
-- Bare skill names for upstream prose-production skills (`scientific-writing`, `scientific-schematics`, `peer-review`, `citation-management`, `research-lookup`) — never `plugin:` prefixed. Zotero access goes through the `zotero-mcp` MCP server (tools: `zotero_search_items` etc.), registered in the plugin's `.mcp.json` — not through a skill. Local execution-engine references use the `superpower-writing:` prefix.
+- Prefixed skill names for plugin-local domain skills (`superpower-writing:scientific-schematics`, `superpower-writing:peer-review`, `superpower-writing:citation-management`, `superpower-writing:research-lookup`). Zotero access goes through the `zotero-mcp` MCP server (tools: `zotero_search_items` etc.), registered in the plugin's `.mcp.json` — not through a skill. Local execution-engine references also use the `superpower-writing:` prefix.
 - Every task reminds: "Log discoveries, decisions, and insights to `.writing/findings.md`".
 - Always include the parallelism groups analysis.
 - Lock file boundaries and responsibilities before task decomposition.

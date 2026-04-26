@@ -38,7 +38,7 @@ user sees every gap at once instead of whack-a-mole.
 
 ### 1. Claim verification is green
 
-Invoke `Skill(skill="claim-verification")`. Require:
+Invoke `Skill(skill="superpower-writing:claim-verification")`. Require:
 
 - The skill exits with all claims in `STATUS: verified`; any `evidence_ready`
   claim with a pending soft-failure override from claim-verification must be
@@ -64,13 +64,15 @@ Parse `.writing/metadata.yaml`. Require:
 Presence check only; the user owns truthfulness. Abort on any `TODO` string
 found anywhere in the file.
 
-### 3. Graphical abstract present
+### 3. Graphical abstract present (conditional)
 
 Check for any file matching `.writing/figures/graphical_abstract.*` (png,
-jpg, jpeg, pdf, svg, tif, tiff). Exactly one match is required. If zero, abort
-with instructions to place the file. If multiple, abort and ask the user to
-pick one (different formats of the same figure are fine — flag only when the
-basenames differ in intent).
+jpg, jpeg, pdf, svg, tif, tiff). This check is only enforced when `metadata.yaml`
+contains `graphical_abstract: required` or the venue is known to require one
+(most systems conferences do not). If the venue requires it and zero matches are
+found, abort with instructions to place the file. If multiple matches, abort and
+ask the user to pick one. If the venue does not require a graphical abstract and
+none is found, emit a warning and continue.
 
 ### 4. No `% draft-only` markers remain
 
@@ -98,6 +100,41 @@ carry every reference. This mirrors the PreToolUse hook's
 `CITATION_FREE_SLUGS` rule and runs independently at the submission gate
 in case the hook was bypassed during editing (manual file copy, external
 editor, etc.).
+
+### 5c. Citation format and completeness
+
+After `refs.bib` is generated (step after the checklist), run these
+citation-specific checks. Reference file: `references/citation-styles.md`.
+
+- **Bidirectional citation coverage:** every in-text `\cite{}` /
+  `\citep{}` / `\citet{}` command in `.writing/manuscript/*.tex` resolves
+  to an entry in `refs.bib`, and every `refs.bib` entry is cited at least
+  once in the manuscript. Orphans in either direction are hard failures
+  (unless `submission.prune_unused_bib: true` is set — in which case
+  uncited entries are silently pruned rather than flagged).
+- **Citation style matches venue requirement:** verify in-text format
+  (numbered vs. author-date) and reference-list formatting match the
+  target venue's stated style. See `references/citation-styles.md`
+  §Journal-Specific Citation Styles for venue-to-style mapping.
+- **DOIs present and valid for journal articles:** every `@article` entry
+  in `refs.bib` whose publication year is 2000 or later must include a
+  `doi` field. Validate each DOI by confirming it resolves (prefix match
+  against `10.` is sufficient at this gate; full HTTP resolution is
+  claim-verification's job).
+- **Preprints cited with version and date:** every `@misc` or
+  `@unpublished` entry with an `eprint` field (arXiv) must include
+  `eprinttype = {arxiv}`, `eprintclass`, and either `version` or a
+  `note` / `urldate` field carrying the access date.
+- **Software and dataset citations include version + DOI or URL:** entries
+  typed `@misc` or `@software` that reference software or datasets must
+  carry a `version` field and either a `doi` or `url` field.
+- **Journal abbreviations consistent with style:** all `journal` fields in
+  `refs.bib` use the abbreviation system the target venue requires
+  (PubMed/Index Medicus for medical venues, ISO for others). See
+  `references/citation-styles.md` §Common Abbreviations for the canonical
+  mapping.
+
+Abort with a file:line list for each failure, grouped by category.
 
 ### 6. LaTeX compile test passes
 

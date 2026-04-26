@@ -83,14 +83,17 @@ A well-balanced abstract gives Method and Result the most real estate; Backgroun
 
 ## Style rules
 
-- **Tense:** past tense for Method and Result ("We enrolled 1,247 patients"; "Accuracy increased by 12.3%"); present tense for Background and Conclusion ("T2D remains the leading cause of adult blindness"; "These findings suggest..."); present-perfect tense for Problem when framing an unresolved state ("No prior study has measured...").
-- **Voice:** active voice wherever possible ("We measured X" over "X was measured"), matching upstream `scientific-writing` conventions.
+- **Tense:** present tense for Background and Conclusion ("X remains a key challenge"; "These findings suggest..."); present-perfect or past tense for the Method and Result summary ("We evaluated X on three benchmarks"; "Accuracy increased by 12.3%"); past tense when reporting specific completed actions; present-perfect when framing an unresolved state ("No prior study has measured...").
+- **Voice:** active voice wherever possible ("We measured X" over "X was measured"), matching the conventions in `writing-principles.md`.
 - **No citations** in the abstract unless the venue explicitly allows them (rare — check venue instructions before including any).
 - **No undefined abbreviations** on first occurrence. The abstract is standalone; readers cannot be expected to have read the glossary.
 - **No figure/table/equation references** ("Figure 2 shows..." belongs in the body).
 - **Declare study registration** (trial ID, PROSPERO ID, OSF preregistration ID) at the end of the Method paragraph if `metadata.yaml` `preregistration.registry` is non-null.
 - **Three-layer numeric discipline (Abstract layer).** The Abstract is the headline layer. Report effect size as **percent change or relative ratio only**; do NOT carry absolute counts alongside percent changes (e.g., write "-41.5%", not "19,130 to 11,189 (-41.5%)"). Uncertainty (CI, p-value, SD) MAY accompany the headline percent if it fits in one clause; otherwise defer to §Results. The full absolute breakdown belongs in §Results. §Introduction is the direction-only layer (write "an order-of-magnitude reduction", not a specific percent). This three-layer split prevents reviewers from cross-checking three copies of the same number and finding drift between them.
-- **Numbers MUST carry units, comparators, and uncertainty where one clause permits.** "Accuracy improved by 10" is not a verifiable result; "Accuracy improved by +10.3 pp (95% CI 8.1–12.5, p < 0.001)" is. Consistent with the three-layer rule above, prefer percent-change or relative-ratio forms in the abstract; push absolute baseline-to-new pairs down to §Results.
+- **Numbers MUST carry units, comparators, and uncertainty where one clause permits.** "Accuracy improved by 10" is not a verifiable result; "Accuracy improved by +10.3 pp (95% CI 8.1--12.5, p < 0.001)" is. Consistent with the three-layer rule above, prefer percent-change or relative-ratio forms in the abstract; push absolute baseline-to-new pairs down to §Results.
+- **Write the abstract last.** Draft all body sections first, then distill the abstract. Drafting the abstract first produces placeholder claims that drift from the final results.
+- **Abstract is standalone.** A reader who reads only the abstract should understand what was done, what was found, and why it matters. Do not assume the reader will continue to the body.
+- **Word-limit compliance is hard.** Most venues enforce abstract word limits strictly (150--300 words). Count early and often. If the venue specifies a structured abstract, follow the required labels; otherwise use flowing paragraphs.
 
 ## Common failure modes
 
@@ -100,3 +103,22 @@ A well-balanced abstract gives Method and Result the most real estate; Backgroun
 - **Numbers without units or CIs.** Triggers reviewer suspicion even when the paper's body has the full numbers. Carry the full quantitative claim into the abstract.
 - **Method buried inside Background.** A sentence like "To address this, we conducted a randomized trial in 3,000 adults" belongs in M, not B. If Background ends with "we did X", split it.
 - **Five elements smashed into one paragraph.** Produces an unstructured blob that defeats the whole skeleton. The `% bpmrc: X` tag enforcement exists to catch this.
+
+### Title guidance
+
+The title is the paper's first (and often only) impression on search results, reviewer triage, and citation indexes. A strong CS title does three things simultaneously: names the technical contribution, signals the problem domain, and avoids cruft.
+
+Guidelines:
+
+- **Concise yet descriptive** (typically 8--15 words). Every word should earn its place.
+- **Include the key technique or system name** so readers can find the paper by keyword search. Domain-specific nouns (e.g., "sparse attention", "lock-free queue") improve discoverability.
+- **Avoid abbreviations, jargon-only constructions, and question-format titles** unless the venue explicitly allows them.
+- **Make it specific enough to distinguish from other studies** on the same topic. "Efficient Inference for Large Language Models" is too broad; "Sparse-fold Attention Reduces LLM Inference Memory by 60%" is better.
+- **Include key search terms** for discoverability (engineers search by problem, method, or system name).
+
+Examples:
+
+- Good: "Sparse-fold Attention for Memory-Efficient Transformer Inference" --- names the technique, signals the domain, gives a concrete contribution hint.
+- Good: "Lock-free Partial Snapshots for Distributed Key-Value Stores" --- names the data structure, the system class, and the concurrency model.
+- Too vague: "Improving System Performance"
+- Too detailed: "A Lock-free Algorithm for Maintaining Consistent Snapshots Across 16 Nodes in a Distributed Key-Value Store with tunable Consistency Levels"

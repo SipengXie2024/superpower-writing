@@ -19,14 +19,19 @@ Do NOT write prose in the plan itself — the plan enumerates tasks; drafting wr
 - [ ] **Step 1: Resolve evidence for each stub claim**
 
   For each claim in `claims/section_03_methods.md` with `STATUS: stub`:
-  - For `type: citation` EVIDENCE → Zotero-first when `metadata.yaml zotero.enabled: true`: call the `zotero_search_items` MCP tool with `query=<DOI>` (filter by `data.collections` containing `collection_key`). On a miss, call `Skill(skill="citation-management")` then `Skill(skill="research-lookup")`.
+  - For `type: citation` EVIDENCE → Zotero-first when `metadata.yaml zotero.enabled: true`: call the `zotero_search_items` MCP tool with `query=<DOI>` (filter by `data.collections` containing `collection_key`). On a miss, call `Skill(skill="superpower-writing:citation-management")` then `Skill(skill="superpower-writing:research-lookup")`.
   - For `type: dataset` → confirm the dataset identifier resolves (e.g., open the referenced URL/DOI).
   - For `type: figure` or `type: table` → confirm the artifact is scheduled in a figure/table task in this plan.
   - Flip STATUS to `evidence_ready` once every EVIDENCE entry is resolved.
 
-- [ ] **Step 2: Draft prose via scientific-writing**
+- [ ] **Step 2: Draft prose**
 
-  Invoke `Skill(skill="scientific-writing")` with:
+  READ the following reference files for style and structural guidance:
+  - `skills/drafting/references/writing-principles.md` — IMRAD conventions, voice, tense rules.
+  - `skills/drafting/references/style-cautions.md` — patterns to avoid at drafting time.
+  - `skills/drafting/references/section-standards/03_methods.md` (or the matching standard for the current section) — section-specific skeleton and structural tags.
+
+  Draft with:
   - section: Methods
   - outline excerpt: <copy from outline.md>
   - claims: <load claims/section_03_methods.md>
@@ -48,7 +53,7 @@ Do NOT write prose in the plan itself — the plan enumerates tasks; drafting wr
 - Read: `.writing/manuscript/03_methods.tex`, `.writing/claims/section_03_methods.md`
 - Write: `.writing/verify-report.md` (append section), update `STATUS` in claims file.
 
-- [ ] **Step 1: Invoke `Skill(skill="claim-verification")` scoped to Methods**
+- [ ] **Step 1: Invoke `Skill(skill="superpower-writing:claim-verification")` scoped to Methods**
 
   Run the four-pass verifier on Methods only (completeness, citation resolution dual source, numeric/table consistency, reporting-guideline subset). On all-pass, flip eligible claims `evidence_ready` → `verified`.
 
@@ -65,7 +70,7 @@ Do NOT write prose in the plan itself — the plan enumerates tasks; drafting wr
 - Read: `.writing/manuscript/03_methods.tex`, `.writing/verify-report.md`
 - Write: `.writing/reviews/internal_methods_<date>.md`
 
-- [ ] **Step 1: Invoke `Skill(skill="peer-review")` as co-author reviewer**
+- [ ] **Step 1: Invoke `Skill(skill="superpower-writing:peer-review")` as co-author reviewer**
 
   Prompt the skill to produce Major/Minor/OutOfScope comments against Methods prose. Store the output under `.writing/reviews/internal_methods_<ISO-date>.md`.
 
@@ -85,7 +90,7 @@ Do NOT write prose in the plan itself — the plan enumerates tasks; drafting wr
 
 ## Per-figure template
 
-For each figure listed in outline.md (plus the mandatory graphical abstract F0):
+For each figure listed in outline.md (plus the graphical abstract F0, if applicable — systems papers typically omit this; only include when the venue or author explicitly requests one):
 
 ````markdown
 ### Task F<n>: Figure <n> — <short name>
@@ -94,7 +99,7 @@ For each figure listed in outline.md (plus the mandatory graphical abstract F0):
 - Read: `.writing/outline.md` §Figures, relevant `claims/*.md` entries of `type: figure`
 - Write: `.writing/figures/fig<n>_<slug>.svg` (or `.png`) + `.writing/figures/fig<n>_<slug>_caption.md`
 
-- [ ] **Step 1: Delegate generation to `Skill(skill="scientific-schematics")`**
+- [ ] **Step 1: Delegate generation to `Skill(skill="superpower-writing:scientific-schematics")`**
 
   Provide: figure spec from outline, data reference from claims, required style (e.g., journal target format), and requested output format (SVG for schematics, PNG for data plots).
 
@@ -114,7 +119,7 @@ For each figure listed in outline.md (plus the mandatory graphical abstract F0):
   ```
 ````
 
-The graphical abstract is mandatory — always emit a Task F0 for it regardless of outline.
+The graphical abstract is optional — only emit a Task F0 for it when the venue requires one or the author explicitly chooses to include one. Systems papers (SOSP, OSDI, NSDI, SIGCOMM, etc.) typically do not include graphical abstracts.
 
 ## Per-table template
 

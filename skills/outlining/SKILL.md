@@ -64,13 +64,13 @@ If the idea is still exploratory, stop and route to `superpower-writing:brainsto
 Before proposing section-level claims, ground the paper in prior work. This is the only phase in the pipeline where broad literature reading happens; later phases only resolve specific cited items.
 
 ```
-Skill(skill="literature-review")
+Skill(skill="superpower-writing:literature-review")
 ```
 
 Use it to synthesize the landscape around the core contribution: what is known, what is contested, what is missing. Follow up with targeted lookups:
 
 ```
-Skill(skill="research-lookup")
+Skill(skill="superpower-writing:research-lookup")
 ```
 
 For specific papers you or the user mention, for canonical datasets, or for recent preprints.
@@ -227,6 +227,17 @@ Use short imperative claims. Numeric values that belong in prose (e.g., sample s
   ```
 
 - All IMRAD sections now have matching standards files. If the paper introduces a non-IMRAD section (e.g., §Glossary, §Ethics Statement, §Reproducibility Checklist), no standards file applies — generic bullet count from the table above governs, and `{SECTION_STANDARD}` falls through to the "no standard applies" text.
+
+### IMRAD Variations
+
+Not every venue uses canonical IMRAD (I-M-R-D-C as separate sections). When generating the skeleton, adapt to the venue's expected structure:
+
+- **Combined Results and Discussion.** Some venues (common in ML conferences, Nature/Science short articles) merge Results and Discussion into a single section where each finding is presented then immediately interpreted. When this applies, interleave `[R]`/`[T]` result bullets with `[I]` interpretation bullets under one heading, and drop the standalone Discussion ILFS block.
+- **IMRaD without separate Conclusion.** Many journals fold the conclusion into the final Discussion paragraph. When this applies, omit the `06_conclusion` stem and append the RSF conclusion template (minus `[F]` if Discussion already has ILFS `[F]`) to the end of the Discussion bullets.
+- **ILMRaD (Literature Review as explicit section).** Theses, dissertations, and some engineering journals require a standalone Literature Review section between Introduction and Methods. When this applies, add a `NN_literature_review.tex` stem and structure its bullets thematically (similar to Related Work `[G]` groups) but organized chronologically within each theme.
+- **ML conference format.** NeurIPS/ICML/ICLR papers typically use Introduction-Method-Experiments-Conclusion with Related Work in appendix. The Experiments section combines Results and Discussion (see "Combined Results and Discussion" above), and Related Work may be shortened or moved to supplementary material.
+
+When in doubt, check the target venue's author guidelines or recent publications from the same venue. The outline skeleton should match the venue's section structure before claim stubs are materialized.
 
 ## Step 4: Materialize claim stubs
 

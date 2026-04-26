@@ -5,7 +5,6 @@
 set -euo pipefail
 
 REQUIRED=(
-  scientific-writing
   literature-review
   peer-review
   citation-management
@@ -14,8 +13,11 @@ REQUIRED=(
 )
 
 # Agent Skills standard installs to platform-specific locations. Probe the
-# common ones. First match wins.
+# common ones, plus this plugin's own skills/ directory (preferred when present
+# so the dep-check resolves against shipped copies before any external install).
+# First match wins.
 CANDIDATE_ROOTS=(
+  "$(dirname "${BASH_SOURCE[0]}")/../skills"
   "$HOME/.claude/skills"
   "$HOME/.claude/plugins/cache"
   "$HOME/.cursor/skills"

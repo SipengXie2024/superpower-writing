@@ -91,8 +91,8 @@ For each claim that passed Pass 1 with `type: citation` EVIDENCE entries:
 #### 2b. Network fallback
 
 1. Check `.writing/verify-cache.json` for the DOI. If present AND `source` field indicates successful prior resolution, use cached abstract_hash to confirm abstract still matches (re-fetch abstract only if hash mismatch or cache entry absent).
-2. On cache miss / mismatch, invoke `Skill(skill="citation-management")` with the DOI. This resolves the DOI against Crossref and returns canonical metadata.
-3. On failure or ambiguity, invoke `Skill(skill="research-lookup")` with the DOI and the CLAIM text. research-lookup queries Crossref/PubMed and returns abstract + metadata.
+2. On cache miss / mismatch, invoke `Skill(skill="superpower-writing:citation-management")` with the DOI. This resolves the DOI against Crossref and returns canonical metadata.
+3. On failure or ambiguity, invoke `Skill(skill="superpower-writing:research-lookup")` with the DOI and the CLAIM text. research-lookup queries Crossref/PubMed and returns abstract + metadata.
 4. **Network hit:** record `source: network` in the claim EVIDENCE entry.
 5. **`auto_push_new_citations: true` behavior:** if Zotero is enabled AND auto_push is true AND network (not Zotero) returned the hit, push the resolved item to `zotero.collection_key` by calling `zotero_add_by_doi(doi=<DOI>, collection_key=<key>)` from the `zotero` MCP server. The tool dedupes by DOI internally. Update EVIDENCE `source` to `both` and record the returned item key as `zotero_item_key`.
 6. **Network miss AND Zotero miss:** FAIL: `DOI <doi> for claim '<id>' unresolvable via Zotero or Crossref/PubMed`.
@@ -133,7 +133,7 @@ Purpose: catch copy-paste drift between prose and tables.
 
 1. Read `metadata.yaml.reporting_guideline` (CONSORT | STROBE | PRISMA | ARRIVE | none).
 2. If `none`: SKIP this pass, record `n/a` in report.
-3. Otherwise, invoke `Skill(skill="peer-review")` with arguments: `checklist: <guideline>`, `manuscript_dir: .writing/manuscript/`, `metadata: .writing/metadata.yaml`. peer-review walks the checklist and returns a per-item PASS/FAIL array.
+3. Otherwise, invoke `Skill(skill="superpower-writing:peer-review")` with arguments: `checklist: <guideline>`, `manuscript_dir: .writing/manuscript/`, `metadata: .writing/metadata.yaml`. peer-review walks the checklist and returns a per-item PASS/FAIL array.
 4. Every checklist FAIL becomes a top-level FAIL in the report — does not attach to a single claim (these are document-level concerns).
 
 ### Step 5: Emit Report
@@ -216,16 +216,16 @@ The verify-report.md is the document-of-record for this verification round. It i
 
 ## Upstream Skill Contracts
 
-This skill invokes these upstream skills by bare name via the Skill tool (no `plugin:` prefix — scientific-agent-skills is an Agent Skills collection):
+This skill invokes these plugin-local skills via the Skill tool with the `superpower-writing:` prefix:
 
 | Skill | Invocation point | Expected I/O |
 |-------|------------------|--------------|
 | `zotero-mcp` (MCP) | Pass 2a, 2c body lookup, §5 push-back | `zotero_search_items` + `zotero_get_item_metadata` for query-by-DOI; `zotero_semantic_search` for claim-text similarity fallback (catches DOI-mismatched items and finds paragraph-level support when the abstract is ambiguous); `zotero_get_item_fulltext` for narrow passage reads when chunks alone are insufficient; `zotero_add_by_doi` for dedup-aware push. Registered in `.mcp.json`. |
-| `citation-management` | Pass 2b primary | Resolve DOI → canonical Crossref record. |
-| `research-lookup` | Pass 2b fallback / semantic match | DOI → abstract; optionally compare abstract ↔ claim text. |
-| `peer-review` | Pass 4 | Input: checklist name + manuscript dir. Output: per-item PASS/FAIL. |
+| `superpower-writing:citation-management` | Pass 2b primary | Resolve DOI → canonical Crossref record. |
+| `superpower-writing:research-lookup` | Pass 2b fallback / semantic match | DOI → abstract; optionally compare abstract ↔ claim text. |
+| `superpower-writing:peer-review` | Pass 4 | Input: checklist name + manuscript dir. Output: per-item PASS/FAIL. |
 
-If any of these skills is missing, `main` skill's dep gate will have already hard-failed the session. Inside this skill, a missing upstream at invocation time is an unrecoverable error: halt verification and surface the install command.
+If any of these skills is missing, `main` skill's dep gate will have already hard-failed the session. Inside this skill, a missing skill at invocation time is an unrecoverable error: halt verification and surface the install command.
 
 ## Integration Points
 

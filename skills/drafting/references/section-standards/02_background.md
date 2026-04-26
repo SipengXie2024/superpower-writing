@@ -16,6 +16,8 @@ The §Background (sometimes titled §Preliminaries or §Technical Background) se
 
 Why this structure dominates: papers that skip D or N force the reader to flip back to Introduction or other papers to reconstruct notation; papers that skip P leave §Methods' contributions hanging in a vacuum; papers that skip L leave the reader confused about why a new method was needed at all. Every DNPL element answers a question the reader will otherwise carry into §Methods and resolve less charitably.
 
+**Background vs. Related Work.** §Background describes the *technical apparatus* the reader needs to follow §Methods (notation, definitions, the specific baseline being extended). §Related Work surveys the *literature landscape* (alternative approaches, concurrent work, broader context). If a paragraph compares multiple approaches without defining notation, it belongs in §Related Work, not here. A useful test: if removing a paragraph does not break the reader's ability to understand §Methods, it probably belongs in §Related Work.
+
 ## Role of each element
 
 | Element                          | Purpose                                                                                           | Answers                                                                      |
@@ -92,20 +94,26 @@ Rules:
 - The **N paragraph is special**: it should include every symbol §Methods will reuse. Readers should never have to guess what a variable means when it reappears in §Methods or §Results.
 - The **P paragraph** should describe prior approaches using the notation from N, not informally. If a reader finishes P and still cannot articulate what the baseline does in one sentence, P has failed.
 - The **L paragraph must be concrete**, not aesthetic. "Prior approaches are not as scalable" is not a limitation; "Prior approaches require $O(n^2)$ memory, exceeding commodity GPU capacity for $n > 32k$" is. L is where §Methods' contribution earns its shape, so precision here pays off downstream.
-- Length budget: ~500–1,200 words total. Notation-heavy papers (theoretical CS, cryptography) may push to 2,000 words; applied ML/systems papers typically stay under 1,000.
+- Length budget: ~500--1,200 words total. Notation-heavy papers (theoretical CS, cryptography) may push to 2,000 words; applied ML/systems papers typically stay under 1,000.
 - Equations: inline via `$...$`, display via `\[ ... \]` or `\begin{equation} ... \end{equation}`. Label only equations referenced later (via `\label{eq:foo}` + `\eqref{eq:foo}`).
+- **Table of notation (optional).** Papers with 10+ symbols may include a compact notation table at the end of N. This is a convenience for the reader, not a substitute for inline definitions --- every symbol must still be defined in prose at first use.
 
 ## Style rules
 
 - **Tense:**
+  - Present tense dominates §Background. Use simple present for definitions, descriptions of how systems work, and established facts about the domain.
   - D: simple present ("Image classification models assign a label to an input image").
   - N: simple present for definitions ("Let $f_\theta$ denote a parameterized classifier").
-  - P: simple present for how the baseline works ("Softmax attention computes..."); simple past for historical statements ("Vaswani et al. introduced multi-head attention").
+  - P: simple present for how the baseline works ("Softmax attention computes..."); simple past only for historical statements about when an approach was introduced ("Vaswani et al. introduced multi-head attention in 2017").
   - L: simple present for structural limitations ("This approach scales quadratically in sequence length"); simple past for empirical limitations observed in prior work ("Prior benchmarks reported latencies above 200 ms").
 - **Voice:** active voice; avoid "it is well known that…" and "it has been shown that…" — cite specifically or drop the claim.
 - **Citations:** dense in D, P, L; usually sparse in N (notation is often conventional, not cited). Cite the canonical source for every baseline mentioned in P; cite the benchmark or measurement source for every limitation in L. Use `\cite{citekey}` (standard LaTeX); group multiple cites as `\cite{a,b,c}`.
 - **No forward references by section number.** "As we will see in §4..." couples this section to section numbering that may shift. Refer by content ("our method addresses this by...") not by section number.
 - **Notation hygiene:** every symbol introduced in N MUST be used somewhere in §Methods or §Results; conversely, every symbol §Methods uses MUST be defined in N. Dangling or unused notation is a reviewer magnet.
+- **Audience assumption.** Write for a reader who has just finished §Introduction and needs the technical apparatus before entering §Methods. This means N should define terms §Introduction used informally but did not formalize, and P should describe baselines with enough precision that a reader who skipped §Related Work can still follow the comparison.
+- **Equation style.** Keep equations compact. A single display equation with aligned definitions is better than five inline equations scattered across a paragraph. Use `\begin{align}` or `\begin{equation}` for any expression referenced later; use inline `$...$` for single-use symbols.
+- **Paragraph transitions.** D flows into N ("To formalize this, we introduce…"); N flows into P ("Using this notation, the dominant approach is…"); P flows into L ("However, this approach suffers from…"). Each transition should be explicit, not implied.
+- **Length discipline.** §Background should be the second-shortest section after §Abstract. If it exceeds 1,500 words, material has leaked in from §Related Work or §Methods. Move literature survey to §Related Work and design details to §Methods.
 
 ## Common failure modes
 
@@ -115,3 +123,8 @@ Rules:
 - **Baseline described informally.** P describes the prior approach in words but not using N's notation, forcing the reader to map English to formulas. Symptom: §Methods' comparison paragraphs read as hand-waving. Fix: rewrite P using equations and defined symbols from N.
 - **Limitation not actionable.** L says "prior approaches have limitations" without specifying which. Symptom: reviewers fill in their own limitations and find the Method addresses the wrong one. Fix: make L quantitative or mechanism-specific — readers should be able to predict what §Methods will propose from reading L alone.
 - **Background blurs into Related Work.** D + P grow into a full literature review, duplicating §Related Work. Symptom: two sections with the same content. Fix: keep Background narrow (just enough to support §Methods); push broader coverage to §Related Work.
+- **Notation overload.** N introduces 20+ symbols, most of which are never used again. Symptom: the notation table reads like a textbook appendix. Fix: only define symbols that appear in §Methods or §Results. If a symbol is used once, define it inline where it appears instead of in N.
+- **Prior approach described without critique.** P explains how the baseline works but never mentions its shortcomings, leaving L to carry all the critical weight. Symptom: the reader wonders why P was included at all. Fix: weave 1--2 limitation hints into P so L feels like a natural culmination, not a sudden pivot.
+- **Missing baseline in P.** The paper compares against a prior method in §Results but never introduced that method in §Background. Symptom: reviewer writes "baseline X is not adequately described". Fix: every baseline that appears in §Results must be introduced in §Background P or §Results Setup.
+- **D paragraph too broad.** D reads like a Wikipedia introduction to the entire field. Symptom: reviewer skims D because it contains no new signal for a domain expert. Fix: D should be 2--4 sentences that frame the specific problem space, not the entire discipline. Target 50--100 words for D.
+- **L paragraph predicts the wrong method.** The limitation described in L does not align with what §Methods actually proposes. Symptom: reader detects a bait-and-switch. Fix: audit L against §Methods before finalizing; the limitation should directly motivate the method's design choices.
