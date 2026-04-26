@@ -5,6 +5,48 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.8.0] — 2026-04-26
+
+### Changed
+
+- **Scientific schematics: OpenRouter → Codex OAuth.** Replaced the
+  OpenRouter/Gemini image-generation backend with the plugin's own
+  `tools/image-generator/` (Codex OAuth + gpt-image-2). No more
+  `OPENROUTER_API_KEY` dependency. Deleted 956 lines of Python
+  (`generate_schematic_ai.py`, `generate_schematic.py`); generation is now
+  a single `image-gen generate` CLI call driven by SKILL.md instructions.
+
+- **Quality review: Claude → GPT-5.5.** Added `image-gen review`
+  subcommand that sends the generated image to GPT-5.5 for structured
+  multimodal analysis. Returns JSON with 5-criterion scores (accuracy,
+  clarity, labels, layout, appearance), strengths, issues, and pass/fail
+  verdict against document-type thresholds. SKILL.md Step 3 now calls
+  `image-gen review` instead of Claude's Read tool.
+
+- `scripts/check-deps.sh` now verifies `tools/image-generator/dist/cli.js`
+  exists, Node.js >= 20, and OAuth credentials (warning-only for the
+  latter).
+
+### Added
+
+- `tools/image-generator/src/ops/review.ts` — review operation sending
+  images to GPT-5.5 with a structured scoring prompt.
+- `tools/image-generator/src/codex/client.ts` — `runTextRequest()` for
+  text-only SSE responses alongside existing `runImageRequest()`.
+- Review subcommand in CLI: `image-gen review -i <img> [--doc-type <type>]
+  [-t <threshold>] [-o <output>]`.
+
+## [0.7.0] — 2026-04-25
+
+### Changed
+
+- **Dissolved scientific-writing upstream dependency.** Inlined all
+  domain content (IMRAD templates, reporting guidelines, venue styles,
+  citation styles, figures & tables guide) into the plugin's own skills/
+  and references/. Removed `scientific-agent-skills` (K-Dense-AI) from
+  runtime dependencies. `check-deps.sh` now verifies skills from the
+  plugin's own `skills/` directory instead of external install locations.
+
 ## [0.6.0] — 2026-04-24
 
 ### Added
