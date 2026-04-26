@@ -55,3 +55,14 @@ export interface ParsedImage {
   /** Original SSE event names that contributed to this image. Diagnostic. */
   sourceEvents: string[];
 }
+
+export interface ParsedText {
+  /** Full text content from the model response. */
+  text: string;
+  /** Model the backend reports having used. */
+  model?: string;
+  /** Backend-assigned request id. */
+  requestId?: string;
+  /** Original SSE event names that contributed. Diagnostic. */
+  sourceEvents: string[];
+}

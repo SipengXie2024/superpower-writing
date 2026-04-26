@@ -6,7 +6,7 @@ import { ensureFreshCredentials } from "../auth/refresh.js";
 import { AuthError, CodexApiError, StreamParseError } from "../util/errors.js";
 import { debugEnabled, logger } from "../util/log.js";
 import { parseSSE } from "./sse.js";
-import type { CodexRequestBody, ParsedImage } from "./types.js";
+import type { CodexRequestBody, ParsedImage, ParsedText } from "./types.js";
 
 const CODEX_RESPONSES_URL = "https://chatgpt.com/backend-api/codex/responses";
 const DEFAULT_OUTER_MODEL = "gpt-5.5";
@@ -21,6 +21,11 @@ export const codexConfig = {
 export interface RunImageRequestArgs {
   body: CodexRequestBody;
   /** When true, every received SSE event is appended to a debug file. */
+  debugDump?: boolean;
+}
+
+export interface RunTextRequestArgs {
+  body: Omit<CodexRequestBody, "tools"> & { tools?: CodexRequestBody["tools"] };
   debugDump?: boolean;
 }
 
@@ -190,4 +195,168 @@ function extractFromAny(
 function preview(text: string): string {
   const trimmed = text.trim();
   return trimmed.length > 400 ? `${trimmed.slice(0, 400)}…` : trimmed;
+}
+
+// ── Text (review) request ─────────────────────────────────────────────
+
+export async function runTextRequest({
+  body: rawBody,
+  debugDump,
+}: RunTextRequestArgs): Promise<ParsedText> {
+  const creds = await ensureFreshCredentials();
+
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${creds.access}`,
+    "Content-Type": "application/json",
+    Accept: "text/event-stream",
+    "OpenAI-Beta": "responses=experimental",
+  };
+  if (creds.chatgpt_account_id) {
+    headers["ChatGPT-Account-Id"] = creds.chatgpt_account_id;
+  }
+
+  // Allow callers to omit tools (text-only request).
+  const body = { ...rawBody, tools: (rawBody.tools ?? []) } as CodexRequestBody;
+
+  logger.debug(
+    `POST ${CODEX_RESPONSES_URL} (model=${body.model}, tools=${(body.tools as unknown[]).length})`,
+  );
+
+  const res = await fetch(CODEX_RESPONSES_URL, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+  });
+
+  if (res.status === 401 || res.status === 403) {
+    const text = await res.text().catch(() => "");
+    throw new AuthError(
+      "unauthorized",
+      `Codex backend rejected the access token (HTTP ${res.status}). ` +
+        `Run \`image-gen login\` again. Body: ${preview(text)}`,
+    );
+  }
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new CodexApiError(res.status, preview(text));
+  }
+  if (!res.body) {
+    throw new StreamParseError("Codex response had no body");
+  }
+
+  const dumpPath =
+    debugDump || debugEnabled()
+      ? path.join(tmpdir(), `image-gen-text-sse-${Date.now()}.log`)
+      : null;
+  if (dumpPath) {
+    await fs.writeFile(dumpPath, "", { mode: 0o600 });
+    logger.debug(`Dumping SSE events to ${dumpPath}`);
+  }
+
+  return consumeTextStream(res.body, dumpPath);
+}
+
+async function consumeTextStream(
+  body: ReadableStream<Uint8Array>,
+  dumpPath: string | null,
+): Promise<ParsedText> {
+  let deltas = "";
+  let fullText = "";
+  let completedText = "";
+  const collected: ParsedText = { text: "", sourceEvents: [] };
+
+  for await (const evt of parseSSE(body)) {
+    if (dumpPath) {
+      const line = `event: ${evt.event}\ndata: ${evt.data.slice(0, 4096)}\n\n`;
+      await fs.appendFile(dumpPath, line);
+    }
+
+    let parsed: unknown = null;
+    try {
+      parsed = evt.data ? JSON.parse(evt.data) : null;
+    } catch {
+      continue;
+    }
+    if (!parsed || typeof parsed !== "object") continue;
+    const obj = parsed as Record<string, unknown>;
+
+    // Accumulate text deltas (streaming partial output).
+    if (
+      typeof obj.delta === "string" &&
+      obj.delta.length > 0 &&
+      (evt.event.includes("text") || evt.event.includes("delta"))
+    ) {
+      deltas += obj.delta;
+      if (!collected.sourceEvents.includes(evt.event))
+        collected.sourceEvents.push(evt.event);
+    }
+
+    // Capture full text from "done" events.
+    if (
+      typeof obj.text === "string" &&
+      obj.text.length > fullText.length &&
+      (evt.event.includes("done") || evt.event.includes("completed"))
+    ) {
+      fullText = obj.text;
+      if (!collected.sourceEvents.includes(evt.event))
+        collected.sourceEvents.push(evt.event);
+    }
+
+    // Final response event — extract model, request_id, and output text.
+    if (evt.event === "response.completed" || evt.event === "response.done") {
+      const response = (obj.response as Record<string, unknown> | undefined) ?? obj;
+      if (typeof (response as Record<string, unknown>).id === "string")
+        collected.requestId = (response as Record<string, unknown>).id as string;
+      if (typeof (response as Record<string, unknown>).model === "string")
+        collected.model = (response as Record<string, unknown>).model as string;
+
+      completedText = extractOutputText(response);
+    }
+  }
+
+  // Prefer full text > completed-event text > accumulated deltas.
+  collected.text = fullText || completedText || deltas;
+
+  if (!collected.text) {
+    const hint = dumpPath
+      ? ` See SSE dump at ${dumpPath}.`
+      : " Set IMAGE_GEN_DEBUG=1 to capture the SSE stream.";
+    throw new StreamParseError(
+      `Codex stream completed without a text payload.${hint}`,
+    );
+  }
+
+  return collected;
+}
+
+/** Walk the response.completed payload to find output text strings. */
+function extractOutputText(node: unknown, depth = 0): string {
+  if (depth > 8 || node === null || typeof node !== "object") return "";
+  if (typeof node === "string") return node;
+
+  if (Array.isArray(node)) {
+    return node.map((item) => extractOutputText(item, depth + 1)).join("");
+  }
+
+  const obj = node as Record<string, unknown>;
+  // When we see a content array, concatenate its text parts.
+  if (Array.isArray(obj.content)) {
+    let text = "";
+    for (const part of obj.content) {
+      if (part && typeof part === "object") {
+        const p = part as Record<string, unknown>;
+        if (typeof p.text === "string" && p.type === "output_text") text += p.text;
+      }
+    }
+    if (text) return text;
+  }
+
+  // Recurse into nested objects.
+  let acc = "";
+  for (const value of Object.values(obj)) {
+    if (value && typeof value === "object") {
+      acc += extractOutputText(value, depth + 1);
+    }
+  }
+  return acc;
 }

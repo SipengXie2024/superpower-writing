@@ -1,89 +1,83 @@
 #!/bin/bash
-# Example usage of AI-powered scientific schematic generation
-# 
+# Example usage of scientific schematic generation via image-gen
+#
 # Prerequisites:
-# 1. Set OPENROUTER_API_KEY environment variable
-# 2. Ensure Python 3.10+ is installed
-# 3. Install requests: pip install requests
+# 1. Build the tool: cd tools/image-generator && npm install && npm run build
+# 2. Authenticate: node tools/image-generator/dist/cli.js login
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+IMAGE_GEN="node $SCRIPT_DIR/../../../tools/image-generator/dist/cli.js"
+
 echo "=========================================="
-echo "Scientific Schematics - AI Generation"
+echo "Scientific Schematics - Image Generation"
 echo "Example Usage Demonstrations"
 echo "=========================================="
 echo ""
 
-# Check for API key
-if [ -z "$OPENROUTER_API_KEY" ]; then
-    echo "❌ Error: OPENROUTER_API_KEY environment variable not set"
-    echo ""
-    echo "Get an API key at: https://openrouter.ai/keys"
-    echo "Then set it with: export OPENROUTER_API_KEY='your_key'"
+# Check for credentials
+if ! $IMAGE_GEN status 2>/dev/null; then
+    echo "Error: Not authenticated. Run '$IMAGE_GEN login' first."
     exit 1
 fi
 
-echo "✓ OPENROUTER_API_KEY is set"
+echo "Credentials OK"
 echo ""
 
 # Create output directory
 mkdir -p figures
-echo "✓ Created figures/ directory"
-echo ""
 
-# Example 1: Simple flowchart
-echo "Example 1: CONSORT Flowchart"
-echo "----------------------------"
-python scripts/generate_schematic.py \
-  "CONSORT participant flow diagram. Assessed for eligibility (n=500). Excluded (n=150) with reasons: age<18 (n=80), declined (n=50), other (n=20). Randomized (n=350) into Treatment (n=175) and Control (n=175). Lost to follow-up: 15 and 10. Final analysis: 160 and 165." \
-  -o figures/consort_example.png \
-  --iterations 2
+# Example 1: Distributed system pipeline
+echo "Example 1: Distributed Transaction Pipeline"
+echo "--------------------------------------------"
+$IMAGE_GEN generate \
+  -p "Distributed transaction processing pipeline. Client layer (3 blue boxes) → API gateway (green) → consensus module (Raft, 3 nodes) → write-ahead log (orange cylinder) → storage backend. Left-to-right flow. Clean block-diagram style." \
+  -o figures/txn_pipeline_example.png \
+  --quality high
 
 echo ""
-echo "✓ Generated: figures/consort_example.png"
-echo "  - Also created: consort_example_v1.png, v2.png, v3.png"
-echo "  - Review log: consort_example_review_log.json"
+echo "Generated: figures/txn_pipeline_example.png"
 echo ""
 
-# Example 2: Neural network (shorter for demo)
-echo "Example 2: Simple Neural Network"
-echo "--------------------------------"
-python scripts/generate_schematic.py \
-  "Simple feedforward neural network diagram. Input layer with 4 nodes, hidden layer with 6 nodes, output layer with 2 nodes. Show all connections. Label layers clearly." \
-  -o figures/neural_net_example.png \
-  --iterations 2
+# Example 2: Neural network
+echo "Example 2: Transformer Architecture"
+echo "------------------------------------"
+$IMAGE_GEN generate \
+  -p "Transformer encoder-decoder architecture. Encoder stack on left (input embedding, positional encoding, multi-head attention, feed-forward). Decoder stack on right (masked attention, cross-attention, feed-forward). Cross-attention connection with dashed line. Light blue encoder, light red decoder. All components labeled." \
+  -o figures/transformer_example.png \
+  --quality high
 
 echo ""
-echo "✓ Generated: figures/neural_net_example.png"
+echo "Generated: figures/transformer_example.png"
 echo ""
 
-# Example 3: Biological pathway (minimal)
-echo "Example 3: Signaling Pathway"
-echo "---------------------------"
-python scripts/generate_schematic.py \
-  "Simple signaling pathway: Receptor → Kinase A → Kinase B → Transcription Factor → Gene. Show arrows with 'activation' labels. Use different colors for each component." \
-  -o figures/pathway_example.png \
-  --iterations 2
+# Example 3: Cache hierarchy
+echo "Example 3: Cache Hierarchy"
+echo "--------------------------"
+$IMAGE_GEN generate \
+  -p "Multi-tier cache hierarchy. Top: 4 CPU cores with private L1. Core pairs share L2. All share L3. Below: DRAM controller → DDR5. Bottom: NVMe → SSD. Include latency: 1ns L1, 4ns L2, 12ns L3, 80ns DRAM, 10us SSD. Vertical layout, top-to-bottom." \
+  -o figures/cache_example.png
 
 echo ""
-echo "✓ Generated: figures/pathway_example.png"
+echo "Generated: figures/cache_example.png"
+echo ""
+
+# Example 4: Review the generated image
+echo "Example 4: Quality Review"
+echo "--------------------------"
+$IMAGE_GEN review -i figures/cache_example.png --doc-type conference
+
+echo ""
+echo "Review complete. See figures/cache_example_review.json for details."
 echo ""
 
 echo "=========================================="
-echo "All examples completed successfully!"
+echo "All examples completed!"
 echo "=========================================="
 echo ""
-echo "Generated files in figures/:"
-ls -lh figures/*example*.png 2>/dev/null || echo "  (Files will appear after running with valid API key)"
+echo "Generated files:"
+ls -lh figures/*example*.png 2>/dev/null || echo "  (no files found)"
 echo ""
-echo "Review the review_log.json files to see:"
-echo "  - Quality scores for each iteration"
-echo "  - Detailed critiques and suggestions"
-echo "  - Improvement progression"
+echo "Metadata files (*.meta.json) contain model info and timestamps."
 echo ""
-echo "Next steps:"
-echo "  1. View the generated images"
-echo "  2. Review the quality scores in *_review_log.json"
-echo "  3. Try your own prompts!"
-echo ""
-

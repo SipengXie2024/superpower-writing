@@ -1,192 +1,178 @@
-# Scientific Schematics - Nano Banana 2
+# Scientific Schematics - Image Generation
 
 **Generate any scientific diagram by describing it in natural language.**
 
-Nano Banana 2 creates publication-quality diagrams automatically - no coding, no templates, no manual drawing required.
+gpt-image-2 (via image-gen) creates publication-quality diagrams automatically — no coding, no templates, no manual drawing required. GPT-5.5 reviews quality automatically.
 
 ## Quick Start
 
 ### Generate Any Diagram
 
 ```bash
-# Set your OpenRouter API key
-export OPENROUTER_API_KEY='your_api_key_here'
+# Set CLI path
+IMAGE_GEN="node $CLAUDE_PLUGIN_ROOT/tools/image-generator/dist/cli.js"
 
-# Generate any scientific diagram
-python scripts/generate_schematic.py "CONSORT participant flow diagram" -o figures/consort.png
+# Authenticate (one-time, opens browser)
+$IMAGE_GEN login
+
+# Generate a scientific diagram
+$IMAGE_GEN generate -p "Distributed storage write path: client → gateway → consensus → WAL → memtable → SSTable" -o figures/write_path.png
 
 # Neural network architecture
-python scripts/generate_schematic.py "Transformer encoder-decoder architecture" -o figures/transformer.png
+$IMAGE_GEN generate -p "Transformer encoder-decoder architecture with cross-attention" -o figures/transformer.png --quality high
 
-# Biological pathway
-python scripts/generate_schematic.py "MAPK signaling pathway" -o figures/pathway.png
+# System pipeline
+$IMAGE_GEN generate -p "Request processing pipeline with thread pool and query planner" -o figures/pipeline.png
 ```
 
 ### What You Get
 
-- **Up to two iterations** (v1, v2) with progressive refinement
-- **Automatic quality review** after each iteration
-- **Detailed review log** with scores and critiques (JSON format)
-- **Publication-ready images** following scientific standards
+- **Generated image** (PNG) following scientific diagram best practices
+- **Metadata file** (`*.meta.json`) with model info and timestamp
+- **Quality review** (`*_review.json`) scored by GPT-5.5 against document-type thresholds
+- **Review log** (`*_review_log.json`) with iteration scores and critiques
 
 ## Features
 
-### Iterative Refinement Process
+### Quality Review Process
 
-1. **Generation 1**: Create initial diagram from your description
-2. **Review 1**: AI evaluates clarity, labels, accuracy, accessibility
-3. **Generation 2**: Improve based on critique
-4. **Review 2**: Second evaluation with specific feedback
-5. **Generation 3**: Final polished version
+1. **Generation**: gpt-image-2 creates the diagram from your description
+2. **Review**: GPT-5.5 reads the output PNG and scores on 5 criteria (0-2 each)
+3. **Decision**: If score >= threshold → done. Otherwise, refine and retry (max 2 iterations)
+
+Run a review manually:
+```bash
+$IMAGE_GEN review -i figures/diagram.png --doc-type conference
+```
 
 ### Automatic Quality Standards
 
-All diagrams automatically follow:
+All diagrams are generated following:
 - Clean white/light background
 - High contrast for readability
 - Clear labels (minimum 10pt font)
-- Professional typography
-- Colorblind-friendly colors
+- Professional typography (sans-serif)
+- Colorblind-friendly colors (Okabe-Ito)
 - Proper spacing between elements
-- Scale bars, legends, axes where appropriate
+- No figure numbers or captions in the image
 
 ## Installation
 
-### For AI Generation
-
 ```bash
-# Get OpenRouter API key
-# Visit: https://openrouter.ai/keys
+# Build the image-gen tool (one-time)
+cd $CLAUDE_PLUGIN_ROOT/tools/image-generator
+npm install && npm run build
 
-# Set environment variable
-export OPENROUTER_API_KEY='sk-or-v1-...'
-
-# Or add to .env file
-echo "OPENROUTER_API_KEY=sk-or-v1-..." >> .env
-
-# Install Python dependencies (if not already installed)
-pip install requests
+# Authenticate (opens browser for OAuth)
+node dist/cli.js login
 ```
+
+Requires a ChatGPT Plus/Pro account.
 
 ## Usage Examples
 
-### Example 1: CONSORT Flowchart
+### Example 1: System Architecture
 
 ```bash
-python scripts/generate_schematic.py \
-  "CONSORT participant flow diagram for RCT. \
-   Assessed for eligibility (n=500). \
-   Excluded (n=150): age<18 (n=80), declined (n=50), other (n=20). \
-   Randomized (n=350) into Treatment (n=175) and Control (n=175). \
-   Lost to follow-up: 15 and 10 respectively. \
-   Final analysis: 160 and 165." \
-  -o figures/consort.png
+$IMAGE_GEN generate -p "Distributed transaction processing pipeline. \
+   Client layer (3 nodes) → API gateway → consensus module (Raft, 3 nodes) \
+   → write-ahead log → memtable → SSTable. \
+   Show compaction thread merging SSTables. \
+   Include throughput: 100K ops/sec client, 50K ops/sec consensus. \
+   Dashed arrows for async, solid for sync. Left-to-right flow." \
+  -o figures/txn_pipeline.png --quality high
 ```
 
 **Output:**
-- `figures/consort_v1.png` - Initial generation
-- `figures/consort_v2.png` - After first review
-- `figures/consort_v3.png` - Final version
-- `figures/consort.png` - Copy of final version
-- `figures/consort_review_log.json` - Detailed review log
+- `figures/txn_pipeline.png` - Generated image
+- `figures/txn_pipeline.meta.json` - Generation metadata
+- `figures/txn_pipeline_review_log.json` - Quality review log
 
 ### Example 2: Neural Network Architecture
 
 ```bash
-python scripts/generate_schematic.py \
-  "Transformer architecture with encoder on left (input embedding, \
-   positional encoding, multi-head attention, feed-forward) and \
-   decoder on right (masked attention, cross-attention, feed-forward). \
-   Show cross-attention connection from encoder to decoder." \
-  -o figures/transformer.png \
-  --iterations 2
+$IMAGE_GEN generate -p "Transformer encoder-decoder. \
+   Encoder: input embedding → positional encoding → multi-head self-attention → \
+   add & norm → feed-forward → add & norm. \
+   Decoder: output embedding → positional encoding → masked self-attention → \
+   add & norm → cross-attention → add & norm → feed-forward → add & norm → linear & softmax. \
+   Dashed cross-attention connection from encoder to decoder. \
+   Light blue encoder, light red decoder." \
+  -o figures/transformer.png --quality high
 ```
 
-### Example 3: Biological Pathway
+### Example 3: Cache Hierarchy
 
 ```bash
-python scripts/generate_schematic.py \
-  "MAPK signaling pathway: EGFR receptor → RAS → RAF → MEK → ERK → nucleus. \
-   Label each step with phosphorylation. Use different colors for each kinase." \
-  -o figures/mapk.png
+$IMAGE_GEN generate -p "Multi-tier cache hierarchy for multi-core processor. \
+   Top: 4 CPU cores (blue) with private L1 (light blue). \
+   Core pairs share L2 (green). All share L3 (orange). \
+   Below L3: DRAM controller (purple) → DDR5 (gray). \
+   Bottom: NVMe controller (red) → SSD array. \
+   Latency: 1ns L1, 4ns L2, 12ns L3, 80ns DRAM, 10us SSD. \
+   Vertical layout, top-to-bottom." \
+  -o figures/cache_hierarchy.png
 ```
 
-### Example 4: System Architecture
+### Example 4: IoT System
 
 ```bash
-python scripts/generate_schematic.py \
-  "IoT system block diagram: sensors (bottom) → microcontroller → \
-   WiFi module and display (middle) → cloud server → mobile app (top). \
-   Label all connections with protocols." \
+$IMAGE_GEN generate -p "IoT architecture. \
+   Sensors (green) → ESP32 microcontroller (blue) → WiFi module (orange) + display (purple) \
+   → cloud server (gray) → mobile app (light blue). \
+   Label connections: I2C, UART, WiFi, HTTPS." \
   -o figures/iot_system.png
 ```
 
 ## Command-Line Options
 
 ```bash
-python scripts/generate_schematic.py [OPTIONS] "description" -o output.png
+$IMAGE_GEN generate -p "description" -o output.png [OPTIONS]
 
 Options:
-  --iterations N          Number of AI refinement iterations (default: 2, max: 2)
-  --api-key KEY          OpenRouter API key (or use env var)
-  -v, --verbose          Verbose output
-  -h, --help             Show help message
+  -p, --prompt <text>       Image generation prompt (required)
+  -o, --output <path>       Output file path (required)
+  --quality <level>         Quality: standard | high | auto (default: standard)
+  --size <WxH>              Image dimensions (e.g. 1024x1024)
+  --background <bg>         Background: transparent | opaque | auto
+  --format <fmt>            Output format: png | jpeg | webp (default: png)
 ```
 
-## Python API
-
-```python
-from scripts.generate_schematic_ai import ScientificSchematicGenerator
-
-# Initialize
-generator = ScientificSchematicGenerator(
-    api_key="your_key",
-    verbose=True
-)
-
-# Generate with iterative refinement
-results = generator.generate_iterative(
-    user_prompt="CONSORT flowchart",
-    output_path="figures/consort.png",
-    iterations=2
-)
-
-# Access results
-print(f"Final score: {results['final_score']}/10")
-print(f"Final image: {results['final_image']}")
-
-# Review iterations
-for iteration in results['iterations']:
-    print(f"Iteration {iteration['iteration']}: {iteration['score']}/10")
-    print(f"Critique: {iteration['critique']}")
+Other commands:
+```bash
+$IMAGE_GEN login             # Authenticate (opens browser)
+$IMAGE_GEN status            # Check credential status
+$IMAGE_GEN review -i <img> [--doc-type <type>]  # Review image quality via GPT-5.5
+$IMAGE_GEN variant -i <img> -p "edit" -o <out>  # Create variant of existing image
+$IMAGE_GEN edit -i <img> -p "edit" -o <out>     # Edit existing image
 ```
 
 ## Prompt Engineering Tips
 
 ### Be Specific About Layout
-✓ "Flowchart with vertical flow, top to bottom"  
-✓ "Architecture diagram with encoder on left, decoder on right"  
-✗ "Make a diagram" (too vague)
+- "Flowchart with vertical flow, top to bottom"
+- "Architecture diagram with encoder on left, decoder on right"
+- Avoid: "Make a diagram" (too vague)
 
 ### Include Quantitative Details
-✓ "Neural network: input (784), hidden (128), output (10)"  
-✓ "Flowchart: n=500 screened, n=150 excluded, n=350 randomized"  
-✗ "Some numbers" (not specific)
+- "Neural network: input (784), hidden (128), output (10)"
+- "Pipeline: 500 req/s throughput, 150 dropped, 350 processed"
+- Avoid: "Some numbers" (not specific)
 
 ### Specify Visual Style
-✓ "Minimalist block diagram with clean lines"  
-✓ "Detailed biological pathway with protein structures"  
-✓ "Technical schematic with engineering notation"
+- "Minimalist block diagram with clean lines"
+- "Detailed system architecture with component interactions"
+- "Technical schematic with engineering notation"
 
 ### Request Specific Labels
-✓ "Label all arrows with activation/inhibition"  
-✓ "Include layer dimensions in each box"  
-✓ "Show time progression with timestamps"
+- "Label all arrows with data types"
+- "Include layer dimensions in each box"
+- "Show latency at each stage"
 
 ### Mention Color Requirements
-✓ "Use colorblind-friendly colors"  
-✓ "Grayscale-compatible design"  
-✓ "Color-code by function: blue=input, green=processing, red=output"
+- "Use colorblind-friendly colors"
+- "Grayscale-compatible design"
+- "Color-code by function: blue=input, green=processing, red=output"
 
 ## Review Log Format
 
@@ -194,134 +180,56 @@ Each generation produces a JSON review log:
 
 ```json
 {
-  "user_prompt": "CONSORT participant flow diagram...",
+  "user_prompt": "Distributed storage write path...",
+  "doc_type": "conference",
+  "quality_threshold": 8.0,
   "iterations": [
     {
       "iteration": 1,
-      "image_path": "figures/consort_v1.png",
-      "prompt": "Full generation prompt...",
-      "critique": "Score: 7/10. Issues: font too small...",
-      "score": 7.0,
-      "success": true
-    },
-    {
-      "iteration": 2,
-      "image_path": "figures/consort_v2.png",
-      "score": 8.5,
-      "critique": "Much improved. Remaining issues..."
-    },
-    {
-      "iteration": 3,
-      "image_path": "figures/consort_v3.png",
-      "score": 9.5,
-      "critique": "Excellent. Publication ready."
+      "image_path": "figures/pipeline.png",
+      "score": 8.0,
+      "needs_improvement": false,
+      "critique": "SCORE: 8.0\nSTRENGTHS: Clear flow, well-labeled..."
     }
   ],
-  "final_image": "figures/consort_v3.png",
-  "final_score": 9.5,
-  "success": true
+  "final_score": 8.0,
+  "early_stop": true,
+  "early_stop_reason": "Quality score 8.0 meets threshold 8.0 for conference"
 }
 ```
 
-## Why Use Nano Banana 2
-
-**Simply describe what you want - Nano Banana 2 creates it:**
-
-- ✓ **Fast**: Results in minutes
-- ✓ **Easy**: Natural language descriptions (no coding)
-- ✓ **Quality**: Automatic review and refinement
-- ✓ **Universal**: Works for all diagram types
-- ✓ **Publication-ready**: High-quality output immediately
-
-**Just describe your diagram, and it's generated automatically.**
-
 ## Troubleshooting
 
-### API Key Issues
+### Authentication Issues
 
 ```bash
-# Check if key is set
-echo $OPENROUTER_API_KEY
+# Check credential status
+$IMAGE_GEN status
 
-# Set temporarily
-export OPENROUTER_API_KEY='your_key'
+# Re-authenticate if needed
+$IMAGE_GEN login
 
-# Set permanently (add to ~/.bashrc or ~/.zshrc)
-echo 'export OPENROUTER_API_KEY="your_key"' >> ~/.bashrc
-```
-
-### Import Errors
-
-```bash
-# Install requests library
-pip install requests
-
-# Or use the package manager
-pip install -r requirements.txt
+# Remove stale credentials and re-login
+$IMAGE_GEN logout
+$IMAGE_GEN login
 ```
 
 ### Generation Fails
 
-```bash
-# Use verbose mode to see detailed errors
-python scripts/generate_schematic.py "diagram" -o out.png -v
-
-# Check API status
-curl https://openrouter.ai/api/v1/models
-```
+- Verify credentials: `$IMAGE_GEN status`
+- Check network connectivity
+- Try a simpler prompt first
 
 ### Low Quality Scores
 
-If iterations consistently score below 7/10:
+If scores consistently fall below threshold:
 1. Make your prompt more specific
-2. Include more details about layout and labels
+2. Include more layout and label details
 3. Specify visual requirements explicitly
-4. Increase iterations: `--iterations 2`
+4. Use `--quality high`
 
-## Testing
+## Resources
 
-Run verification tests:
-
-```bash
-python test_ai_generation.py
-```
-
-This tests:
-- File structure
-- Module imports
-- Class initialization
-- Error handling
-- Prompt engineering
-- Wrapper script
-
-## Cost Considerations
-
-OpenRouter pricing for models used:
-- **Nano Banana 2**: ~$2/M input tokens, ~$12/M output tokens
-
-Typical costs per diagram:
-- Simple diagram (1 iteration): ~$0.05-0.15
-- Complex diagram (2 iterations): ~$0.10-0.30
-
-## Examples Gallery
-
-See the full SKILL.md for extensive examples including:
-- CONSORT flowcharts
-- Neural network architectures (Transformers, CNNs, RNNs)
-- Biological pathways
-- Circuit diagrams
-- System architectures
-- Block diagrams
-
-## Support
-
-For issues or questions:
-1. Check SKILL.md for detailed documentation
-2. Run test_ai_generation.py to verify setup
-3. Use verbose mode (-v) to see detailed errors
-4. Review the review_log.json for quality feedback
-
-## License
-
-Part of the scientific-writer package. See main repository for license information.
-
+- Full documentation: `SKILL.md`
+- Quick reference: `QUICK_REFERENCE.md`
+- Example script: `scripts/example_usage.sh`

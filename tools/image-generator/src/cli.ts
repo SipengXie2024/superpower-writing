@@ -5,6 +5,7 @@ import { runLogin } from "./auth/login.js";
 import { deleteCredentials, loadCredentials, redactedSummary } from "./auth/store.js";
 import { generateImage } from "./ops/generate.js";
 import { editImage } from "./ops/edit.js";
+import { reviewImage } from "./ops/review.js";
 import { variantImage } from "./ops/variant.js";
 import { vectorize } from "./ops/vectorize.js";
 import { AuthError, CodexApiError, MissingBinaryError, StreamParseError } from "./util/errors.js";
@@ -119,6 +120,39 @@ program
       }).then((r) => {
         logger.info(`Edited:  ${r.pngPath}`);
         logger.info(`Metadata: ${r.metaPath}`);
+      }),
+    );
+  });
+
+// ── variant ────────────────────────────────────────────────────────────
+program
+  .command("review")
+  .description("Review a scientific diagram image via GPT-5.5 multimodal analysis")
+  .requiredOption("-i, --input <path>", "Image to review")
+  .option("-t, --threshold <n>", "Quality threshold (0-10)", parseFloat)
+  .option("--doc-type <type>", "Document type (journal|conference|thesis|grant|preprint|report|poster|presentation)")
+  .option("-p, --prompt <text>", "Custom review system prompt (use {THRESHOLD} placeholder)")
+  .option("-o, --output <path>", "Output JSON path (default: <input_stem>_review.json)")
+  .action(async (opts: {
+    input: string;
+    threshold?: number;
+    docType?: string;
+    prompt?: string;
+    output?: string;
+  }) => {
+    await handle(
+      reviewImage({
+        input: opts.input,
+        threshold: opts.threshold,
+        docType: opts.docType,
+        customPrompt: opts.prompt,
+        output: opts.output,
+      }).then((r) => {
+        logger.info(`Review:   ${r.reviewPath}`);
+        if (r.meta.total !== undefined) {
+          logger.info(`Score:    ${r.meta.total}/10 (threshold: ${r.meta.threshold})`);
+          logger.info(`Passes:   ${r.meta.passes}`);
+        }
       }),
     );
   });

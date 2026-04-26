@@ -87,5 +87,48 @@ EOF
   exit 1
 fi
 
-echo "[superpower-writing] deps OK (skills at $found_root; PyYAML present)"
+# ── Verify image-generator is built ─────────────────────────────────────
+IMAGE_GEN_ROOT="$(dirname "${BASH_SOURCE[0]}")/../tools/image-generator"
+IMAGE_GEN_CLI="$IMAGE_GEN_ROOT/dist/cli.js"
+
+if [[ ! -f "$IMAGE_GEN_CLI" ]]; then
+  cat >&2 <<EOF
+[superpower-writing] Dependency check FAILED.
+
+image-generator is not built. Run:
+
+    cd tools/image-generator && npm install && npm run build
+
+EOF
+  exit 1
+fi
+
+# Check Node.js version (>= 20 required by image-generator)
+if ! node -e "const v = process.versions.node.split('.').map(Number); process.exit(v[0] < 20 ? 1 : 0)" 2>/dev/null; then
+  cat >&2 <<EOF
+[superpower-writing] Dependency check FAILED.
+
+image-generator requires Node.js >= 20. Found: $(node --version 2>/dev/null || echo 'not installed')
+
+Install or update Node.js: https://nodejs.org/
+EOF
+  exit 1
+fi
+
+# Check Codex OAuth credentials (warning only — user may not need image generation)
+TOKEN_FILE="$HOME/.config/superpower-writing/codex-tokens.json"
+if [[ ! -f "$TOKEN_FILE" ]]; then
+  cat >&2 <<EOF
+[superpower-writing] Dependency check WARNING.
+
+image-generator is not authenticated. Run once:
+
+    node $IMAGE_GEN_CLI login
+
+This opens a browser for OAuth (requires ChatGPT Plus/Pro account).
+Diagram generation will not work until you log in.
+EOF
+fi
+
+echo "[superpower-writing] deps OK (skills at $found_root; PyYAML present; image-gen built)"
 exit 0
