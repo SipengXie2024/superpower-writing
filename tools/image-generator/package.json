@@ -1,0 +1,30 @@
+{
+  "name": "@superpower-writing/image-generator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Internal Codex-OAuth-backed image generator for paper figures (gpt-image-2). Not published.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "image-gen": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "rebuild": "npm run clean && npm run build",
+    "cli": "node dist/cli.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@mariozechner/pi-ai": "^0.70.2",
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

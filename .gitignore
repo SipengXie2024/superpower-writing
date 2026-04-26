@@ -31,3 +31,6 @@ __pycache__/
 
 # Node (pyzotero upstream uses npx; transient installs)
 node_modules/
+
+# TypeScript build artifacts under tools/* (e.g. image-generator)
+tools/*/dist/
