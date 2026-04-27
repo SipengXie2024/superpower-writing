@@ -106,6 +106,8 @@ def resolve_post_content(tool_name: str, tool_input: dict, file_path: Path) -> s
                 bool(edit.get("replace_all")),
             )
         return content
+    if tool_name == "NotebookEdit":
+        return None
     return None
 
 

@@ -17,7 +17,7 @@ Do not invoke any superpower-writing skill (main, outlining, writing-plans,
 drafting, claim-verification, revision, submission) until the missing
 dependencies are installed."
 else
-  BODY="superpower-writing deps OK. Upstream scientific-agent-skills detected."
+  BODY="superpower-writing deps OK. Bundled domain skills detected."
 fi
 
 cat <<EOF

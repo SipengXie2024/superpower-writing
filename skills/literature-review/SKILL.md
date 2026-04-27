@@ -35,20 +35,8 @@ This is not optional. Literature reviews without visual elements are incomplete.
 2. Prefer 2-3 figures for comprehensive reviews (search strategy flowchart, thematic synthesis diagram, conceptual framework)
 
 **How to generate figures:**
-- Use the **scientific-schematics** skill to generate AI-powered publication-quality diagrams
-- Simply describe your desired diagram in natural language
-- Nano Banana Pro will automatically generate, review, and refine the schematic
-
-**How to generate schematics:**
-```bash
-python scripts/generate_schematic.py "your diagram description" -o figures/output.png
-```
-
-The AI will automatically:
-- Create publication-quality images with proper formatting
-- Review and refine through multiple iterations
-- Ensure accessibility (colorblind-friendly, high contrast)
-- Save outputs in the figures/ directory
+- Invoke `Skill(skill="superpower-writing:scientific-schematics")` and describe the diagram in natural language. That skill is the single source of truth for the image-generation backend (gpt-image-2 via Codex OAuth, with GPT-5.5 quality review). It writes outputs to `.writing/figures/`.
+- For data plots (CDFs, training curves, ablation bars, Pareto fronts) invoke `Skill(skill="superpower-writing:scientific-visualization")` instead — that skill ships matplotlib presets for IEEE / ACM / USENIX / NeurIPS / ICML / ICLR.
 
 **When to add schematics:**
 - PRISMA flow diagrams for systematic reviews

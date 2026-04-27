@@ -1,11 +1,12 @@
 # superpower-writing
 
-> Standalone Claude Code plugin for scientific manuscript writing. Includes its
-> own execution engines ported and adapted from superpower-planning in v0.2.0.
-> Delegates all domain content (IMRAD structure, reporting guidelines, citation
-> management, figure generation, literature lookup) to the upstream
-> [scientific-agent-skills](https://github.com/K-Dense-AI/scientific-agent-skills)
-> collection.
+> Self-contained Claude Code plugin for scientific manuscript writing.
+> Domain skills (IMRAD section standards, reporting guidelines, citation
+> management, figure generation, literature lookup, data-plot
+> visualization) and execution engines (subagent-driven, team-driven,
+> drafting, claim-verification, revision, submission) ship inside this
+> plugin's `skills/` directory. The earlier hard dependency on
+> `K-Dense-AI/scientific-agent-skills` was dissolved in v0.7.0.
 
 <!-- This README is written to be agent-executable. Every install step, every
      check, and every troubleshooting recipe is a literal command you can run
@@ -13,15 +14,15 @@
 
 ## Status
 
-- **Version**: `v0.4.0`
-- **Scope**: single-author IMRAD research manuscripts
-- **Dependencies**: scientific-agent-skills (hard), Zotero API (optional)
+- **Version**: `v0.9.1`
+- **Scope**: single-author IMRAD research manuscripts (CS / systems / ML / HCI)
+- **Dependencies**: Zotero API (optional, gated by `zotero.enabled` in metadata); Codex OAuth (used by `scientific-schematics`)
 - **Repo**: https://github.com/SipengXie2024/superpower-writing
 
 ## TL;DR — what this plugin does
 
 1. Persists your paper state in `.writing/` (outline, claims, manuscript, metadata, reviews, archive).
-2. Forces **claim-first writing**: every load-bearing paragraph in `manuscript/NN_*.md` must carry `<!-- claim: id -->` bound to a claim with `STATUS: evidence_ready` (or `<!-- draft-only -->` for exploration). A `PreToolUse` hook hard-blocks writes that violate this.
+2. Forces **claim-first writing**: every load-bearing paragraph in `manuscript/NN_*.tex` must carry `% claim: id` bound to a claim with `STATUS: evidence_ready` (or `% draft-only` for exploration). A `PreToolUse` hook hard-blocks writes that violate this.
 3. Resolves citations **Zotero first → network fallback** (when Zotero is enabled). Pushes new DOIs back to your library if configured.
 4. Gates submission: claim-verification must pass, `metadata.yaml` complete, graphical abstract present, zero `draft-only` or `[NEEDS-EVIDENCE]` remaining.
 
@@ -33,22 +34,13 @@ Run these in order. Each command prints what it did; compare to "Expected".
 
 ```bash
 which claude && claude --version      # needs Claude Code CLI
-which uv || curl -LsSf https://astral.sh/uv/install.sh | sh   # upstream skills need uv
 which gh && gh auth status             # needed only if you want to push
-python3 -c "import yaml"               # hook uses PyYAML
+python3 -c "import yaml; yaml.safe_load('a: 1')"  # hook uses PyYAML
 ```
 
-Expected: no command fails. If `python3 -c "import yaml"` errors, run `pip install --user pyyaml`.
+Expected: no command fails. If the PyYAML probe errors, run `pip install --user --upgrade pyyaml`.
 
-### 1. Install upstream scientific-agent-skills (hard dependency)
-
-```bash
-npx skills add K-Dense-AI/scientific-agent-skills
-```
-
-Expected: finishes without error. The plugin's `check-deps.sh` will now find `scientific-writing`, `literature-review`, `peer-review`, `citation-management`, `research-lookup`, `scientific-schematics`, `scientific-visualization` on disk.
-
-### 2. Install this plugin
+### 1. Install this plugin
 
 ```bash
 claude plugin marketplace add /absolute/path/to/superpower-writing
@@ -65,7 +57,7 @@ claude plugin install superpower-writing
 
 Expected: `claude plugin list` shows `superpower-writing` as installed.
 
-### 3. Verify the install
+### 2. Verify the install
 
 ```bash
 cd /path/to/superpower-writing
@@ -76,7 +68,7 @@ Expected (success): `[superpower-writing] deps OK (found at: <root>)`.
 
 If FAIL, the script prints a fix recipe including the exact `npx` command and the 7 candidate skill roots it searched. Follow it and re-run.
 
-### 4. (Optional) Enable Zotero integration
+### 3. (Optional) Enable Zotero integration
 
 Zotero turns on **dual source of truth**: citations are resolved from your Zotero library first, then fall back to network lookup via `research-lookup` / `citation-management`. When `auto_push_new_citations: true`, new DOIs discovered via network are pushed back to your configured collection.
 
@@ -108,7 +100,7 @@ zotero:
 
 `scripts/check-zotero.sh` is idempotent; it never echoes the API key (header-only, body discarded).
 
-### 5. Run the smoke test
+### 4. Run the smoke test
 
 ```bash
 bash tests/smoke.sh
@@ -192,7 +184,7 @@ When `zotero.enabled: false` (default), the pipeline runs network-only.
   claims/
     section_<NN>_<slug>.md  # YAML list of {id, CLAIM, EVIDENCE[], STATUS}
   figures/                  # diagrams via scientific-schematics; data plots via scientific-visualization
-    graphical_abstract.png  # mandatory per scientific-writing
+    graphical_abstract.png  # mandatory per submission gate
   reviews/
     internal_<date>.md
     journal_<round>.md
@@ -206,12 +198,12 @@ When `zotero.enabled: false` (default), the pipeline runs network-only.
 
 | Symptom                                         | Diagnostic                                                      | Fix                                                                                  |
 |-------------------------------------------------|-----------------------------------------------------------------|--------------------------------------------------------------------------------------|
-| `check-deps.sh` fails                           | check message; names missing skill(s)                           | `npx skills add K-Dense-AI/scientific-agent-skills`                                  |
+| `check-deps.sh` fails                           | check message; names missing skill(s)                           | re-clone or reinstall this plugin (skills are bundled inside it; missing means an incomplete install)                                  |
 | `check-zotero.sh` exits 1 "API key not set"     | `.env` missing or incomplete                                    | `cp .env.example .env` then fill in the two required fields                          |
 | `check-zotero.sh` HTTP 403                      | key lacks required scope                                        | regenerate at zotero.org/settings/keys with read+write on the library                |
 | `check-zotero.sh` HTTP 404                      | wrong `ZOTERO_LIBRARY_ID` or `ZOTERO_LIBRARY_TYPE`              | `curl -sS https://api.zotero.org/keys/<YOUR_KEY>` → read `userID` field (use that as `ZOTERO_LIBRARY_ID` with `ZOTERO_LIBRARY_TYPE=user`) |
 | Hook blocks a legitimate write                  | claim referenced but no such `id` in `claims/section_...md`     | Add the claim entry and set `STATUS: evidence_ready` after evidence is resolved      |
-| Hook blocks an exploratory paragraph            | untagged prose in a protected section                           | Either tag `<!-- draft-only -->` or write a proper `claim` entry                     |
+| Hook blocks an exploratory paragraph            | untagged prose in a protected section                           | Either tag `% draft-only` or write a proper `claim` entry                            |
 | `smoke.sh` fails                                | read the specific `FAIL: ...` line                              | Each check is independent; fix what's listed                                         |
 
 ## Layout

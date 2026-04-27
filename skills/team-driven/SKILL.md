@@ -135,16 +135,18 @@ Determine `MAX_PARALLEL` = largest group size. This is the number of implementer
 TeamCreate: team_name="plan-execution"
 
 # Spawn implementers (one per max parallel slot)
-Task(team_name="plan-execution", name="implementer-1", subagent_type="general-purpose")
-Task(team_name="plan-execution", name="implementer-2", subagent_type="general-purpose")
+Agent(team_name="plan-execution", name="implementer-1", subagent_type="superpower-writing:section-drafter")
+Agent(team_name="plan-execution", name="implementer-2", subagent_type="superpower-writing:section-drafter")
 ...
 
 # Spawn spec-reviewer
-Task(team_name="plan-execution", name="spec-reviewer", subagent_type="superpower-writing:spec-reviewer")
+Agent(team_name="plan-execution", name="spec-reviewer", subagent_type="superpower-writing:spec-reviewer")
 
 # Spawn manuscript-reviewer
-Task(team_name="plan-execution", name="manuscript-reviewer", subagent_type="superpower-writing:manuscript-reviewer")
+Agent(team_name="plan-execution", name="manuscript-reviewer", subagent_type="superpower-writing:manuscript-reviewer")
 ```
+
+`subagent_type` is task-domain dependent. For per-section manuscript drafting (the canonical use inside this plugin), use `superpower-writing:section-drafter` so the writers inherit IMRAD claim-first wiring; for non-writing parallel work, fall back to `general-purpose`.
 
 **Implementer teammate prompt:** Use `./implementer-teammate-prompt.md` template.
 

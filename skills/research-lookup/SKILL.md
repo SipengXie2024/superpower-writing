@@ -37,12 +37,8 @@ Use this skill when you need:
 **When creating documents with this skill, always consider adding scientific diagrams and schematics to enhance visual communication.**
 
 If your document does not already contain schematics or diagrams:
-- Use the **scientific-schematics** skill to generate AI-powered publication-quality diagrams
-- Simply describe your desired diagram in natural language
-
-```bash
-python scripts/generate_schematic.py "your diagram description" -o figures/output.png
-```
+- Invoke `Skill(skill="superpower-writing:scientific-schematics")` and describe the diagram in natural language. That skill is the single source of truth for the image-generation backend (gpt-image-2 via Codex OAuth, with GPT-5.5 quality review). It writes outputs to `.writing/figures/`.
+- For data plots (CDFs, training curves, ablation bars, Pareto fronts) invoke `Skill(skill="superpower-writing:scientific-visualization")` instead — that skill ships matplotlib presets for IEEE / ACM / USENIX / NeurIPS / ICML / ICLR.
 
 ---
 

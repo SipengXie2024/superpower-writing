@@ -5,6 +5,69 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.9.1] — 2026-04-27
+
+### Fixed
+
+- **`team-driven` SKILL.md spawn API.** Lines 138, 139, 143, 146 used a
+  non-existent `Task(team_name=…)` tool. Replaced with the correct
+  `Agent(team_name=…)` form. Every team-driven session would have failed
+  at the spawn step before this fix.
+- **Drafter agent type unified across drafting → team-driven.**
+  `drafting/SKILL.md` says team-driven spawns
+  `superpower-writing:section-drafter`. The team-driven example now
+  matches (was `general-purpose`). Added a one-line note that lead
+  agents can pick another `subagent_type` for non-writing parallel work.
+- **`hooks/enforce-terms.py` NotebookEdit case made explicit** for
+  parity with `enforce-claims.py:137-138`. Behavior unchanged
+  (NotebookEdit was already a pass-through via fall-through), but the
+  explicit case eliminates parity-drift risk in future refactors.
+- **`scripts/check-deps.sh` PyYAML probe now exercises the parser**
+  (`yaml.safe_load('a: 1')`), not just the import. Broken / partial
+  PyYAML installs now surface at SessionStart instead of at the first
+  manuscript edit.
+- **`scripts/check-deps.sh` failure message updated post-v0.7.0.**
+  When a bundled domain skill is missing, the error now tells the user
+  to re-clone or reinstall the plugin (the skill is bundled inside
+  `skills/` — its absence means an incomplete install, not a missing
+  upstream package). Removed the stale `npx skills add
+  K-Dense-AI/scientific-agent-skills` and `uv` install hints.
+- **`hooks/check-deps.sh` SessionStart reminder.** The "deps OK"
+  message no longer claims it detected upstream `scientific-agent-skills`;
+  it now reports "Bundled domain skills detected."
+
+### Removed
+
+- **OpenRouter image-generation dead code.** CHANGELOG v0.8.0 said
+  `generate_schematic.py` and `generate_schematic_ai.py` were deleted,
+  but ~3800 LOC of these scripts (with hard-coded `OPENROUTER_API_KEY`
+  dependencies) remained shipped under four skills:
+  `literature-review/scripts/`, `research-lookup/scripts/`,
+  `citation-management/scripts/`, `peer-review/scripts/`. All eight
+  files are now actually deleted.
+- **Inline `python scripts/generate_schematic.py` instructions** in
+  `literature-review/SKILL.md`, `research-lookup/SKILL.md`, and
+  `citation-management/SKILL.md`. These referenced the just-deleted
+  scripts and would have failed with `OPENROUTER_API_KEY not found`.
+  Replaced with a redirect to the canonical
+  `Skill(skill="superpower-writing:scientific-schematics")` (image
+  generation) and `Skill(skill="superpower-writing:scientific-visualization")`
+  (data plots). "Nano Banana Pro" mentions removed (replaced by
+  gpt-image-2 + GPT-5.5 review per v0.8.0).
+
+### Changed
+
+- **README.md modernized.** Header tagline drops "delegates to upstream
+  scientific-agent-skills". Status block: version `v0.4.0` → `v0.9.1`,
+  dependencies cleaned. TL;DR line updated from `manuscript/NN_*.md`
+  with `<!-- claim: id -->` to `manuscript/NN_*.tex` with `% claim: id`
+  (LaTeX migration was v0.3.0). Install checklist drops the
+  upstream-skills install step (former Section 1) and renumbers
+  subsequent sections. Troubleshooting recipes updated:
+  `<!-- draft-only -->` → `% draft-only`; `check-deps.sh` failure
+  remediation points at plugin reinstall, not `npx skills add
+  K-Dense-AI/scientific-agent-skills`.
+
 ## [0.9.0] — 2026-04-27
 
 ### Added
@@ -409,6 +472,7 @@ Initial scaffold.
 - Auto-submission to journal portals.
 - LaTeX compile.
 
+[0.9.1]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.9.1
 [0.9.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.9.0
 [0.8.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.8.0
 [0.7.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.7.0

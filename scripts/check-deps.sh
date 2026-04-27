@@ -57,16 +57,18 @@ if (( ${#missing[@]} > 0 )); then
   cat >&2 <<EOF
 [superpower-writing] Dependency check FAILED.
 
-Missing upstream skills: ${missing[*]}
+Missing bundled domain skills: ${missing[*]}
 
-Install scientific-agent-skills (K-Dense-AI) via the agentskills.io standard:
+These skills ship inside this plugin and are normally found under the
+plugin's own skills/ directory. A missing skill means the plugin itself
+is incomplete — re-clone or reinstall:
 
-    npx skills add K-Dense-AI/scientific-agent-skills
+    git clone https://github.com/SipengXie2024/superpower-writing.git
+    # then: claude plugin marketplace add /absolute/path/to/superpower-writing
 
-If 'uv' is not yet installed (required by upstream scientific skills for
-Python dependencies):
-
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+(The earlier upstream dependency on K-Dense-AI/scientific-agent-skills
+was dissolved in v0.7.0; legacy install roots are still probed for
+back-compat but new installs should use the bundled copies.)
 
 Roots searched:
 EOF
@@ -74,16 +76,18 @@ EOF
   exit 1
 fi
 
-# The PreToolUse hook (hooks/enforce-claims.py) requires PyYAML. Probe it so
-# users find out at SessionStart rather than at first Edit.
-if ! python3 -c "import yaml" 2>/dev/null; then
+# The PreToolUse hook (hooks/enforce-claims.py) requires PyYAML. Probe both
+# import AND a real parse so a broken/partial install fails at SessionStart
+# rather than at the first manuscript Edit.
+if ! python3 -c "import yaml; yaml.safe_load('a: 1')" 2>/dev/null; then
   cat >&2 <<EOF
 [superpower-writing] Dependency check FAILED.
 
-Upstream skills OK, but PyYAML is missing. The PreToolUse hook parses YAML
-claim files and will block every manuscript write until you install it:
+Bundled skills OK, but PyYAML is missing or broken. The PreToolUse hook
+parses YAML claim files and will block every manuscript write until it is
+installed and parsing correctly:
 
-    pip install --user pyyaml
+    pip install --user --upgrade pyyaml
 EOF
   exit 1
 fi
