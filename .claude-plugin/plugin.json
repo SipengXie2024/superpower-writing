@@ -1,7 +1,7 @@
 {
   "name": "superpower-writing",
   "description": "Self-contained IMRAD academic-writing lifecycle plugin for systems, ML, and HCI papers. Ships domain skills (research lookup, citation management, literature review, peer review, scientific schematics) and reference files (writing principles, figures & tables, citation styles, venue styles). Provides persistent state, stage gates, claim-first verification, subagent execution, and review loops.",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "author": {
     "name": "sipeng"
   },

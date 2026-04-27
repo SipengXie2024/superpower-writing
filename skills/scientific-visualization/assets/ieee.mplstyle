@@ -1,0 +1,64 @@
+# IEEE Transactions / Conferences style (IEEEtran class)
+# Usage: plt.style.use('ieee.mplstyle')
+#
+# Tuned for IEEE single-column width = 3.5 in (8.9 cm). Full-width figures
+# (\begin{figure*}) should override figsize to (7.16, h).
+
+# Figure
+figure.dpi: 100
+figure.facecolor: white
+figure.constrained_layout.use: True
+figure.figsize: 3.5, 2.4
+
+# Font
+font.size: 8
+font.family: sans-serif
+font.sans-serif: Arial, Helvetica, DejaVu Sans
+
+pdf.fonttype: 42
+ps.fonttype: 42
+
+# Axes
+axes.linewidth: 0.5
+axes.labelsize: 9
+axes.titlesize: 9
+axes.spines.top: False
+axes.spines.right: False
+axes.edgecolor: black
+axes.axisbelow: True
+axes.grid: False
+axes.prop_cycle: cycler('color', ['0072B2', 'D55E00', '009E73', 'CC79A7', 'E69F00', '56B4E9', 'F0E442', '000000'])
+
+# Ticks
+xtick.major.size: 3
+xtick.minor.size: 1.8
+xtick.major.width: 0.5
+xtick.minor.width: 0.4
+xtick.labelsize: 7
+xtick.direction: out
+ytick.major.size: 3
+ytick.minor.size: 1.8
+ytick.major.width: 0.5
+ytick.minor.width: 0.4
+ytick.labelsize: 7
+ytick.direction: out
+
+# Lines
+lines.linewidth: 1.5
+lines.markersize: 4
+lines.markeredgewidth: 0.5
+
+# Legend
+legend.fontsize: 7
+legend.frameon: False
+
+# Save
+savefig.dpi: 600
+savefig.format: pdf
+savefig.bbox: tight
+savefig.pad_inches: 0.05
+savefig.facecolor: white
+
+# Image
+image.cmap: viridis
+image.aspect: auto

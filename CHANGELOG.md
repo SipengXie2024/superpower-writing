@@ -5,6 +5,51 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.9.0] — 2026-04-27
+
+### Added
+
+- **`scientific-visualization` skill (CS edition).** Inlined from upstream
+  K-Dense AI `scientific-agent-skills/scientific-visualization`, with biology
+  content stripped: dropped Nature / Science / Cell / ACS specifics,
+  microscopy / fluorophore / DNA-base palettes, gene-expression /
+  cell-count examples. Replaced with CS venues (IEEE, ACM `acmart`, USENIX,
+  NeurIPS, ICML, ICLR, arXiv) and CS figure types (latency CDF, throughput
+  scaling, training curves with multi-seed bands, Pareto fronts, ablation
+  bars, roofline, cache-miss heatmap, stacked-bar latency breakdown).
+  - `skills/scientific-visualization/SKILL.md` — main skill, ~340 lines.
+  - `references/publication_guidelines.md` — universal CS best practices
+    (PDF default, font embedding via `pdf.fonttype: 42`, statistical
+    rigor for systems / ML papers).
+  - `references/venue_requirements.md` — exact widths, fonts, formats per
+    venue, with LaTeX `\includegraphics` patterns.
+  - `references/color_palettes.md` — Okabe-Ito / Wong / Tol palettes,
+    perceptually uniform colormaps, method-to-color consistency,
+    grayscale verification recipes.
+  - `references/matplotlib_examples.md` — twelve runnable patterns.
+  - `scripts/style_presets.py` — `apply_publication_style(name)`,
+    `set_color_palette(name)`, `configure_for_venue(venue, width)`,
+    targeting `ieee` / `acm` / `usenix` / `neurips` / `icml` / `iclr` /
+    `arxiv`.
+  - `scripts/figure_export.py` — `save_publication_figure()`,
+    `save_for_venue()`, `check_figure_size()` (warns when figsize doesn't
+    match venue column width), `verify_font_embedding()` (probes
+    `pdffonts` for Type 3 fonts and missing embeddings).
+  - `assets/color_palettes.py` — importable color constants (Okabe-Ito
+    full, Okabe-Ito 4-subset, Okabe-Ito 2-subset for baseline-vs-ours,
+    Wong, Tol Bright / Muted / Light / High Contrast).
+  - `assets/{publication,ieee,acm,neurips,presentation}.mplstyle` — five
+    preconfigured style files. `nature.mplstyle` from upstream is
+    intentionally not ported.
+- `skills/main/SKILL.md` Plugin-Local Domain Skills table now lists
+  `scientific-visualization` next to `scientific-schematics` with a clear
+  "data plots vs schematic diagrams" boundary.
+- `scripts/check-deps.sh` adds `scientific-visualization` to its
+  `REQUIRED` skill probe list, so dep-check verifies the new skill is
+  on disk at session start.
+- `tests/smoke.sh` skill-presence loop now includes
+  `scientific-visualization`.
+
 ## [0.8.0] — 2026-04-26
 
 ### Changed
@@ -364,6 +409,12 @@ Initial scaffold.
 - Auto-submission to journal portals.
 - LaTeX compile.
 
+[0.9.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.9.0
+[0.8.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.8.0
+[0.7.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.7.0
+[0.6.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.6.0
+[0.5.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.5.0
+[0.4.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.4.0
 [0.3.2]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.3.2
 [0.3.1]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.3.1
 [0.3.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.3.0

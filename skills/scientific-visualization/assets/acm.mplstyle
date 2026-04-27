@@ -1,0 +1,65 @@
+# ACM sigconf / acmsmall (acmart class) style
+# Usage: plt.style.use('acm.mplstyle')
+#
+# Tuned for ACM sigconf single-column width = 3.33 in (8.46 cm). Two-column
+# figures (\begin{figure*}) should override figsize to (7.0, h). USENIX uses
+# the same layout, so this style works for both.
+
+# Figure
+figure.dpi: 100
+figure.facecolor: white
+figure.constrained_layout.use: True
+figure.figsize: 3.33, 2.3
+
+# Font (slightly smaller body to fit ACM's tighter column)
+font.size: 7
+font.family: sans-serif
+font.sans-serif: Arial, Helvetica, DejaVu Sans
+
+pdf.fonttype: 42
+ps.fonttype: 42
+
+# Axes
+axes.linewidth: 0.5
+axes.labelsize: 8
+axes.titlesize: 8
+axes.spines.top: False
+axes.spines.right: False
+axes.edgecolor: black
+axes.axisbelow: True
+axes.grid: False
+axes.prop_cycle: cycler('color', ['0072B2', 'D55E00', '009E73', 'CC79A7', 'E69F00', '56B4E9', 'F0E442', '000000'])
+
+# Ticks
+xtick.major.size: 2.5
+xtick.minor.size: 1.5
+xtick.major.width: 0.5
+xtick.minor.width: 0.4
+xtick.labelsize: 6
+xtick.direction: out
+ytick.major.size: 2.5
+ytick.minor.size: 1.5
+ytick.major.width: 0.5
+ytick.minor.width: 0.4
+ytick.labelsize: 6
+ytick.direction: out
+
+# Lines
+lines.linewidth: 1.2
+lines.markersize: 3
+lines.markeredgewidth: 0.4
+
+# Legend
+legend.fontsize: 6
+legend.frameon: False
+
+# Save
+savefig.dpi: 600
+savefig.format: pdf
+savefig.bbox: tight
+savefig.pad_inches: 0.05
+savefig.facecolor: white
+
+# Image
+image.cmap: viridis
+image.aspect: auto

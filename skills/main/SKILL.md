@@ -6,7 +6,7 @@ description: Router and dependency gate for superpower-writing. Loaded at sessio
 <EXTREMELY-IMPORTANT>
 If there is even a 1% chance a writing skill applies to your task, you MUST invoke it. No exceptions, no rationalizations.
 
-This plugin is self-contained. Domain content (writing principles, figures/tables, citation styles, venue styles) lives in plugin-local reference files under `skills/drafting/references/` and `skills/submission/references/`. Skills that were previously upstream (`research-lookup`, `citation-management`, `literature-review`, `scientific-schematics`, `peer-review`) now ship as plugin-local skills invoked with the `superpower-writing:` prefix — e.g. `Skill(skill="superpower-writing:research-lookup")`.
+This plugin is self-contained. Domain content (writing principles, figures/tables, citation styles, venue styles) lives in plugin-local reference files under `skills/drafting/references/` and `skills/submission/references/`. Skills that were previously upstream (`research-lookup`, `citation-management`, `literature-review`, `scientific-schematics`, `scientific-visualization`, `peer-review`) now ship as plugin-local skills invoked with the `superpower-writing:` prefix — e.g. `Skill(skill="superpower-writing:research-lookup")`.
 </EXTREMELY-IMPORTANT>
 
 ## Announce on Entry
@@ -39,7 +39,7 @@ Run:
 ${CLAUDE_PLUGIN_ROOT}/scripts/check-deps.sh
 ```
 
-This probes standard Agent Skills install locations for: `literature-review`, `peer-review`, `citation-management`, `research-lookup`, `scientific-schematics`. These skills are now bundled under the plugin's own `skills/` directory.
+This probes standard Agent Skills install locations for: `literature-review`, `peer-review`, `citation-management`, `research-lookup`, `scientific-schematics`, `scientific-visualization`. These skills are now bundled under the plugin's own `skills/` directory.
 
 **On non-zero exit:** refuse all subsequent superpower-writing skill invocations. Surface the install command verbatim to the user:
 
@@ -184,7 +184,8 @@ Plugin-local domain skills (invoked with `superpower-writing:` prefix):
 | `research-lookup` | drafting, claim-verification | Paper/abstract retrieval for evidence resolution. |
 | `citation-management` | drafting, claim-verification, submission | Citation formatting, DOI resolution, bibliography assembly. |
 | `peer-review` | claim-verification, revision | Reporting-guideline checklists (CONSORT / STROBE / PRISMA). |
-| `scientific-schematics` | drafting | Graphical abstracts and schematic figures. |
+| `scientific-schematics` | drafting | Graphical abstracts and schematic figures (architecture / data-flow / pipeline diagrams). |
+| `scientific-visualization` | drafting | Publication-ready data plots (CDFs, throughput curves, training curves, ablation bars, Pareto fronts) for IEEE / ACM / USENIX / NeurIPS / ICML / ICLR. CS-tailored. |
 | `zotero-mcp` (MCP) | drafting, claim-verification, outlining, submission, revision | All Zotero calls when `zotero.enabled: true`. Registered in `.mcp.json`. Core tools: `zotero_search_items` (DOI / title / author lookup), `zotero_get_item_metadata` (markdown or BibTeX export), `zotero_get_item_fulltext` (server-side extracted PDF text, web-API mode supported), `zotero_semantic_search` (AI similarity search over the chunked library — paragraph-level matches when paper bodies are indexed), `zotero_advanced_search`, `zotero_get_collections` / `zotero_get_collection_items`, `zotero_add_by_doi` (auto-fetches metadata + open-access PDF). Scite citation intelligence via `scite_enrich_item` / `scite_enrich_search` / `scite_check_retractions`. |
 
 # Claim-First Protocol

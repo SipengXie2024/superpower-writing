@@ -10,6 +10,7 @@ REQUIRED=(
   citation-management
   research-lookup
   scientific-schematics
+  scientific-visualization
 )
 
 # Agent Skills standard installs to platform-specific locations. Probe the

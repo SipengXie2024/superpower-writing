@@ -46,7 +46,7 @@ Expected: no command fails. If `python3 -c "import yaml"` errors, run `pip insta
 npx skills add K-Dense-AI/scientific-agent-skills
 ```
 
-Expected: finishes without error. The plugin's `check-deps.sh` will now find `scientific-writing`, `literature-review`, `peer-review`, `citation-management`, `research-lookup`, `scientific-schematics` on disk.
+Expected: finishes without error. The plugin's `check-deps.sh` will now find `scientific-writing`, `literature-review`, `peer-review`, `citation-management`, `research-lookup`, `scientific-schematics`, `scientific-visualization` on disk.
 
 ### 2. Install this plugin
 
@@ -191,7 +191,7 @@ When `zotero.enabled: false` (default), the pipeline runs network-only.
     07_acknowledgments.md   # exempt (optional)
   claims/
     section_<NN>_<slug>.md  # YAML list of {id, CLAIM, EVIDENCE[], STATUS}
-  figures/                  # via scientific-schematics
+  figures/                  # diagrams via scientific-schematics; data plots via scientific-visualization
     graphical_abstract.png  # mandatory per scientific-writing
   reviews/
     internal_<date>.md

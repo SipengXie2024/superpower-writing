@@ -218,7 +218,7 @@ python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/marketplace
 python3 -c "import json; json.load(open('$PLUGIN_ROOT/hooks/hooks.json'))" && pass "hooks.json valid"
 
 echo "== 6. skill + command + hook presence =="
-for name in main outlining writing-plans drafting claim-verification revision submission; do
+for name in main outlining writing-plans drafting claim-verification revision submission scientific-visualization; do
   [[ -f "$PLUGIN_ROOT/skills/$name/SKILL.md" ]] \
     && pass "skills/$name/SKILL.md" \
     || fail "missing skills/$name/SKILL.md"
