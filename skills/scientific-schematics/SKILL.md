@@ -374,6 +374,83 @@ $IMAGE_GEN generate -p "IoT system architecture block diagram. \
 - "Grayscale-compatible design"
 - "Color-code by function: blue for input, green for processing, red for output"
 
+## Common Failure Modes and Prompt Locks
+
+Two specific prompt-level failure modes recur often enough to deserve their own
+dedicated locks at the top of any non-trivial diagram prompt. Both have been
+observed to slip past the GPT-5.5 reviewer with a passing score, so they
+cannot be relied on to be caught downstream — they must be prevented in the
+prompt itself.
+
+### Failure mode 1: Cross-view inconsistency
+
+When the same conceptual entity (a data layout, a fixed mapping, an enum
+partition) appears across multiple views of one figure — say, source-side
+illustration plus a table plus a runtime trace plus a final artifact — a
+plain prompt that re-describes the entity in each view will let the
+generation model independently re-invent specifics in each view. The
+typical symptom is that one view shows a 1-invariant + 2-variant split
+while another view shows a 2-invariant + 1-variant split, producing an
+internal contradiction that auditors and reviewers catch as an accuracy
+error.
+
+The fix is to reserve a `CRITICAL CONSISTENCY` block at the very top of
+the prompt that defines the entity once, then have each view reference it
+rather than redefining it.
+
+Example:
+
+```
+== CRITICAL CONSISTENCY ==
+The contract has exactly 3 PUSH positions:
+- PUSH 1 = variant
+- PUSH 2 = invariant (value 0xCC)
+- PUSH 3 = variant
+This 1-invariant + 2-variant split must hold consistently in every view
+where it appears: member cards, per-member constant table, classifier
+chips, runtime variant tables, shared compiled artifact.
+```
+
+Subsequent view descriptions should refer to this lock ("orange variant,
+green invariant per the consistency block"), not re-state the partition
+from scratch.
+
+### Failure mode 2: Discontinuous arrows
+
+A prompt that says "an arrow goes from A, crosses the divider, and reaches
+B" lets the generation model render two disconnected stub arrows, one
+ending at the divider and another beginning on the other side. The visual
+gap reads as a broken connection. This is particularly common when the
+arrow path crosses any visual element (divider line, quadrant boundary,
+text label).
+
+The fix is to mandate single-polyline continuity explicitly:
+
+```
+== CRITICAL ARROW CONTINUITY ==
+Every arrow must be a single continuous unbroken polyline from its source
+box to an arrowhead at its target box. Arrows must not have gaps, breaks,
+or detached segments. Bends are allowed at right angles, but every bend
+must be a single connected joint, not two separate arrows.
+```
+
+For arrows that span large regions (across a divider, across a quadrant
+boundary), additionally specify the path geometry rather than the
+endpoints alone: "starts at the bottom of X, goes straight down crossing
+the divider, makes ONE left turn, ends with its arrowhead pointing at the
+top of Y; this must be one connected polyline, not two separate
+segments."
+
+### Why these belong at the top of the prompt
+
+Both failure modes have produced 10/10 GPT-5.5 review scores while
+exhibiting the defect, because the reviewer evaluates accuracy at the
+view level (each table looks correct on its own) and clarity at the
+local arrow level (each stub looks like a clean arrow on its own) rather
+than auditing cross-view facts or end-to-end arrow paths. Catching these
+at review time is therefore not reliable; preventing them at prompt time
+is.
+
 ## Programmatic Access
 
 The image-gen CLI is the recommended interface for diagram generation. For direct Node.js usage (e.g. scripting or integration), see `tools/image-generator/README.md`.

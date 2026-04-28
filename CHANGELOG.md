@@ -5,6 +5,27 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.9.2] — 2026-04-28
+
+### Added
+
+- **`scientific-schematics` SKILL.md: Common Failure Modes and Prompt
+  Locks.** New section documenting two recurring gpt-image-2 failure
+  modes that have been observed to slip past the GPT-5.5 reviewer with a
+  passing score, so they cannot be relied on to be caught downstream and
+  must be prevented at prompt time.
+  - *Cross-view inconsistency.* When the same conceptual entity (a data
+    layout, a fixed mapping, an enum partition) appears across multiple
+    views of one figure, the model independently re-invents specifics in
+    each view unless the prompt opens with a `== CRITICAL CONSISTENCY ==`
+    block that fixes the entity once and is referenced by every view.
+  - *Discontinuous arrows.* A prompt that says "an arrow goes from A,
+    crosses the divider, and reaches B" lets the model render two
+    disconnected stub arrows. Mandate single-polyline continuity via a
+    `== CRITICAL ARROW CONTINUITY ==` block, and for arrows spanning
+    large regions, specify the path geometry (one bend, one connected
+    polyline) rather than the endpoints alone.
+
 ## [0.9.1] — 2026-04-27
 
 ### Fixed
