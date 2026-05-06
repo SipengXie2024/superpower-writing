@@ -1,6 +1,6 @@
 ---
 name: peer-review
-description: Structured manuscript/grant review with checklist-based evaluation for systems, ML, and HCI venues. Use when writing formal peer reviews covering methodology, statistical validity, reproducibility, and constructive feedback. Clinical reporting standards (CONSORT, STROBE, etc.) are optional and only invoked for clinical/medical venues. For evaluating claims/evidence quality use scientific-critical-thinking; for quantitative scoring frameworks use scholar-evaluation.
+description: Structured manuscript or grant review with checklist-based evaluation for systems, ML, and HCI venues. Use when writing formal peer reviews covering methodology, statistical validity, reproducibility, and constructive feedback. Clinical reporting standards (CONSORT, STROBE, etc.) load only for clinical or medical venues.
 allowed-tools: Read Write Edit Bash
 license: MIT license
 metadata:

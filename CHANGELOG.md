@@ -5,6 +5,52 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.10.0] — 2026-05-06
+
+### Added
+
+- **Vendored prose-polish skills.** Four skills moved from user-level
+  `~/.claude/skills/` (and the `elements-of-style` plugin) into this plugin
+  so the polish workflow is self-contained.
+  - `superpower-writing:humanizer` — strip AI-writing tells (em-dash overuse,
+    inflated symbolism, rule-of-three, vague attribution, AI vocabulary,
+    formulaic challenges, generic positive conclusions). Based on Wikipedia's
+    "Signs of AI writing" guide.
+  - `superpower-writing:writing-clearly-and-concisely` — Strunk's rules for
+    clarity and concision. Vendored from the `elements-of-style` plugin.
+  - `superpower-writing:polish` — two-pass prose polish (humanizer first,
+    Strunk second). Internal `Skill()` calls rewritten to plugin-prefixed
+    names so the pipeline does not depend on user-level skills.
+  - `superpower-writing:polish-by-diff` — multi-section manuscript polish via
+    parallel subagents that produce unified diffs for per-hunk user review.
+    Purpose-built for `.writing/manuscript/*.tex` and `% claim:` discipline.
+    Subagent prompt template updated to invoke the plugin-prefixed `polish`
+    skill.
+- **`superpower-writing:collaborating-with-codex`.** Vendored from
+  `superpower-planning` so superpower-writing can delegate coding work to
+  Codex CLI without needing planning to be loaded. Includes
+  `scripts/codex_bridge.py` (the 60–120s blocking bridge — invoke with
+  `run_in_background: true`). Bridge path resolves via
+  `${CLAUDE_PLUGIN_ROOT}/skills/collaborating-with-codex/scripts/codex_bridge.py`,
+  which points at the loading plugin's own root, so the same path works from
+  either plugin. The "Inside the plugin" note in the SKILL.md was generalized
+  to acknowledge both vendors.
+
+### Changed
+
+- Plugin description now lists "prose polish" alongside the other domain
+  skills.
+- **Tightened SKILL.md descriptions for four bloated entries.** No
+  trigger-surface loss; total ~165 words of redundant trigger phrases and
+  repeated rationale removed.
+  - `humanizer`: 60 → 44 words.
+  - `polish`: 119 → 68 words. Cut duplicate English+Chinese trigger lists.
+  - `polish-by-diff`: 168 → 81 words. Cut six near-synonymous Chinese
+    trigger phrases and the (a)(b)(c)(d) "Prefer this over" enumeration.
+  - `peer-review`: 52 → 41 words. Removed dead references to
+    `scientific-critical-thinking` and `scholar-evaluation`, which were
+    sibling skills in the K-Dense-AI bundle that v0.7.0 dissolved.
+
 ## [0.9.2] — 2026-04-28
 
 ### Added
