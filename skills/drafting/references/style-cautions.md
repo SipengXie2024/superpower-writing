@@ -1,6 +1,6 @@
 # Style cautions for section intros and argumentative prose
 
-Five patterns slip past outline compliance and prose-quality review because they look locally fluent but corrupt the paper's structure or invite reviewer attacks. Teach every drafter these before prose is produced, and have every reviewer flag them before the draft ships. They are additive to the prose-style guidance in `section-standards/*.md`: section standards shape paragraph count and structural tags; these cautions shape argumentative structure and term ordering.
+Seven patterns slip past outline compliance and prose-quality review because they look locally fluent but corrupt the paper's structure or invite reviewer attacks. Teach every drafter these before prose is produced, and have every reviewer flag them before the draft ships. They are additive to the prose-style guidance in `section-standards/*.md`: section standards shape paragraph count and structural tags; these cautions shape argumentative structure and term ordering.
 
 Loaded by:
 
@@ -65,6 +65,38 @@ A section's intro must not use technical terms that are only defined later in th
 
 Practical check: scan the intro for any word that appears `\emph{...}` or is first-defined later in the section. If found, replace with its upstream paraphrase or relocate the definition.
 
+## Lesson 5 — Results topic and closing sentences carry qualitative conclusions
+
+Results paragraphs run a strict three-zone discipline. The first sentence states the qualitative answer to the research question. The last sentence states the design or scientific implication. The middle carries supporting numbers, table references, and methodology.
+
+**Why it hurts.** Methodology-framing topic sentences ("a static scan of the filtered corpus answers RQ1", "this section reports compile-time savings", "we compute X over Y") tell the reader work was done but not what was found. Reviewers skim topic sentences; if they read process narration instead of conclusions, the paragraph reads as a process log rather than a result. Closing sentences that merely summarize the data ("the data shows Z") miss the chance to land the design implication, leaving the design choice un-anchored to its evidence.
+
+**How to apply.** Replace methodology topic sentences with the qualitative answer itself. Push closing sentences from "the data shows Z" to "treating Z as ... therefore matches ...". Before submitting, read the first and last sentence of every Results paragraph in sequence; if the chain reads as a coherent standalone narrative without the body sentences, the discipline is in place. If the chain reads as a list of methodology pointers and data summaries, rewrite topic and closing sentences across the section.
+
+**Before:**
+
+> A static scan of the filtered corpus answers RQ1. The constants inside multi-member families are overwhelmingly stable. On Base, 93.06% of PUSH-immediate bytes hold the same value in every family member. The invariant subset that the system preserves as compile-time constants is therefore the dominant case, not a sparse side channel.
+
+**After:**
+
+> Most bytes inside multi-member bytecode families are invariant across members, answering RQ1. The invariant PUSH-immediate byte share is 93.06% on Base, computed over 428 multi-member families. Treating these invariant bytes as compile-time constants therefore matches the common case in deployed contracts, not a corner case.
+
+## Lesson 6 — Multi-corpus results read as parallel evidence, not anchor + extension
+
+When a finding is supported by data from multiple corpora, list the corpora as peers in canonical order rather than anchoring on one and treating the rest as a generalization check.
+
+**Why it hurts.** Anchor-and-extension framing implicitly privileges the anchor and invites the reviewer pushback "your result depends on the anchor corpus and may not generalize". The connector "the same comparison reproduces this structure on the other corpora" is a tell — it signals the prose was written single-corpus first and retrofitted, and reviewers parse the seams. Parallel framing answers the generalization pushback by construction; anchor-extension framing concedes it.
+
+**How to apply.** Topic sentence names the corpora as a set ("on every studied chain", "across the four datasets"). Data sentence lists per-corpus numbers in canonical order with sample counts in matching order: "X% on A, Y% on B, ..., over n_A, n_B, ... families respectively". If one corpus has additional data the others do not (e.g., a longitudinal stat measured only on the primary chain), demote it to a chain-specific complement after the parallel listing rather than leading with it. The conclusion sentence frames the finding as "across the studied chains" rather than "on A, with similar results on B, C, D".
+
+**Before:**
+
+> On Base, the invariant share is 93.06% over 428 families. The same byte-level cross-member comparison on the Ethereum, BSC, and Arbitrum 10K-block windows reproduces this structure: 92.32% on Ethereum, 93.35% on BSC, and 93.23% on Arbitrum.
+
+**After:**
+
+> The invariant share is 93.06% on Base, 92.32% on Ethereum, 93.35% on BSC, and 93.23% on Arbitrum, over 428, 682, 168, and 99 multi-member families respectively.
+
 ## How to apply at drafting time
 
 Before writing any section intro, overview paragraph, thesis sentence, or contribution-list bullet, run the following scan against the intended prose:
@@ -74,6 +106,8 @@ Before writing any section intro, overview paragraph, thesis sentence, or contri
 3. **Dataset pre-hedge scan (Lesson 2)** — grep the draft for the dataset name in thesis / contribution / intro positions. Strip unless the sentence is inside the numbers-first subsection or the external-validity block.
 4. **Roadmap scan (Lesson 3)** — does any section intro read "The remaining subsections..." or "§X.Y discusses..."? Rewrite as a claim-first thesis with parenthetical `\S\ref{...}`.
 5. **Forward-reference scan (Lesson 4)** — for each section's intro paragraph, list the emphasized terms (`\emph{...}`) and defined-later nouns. Replace each with an upstream paraphrase, or relocate the definition.
+6. **Topic-and-closing scan (Lesson 5)** — for each Results paragraph, read only the first and last sentence. If the topic sentence narrates methodology rather than answering an RQ, rewrite. If the closing sentence merely summarizes the data rather than stating a design or scientific implication, push it one step further.
+7. **Parallel-corpora scan (Lesson 6)** — grep Results paragraphs for connectors like "the same comparison ... reproduces" or "this pattern also holds on". When found, restructure the surrounding prose to list all corpora as peers in one sentence, with sample counts in matching order.
 
 ## How to apply at review time
 

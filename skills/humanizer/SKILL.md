@@ -178,6 +178,30 @@ If the input mixes languages (e.g. Chinese narrative with English code identifie
 **After:**
 > Alamata Raya Kobo is a town in the Gonder region of Ethiopia, known for its weekly market and 18th-century church.
 
+#### 4a. Promotional language in academic / systems-paper Results prose
+
+The default §4 list misfires on academic registers because the inflated words there (vibrant, nestled, breathtaking) rarely appear in research prose. The Results sections of systems / ML / security papers have a distinct dialect of inflation; strip these even when the overall register is academic.
+
+**Words to watch:** overwhelmingly, dominant, captures, sparse side channel, settling RQ in the affirmative, highly, extensively, robustly, comprehensively, decisively, conclusively, strikingly, remarkably, definitively, clearly demonstrates, the dominant case.
+
+**Problem:** A 90+ percent measurement already establishes the claim. Inflated adjectives wrap the number in advocacy and read as compensation for weak evidence rather than confidence in strong evidence. Reviewers parse adjective inflation as defensiveness.
+
+**Substitution patterns:**
+- `overwhelmingly invariant` → `most bytes are invariant` (or just state the percent)
+- `the dominant case, not a sparse side channel` → `the common case, not a corner case`
+- `settling RQ in the affirmative` → `answering RQ`
+- `captures the dominant structure of X` → `matches the structure of X` or factual description
+- `clearly demonstrates / robustly shows / decisively establishes` → `shows`
+- `highly effective` → state the metric directly
+
+**Before:**
+> A static scan of the filtered corpus answers RQ1. The constants inside multi-member families are overwhelmingly stable. The invariant subset that the system preserves as compile-time constants is therefore the dominant case, not a sparse side channel.
+
+**After:**
+> Most bytes inside multi-member families are invariant across members. Treating these invariant bytes as compile-time constants therefore matches the common case, not a corner case.
+
+The "common case / corner case" pair is the systems-paper-native rhetorical contrast that preserves the rebuttal-of-objection function ("this regularity is broad enough to design around") without promotional language.
+
 
 ### 5. Vague Attributions and Weasel Words
 

@@ -166,7 +166,7 @@ The Zotero-first / network-fallback / optional auto-push flow is fully specified
 
 ## Style cautions for section intros and argumentative prose
 
-Five patterns slip past outline compliance and prose-quality review because they look locally fluent but corrupt the paper's structure or invite reviewer attacks. The canonical rules, verbatim before/after example, and scanning checks live at [`references/style-cautions.md`](references/style-cautions.md); the drafter prompt template loads that file at write time, and both reviewer agents paraphrase it with added severity and flagging context — keep the three wordings in sync when any rule changes (see the reference's "Loaded by" block).
+Seven patterns slip past outline compliance and prose-quality review because they look locally fluent but corrupt the paper's structure or invite reviewer attacks. The canonical rules, verbatim before/after example, and scanning checks live at [`references/style-cautions.md`](references/style-cautions.md); the drafter prompt template loads that file at write time, and both reviewer agents paraphrase it with added severity and flagging context — keep the three wordings in sync when any rule changes (see the reference's "Loaded by" block).
 
 At a glance:
 
@@ -175,6 +175,8 @@ At a glance:
 - **No dataset pre-hedging in argumentative prose** — `on X dataset` or `in our workload` inside thesis sentences pre-narrows the claim. Allowed only where numbers are first reported and in the discussion's external-validity block.
 - **Section intros foreground claims, not roadmaps** — replace `The remaining subsections discuss X, Y, Z` with a claim-first thesis; subsection pointers become parenthetical `\S\ref{...}`. Reference file has the verbatim before/after.
 - **Forward-reference discipline in intros** — a section's intro must not use technical terms defined only later in the same section.
+- **Results topic and closing sentences carry qualitative conclusions** — first sentence states the qualitative answer to the RQ, last sentence states the design or scientific implication, middle carries numbers and methodology. Reading first+last pairs end-to-end across the section should yield a defensible standalone narrative.
+- **Multi-corpus results are parallel, not anchored** — list corpora as peers (`X% on A, Y% on B, ..., over n_A, n_B, ... respectively`); the connector `the same comparison reproduces this structure on the other corpora` is a retrofitting tell and should be replaced with a single parallel listing.
 
 ## Integration
 
