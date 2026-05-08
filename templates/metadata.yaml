@@ -8,4 +8,5 @@ project:
 export:
   output_name: bid-document.docx
   reference_docx: ""
+  docx_templates: {}
   pandoc_args: []

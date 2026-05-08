@@ -60,18 +60,43 @@ combined.write_text("\n\n".join(parts), encoding="utf-8")
 print(f"Generated {combined}")
 PY
 
-output_name=$(python3 - "$TARGET" <<'PY'
+export_info=$(python3 - "$TARGET" <<'PY'
 import sys
 from pathlib import Path
 try:
     import yaml
 except Exception:
     print("bid-document.docx")
+    print("")
     sys.exit(0)
-data = yaml.safe_load((Path(sys.argv[1]) / "metadata.yaml").read_text(encoding="utf-8")) or {}
-print(((data.get("export") or {}).get("output_name")) or "bid-document.docx")
+
+target = Path(sys.argv[1])
+metadata = yaml.safe_load((target / "metadata.yaml").read_text(encoding="utf-8")) or {}
+outline = yaml.safe_load((target / "outline.yaml").read_text(encoding="utf-8")) or {}
+export = metadata.get("export") or {}
+print(export.get("output_name") or "bid-document.docx")
+sections = outline.get("sections") or []
+parent_ids = {str(section.get("parent_id")).strip() for section in sections if section.get("parent_id") is not None}
+templates = sorted({str(section.get("docx_template") or "").strip() for section in sections if str(section.get("id") or "").strip() not in parent_ids and str(section.get("docx_template") or "").strip()})
+if len(templates) > 1:
+    print(f"ERROR: multiple docx_template profiles in one export: {', '.join(templates)}", file=sys.stderr)
+    sys.exit(2)
+if templates:
+    profile = templates[0]
+    path = (export.get("docx_templates") or {}).get(profile)
+    if not path:
+        print(f"ERROR: docx_template profile not configured: {profile}", file=sys.stderr)
+        sys.exit(2)
+    ref = Path(path)
+    if not ref.is_absolute():
+        ref = target / ref
+    print(str(ref))
+else:
+    print(export.get("reference_docx") or "")
 PY
 )
+output_name=$(printf '%s\n' "$export_info" | sed -n '1p')
+reference_docx=$(printf '%s\n' "$export_info" | sed -n '2p')
 
 if ! command -v pandoc >/dev/null 2>&1; then
   echo "pandoc not found; generated $COMBINED only" >&2
@@ -79,19 +104,6 @@ if ! command -v pandoc >/dev/null 2>&1; then
 fi
 
 args=("$COMBINED" "-o" "$OUT_DIR/$output_name")
-reference_docx=$(python3 - "$TARGET" <<'PY'
-import sys
-from pathlib import Path
-try:
-    import yaml
-except Exception:
-    sys.exit(0)
-data = yaml.safe_load((Path(sys.argv[1]) / "metadata.yaml").read_text(encoding="utf-8")) or {}
-ref = ((data.get("export") or {}).get("reference_docx")) or ""
-if ref:
-    print(ref)
-PY
-)
 if [[ -n "$reference_docx" ]]; then
   args+=("--reference-doc=$reference_docx")
 fi

@@ -2,14 +2,14 @@
 
 Claude Code plugin for writing large Chinese bid documents.
 
-It keeps a bid workspace in `.bid/`, helps build a multi-level outline, records section-by-section interview decisions, drafts each leaf section as its own Markdown file, checks minimum character targets, and exports the assembled document to docx through Pandoc.
+It keeps a bid workspace in `.bid/`, helps build a multi-level outline, records section-by-section interview decisions, drafts each leaf section as its own Markdown file, checks minimum character targets plus required functional/performance indicators, and exports the assembled document to docx through Pandoc.
 
 ## Status
 
 - **Version**: `v0.1.0`
 - **Scope**: MVP writing loop for large Chinese bid documents
 - **Primary format**: one Markdown file per leaf section
-- **Export**: Pandoc docx, with optional `reference_docx`
+- **Export**: Pandoc docx, with optional global `reference_docx` or section-level `docx_template` profiles
 
 ## Install
 
@@ -67,6 +67,14 @@ sections:
     must_cover:
       - "项目背景"
       - "建设目标"
+    functional_indicators:
+      - "支持用户权限分级管理"
+    performance_indicators:
+      - "响应时间 ≤ 2 秒"
+    docx_template: "technical-small-section"
+    format_requirements:
+      figures: "所有图片需有图题，格式为：图N 说明文字"
+      tables: "所有表格需有表题，格式为：表N 说明文字"
     input_refs: []
     prompt_refs: []
     status: planned
@@ -82,7 +90,7 @@ bash scripts/check-bid.sh
 bash scripts/export-docx.sh
 ```
 
-`check-bid.sh` counts non-whitespace Markdown content as an approximate Chinese character count. This is a writing control metric, not a legal page-count guarantee.
+`check-bid.sh` counts non-whitespace Markdown content as an approximate Chinese character count. It also verifies declared functional/performance indicators and simple figure/table caption requirements when `format_requirements` is present. This is a writing control metric, not a legal page-count guarantee.
 
 ## Dependencies
 
@@ -94,7 +102,7 @@ python3 -m pip install --user pyyaml
 
 Install Pandoc to generate docx. Without Pandoc, export still creates `.bid/export/combined.md` and reports that docx generation was skipped.
 
-To control Word styles, set `export.reference_docx` in `.bid/metadata.yaml`.
+To control Word styles globally, set `export.reference_docx` in `.bid/metadata.yaml`. To control a small chapter's Word format, set that leaf section's `docx_template` in `.bid/outline.yaml` and map it under `export.docx_templates` in `.bid/metadata.yaml`.
 
 ## Humanizer
 
