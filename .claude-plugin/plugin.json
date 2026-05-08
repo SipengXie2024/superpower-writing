@@ -1,19 +1,18 @@
 {
-  "name": "superpower-writing",
-  "description": "Self-contained IMRAD academic-writing lifecycle plugin for systems, ML, and HCI papers. Ships domain skills (research lookup, citation management, literature review, peer review, scientific schematics, prose polish) and reference files (writing principles, figures & tables, citation styles, venue styles). Provides persistent state, stage gates, claim-first verification, subagent execution, and review loops.",
-  "version": "0.10.1",
+  "name": "cn-bid-writing",
+  "description": "中文大型标书写作插件，支持大纲访谈、逐小节 Markdown 写作、外部 prompt/input 管理、字数检查和 Pandoc docx 导出。",
+  "version": "0.1.0",
   "author": {
     "name": "sipeng"
   },
-  "repository": "https://github.com/SipengXie2024/superpower-writing",
+  "repository": "https://github.com/SipengXie2024/cn-bid-writing",
   "license": "MIT",
   "keywords": [
-    "skills",
-    "academic-writing",
-    "imrad",
-    "claim-first",
-    "systems-papers",
-    "self-contained",
-    "zotero"
+    "chinese",
+    "bid-writing",
+    "proposal",
+    "docx",
+    "markdown",
+    "outline"
   ]
 }

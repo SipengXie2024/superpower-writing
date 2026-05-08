@@ -1,8 +1,8 @@
 ---
-description: Draft one or all sections of the paper. Enforces claim-first protocol via PreToolUse hook.
-argument-hint: "[section name or 'all']"
+description: Draft or continue one or more bid sections as Markdown.
+argument-hint: "[section-id|all]"
 ---
 
-Invoke the `superpower-writing:drafting` skill. Section (if specified): $ARGUMENTS.
+Invoke the `cn-bid-writing:drafting` skill. Draft target: $ARGUMENTS.
 
-The skill orchestrates per-section LaTeX prose generation in serial or parallel mode. Each drafter subagent must resolve claim EVIDENCE (Zotero first when enabled, network fallback) to `STATUS: evidence_ready` before the PreToolUse hook at `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` permits writing to `.writing/manuscript/*.tex`.
+The skill reads `.bid/outline.yaml`, `.bid/prompts/`, and `.bid/inputs/`, then writes or continues the mapped file under `.bid/chapters/`.

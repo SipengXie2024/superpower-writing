@@ -1,14 +1,14 @@
 {
-  "name": "superpower-writing",
-  "description": "Local marketplace for superpower-writing IMRAD academic-writing plugin",
+  "name": "cn-bid-writing",
+  "description": "Local marketplace for cn-bid-writing Chinese bid document plugin",
   "owner": {
     "name": "sipeng"
   },
   "plugins": [
     {
-      "name": "superpower-writing",
-      "description": "IMRAD academic-writing lifecycle plugin",
-      "version": "0.10.0",
+      "name": "cn-bid-writing",
+      "description": "Chinese bid document writing plugin",
+      "version": "0.1.0",
       "source": "./"
     }
   ]

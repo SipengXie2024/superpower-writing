@@ -1,34 +1,17 @@
-# Writing Findings & Decisions
+# 标书写作记录
 
-## Requirements
+## 用户访谈结论
+
 -
 
-## Research Findings
-<!-- Literature synthesis, prior-art scan, reference papers. -->
+## 写作约束
+
 -
 
-## Technical Decisions
-| Decision | Rationale |
-|----------|-----------|
-|          |           |
+## 外部输入材料
 
-## Reviewer Context
-<!-- Internal co-author feedback, journal-specific guidance, reviewer hot buttons. -->
 -
 
-## Issues Encountered
-| Issue | Resolution |
-|-------|------------|
-|       |            |
+## 待确认问题
 
-## Resources
 -
-
-## Debugging Findings
-<!-- Added by debugging skill -->
-
-## Code Review Findings
-<!-- Added by requesting-review skill -->
-
----
-*Update this file after every 2 view/search/lookup operations to prevent lost context.*

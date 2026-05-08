@@ -2,15 +2,14 @@
 .env
 .env.local
 .env.*.local
-.writing/secrets.local
 **/secrets.local
 
-# Writing working state
-.writing/verify-cache.json
-.writing/stash/
-# .writing/ itself IS tracked — only caches/stashes are ignored
+# Bid workspace artifacts
+.bid/export/*.docx
+.bid/export/*.tmp
+.bid/stash/
 
-# Plugin-internal design history (kept locally, not published)
+# Plugin-internal planning history
 .planning/
 
 # Python
@@ -29,18 +28,5 @@ __pycache__/
 *.swo
 .DS_Store
 
-# Node (pyzotero upstream uses npx; transient installs)
+# Node
 node_modules/
-
-# TypeScript build artifacts under tools/* (e.g. image-generator)
-tools/*/dist/
-
-# Local developer automation — not shipped with the plugin.
-# The two hooks below are registered via .claude/settings.local.json
-# (itself ignored by the global git ignore), not via hooks/hooks.json.
-/CLAUDE.md
-/agents/plugin-lint.md
-/hooks/block-marketplace-writes.sh
-/hooks/shellcheck-on-edit.sh
-/skills/release-prep/
-/skills/scaffold-component/

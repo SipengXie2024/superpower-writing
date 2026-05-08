@@ -1,8 +1,8 @@
 ---
-description: Start or resume the outlining phase of a research paper.
-argument-hint: "[topic or working title]"
+description: Create or update the outline for a Chinese bid document.
+argument-hint: "[bid topic or requirements]"
 ---
 
-Invoke the `superpower-writing:outlining` skill. Topic or working title (if provided): $ARGUMENTS.
+Invoke the `cn-bid-writing:outlining` skill. Topic or requirements: $ARGUMENTS.
 
-The skill will iterate literature retrieval, produce `.writing/outline.md` with an IMRAD structure plus per-section claim lists, and populate `.writing/metadata.yaml`. If `.writing/` does not yet exist it will be initialized first.
+The skill will initialize `.bid/` if needed, then update `.bid/outline.md` and `.bid/outline.yaml` with a multi-level section tree suitable for section-by-section drafting.

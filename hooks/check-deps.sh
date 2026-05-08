@@ -1,28 +1,12 @@
 #!/usr/bin/env bash
-# SessionStart hook. Runs the shared dep-check script and emits a
-# system-reminder summarizing status. Never blocks session start
-# (exit 0 always); reminder is advisory.
-set -uo pipefail
+# Lightweight dependency notice for cn-bid-writing.
 
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
-OUTPUT="$("$PLUGIN_ROOT/scripts/check-deps.sh" 2>&1)" || true
-STATUS=$?
+set -euo pipefail
 
-if [[ $STATUS -ne 0 ]]; then
-  BODY="superpower-writing dependency check FAILED.
-
-$OUTPUT
-
-Do not invoke any superpower-writing skill (main, outlining, writing-plans,
-drafting, claim-verification, revision, submission) until the missing
-dependencies are installed."
-else
-  BODY="superpower-writing deps OK. Bundled domain skills detected."
+if ! python3 -c "import yaml" >/dev/null 2>&1; then
+  echo "[cn-bid-writing] PyYAML not found; install it before running /bid:check or /bid:export-docx." >&2
 fi
 
-cat <<EOF
-<system-reminder>
-$BODY
-</system-reminder>
-EOF
-exit 0
+if ! command -v pandoc >/dev/null 2>&1; then
+  echo "[cn-bid-writing] pandoc not found; /bid:export-docx will still build combined markdown but cannot create docx." >&2
+fi
