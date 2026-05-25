@@ -540,7 +540,8 @@ The "common case / corner case" pair is the systems-paper-native rhetorical cont
 8. Answer briefly with the remaining tells (if any)
 9. Prompt: "Now make it not obviously AI generated."
 10. Present the final version (revised after the audit)
-11. **Register-shifting edits checkpoint:** scan the diff between input and final. If any of the changes below were made, list them as separate bullets (`original phrase` → `rewritten phrase`) and ask the user whether to keep each one before treating delivery as final:
+11. **Self-score** the final version with the Self-Scoring rubric below. If it scores below 35/50, revise the weak dimensions and re-score before continuing.
+12. **Register-shifting edits checkpoint:** scan the diff between input and final. If any of the changes below were made, list them as separate bullets (`original phrase` → `rewritten phrase`) and ask the user whether to keep each one before treating delivery as final:
     - Person change (we ↔ I, third-person ↔ first-person)
     - Hyphen stripped from a compound modifier
     - Scholarly verb informalized (shows / demonstrates / preserves / reports / presents → lands / dresses up / pulls off / etc.)
@@ -550,6 +551,20 @@ The "common case / corner case" pair is the systems-paper-native rhetorical cont
 
     If no such edits were made, state "No register-shifting edits flagged" and skip the question. When the user is unreachable (batch mode, automation), default to keeping the original wording for any flagged edit and note that you reverted them.
 
+## Self-Scoring
+
+After the audit, rate the final version 1 to 10 on each dimension, then sum. Score the text in its own register. Do not penalize scholarly prose for sounding scholarly, or quoted material for matching its source.
+
+| Dimension | Question | Watch for |
+|-----------|----------|-----------|
+| Directness | Does it state claims, or announce and inflate them? | signposting, significance inflation, persuasive-authority tropes (rules 1, 27, 28) |
+| Rhythm | Varied sentence structure, or metronomic? | rule of three, negative parallelism, staccato fragments, false ranges (rules 9, 10, 12) |
+| Density | Tight, or padded? | filler, excessive hedging, -ing tails, copula detours, synonym cycling (rules 3, 8, 11, 23, 24) |
+| Specificity | Concrete sources and numbers, or vague? | vague declaratives, weasel attribution, promotional adjectives (rules 1, 4, 4a, 5) |
+| Register fidelity | Does it stay in the input's register? | scholarly verbs informalized, person switched, voice injected, domain compounds stripped (Register Awareness, rules 4a, 26) |
+
+Below 35/50: revise the weak dimensions and re-score before delivering. The total is a prompt to look again, not a stopping rule. A 40 with one glaring tell still needs the fix.
+
 ## Output Format
 
 Provide:
@@ -557,8 +572,9 @@ Provide:
 2. Draft rewrite
 3. "What makes the below so obviously AI generated?" (brief bullets)
 4. Final rewrite
-5. **Flagged register-shifting edits** — list per checkpoint above, or "No register-shifting edits flagged"
-6. A brief summary of changes made (optional, if helpful)
+5. **Self-scoring** — the five dimension scores (1 to 10 each) and the total out of 50
+6. **Flagged register-shifting edits** — list per checkpoint above, or "No register-shifting edits flagged"
+7. A brief summary of changes made (optional, if helpful)
 
 
 ## Full Example

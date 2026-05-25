@@ -5,6 +5,39 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.10.2] — 2026-05-25
+
+### Added
+
+- **`superpower-writing:humanizer`: Self-Scoring rubric.** A five-dimension
+  self-check (Directness, Rhythm, Density, Specificity, Register fidelity),
+  each rated 1 to 10; below 35/50 the skill revises the weak dimensions and
+  re-scores before delivering. Ported from the `stop-slop` skill but re-tuned
+  for academic register: the original's essay-oriented Trust and Authenticity
+  dimensions were replaced by Specificity (concrete sources and numbers over
+  vague declaratives) and Register fidelity (scholarly verbs, person, and
+  domain compounds preserved), and every dimension maps to the skill's
+  existing numbered rules. Wired into the Process (new step 11) and the
+  Output Format.
+
+## [0.10.1] — 2026-05-07
+
+### Added
+
+- **`superpower-writing:humanizer`: Results-section style cautions for
+  systems papers (§4a).** Dialect-specific promotional-language list for
+  academic Results prose (overwhelmingly, dominant, captures, sparse side
+  channel, settling RQ in the affirmative), with substitution patterns
+  including the "common case / corner case" contrast that preserves the
+  rebuttal-of-objection function without inflated language.
+- **`superpower-writing:drafting`: two Results-prose style-cautions lessons.**
+  Lesson 5 — Results topic and closing sentences carry qualitative
+  conclusions, not methodology narration; the first and last sentences across
+  a section should read as a defensible standalone narrative. Lesson 6 —
+  multi-corpus results read as parallel evidence, not anchor plus extension;
+  list corpora in canonical order with matching sample counts instead of
+  retrofitting connectors.
+
 ## [0.10.0] — 2026-05-06
 
 ### Added
