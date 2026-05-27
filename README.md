@@ -16,7 +16,7 @@
 
 - **Version**: `v0.9.1`
 - **Scope**: single-author IMRAD research manuscripts (CS / systems / ML / HCI)
-- **Dependencies**: Zotero API (optional, gated by `zotero.enabled` in metadata); Codex OAuth (used by `scientific-schematics`)
+- **Dependencies**: Zotero API (optional, gated by `zotero.enabled` in metadata); Codex CLI (used by `scientific-schematics` for figure generation via `collaborating-with-codex`)
 - **Repo**: https://github.com/SipengXie2024/superpower-writing
 
 ## TL;DR — what this plugin does

@@ -5,6 +5,41 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.11.0] — 2026-05-27
+
+### Changed
+
+- **`superpower-writing:scientific-schematics` now delegates generation to
+  Codex's native `image_gen`.** The backend swapped from the bundled
+  `tools/image-generator` CLI (reverse-engineered Codex OAuth + gpt-image-2,
+  GPT-5.5 review) to delegation through the
+  `superpower-writing:collaborating-with-codex` bridge, which runs Codex's
+  `imagegen-scientific-schematics` skill for design and visual review. The skill
+  name and all caller call sites (`drafting`, `literature-review`,
+  `citation-management`, `research-lookup`, `writing-plans`,
+  `scientific-visualization`, `main`) are unchanged — only the generation path
+  moved. No OAuth login or `npm` build step is required anymore. Verified
+  end-to-end: a bridge call generated a valid PNG and saved it to the target
+  path.
+- **`superpower-writing:collaborating-with-codex`: documents figure
+  generation.** New "Image and Diagram Generation" section, plus a description
+  update, making the bridge the documented home for delegating
+  publication-quality schematics to Codex `image_gen` (work Claude has no
+  native tool for).
+- **`scripts/check-deps.sh`: figure-backend check rewritten.** The
+  image-generator build / Node.js ≥ 20 / Codex-OAuth-token checks were replaced
+  by a single warning-only probe for the `codex` CLI on PATH.
+
+### Removed
+
+- **`tools/image-generator/` (the local gpt-image-2 CLI).** Deleted in full —
+  Codex's built-in `image_gen` is now the only figure-generation path, matching
+  Codex's own guidance to stop using reverse-engineered OAuth flows. Also
+  removed the CLI-specific
+  `scientific-schematics/references/{README,QUICK_REFERENCE}.md` and
+  `scientific-schematics/scripts/example_usage.sh`; the backend-agnostic
+  `references/best_practices.md` is kept.
+
 ## [0.10.2] — 2026-05-25
 
 ### Added
