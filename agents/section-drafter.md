@@ -1,6 +1,6 @@
 ---
 name: section-drafter
-description: Draft one LaTeX manuscript section (abstract/intro/methods/results/discussion) under the claim-first protocol. Resolves evidence via Zotero first, network fallback, only then writes prose tagged with `% claim: id` line comments. Designed for parallel team-driven drafting where each section gets a fresh context.
+description: Draft one LaTeX manuscript section (abstract/intro/methods/results/discussion) under the claim-first protocol. Resolves evidence via Zotero first, network fallback, only then writes prose tagged with `% claim: id` line comments. Designed for parallel dynamic-workflow drafting where each section gets a fresh context.
 model: inherit
 color: green
 tools: Read, Write, Edit, Grep, Glob, Bash, Skill

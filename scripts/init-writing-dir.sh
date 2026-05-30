@@ -68,7 +68,8 @@ create_if_missing "$TEMPLATE_DIR/findings.md"   "$TARGET/findings.md"
 create_if_missing "$TEMPLATE_DIR/metadata.yaml" "$TARGET/metadata.yaml"
 [[ -f "$TARGET/outline.md" ]] || : > "$TARGET/outline.md"
 
-# refs.bib: empty file that `submission` will later populate from Zotero.
+# refs.bib: empty file that drafting / claim-verification / citation-management
+# populate from Zotero and network lookups as citations resolve.
 [[ -f "$TARGET/refs.bib" ]] || : > "$TARGET/refs.bib"
 
 # main.tex: top-level LaTeX skeleton that \input{}s each manuscript section.
@@ -142,5 +143,5 @@ Initialized $TARGET/
 
 Next step: open \`$TARGET/outline.md\` and start outlining, or invoke the
 \`superpower-writing:outlining\` skill. Sections are drafted as individual
-.tex files under manuscript/ and pulled together by main.tex at submission.
+.tex files under manuscript/ and pulled together by main.tex for compilation.
 EOF

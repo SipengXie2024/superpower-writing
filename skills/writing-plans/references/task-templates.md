@@ -55,7 +55,7 @@ Do NOT write prose in the plan itself — the plan enumerates tasks; drafting wr
 
 - [ ] **Step 1: Invoke `Skill(skill="superpower-writing:claim-verification")` scoped to Methods**
 
-  Run the four-pass verifier on Methods only (completeness, citation resolution dual source, numeric/table consistency, reporting-guideline subset). On all-pass, flip eligible claims `evidence_ready` → `verified`.
+  Run claim-verification on Methods only (Pass 1 completeness, Pass 2 citation resolution + semantic match; Pass 3 numeric/table consistency when the numbers are settled). On all-pass, flip eligible claims `evidence_ready` → `verified`.
 
 - [ ] **Step 2: Commit**
 
@@ -70,13 +70,13 @@ Do NOT write prose in the plan itself — the plan enumerates tasks; drafting wr
 - Read: `.writing/manuscript/03_methods.tex`, `.writing/verify-report.md`
 - Write: `.writing/reviews/internal_methods_<date>.md`
 
-- [ ] **Step 1: Invoke `Skill(skill="superpower-writing:peer-review")` as co-author reviewer**
+- [ ] **Step 1: Dispatch the `superpower-writing:manuscript-reviewer` agent against Methods prose**
 
-  Prompt the skill to produce Major/Minor/OutOfScope comments against Methods prose. Store the output under `.writing/reviews/internal_methods_<ISO-date>.md`.
+  Produce severity-tagged (Major/Minor/Presentation) comments on writing quality, IMRAD coherence, and claim support. Store the output under `.writing/reviews/internal_methods_<ISO-date>.md`. In a dynamic workflow this is the manuscript-review pipeline stage; in manual batch it runs at the checkpoint.
 
-- [ ] **Step 2: If review raises Major issues, route to `revision` skill**
+- [ ] **Step 2: Apply the agreed fixes, then re-verify**
 
-  `revision` handles intake → classify → respond-per-item → apply-diff → re-verify. This skill does NOT apply diffs itself.
+  Address Major issues by re-drafting the affected paragraphs (the claim-first hook still applies), then re-run claim-verification on the touched claims. Leave non-blocking comments in the review file for the human author to weigh during refinement.
 
 - [ ] **Step 3: Commit review file**
 

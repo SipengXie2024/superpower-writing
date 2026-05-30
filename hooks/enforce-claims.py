@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PreToolUse hook enforcing claim-first writing protocol (LaTeX).
+r"""PreToolUse hook enforcing claim-first writing protocol (LaTeX).
 
 Reads Claude Code PreToolUse JSON on stdin, writes decision JSON on stdout.
 

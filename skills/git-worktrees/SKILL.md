@@ -200,4 +200,4 @@ Ready to implement auth feature
 - Any skill needing isolated workspace
 
 **Pairs with:**
-- **superpower-writing:finishing-branch** - REQUIRED for cleanup after work complete
+- **superpower-writing:archiving** - snapshot `.writing/` into the archive when the skeleton is done

@@ -1,12 +1,12 @@
 ---
 name: main
-description: Router and dependency gate for superpower-writing. Loaded at session start. Verifies scientific-agent-skills is installed, routes between outlining/writing-plans/drafting/claim-verification/revision/submission based on stage in .writing/progress.md. Use when the user starts an academic-writing task (paper, manuscript, IMRAD draft, rebuttal).
+description: Router and dependency gate for superpower-writing. Loaded at session start. Verifies bundled domain skills are installed, routes between outlining/writing-plans/drafting/claim-verification based on stage in .writing/progress.md. Produces a detailed evidence-backed skeleton for human refinement. Use when the user starts an academic-writing task (paper, manuscript, IMRAD draft, skeleton).
 ---
 
 <EXTREMELY-IMPORTANT>
 If there is even a 1% chance a writing skill applies to your task, you MUST invoke it. No exceptions, no rationalizations.
 
-This plugin is self-contained. Domain content (writing principles, figures/tables, citation styles, venue styles) lives in plugin-local reference files under `skills/drafting/references/` and `skills/submission/references/`. Skills that were previously upstream (`research-lookup`, `citation-management`, `literature-review`, `scientific-schematics`, `scientific-visualization`, `peer-review`) now ship as plugin-local skills invoked with the `superpower-writing:` prefix — e.g. `Skill(skill="superpower-writing:research-lookup")`.
+This plugin is self-contained. Domain content (writing principles, figures/tables, citation styles) lives in plugin-local reference files under `skills/drafting/references/`. Skills that were previously upstream (`research-lookup`, `citation-management`, `literature-review`, `scientific-schematics`, `scientific-visualization`) now ship as plugin-local skills invoked with the `superpower-writing:` prefix — e.g. `Skill(skill="superpower-writing:research-lookup")`.
 </EXTREMELY-IMPORTANT>
 
 ## Announce on Entry
@@ -25,7 +25,7 @@ Then perform the dep check and `.writing/` detection below before doing anything
 
 - Local (this plugin): `Skill(skill="superpower-writing:drafting")` — prefixed.
 - Plugin-local domain skills: `Skill(skill="superpower-writing:research-lookup")`, `Skill(skill="superpower-writing:citation-management")`, etc. — prefixed with `superpower-writing:`. These ship with this plugin.
-- Local execution engines: `Skill(skill="superpower-writing:subagent-driven")`, `Skill(skill="superpower-writing:team-driven")`, `Skill(skill="superpower-writing:executing-plans")` — prefixed as normal. These ship with this plugin; no sibling-plugin dependency.
+- Execution: large parallel drafting and cross-section review run as a Claude Code **dynamic workflow** (ask Claude to run a workflow — include "workflow" in the request — or turn on `/effort ultracode`). `Skill(skill="superpower-writing:executing-plans")` is the manual-batch fallback. Both ship with this plugin; no sibling-plugin dependency.
 
 # Dependency Gate (HARD)
 
@@ -39,18 +39,12 @@ Run:
 ${CLAUDE_PLUGIN_ROOT}/scripts/check-deps.sh
 ```
 
-This probes standard Agent Skills install locations for: `literature-review`, `peer-review`, `citation-management`, `research-lookup`, `scientific-schematics`, `scientific-visualization`. These skills are now bundled under the plugin's own `skills/` directory.
+This probes the plugin's own `skills/` directory first (the bundled domain skills ship there), then legacy Agent Skills install locations for back-compat. Required: `literature-review`, `citation-management`, `research-lookup`, `scientific-schematics`, `scientific-visualization`, plus a PyYAML probe for the claim hook.
 
-**On non-zero exit:** refuse all subsequent superpower-writing skill invocations. Surface the install command verbatim to the user:
-
-```
-npx skills add K-Dense-AI/scientific-agent-skills
-```
-
-If `uv` is missing (required by upstream):
+**On non-zero exit:** refuse all subsequent superpower-writing skill invocations and surface the script's output verbatim — it names the missing dependency and the fix. A missing bundled skill means the plugin install is incomplete (re-clone or reinstall the plugin); a missing `pyyaml` is fixed with:
 
 ```
-curl -LsSf https://astral.sh/uv/install.sh | sh
+pip install --user --upgrade pyyaml
 ```
 
 Do not proceed to outlining / drafting / anything. Silent degradation produces unverified manuscripts.
@@ -71,7 +65,7 @@ If `metadata.yaml` is absent or `zotero.enabled` is unset/false, skip this step.
 
 Check for `.writing/` in the project root.
 
-- **Absent and task is writing-related** (paper, manuscript, IMRAD, rebuttal, journal submission, revision, outline, abstract, methods section, etc.): run
+- **Absent and task is writing-related** (paper, manuscript, IMRAD draft, outline, abstract, methods section, skeleton, etc.): run
 
   ```bash
   ${CLAUDE_PLUGIN_ROOT}/scripts/init-writing-dir.sh
@@ -96,12 +90,12 @@ When `.writing/` already exists at session start:
 
 # Stage Gate Routing
 
-The writing lifecycle from design.md §7:
+The writing lifecycle (skeleton-first — the plugin produces a detailed, evidence-backed skeleton for the human author to refine, not a submission-ready paper):
 
 ```
-(dep-check) -> outlining -> writing-plans -> drafting -> revision* -> submission
-                                    ^                        |
-                                    +--- loop on reviews ----+
+(dep-check) -> outlining -> writing-plans -> drafting -> claim-verification
+                                                              |
+                                            (skeleton ready for human refinement)
 ```
 
 Each stage writes a dashboard row to `.writing/progress.md`. Route by inspecting the dashboard:
@@ -113,8 +107,7 @@ Each stage writes a dashboard row to `.writing/progress.md`. Route by inspecting
 | Outline + metadata complete, no `plan.md` | per-section/figure plan | `superpower-writing:writing-plans` |
 | `plan.md` present, `manuscript/*.tex` empty or partial | prose | `superpower-writing:drafting` |
 | Draft complete, no `verify-report.md` or report has failures | evidence audit | `superpower-writing:claim-verification` |
-| Reviews present in `.writing/reviews/`, unaddressed | review response | `superpower-writing:revision` |
-| All sections verified, metadata complete, no unresolved `[NEEDS-EVIDENCE]` or `% draft-only` | submission gate | `superpower-writing:submission` |
+| All sections drafted, claim-verification PASS, no unresolved `[NEEDS-EVIDENCE]` or `% draft-only` | skeleton ready | done — hand the evidence-backed skeleton to the human author for refinement |
 
 Skipping a gate (e.g., jumping from outline directly to drafting without writing-plans) requires explicit user override, surfaced as a warning.
 
@@ -124,11 +117,9 @@ When the user starts a non-trivial writing task (multi-section paper, multi-day 
 
 **Option 1: Quick Plan (Plan Mode)** — Lightweight read-only exploration. Best for a medium-scope task with known IMRAD shape, quick alignment on scope before outlining.
 
-**Option 2: Lightweight Execution** — Fast structured execution with `.writing/` tracking but no spec-interview or review loops. Best for short communications, commentaries, or a 2-3 section note where the claims are already clear.
+**Option 2: Structured Brainstorming** — Full pipeline: `superpower-writing:brainstorming` (design doc) → `superpower-writing:spec-interview` (refinement) → `superpower-writing:outlining` (IMRAD structure + claims). Best for a new research manuscript, complex methods, multi-study papers, or when the narrative arc is still unclear.
 
-**Option 3: Structured Brainstorming** — Full pipeline: `superpower-writing:brainstorming` (design doc) → `superpower-writing:spec-interview` (refinement) → `superpower-writing:outlining` (IMRAD structure + claims). Best for a new research manuscript, complex methods, multi-study papers, or when the narrative arc is still unclear.
-
-**Option 4: Stash Current Work** — Pause an in-progress paper safely; move `.writing/` (except `archive/`) into `.writing/stash/<paper-name>/`. Best when switching to a different paper, awaiting co-author input, or waiting on external data.
+**Option 3: Stash Current Work** — Pause an in-progress paper safely; move `.writing/` (except `archive/`) into `.writing/stash/<paper-name>/`. Best when switching to a different paper, awaiting co-author input, or waiting on external data.
 
 **When to skip this choice:**
 - Trivial edits (fix a typo, tweak one sentence) → just do it.
@@ -137,8 +128,6 @@ When the user starts a non-trivial writing task (multi-section paper, multi-day 
 
 **After Plan Mode completes:** If the approved plan reveals complex work (3+ sections, figures, multi-round lit review), suggest transitioning to `superpower-writing:writing-plans` for a formal decomposition plan. Plan-mode output feeds the plan — reference it, don't re-derive.
 
-**When Lightweight Execution is chosen:** invoke `superpower-writing:lightweight-execute`. That skill handles `.writing/` init, checklist, implementation, and verification. For writing specifically, bolt on `superpower-writing:drafting` when prose writes begin (so the claim-first hook fires).
-
 # Execution Routing
 
 When the user says "execute the plan", "start drafting", "write the paper", "implement the sections", do NOT directly invoke a single execution skill. Instead:
@@ -146,13 +135,12 @@ When the user says "execute the plan", "start drafting", "write the paper", "imp
 1. If no plan exists at `.writing/plan.md`, invoke `superpower-writing:writing-plans` — it produces `.writing/plan.md` directly (no further delegation; the writing-domain skill now owns the planning mechanics).
 2. If a plan exists, present the execution strategy via `AskUserQuestion`:
 
-   - **Subagent-Driven (this session, sequential)** → `superpower-writing:subagent-driven`. One subagent per section, 2-stage review between sections. Best for short-to-medium papers where context load is manageable and you want tight quality control between sections.
-   - **Team-Driven (this session, parallel)** → `superpower-writing:team-driven`. Agent Team with parallel section writers + dedicated reviewer. Best for long papers with many independent sections (Methods sub-blocks, multi-experiment Results) where time is the constraint.
-   - **Parallel Session (separate session)** → `superpower-writing:executing-plans`. Batch execution with manual checkpoints in a fresh session. Best when you want human review between batches or will resume across days.
+   - **Claude Code Dynamic Workflow** (recommended for multi-section papers) — ask Claude to run a workflow that executes `.writing/plan.md` (include the word "workflow" in the request so Claude writes one), or turn on `/effort ultracode`. The workflow drafts independent sections in parallel with the `superpower-writing:section-drafter` agent, then runs the two-stage review as a pipeline — `superpower-writing:spec-reviewer` for outline/claim alignment, then `superpower-writing:manuscript-reviewer` for writing quality. It reads `.writing/plan.md`, `.writing/outline.md`, and `.writing/findings.md`, and writes drafted prose, progress, and findings back into `.writing/`. The claim-first PreToolUse hook still fires on every section write.
+   - **Manual Batch Session** → `superpower-writing:executing-plans`, for a separate or manual session that drafts plan batches and stops at checkpoints. Best when workflows are unavailable or the user wants explicit per-batch review.
 
-3. Recommend based on paper shape: high parallelism + heavy lit search per section → Team-Driven. Short note, tight prose control → Subagent-Driven. Multi-day timeline, manual checkpoints → Parallel Session.
+3. Recommend based on paper shape: many loosely-coupled sections, heavy per-section lit search, or a long paper → Dynamic Workflow; the user wants manual checkpoints across days or workflow support is unavailable → Manual Batch Session.
 
-Execution engines live locally under `superpower-writing:{subagent-driven,team-driven,executing-plans}`. Drafting subagents invoke `superpower-writing:drafting` as their per-task skill; the local execution engine handles subagent orchestration, team coordination, and session handoff.
+Drafting mechanics (the per-section claim-first prompt, the Zotero-first evidence loop, the graphical-abstract dispatch) live in `superpower-writing:drafting`, which both paths invoke per section.
 
 # Stash / Resume Routing
 
@@ -171,10 +159,8 @@ Skills in this plugin (all invoked as `superpower-writing:<name>`):
 | `superpower-writing:main` | This router. Loaded at session start. Dep gate + stage routing. |
 | `superpower-writing:outlining` | Idea → IMRAD outline + per-section claim stubs + populated `metadata.yaml`. Combines design-exploration and spec-writing. |
 | `superpower-writing:writing-plans` | Approved outline → executable per-section/per-figure/per-table task plan with dependency graph. Writes `.writing/plan.md`. |
-| `superpower-writing:drafting` | Section-by-section prose writing in serial or parallel mode. Enforces claim-first protocol: each section subagent resolves EVIDENCE via `research-lookup` / `citation-management` **before** writing tagged prose. |
-| `superpower-writing:claim-verification` | Pre-submission auditor. Walks every `% claim: id` LaTeX line comment, confirms `\cite{}` citekeys resolve against `.writing/refs.bib`, runs semantic match against abstracts, checks numeric/table consistency, blocks on any `[NEEDS-EVIDENCE]` or `draft-only` marker. |
-| `superpower-writing:revision` | Unified review-loop handler for internal co-author and external journal reviewer comments. Classify → respond → apply diff → re-verify. |
-| `superpower-writing:submission` | Final gate: verifies all claims PASS, metadata complete, graphical abstract present, no draft-only tags. Freezes a copy to `.writing/archive/<date>/`. |
+| `superpower-writing:drafting` | Section-by-section prose writing via a dynamic workflow (parallel sections) or a manual batch session. Enforces claim-first protocol: each section subagent resolves EVIDENCE via `research-lookup` / `citation-management` **before** writing tagged prose. |
+| `superpower-writing:claim-verification` | Evidence-reliability check. Walks every `% claim: id` LaTeX line comment, confirms `\cite{}` citekeys resolve against `.writing/refs.bib`, runs semantic match against abstracts to catch hallucinated or mismatched citations, optionally checks numeric/table consistency. Run on demand or when the skeleton is ready for the human author. |
 
 Plugin-local domain skills (invoked with `superpower-writing:` prefix):
 
@@ -182,11 +168,10 @@ Plugin-local domain skills (invoked with `superpower-writing:` prefix):
 |-------|---------|---------|
 | `literature-review` | outlining, drafting, claim-verification | Structured lit synthesis. |
 | `research-lookup` | drafting, claim-verification | Paper/abstract retrieval for evidence resolution. |
-| `citation-management` | drafting, claim-verification, submission | Citation formatting, DOI resolution, bibliography assembly. |
-| `peer-review` | claim-verification, revision | Reporting-guideline checklists (CONSORT / STROBE / PRISMA). |
+| `citation-management` | drafting, claim-verification | Citation formatting, DOI resolution, bibliography assembly. |
 | `scientific-schematics` | drafting | Graphical abstracts and schematic figures (architecture / data-flow / pipeline diagrams). |
 | `scientific-visualization` | drafting | Publication-ready data plots (CDFs, throughput curves, training curves, ablation bars, Pareto fronts) for IEEE / ACM / USENIX / NeurIPS / ICML / ICLR. CS-tailored. |
-| `zotero-mcp` (MCP) | drafting, claim-verification, outlining, submission, revision | All Zotero calls when `zotero.enabled: true`. Registered in `.mcp.json`. Core tools: `zotero_search_items` (DOI / title / author lookup), `zotero_get_item_metadata` (markdown or BibTeX export), `zotero_get_item_fulltext` (server-side extracted PDF text, web-API mode supported), `zotero_semantic_search` (AI similarity search over the chunked library — paragraph-level matches when paper bodies are indexed), `zotero_advanced_search`, `zotero_get_collections` / `zotero_get_collection_items`, `zotero_add_by_doi` (auto-fetches metadata + open-access PDF). Scite citation intelligence via `scite_enrich_item` / `scite_enrich_search` / `scite_check_retractions`. |
+| `zotero-mcp` (MCP) | drafting, claim-verification, outlining | All Zotero calls when `zotero.enabled: true`. Registered in `.mcp.json`. Core tools: `zotero_search_items` (DOI / title / author lookup), `zotero_get_item_metadata` (markdown or BibTeX export), `zotero_get_item_fulltext` (server-side extracted PDF text, web-API mode supported), `zotero_semantic_search` (AI similarity search over the chunked library — paragraph-level matches when paper bodies are indexed), `zotero_advanced_search`, `zotero_get_collections` / `zotero_get_collection_items`, `zotero_add_by_doi` (auto-fetches metadata + open-access PDF). Scite citation intelligence via `scite_enrich_item` / `scite_enrich_search` / `scite_check_retractions`. |
 
 # Claim-First Protocol
 
@@ -203,11 +188,11 @@ A **PreToolUse hook** (`${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh`) blocks a
 
 The hook exempts any section stem whose slug is in `UNPROTECTED_SLUGS` (`abstract`, `references`, `acknowledgments`) from paragraph-tag enforcement. Slug match is by slug-ending: `00_abstract` matches `_abstract`; `09_references` matches `_references`; `10_acknowledgments` matches `_acknowledgments`. All other `manuscript/NN_*.tex` files require every load-bearing paragraph to carry `% claim: id` or `% draft-only`.
 
-Markdown manuscript files (`.md` under `manuscript/`) are NOT intercepted — the plugin operates on LaTeX only. If a `.md` slips into `manuscript/`, it falls through unenforced; convert to `.tex` before the submission gate.
+Markdown manuscript files (`.md` under `manuscript/`) are NOT intercepted — the plugin operates on LaTeX only. If a `.md` slips into `manuscript/`, it falls through unenforced; convert to `.tex` before claim-verification.
 
 ## Citation Placement Rule
 
-The abstract is **citation-free**. `CITATION_FREE_SLUGS = {"abstract"}` in the hook — any stem ending in `_abstract` (e.g. `00_abstract.tex`) is blocked when the write contains any LaTeX citation command (`\cite`, `\citep`, `\citet`, `\nocite`, `\parencite`, `\textcite`, `\autocite`, `\footcite`, `\citeauthor`, `\citeyear`, `\citealt`, `\citealp`, or any `\*cite*` variant) or a `% claim: id` tag. The abstract is a self-contained summary of the paper's own findings; references belong in the body. Every body section (`01_introduction.tex`, `02_background.tex`, `03_methods.tex`, `04_results.tex`, `05_discussion.tex`, etc.) MUST back every load-bearing claim with a `\cite{citekey}` whose citekey resolves against `.writing/refs.bib`; missing citations surface as FAILs in `claim-verification` Pass 2 and block `submission`.
+The abstract is **citation-free**. `CITATION_FREE_SLUGS = {"abstract"}` in the hook — any stem ending in `_abstract` (e.g. `00_abstract.tex`) is blocked when the write contains any LaTeX citation command (`\cite`, `\citep`, `\citet`, `\nocite`, `\parencite`, `\textcite`, `\autocite`, `\footcite`, `\citeauthor`, `\citeyear`, `\citealt`, `\citealp`, or any `\*cite*` variant) or a `% claim: id` tag. The abstract is a self-contained summary of the paper's own findings; references belong in the body. Every body section (`01_introduction.tex`, `02_background.tex`, `03_methods.tex`, `04_results.tex`, `05_discussion.tex`, etc.) MUST back every load-bearing claim with a `\cite{citekey}` whose citekey resolves against `.writing/refs.bib`; missing citations surface as FAILs in `claim-verification` Pass 2.
 
 Drafting and claim-verification skills must be aware of this hook and surface its block reason to the user. The fix is always: resolve EVIDENCE first (via `research-lookup` / `citation-management` / Zotero lookup), bump `STATUS` to `evidence_ready`, then write prose.
 

@@ -49,11 +49,11 @@ Based on feedback:
 
 ### Step 5: Complete Development
 
-After all tasks complete and verified:
-- **Read `.writing/progress.md`** to compile a full summary of all batches, test results, and verification evidence before presenting final status
-- Announce: "I'm using the finishing-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use superpower-writing:finishing-branch
-- Follow that skill to verify tests, present options, execute choice
+After all tasks complete:
+- **Read `.writing/progress.md`** to compile a full summary of all batches and verification evidence.
+- Run `superpower-writing:claim-verification` if the manuscript is ready for an evidence-reliability pass.
+- Present a concise completion summary: what was drafted, claim/citation status, any remaining `[NEEDS-EVIDENCE]` or `% draft-only` markers, and the recommended next step (hand the skeleton to the human author for refinement, or archive via `superpower-writing:archiving`).
+- Do NOT merge, create a PR, or run destructive git cleanup unless the user explicitly asks in this session.
 
 ## When to Stop and Ask for Help
 
@@ -87,7 +87,8 @@ After all tasks complete and verified:
 
 ## Integration
 
-**Required workflow skills:**
-- **superpower-writing:git-worktrees** - RECOMMENDED: Set up isolated workspace unless already on a feature branch
-- **superpower-writing:writing-plans** - Creates the plan this skill executes
-- **superpower-writing:finishing-branch** - Complete development after all tasks
+**Related skills:**
+- **superpower-writing:git-worktrees** - recommended when starting from a shared or risky branch
+- **superpower-writing:writing-plans** - creates the plan this skill executes
+- **superpower-writing:claim-verification** - evidence-reliability pass once sections are drafted
+- **superpower-writing:archiving** - archive the completed `.writing/` state when done

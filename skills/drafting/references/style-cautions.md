@@ -1,6 +1,6 @@
 # Style cautions for section intros and argumentative prose
 
-Seven patterns slip past outline compliance and prose-quality review because they look locally fluent but corrupt the paper's structure or invite reviewer attacks. Teach every drafter these before prose is produced, and have every reviewer flag them before the draft ships. They are additive to the prose-style guidance in `section-standards/*.md`: section standards shape paragraph count and structural tags; these cautions shape argumentative structure and term ordering.
+These patterns slip past outline compliance and prose-quality review because they look locally fluent but corrupt the paper's structure or invite reviewer attacks. Teach every drafter these before prose is produced, and have every reviewer flag them before the draft ships. They are additive to the prose-style guidance in `section-standards/*.md`: section standards shape paragraph count and structural tags; these cautions shape argumentative structure and term ordering.
 
 Loaded by:
 
@@ -115,7 +115,7 @@ The reviewer agents (`manuscript-reviewer.md` item 7; `spec-reviewer.md` item 5)
 
 ## Imported Patterns (from scientific-writing dissolution)
 
-Five patterns originally extracted from the scientific-writing skill's Common Writing Pitfalls, adapted for systems-paper context. These complement the five structural patterns above: the structural patterns govern where claims live and how intros are organized; these govern word- and sentence-level clarity.
+Five patterns originally extracted from the scientific-writing skill's Common Writing Pitfalls, adapted for systems-paper context. These complement the structural patterns above: the structural patterns govern where claims live and how intros are organized; these govern word- and sentence-level clarity.
 
 ### Jargon Overload
 
@@ -204,3 +204,70 @@ Several sentence-level faults recur across systems papers: passive-voice overuse
 **GOOD:**
 
 > The system uses sparse data structures to reduce memory usage. Remapping bytecodes to compact encodings cuts working set size by 30% (Table 3). We evaluated on three benchmarks chosen to span real-world workload characteristics (§5.1).
+
+## Reviewer-facing hard rules (production systems-paper practice)
+
+Fixed conventions distilled from shipping CS/systems papers. They apply to all reviewer-facing prose (abstract, intro, related work, methods, results, discussion, threat model, limitations). They are additive to the lessons above: the lessons govern argument structure; these govern punctuation, claim form, and editing-pass decisions.
+
+### Punctuation: no em-dashes, no in-sentence colons
+
+Both are grammatical in academic English; the preference here is fixed. Never use em-dashes (`---`, `--`, or a single em-dash) in prose, and never use a colon mid-sentence. Standard substitutions:
+
+- `X --- appositive list --- verb ...` becomes `X, including Y, Z, and W, verb ...`
+- `general claim: specific elaboration` becomes two sentences, or `general claim, so specific elaboration`
+- `... main clause --- trailing elaboration.` becomes `..., and/but/so trailing elaboration.` or a sentence break
+
+The one exception is the colon introducing a LaTeX `\begin{itemize}`. Inside `\item` bodies, em-dashes must still be replaced.
+
+### Goal-form, not precondition-form
+
+State design properties as commitments enforced by construction, not as runtime checks.
+
+- ✅ "The system's goal is X; the design enforces this by construction." Reads as a correctness commitment.
+- ❌ "The system does Y only when X holds." Reads as a runtime check, often unverifiable at the stated time, and misrepresents the causal arrow.
+
+Reuse boundaries, admission filters, and sharing rules are *designed to guarantee X by construction*, not to verify X at runtime.
+
+### Reviewer self-containment: no low-level identifiers in argumentative prose
+
+Argumentative prose must read standalone to a reviewer who has never seen the implementation. Keep function names, struct/enum/field identifiers, file paths, line numbers, raw byte-layout phrases, and hex literals out of claim text; they belong in an Implementation section or supporting material. Draft scan: if a claim sentence contains a CamelCase identifier, a snake_case identifier, a `0x...` hex literal, or an acronym not expanded in the same paragraph, rewrite it. Observation before name: describe what a thing does, then attach the term, so naming reads as earned rather than stipulated.
+
+### Delete defensive negations; keep substantive disambiguations
+
+Test: would a careful reviewer produce the negated reading on their own?
+
+- **No.** Defensive. The reader was never going to read it that way, and rebutting a misreading makes prose self-conscious. Delete it and state the positive form alone.
+- **Yes.** Two genuinely plausible readings, and the paper must actively reject one. Keep it; that is disambiguation, not defense.
+
+### Direct positive contrasts
+
+Avoid stacked `rather than` constructions in reviewer-facing prose. State the positive claim first; use a separate contrast sentence only when a real contrast must be drawn.
+
+### Strip inflated adjectives, let the numbers carry the load
+
+A 90-plus percent number already establishes the claim. Inflated adjectives wrap it in advocacy and read as compensation for weak evidence. Remove *overwhelmingly, dominant, captures, highly, extensively, robustly, comprehensively, settling RQ in the affirmative.*
+
+| ❌ Inflated | ✅ Direct |
+|---|---|
+| overwhelmingly invariant | most bytes are invariant, or the percent alone |
+| dominant case, not a sparse side channel | common case, not a corner case |
+| settling RQ in the affirmative | answering RQ |
+| captures the dominant structure | matches the structure |
+
+"Common case / corner case" is the systems-native contrast: it keeps the rebuttal-of-objection function without promotional language.
+
+### Editing-pass defaults
+
+When an aggressive polish pass on a long section returns many paragraph-pair replacements, 70-90% are typically correct. The recurring exceptions have stable defaults.
+
+**Default REJECT:**
+
+- Stripping a parenthetical limiter that establishes term scope at first use (`Naive (per-hash) AOT` to `Naive per-hash AOT` loses the scope marker).
+- Modifier reordering that flips the argumentative subject (`filter (...) identically to Naive AOT` to `filter used by Naive AOT` changes whose filter it is).
+- Deleting a mid-sentence editorial qualifier that binds to a downstream argument (`Third, and most consequential in production`).
+- Semicolon-merging two short sentences when one is a term definition (`We call these positions invariants.` stays standalone).
+- Register downgrades (neutral `is part of` to breezy `falls out of`).
+
+**Default ACCEPT:**
+
+- Removing a self-deprecating qualifier wrapped around a real design choice (`Admission as an extension` to `Admission`), when the Discussion already states the trade-off confidently. Optionally add a forward-reference into Discussion to preserve scope visibility.

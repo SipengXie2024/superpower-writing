@@ -1,6 +1,6 @@
 # Writing Principles
 
-Reference for drafting and revising systems/ML prose. Covers principles only; section-specific tense rules live in `section-standards/*.md`, style anti-patterns in `style-cautions.md`, and venue conventions in `submission/references/venue-styles.md`.
+Reference for drafting and revising systems/ML prose. Covers principles only; section-specific tense rules live in `section-standards/*.md` and style anti-patterns in `style-cautions.md`. Venue-specific figure and format conventions live in the `superpower-writing:scientific-visualization` skill (`references/venue_requirements.md`).
 
 ## Three Pillars
 

@@ -5,6 +5,37 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.12.0] — 2026-05-30
+
+### Changed
+
+- **Repositioned to skeleton-first.** The plugin now produces a detailed, evidence-backed paper skeleton for a human author to refine; it no longer attempts a submission-ready manuscript end-to-end. `main`, `README`, and stage-gate routing reflect this: the lifecycle ends at `claim-verification`, not a submission gate.
+- **Execution delegated to Claude Code dynamic workflows.** Parallel section drafting and the two-stage (spec then manuscript) review now run as a native dynamic workflow, with `executing-plans` as a manual-batch fallback. `drafting`, `writing-plans`, and `main` route accordingly. The `section-drafter` / `spec-reviewer` / `manuscript-reviewer` agents are reused as workflow `agentType`s.
+- **`claim-verification` refocused on citation reliability.** Kept Pass 1 (claim completeness) and Pass 2 (citation resolution plus semantic match against the cited abstract, the main guard against hallucinated citations); Pass 3 (numeric/table consistency) is now optional; the reporting-guideline checklist pass was removed. No longer bound to a submission gate.
+- **Imported MHOT writing rules.** `skills/drafting/references/style-cautions.md` gained reviewer-facing hard rules from production systems-paper practice: no em-dashes or in-sentence colons, goal-form over precondition-form, reviewer self-containment (no low-level identifiers in argumentative prose), delete defensive negations, strip inflated adjectives, and editing-pass REJECT/ACCEPT defaults.
+
+### Added
+
+- **Academic Research Assistant output style** (`output-styles/academic-research-assistant.md`): a rigorous, evidence-driven research persona shipped with the plugin. Enable via `/config` or the `outputStyle` setting.
+
+### Removed
+
+- **Skills (8):** `subagent-driven`, `team-driven`, `lightweight-execute`, `verification`, `finishing-branch`, `submission`, `revision`, `peer-review`. Parallel orchestration is now a dynamic-workflow concern; submission, reviewer-response, and reporting-guideline checklists are out of scope for a skeleton-first plugin.
+- **Agent:** `rebuttal-auditor` (only used by the removed `revision` skill).
+- **Commands:** `/writing:submit`, `/writing:revise`.
+
+### Fixed
+
+Post-migration coherence pass (independent Codex review + full grep sweep; verified with `tests/smoke.sh` and a zero-dangling-ref grep):
+
+- **Dangling references to removed skills.** Live references to the deleted `revision` and `submission` skills still routed as invokable paths in `claim-verification`, `outlining`, `drafting`, `writing-plans`, and `scripts/init-writing-dir.sh`; all now point to `drafting` / `polish` / `claim-verification` / the human author.
+- **Stale shipped progress template.** `templates/progress.md` (the file `init-writing-dir.sh` actually copies) lacked the `Spec Review` / `Manuscript Review` / `Plan Align` dashboard columns required by `review-loop-protocol.md`, listed deleted `revision`/`submission` lifecycle phases, and carried a Verification-Evidence schema that disagreed with what `claim-verification` writes. Rewritten to the dynamic-workflow schema; `check-writing-state.sh` repointed to the canonical top-level `templates/`, and the duplicate `skills/planning-foundation/templates/{progress,findings}.md` removed. Fresh-init state detection now correctly reports `empty` instead of `active`.
+- **SessionStart dep gate never failed.** `hooks/check-deps.sh` read `$?` after `|| true`, so the status was always 0 and a failed dependency check silently reported OK. Removed the `|| true`.
+- **Abstract claims contradiction.** `section-standards/00_abstract.md` told the drafter to create `claims/section_00_abstract.md`, which the PreToolUse hook and `outlining` forbid for citation-free abstracts. Abstracts now carry only `% bpmrc:` structural tags and no claims file.
+- **`claim-verification` internal consistency.** Removed "Pass 2–4" wording (Pass 4 no longer exists), reordered Pass 2d/2e, and added an explicit semantic-soft-fail Override field to the report template.
+- **Stale guidance.** `main`'s dep-gate text now prints the reinstall/PyYAML fix the dep script actually emits (not the removed `npx skills add K-Dense-AI/...`); `enforce-claims.py`'s docstring is now a raw string (no `\c` SyntaxWarning); README/`writing-plans` `.writing/` layouts show `.tex` (not `.md`) manuscript files; the graphical abstract is consistently optional (systems papers usually omit it).
+- **`tests/smoke.sh`** now asserts the shipped output style is present and the removed skills/commands/agent stay deleted.
+
 ## [0.11.0] — 2026-05-27
 
 ### Changed

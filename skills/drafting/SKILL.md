@@ -1,11 +1,11 @@
 ---
 name: drafting
-description: Orchestrates prose drafting section-by-section, in serial (subagent + 2-stage review) or parallel (Agent Team) mode. Each section subagent must resolve claim EVIDENCE via research-lookup before writing prose (claim-first protocol; PreToolUse hook enforces this). Use after writing-plans produces .writing/plan.md.
+description: Orchestrates prose drafting section-by-section via a Claude Code dynamic workflow (parallel sections + two-stage review) or a manual batch session. Each section drafter must resolve claim EVIDENCE via research-lookup before writing prose (claim-first protocol; PreToolUse hook enforces this). Use after writing-plans produces .writing/plan.md.
 ---
 
 # Drafting
 
-Drive prose production for the LaTeX manuscript. For every section in `.writing/plan.md`, resolve evidence for every claim first, then write `% claim: id`-tagged paragraphs (LaTeX line comments) in `manuscript/*.tex`. This skill owns the writing-specific prompt template, the Zotero-aware evidence loop, and the graphical abstract dispatch; execution is handled by the local `superpower-writing:{subagent-driven, team-driven, executing-plans}` engines.
+Drive prose production for the LaTeX manuscript. For every section in `.writing/plan.md`, resolve evidence for every claim first, then write `% claim: id`-tagged paragraphs (LaTeX line comments) in `manuscript/*.tex`. This skill owns the writing-specific prompt template, the Zotero-aware evidence loop, and the graphical abstract dispatch; orchestration is handled by a Claude Code dynamic workflow (parallel section drafting + a two-stage review pipeline) or, as a manual fallback, by `superpower-writing:executing-plans`.
 
 **Announce at start:** "I'm using the drafting skill to produce manuscript prose."
 
@@ -15,13 +15,12 @@ Drafting is the stage where claims become sentences. The hard rule is **claim-fi
 
 > Claim-first protocol: see `superpower-writing:main` §Claim-First Protocol.
 
-This skill only shapes the per-section prompt and the bookkeeping. The orchestration engine is one of three local `superpower-writing` skills, picked by mode:
+This skill only shapes the per-section prompt and the bookkeeping. Orchestration is picked by mode:
 
-- **serial** → `subagent-driven` (one implementer per section + spec review + quality review)
-- **parallel** → `team-driven` (Agent Team with dedicated reviewer, multiple sections in flight)
-- **session-handoff** → `executing-plans` (batch execution across sessions with human checkpoints)
+- **workflow** → a Claude Code dynamic workflow drafts independent sections in parallel with the `section-drafter` agent, then runs the two-stage review as a pipeline (`spec-reviewer` for outline/claim alignment, then `manuscript-reviewer` for writing quality). Default for multi-section papers.
+- **manual-batch** → `executing-plans` (batch execution across a separate or manual session with checkpoints). Fallback when workflows are unavailable or the user wants explicit per-batch review.
 
-All three already know how to read `.writing/plan.md` as their task source once the per-section template below is injected into their implementer prompts.
+Both read `.writing/plan.md` as the task source once the per-section template below is injected into the drafter prompt.
 
 ## When to Use
 
@@ -32,7 +31,7 @@ Invoke after `writing-plans` has produced `.writing/plan.md` with per-section dr
 - `.writing/metadata.yaml` is filled (non-YAGNI fields).
 - `.writing/plan.md` lists the concrete section/figure/table tasks.
 
-Skip this skill if the user only wants to revise existing prose (use `revision`) or verify an already-drafted manuscript (use `claim-verification`).
+Skip this skill if the user only wants to copy-edit existing prose (use `polish` or `polish-by-diff`) or verify an already-drafted manuscript (use `claim-verification`).
 
 ## Checklist
 
@@ -42,7 +41,7 @@ Before dispatching any section:
 - [ ] `.writing/claims/section_<NN>_<slug>.md` exists for every section listed.
 - [ ] `.writing/metadata.yaml` has been read; note `zotero.enabled` and `zotero.auto_push_new_citations`.
 - [ ] `.writing/manuscript/` directory exists (created by `init-writing-dir.sh`).
-- [ ] Graphical-abstract slot is tracked in `.writing/progress.md` (required by the writing conventions in `skills/drafting/references/writing-principles.md`).
+- [ ] If the paper includes a graphical abstract (systems papers usually omit it), its slot is tracked in `.writing/progress.md`.
 
 Per section, before marking complete:
 
@@ -50,7 +49,7 @@ Per section, before marking complete:
 - [ ] Every load-bearing paragraph carries `% claim: id`; drafting notes use `% draft-only` (both are LaTeX line comments at column 0).
 - [ ] If `.writing/glossary.md` exists: the first introduction of every glossary term is tagged `% define: <id>` in the section matching `defined_in`; subsequent uses in other sections that should be ordering-checked are tagged `% use: <id>`.
 - [ ] PreToolUse hook did not block any write (visible as exit-2 JSON from `enforce-claims.sh` or `enforce-terms.sh`).
-- [ ] `.writing/progress.md` Task Dashboard row updated (Status, Claim Verification, Citation Check).
+- [ ] `.writing/progress.md` Task Dashboard row updated (Status, Spec Review, Manuscript Review, Claim Verification).
 
 ## Process
 
@@ -62,25 +61,21 @@ Use `AskUserQuestion` to let the user pick the execution strategy. Do NOT defaul
 Question: How should I draft this manuscript?
 Header:   "Drafting mode"
 Options:
-  - Label:       "Serial (subagent-driven)"
-    Description: "One implementer subagent per section, two-stage review after each. Best for short papers or when sections depend on each other."
-  - Label:       "Parallel (team-driven)"
-    Description: "Agent Team drafts independent sections in parallel with a dedicated reviewer. Best for long papers with independent sections."
-  - Label:       "Session handoff (executing-plans)"
-    Description: "Batch execution across sessions with human checkpoints between batches. Best when you want to review in chunks."
+  - Label:       "Dynamic Workflow"
+    Description: "A Claude Code workflow drafts independent sections in parallel, then runs spec + manuscript review as a pipeline. Best for multi-section papers."
+  - Label:       "Manual Batch (executing-plans)"
+    Description: "Batch execution across a separate or manual session with checkpoints. Best when workflows are unavailable or you want explicit per-batch review."
 ```
 
 Recommend by heuristic:
 
-- ≤ 3 draft sections OR sections with heavy narrative cross-refs (Intro ↔ Discussion) → serial.
-- ≥ 4 independent sections (Methods + Results blocks) → parallel.
-- User explicitly wants to checkpoint between batches, or session is long-running → session-handoff.
+- Multi-section paper, loosely-coupled sections, or heavy per-section lit search → Dynamic Workflow.
+- User wants manual checkpoints across batches, or workflow support is unavailable → Manual Batch.
 
 Then hand off:
 
-- serial → `Skill(skill="superpower-writing:subagent-driven")` with implementer subagent type `superpower-writing:section-drafter`, spec-reviewer `superpower-writing:spec-reviewer`, and manuscript reviewer `superpower-writing:manuscript-reviewer` (writing-quality lens).
-- parallel → `Skill(skill="superpower-writing:team-driven")` spawning one `superpower-writing:section-drafter` per independent section plus one shared `superpower-writing:manuscript-reviewer`. Keep `superpower-writing:spec-reviewer` for plan alignment.
-- session-handoff → `Skill(skill="superpower-writing:executing-plans")` (same agent types, separate session).
+- **Dynamic Workflow** → ask Claude to run a workflow (include the word "workflow" in the request) or turn on `/effort ultracode`. The workflow drafts each section with the `superpower-writing:section-drafter` agent (the per-section prompt below is its task body), then pipes each drafted section through `superpower-writing:spec-reviewer` (outline/claim alignment) and `superpower-writing:manuscript-reviewer` (writing quality). Independent sections run in parallel; the claim-first PreToolUse hook fires on every write. The two-stage review contract — gate order, 3-round cap, and the plan-alignment gate — is specified in `skills/planning-foundation/references/review-loop-protocol.md`.
+- **Manual Batch** → `Skill(skill="superpower-writing:executing-plans")` in a separate or manual session, using the same `section-drafter` prompt body and the same two-stage review (`spec-reviewer` then `manuscript-reviewer`) at each batch checkpoint.
 
 The `section-drafter` agent file at `agents/section-drafter.md` already encodes the claim-first protocol and the Zotero-first evidence resolution flow; the per-section prompt (next section) layers the specific section details on top of that baseline. Inject `.writing/plan.md` task text verbatim.
 
@@ -103,13 +98,13 @@ Read the full template at [`references/section-drafter-prompt.md`](references/se
 
   The canonical filenames in `section-standards/` are `00_abstract.md`, `01_introduction.md`, `02_background.md`, `03_methods.md`, `04_results.md`, `05_discussion.md`, `06_conclusion.md`, `07_related_work.md`, `08_motivation.md`. See [`references/section-standards/README.md`](references/section-standards/README.md) for the full contract.
 
-The orchestrator (serial / parallel / session-handoff) layers its review gates on top of this body without modifying Steps A–C. Section standards are data injected into the prompt, not another gate in the pipeline — every engine resolves them the same way.
+Whichever execution path runs (dynamic workflow or manual batch), it layers its review gates on top of this body without modifying Steps A–C. Section standards are data injected into the prompt, not another gate in the pipeline — both paths resolve them the same way.
 
 ### 3. Graphical abstract and schematics
 
-The writing conventions mandate at least one graphical abstract plus at least one schematic figure (see `skills/drafting/references/writing-principles.md`). Do not attempt to draw these with prose tools.
+Systems papers usually carry at least one schematic figure (architecture / data-flow / pipeline). A graphical abstract is **optional** — include one only when the venue or author explicitly requests it; most CS/systems venues omit it. Do not attempt to draw either with prose tools.
 
-- For the graphical abstract:
+- For the graphical abstract (when the paper includes one):
 
   ```
   Skill(skill="superpower-writing:scientific-schematics")
@@ -127,16 +122,15 @@ The writing conventions mandate at least one graphical abstract plus at least on
 
 After each section returns (drafted and committed), the orchestrator updates `.writing/progress.md` Task Dashboard. Expected columns:
 
-| Section | Status | Claim Verification | Citation Check | Reviewer Cycle | Key Outcome |
-|---------|--------|--------------------|----------------|----------------|-------------|
-| 02_methods | drafted | 5/5 evidence_ready | pending | - | 1247-patient T2D cohort described |
+| Section / Figure | Status | Spec Review | Manuscript Review | Plan Align | Claim Verification | Key Outcome |
+|------------------|--------|-------------|-------------------|------------|--------------------|-------------|
+| 02_methods | drafted | PASS | PASS | PASS | 5/5 evidence_ready | 1247-patient T2D cohort described |
 
 Set:
 
 - **Status**: `drafted` once prose is committed. `verified` is reserved for claim-verification.
-- **Claim Verification**: ratio of `evidence_ready` or `verified` claims to total claims in that section's claims file. This is a lightweight count; the real check is the claim-verification skill.
-- **Citation Check**: `pending` until `claim-verification` runs. This skill does not perform DOI resolution / semantic matching.
-- **Reviewer Cycle**: filled by the underlying `subagent-driven` / `team-driven` / `executing-plans` engine.
+- **Spec Review / Manuscript Review / Plan Align**: filled by the two-stage review pipeline (and the plan-alignment gate) — the workflow runs it per section, the manual-batch path runs it at each checkpoint. See `skills/planning-foundation/references/review-loop-protocol.md`. Leave as `-` when no review gate applies.
+- **Claim Verification**: ratio of `evidence_ready` or `verified` claims to total claims in that section's claims file. This is a lightweight count; the real check (DOI resolution / semantic matching) is the claim-verification skill.
 
 If any claim remains `stub` (because of a `[NEEDS-EVIDENCE]` miss), set Status to `blocked: <count> unresolved` and surface to the user. Do NOT mark the section drafted while stubs remain in its prose.
 
@@ -148,19 +142,19 @@ The Zotero-first / network-fallback / optional auto-push flow is fully specified
 
 **Claim-first, always.** Evidence before prose is the central discipline of this plugin. The hook is the backstop, not the workflow — the workflow is Step A of the template. If drafting ever feels "fast" because a subagent skipped Step A, the hook will stop it and you will redo the work. Do it right the first time.
 
-**Own the prompt; invoke execution by name.** This skill owns the per-section prompt template and the claim-first bookkeeping. Execution (parallelism, review gates, session management) is handled by the local `superpower-writing:{subagent-driven, team-driven, executing-plans}` engines, which this skill invokes by name.
+**Own the prompt; delegate orchestration.** This skill owns the per-section prompt template and the claim-first bookkeeping. Orchestration (parallelism, review gates, session management) is handled by a Claude Code dynamic workflow or, as a manual fallback, by `superpower-writing:executing-plans`.
 
 **Section standards refine, never contradict.** The files under `references/section-standards/` prescribe section-specific skeletons (BPMRC for abstracts, and whatever conventions get added for introductions, methods, etc.). They are loaded verbatim into the drafter prompt so every section that has a standard gets the same treatment. When a standard and the outline disagree, the drafter escalates rather than silently picking one — drift between outline and draft is a structural bug, not a judgment call. Adding a new standard is a `section-standards/<stem>.md` file plus, optionally, an outline-level reference in the outlining skill; no orchestrator change is needed.
 
 **Zotero miss is not a failure.** A DOI absent from the user's Zotero library just means the user has not yet vetted it. Network fallback is normal and expected. The only failure mode is "no credible source anywhere", which must be escalated.
 
-**Graphical abstract is a first-class task.** The writing conventions require one. Do not skip it, and do not inline its generation into a prose section — route it through `superpower-writing:scientific-schematics` as its own task.
+**Figures are first-class tasks.** A graphical abstract is optional (systems papers usually omit it), but whenever the paper includes a graphical abstract or schematic, do not inline its generation into a prose section — route it through `superpower-writing:scientific-schematics` as its own task.
 
-**Progress dashboard is the handoff contract.** `claim-verification` and `revision` read `.writing/progress.md` to know what has been drafted, verified, or reviewed. A section is not "drafted" until its row is updated and committed.
+**Progress dashboard is the handoff contract.** `claim-verification` and the human author read `.writing/progress.md` to know what has been drafted, verified, or reviewed. A section is not "drafted" until its row is updated and committed.
 
 **Do not fight the hook.** If `enforce-claims.sh` blocks a write, the hook is telling you the claim-first protocol was violated. Resolve the underlying cause (missing claim entry, stub STATUS, untagged paragraph). Never propose disabling the hook or bypassing it with a sneaky `MultiEdit`.
 
-**Locked-term renames are not prose edits.** If the user or a sub-agent proposes renaming a term that is already locked in `.writing/progress.md` naming decisions, in `.writing/outline.md` bullet labels, or in prior drafted prose across multiple manuscript files, do NOT silently apply the edit. Delegate to `Skill(skill="superpower-writing:revision")` Step 2.5 (locked-term rename impact scan) even when no formal review round is in progress. The drafting skill handles prose within an agreed spec; renames cross the prose/spec boundary and need an audit of which files mention the old term and an explicit findings.md entry so the planning-file audit trail survives the rename. Applying a locked-term rename as if it were a single-file edit silently desynchronizes the manuscript from its naming history.
+**Locked-term renames are not prose edits.** If the user or a sub-agent proposes renaming a term that is already locked in `.writing/progress.md` naming decisions, in `.writing/outline.md` bullet labels, or in prior drafted prose across multiple manuscript files, do NOT silently apply the edit. Treat it as a cross-file rename: grep every `.writing/manuscript/`, `.writing/outline.md`, and `.writing/findings.md` file for the old term, update them together in one pass, and record the rename in `.writing/findings.md` so the audit trail survives. The drafting skill handles prose within an agreed spec; renames cross the prose/spec boundary and need an audit of which files mention the old term and an explicit findings.md entry so the planning-file audit trail survives the rename. Applying a locked-term rename as if it were a single-file edit silently desynchronizes the manuscript from its naming history.
 
 **Define terms before they flow across sections.** When `.writing/glossary.md` is present, the companion `enforce-terms.sh` hook blocks writes that use a term in a section before the section declared as its definition site. The fix is the same shape as the claim protocol: add or update the glossary entry, move the `% define: <id>` to the right section, or reorder sections so the term lands before its first use. `% use: <id>` is an **opt-in** annotation — you only tag the uses you want the hook to verify. An untagged occurrence of the term is not checked, so this remains a lightweight discipline rather than a universal requirement.
 
@@ -182,8 +176,7 @@ At a glance:
 
 - `superpower-writing:writing-plans` — produces `.writing/plan.md`; drafting reads it verbatim.
 - `superpower-writing:claim-verification` — downstream; consumes `.writing/manuscript/*.tex` and confirms every claim tag.
-- `superpower-writing:revision` — downstream; called when reviews come back.
-- `superpower-writing:subagent-driven` / `team-driven` / `executing-plans` — the actual execution engines.
+- `superpower-writing:executing-plans` — manual-batch execution fallback; the primary path is a Claude Code dynamic workflow that drafts sections in parallel and reviews them in a pipeline.
 - Plugin-local `writing-principles.md` — voice and structure rules.
 - Plugin-local `superpower-writing:scientific-schematics` — graphical abstract + schematics.
 - Plugin-local `superpower-writing:research-lookup`, `superpower-writing:citation-management` — evidence resolution (network).

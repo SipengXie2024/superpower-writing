@@ -1,6 +1,6 @@
-# Review-Loop Protocol (shared by subagent-driven and team-driven)
+# Review-Loop Protocol (two-stage review for dynamic-workflow and manual-batch drafting)
 
-This file is the single source of truth for the two-stage review gate, review-loop caps, plan anchoring, and the plan-alignment gate. Both `subagent-driven` and `team-driven` reference this file from their SKILL.md; the execution mechanics differ (one-shot subagent vs persistent teammate with peer DMs) but the protocol below is identical.
+This file is the single source of truth for the two-stage review gate, review-loop caps, plan anchoring, and the plan-alignment gate. The `drafting` skill's dynamic-workflow path runs it as a pipeline (draft → spec review → manuscript review, with independent sections in parallel); the manual-batch path (`executing-plans`) runs it at each batch checkpoint. The execution mechanics differ but the protocol below is identical.
 
 When you change anything here, every consumer picks up the change automatically. Do not duplicate this content into individual SKILL.md files.
 
@@ -10,10 +10,10 @@ Spec compliance and writing quality fail in different ways and take different to
 
 ## The two reviewers
 
-1. **Spec compliance review** — verifies the produced artifact matches the original plan. Nothing extra, nothing missing, no drift from the outline's claim set or the plan's file contract. In subagent-driven this is the `superpower-writing:spec-reviewer` subagent dispatched after the implementer returns. In team-driven it is the persistent `spec-reviewer` teammate that the implementer DMs directly.
-2. **Manuscript quality review** — verifies the artifact is well-built: prose reads cleanly, files are organized, tests pass, no magic numbers or obvious smells. In subagent-driven it is the `superpower-writing:manuscript-reviewer` subagent dispatched only after spec review passes. In team-driven the lead DMs the persistent `manuscript-reviewer` teammate once the spec reviewer reports a pass.
+1. **Spec compliance review** — verifies the produced artifact matches the original plan. Nothing extra, nothing missing, no drift from the outline's claim set or the plan's file contract. This is the `superpower-writing:spec-reviewer` agent, run on each drafted section after the `section-drafter` returns.
+2. **Manuscript quality review** — verifies the artifact is well-built: prose reads cleanly, sections are organized, every load-bearing paragraph is claim-tagged, no unsupported numbers or obvious smells. This is the `superpower-writing:manuscript-reviewer` agent, run only after spec review passes.
 
-A task is not complete until BOTH reviewers return APPROVED. No exceptions — not for "simple" tasks, config changes, or "I already self-reviewed thoroughly". The dashboard columns `Spec Review`, `Quality Review` (subagent-driven) or `Manuscript Review` (team-driven), and `Plan Align` must all show `PASS` before the task status flips to `complete`.
+A section is not complete until BOTH reviewers return APPROVED. No exceptions — not for "simple" sections or "I already self-reviewed thoroughly". The dashboard columns `Spec Review`, `Manuscript Review`, and `Plan Align` must all show `PASS` before the section status flips to `complete`.
 
 Manuscript review before spec review passes is always the wrong order — the quality reviewer will end up commenting on content that is about to be rewritten.
 
@@ -21,7 +21,7 @@ Manuscript review before spec review passes is always the wrong order — the qu
 
 Each review stage is capped at **3 fix-review rounds** per task. The initial review does not count as a round. A round is one fix-then-re-review cycle: initial review → fix → re-review (round 1) → fix → re-review (round 2) → fix → re-review (round 3) → STOP.
 
-After 3 rounds without approval, stop looping and escalate. In subagent-driven the orchestrator escalates directly to the user; in team-driven the reviewer DMs the lead with an escalation message that includes:
+After 3 rounds without approval, stop looping and escalate to the user. The workflow (or the manual-batch orchestrator) surfaces an escalation message that includes:
 
 1. Which issues remain unresolved after three attempts
 2. What was attempted in each round
@@ -50,11 +50,9 @@ Verbatim copying plus plan references let implementers and reviewers independent
 
 Per-task reviews catch local failures but miss cumulative drift: individual tasks each pass spec review while the whole implementation walks slowly away from the plan's original intent. The plan alignment gate catches this.
 
-**Subagent-driven triggers the gate once**, after all tasks complete and BEFORE the final manuscript review.
+**Trigger the gate after each parallelism group** completes (or once after all sections in a short paper), before starting the next group. Drift is cheaper to correct between groups than at the end.
 
-**Team-driven triggers the gate after each parallelism group** completes, before starting the next group. Drift is cheaper to correct between groups than at the end.
-
-In both cases the gate is the same sequence:
+The gate is the same sequence:
 
 1. Re-read `.writing/plan.md` completely — refresh the original requirements in context
 2. Re-read `.writing/design.md` if present — refresh architectural constraints
@@ -76,8 +74,8 @@ This gate is cheap (a few minutes of re-reading) and catches failure modes that 
 Both execution modes use the same convention: one directory per role, reused across all tasks, not one directory per task.
 
 ```bash
-mkdir -p .writing/agents/implementer/         # subagent-driven
-mkdir -p .writing/agents/implementer-1/       # team-driven (one per persistent teammate)
+mkdir -p .writing/agents/section-drafter/     # the drafter role, reused across sections
+mkdir -p .writing/agents/section-drafter-1/   # or one per parallel section in a workflow
 mkdir -p .writing/agents/spec-reviewer/
 mkdir -p .writing/agents/manuscript-reviewer/
 ```

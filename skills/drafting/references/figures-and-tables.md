@@ -396,8 +396,8 @@ Each value is the median of five 60-second runs.
 ## Venue-Specific
 
 ML-conference figure expectations, including NeurIPS/ICML/ICLR/CVPR layout
-conventions and page-budget guidance, are covered in
-`submission/references/venue-styles.md`.
+conventions and page-budget guidance, are covered in the
+`superpower-writing:scientific-visualization` skill (`references/venue_requirements.md`).
 
 **Non-ML venues** relevant to systems authors:
 

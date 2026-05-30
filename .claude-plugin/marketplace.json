@@ -7,8 +7,8 @@
   "plugins": [
     {
       "name": "superpower-writing",
-      "description": "IMRAD academic-writing lifecycle plugin",
-      "version": "0.11.0",
+      "description": "Claim-first CS/systems/ML paper-skeleton drafting plugin (evidence-backed, for human refinement)",
+      "version": "0.12.0",
       "source": "./"
     }
   ]

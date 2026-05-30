@@ -41,7 +41,7 @@ You compare actual prose against `.writing/outline.md` and the matching `.writin
 
 - Prose quality: voice, tense, hedging, clarity, claim-to-evidence distance — `superpower-writing:manuscript-reviewer` owns these.
 - Citation integrity: DOI resolvability, reference dedup, numeric/table consistency — `claim-verification` skill owns these.
-- Reporting-guideline checklist items (CONSORT, PRISMA, etc.) — upstream `peer-review` skill owns this.
+- Reporting-guideline checklist items (CONSORT, PRISMA, etc.) — out of scope; this plugin targets CS / ML / systems papers.
 - AI-trace detection (over-parallelism, formulaic connectors, em-dash overuse, uniform sentence length, hedging cliché, throat-clearing) — `superpower-writing:manuscript-reviewer` owns this.
 
 Staying in your lane avoids review thrash and duplicate rounds.

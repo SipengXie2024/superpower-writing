@@ -1,6 +1,6 @@
 ---
 name: collaborating-with-codex
-description: Use when delegating coding work — prototyping, debugging, bug analysis, code quality feedback, executing implementation tasks, or generating publication-quality scientific figures and diagrams — to Codex CLI instead of a Claude subagent. Supports multi-turn sessions via SESSION_ID. Required by `superpower-planning:subagent-driven-codex` and `superpower-writing:scientific-schematics`.
+description: Use when delegating coding work — prototyping, debugging, bug analysis, code quality feedback, executing implementation tasks, or generating publication-quality scientific figures and diagrams — to Codex CLI instead of a Claude subagent. Supports multi-turn sessions via SESSION_ID. Required by `superpower-writing:scientific-schematics` for figure generation.
 ---
 
 > **MANDATORY: ALWAYS run codex_bridge.py in the background.**

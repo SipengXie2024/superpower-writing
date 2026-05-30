@@ -18,7 +18,7 @@ PROJECT_ROOT="${1:-.}"
 PLANNING_DIR="${PROJECT_ROOT}/.writing"
 PROGRESS="${PLANNING_DIR}/progress.md"
 FINDINGS="${PLANNING_DIR}/findings.md"
-TEMPLATE_DIR="${SCRIPT_DIR}/../skills/planning-foundation/templates"
+TEMPLATE_DIR="${SCRIPT_DIR}/../templates"
 
 if [ ! -d "$PLANNING_DIR" ]; then
     echo "missing"

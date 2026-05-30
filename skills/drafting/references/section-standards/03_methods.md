@@ -10,7 +10,7 @@ The §Methods section is the paper's technical core. In CS papers it goes by man
 
 **Slug convention.** Keep the manuscript filename as `NN_methods.tex` regardless of the rendered section title. The orchestrator matches `methods` by slug-ending. If your paper renders "§3 Design" in the final PDF, still author it as `.writing/manuscript/03_methods.tex` with `## Methods` as the outline heading — the rendered title can be changed at typeset time without touching the plugin's bookkeeping. This avoids maintaining parallel standards files for §Design / §Approach / §Algorithm synonyms.
 
-**Scope.** This standard targets CS papers broadly: ML / NLP / CV / systems / databases / graphics / theoretical CS / applied CS. Clinical, biology, and IMRAD-strict medical papers should not use this file — their §Methods follows CONSORT / STROBE / PRISMA checklist conventions instead (handled upstream by `peer-review`).
+**Scope.** This standard targets CS papers broadly: ML / NLP / CV / systems / databases / graphics / theoretical CS / applied CS. Clinical, biology, and IMRAD-strict medical papers should not use this file — their §Methods follows CONSORT / STROBE / PRISMA checklist conventions, which are out of scope for this plugin.
 
 ## Framework
 

@@ -44,3 +44,13 @@ tools/*/dist/
 /hooks/shellcheck-on-edit.sh
 /skills/release-prep/
 /skills/scaffold-component/
+.writing/main.aux
+.writing/main.log
+.writing/main.out
+.writing/main.toc
+.writing/main.bbl
+.writing/main.blg
+.writing/main.synctex.gz
+.writing/main.pdf
+.writing/main.fdb_latexmk
+.writing/main.fls

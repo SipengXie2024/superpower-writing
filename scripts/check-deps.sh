@@ -6,7 +6,6 @@ set -euo pipefail
 
 REQUIRED=(
   literature-review
-  peer-review
   citation-management
   research-lookup
   scientific-schematics

@@ -2,7 +2,7 @@
 
 This is the exact prompt body every section-drafter subagent receives, customized only with the section number, slug, the verbatim task text from `.writing/plan.md`, and the section-specific standard (if one applies). Copy it into the dispatch prompt exactly — do not paraphrase the claim-first warnings or the section-standard block; they are what makes the PreToolUse hook and the structural self-review survivable.
 
-The orchestrator (`subagent-driven` / `team-driven` / `executing-plans`) wraps this template with whatever review gates that engine specifies. The template body itself stays identical across modes. Before dispatch, the orchestrator resolves two placeholders:
+The orchestrator (a Claude Code dynamic workflow, or `executing-plans` for a manual batch session) wraps this template with whatever review gates it specifies. The template body itself stays identical across modes. Before dispatch, the orchestrator resolves two placeholders:
 
 - `{INSERTED}` — the verbatim task text from `.writing/plan.md §Task-{NN}`.
 - `{SECTION_STANDARD}` — resolved via two-level fallback (slug-ending match):
@@ -18,14 +18,14 @@ You are drafting section {NN}: {slug} of the manuscript.
 Output format: LaTeX. Manuscript file is .writing/manuscript/{NN}_{slug}.tex.
 All load-bearing metadata (claim tags, structural tags, draft-only markers) go
 in LaTeX line comments (`%` at column 0). Do NOT produce Markdown — the hook
-only intercepts .tex files and the submission gate expects LaTeX.
+only intercepts .tex files and claim-verification expects LaTeX.
 
 ## Inputs (read before writing)
 - Task text (verbatim from .writing/plan.md §Task-{NN}): {INSERTED}
 - Claims file: .writing/claims/section_{NN}_{slug}.md
 - Outline: .writing/outline.md
 - Metadata: .writing/metadata.yaml
-- refs.bib: .writing/refs.bib (may be empty at first; populated by submission)
+- refs.bib: .writing/refs.bib (may be empty at first; populated as citations resolve during drafting)
 - Any upstream sections already drafted in .writing/manuscript/*.tex
 
 ## Section standard (governs prose structure)
@@ -127,8 +127,8 @@ Structure rules:
       <paragraph prose>
   - Cite prior work using `\cite{citekey}` — the standard LaTeX citation
     command. The citekey MUST match an entry that will exist in
-    .writing/refs.bib after `submission` runs the Zotero export. Do NOT
-    invent citekeys. If the claim's EVIDENCE has no citekey, the claim is
+    .writing/refs.bib once the citation is resolved (citation-management /
+    Zotero export). Do NOT invent citekeys. If the claim's EVIDENCE has no citekey, the claim is
     not evidence_ready — go back to Step A.
   - Multiple citations at the same site: `\cite{smith2019,chen2020,zhang2021}`
     (comma-separated inside a single \cite{}), NOT three separate \cite{}s.
@@ -203,8 +203,10 @@ LaTeX syntax rules:
      not backed by an evidence-resolved claim is a hallucinated citation —
      fix by going back to Step A.
   4. Update .writing/progress.md Task Dashboard row for this section:
-       | {NN}_{slug} | drafted | <claim-pass count>/<total> | pending | - | <key outcome> |
-     Set "Citation Check" to "pending" (claim-verification skill fills it later).
+       | {NN}_{slug} | drafted | - | - | - | <claim-pass count>/<total> | <key outcome> |
+     Leave Spec Review / Manuscript Review / Plan Align as "-" — the review
+     pipeline fills them. The Claim Verification cell is the evidence_ready
+     ratio; the claim-verification skill confirms it later.
   5. Append a one-line entry to the session log.
   6. Commit:
        git add .writing/manuscript/{NN}_{slug}.tex \

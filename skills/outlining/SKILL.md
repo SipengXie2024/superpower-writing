@@ -17,7 +17,7 @@ This is the **spec phase** for a research paper. Output of outlining is the inpu
 
 **Optional: term-definition-before-use protocol.** A second PreToolUse hook at `hooks/enforce-terms.sh` enforces that load-bearing terminology is defined before it is used. This feature is **opt-in**: activate by copying `templates/glossary.md` to `.writing/glossary.md` and listing entries of the form `{id, term, definition, defined_in: <section_stem>}`. Once active, any `% define: <id>` comment in `manuscript/NN_<slug>.tex` must match `glossary[id].defined_in`, and any `% use: <id>` must appear in a section whose numeric prefix is ≥ the define section. Abstracts and references/acknowledgments sections are exempt (abstracts legitimately reference terms defined later in the body). When adding a new term during outlining, append its glossary entry at the same time you add the claim stub — it is cheaper than chasing `% use:` blocks later during drafting.
 
-All three must be complete before handing off to `superpower-writing:writing-plans`. Incomplete metadata blocks the submission gate later — fix it now while context is fresh.
+All three must be complete before handing off to `superpower-writing:writing-plans`. Incomplete metadata blocks claim-verification later — fix it now while context is fresh.
 
 ## When to Use
 
@@ -30,8 +30,8 @@ Trigger this skill when:
 
 Do NOT use this skill for:
 
-- Copy-editing existing prose (use `revision`).
-- Post-review restructuring after journal feedback (use `revision`).
+- Copy-editing existing prose (use `polish` or `polish-by-diff`).
+- Post-review restructuring after journal feedback (the human author's job — out of scope for this plugin).
 - Filling in numeric details in an already-outlined paper (belongs to `drafting` with claim-first protocol).
 
 ## Checklist (each must pass before handoff)
@@ -338,11 +338,11 @@ code_availability:
 reporting_guideline: <CONSORT | STROBE | PRISMA | none>
 ```
 
-**Presence check, not correctness check:** the submission gate only verifies these fields are set. The user owns truthfulness. If a field truly does not apply (e.g., no preregistration for a computational paper), use `null` — not `TODO`.
+**Presence check, not correctness check:** verification only checks these fields are set. The user owns truthfulness. If a field truly does not apply (e.g., no preregistration for a computational paper), use `null` — not `TODO`.
 
 Ask the user for any field you cannot infer. Do not fabricate author names, ORCIDs, affiliations, grant numbers, or preregistration URLs. Use `AskUserQuestion` when information is missing.
 
-`reporting_guideline` is load-bearing: it drives the upstream `peer-review` checklist at claim-verification time. Pick the right one now:
+`reporting_guideline` records the target venue's reporting standard for the human author's reference; for CS / ML / systems papers it is normally `none`. Pick the right one now:
 
 - Randomized trial → `CONSORT`
 - Observational study → `STROBE`

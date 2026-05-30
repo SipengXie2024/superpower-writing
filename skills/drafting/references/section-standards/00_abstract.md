@@ -38,7 +38,7 @@ The abstract MUST follow the **BPMRC** structure: Background → Problem → Met
 
 Outlining self-review (Step 7 of `superpower-writing:outlining`) MUST grep `^- \[B\]`, `^- \[P\]`, `^- \[M\]`, `^- \[R\]`, `^- \[C\]` against the Abstract block and fail if any label is missing, duplicated, or out of order. The earlier "3–7 bullets" heuristic from the generic outlining table does NOT apply to Abstract — BPMRC fixes the count at 5.
 
-Each labeled bullet still seeds a claim stub in `.writing/claims/section_00_abstract.md` with `id`s `abs-b1`, `abs-p1`, `abs-m1`, `abs-r1`, `abs-c1` (or `abs-b1`..`abs-b2` if Background uses two sentences). The claim-first protocol still applies downstream; BPMRC only constrains structure.
+The abstract does **not** get a claims file. Unlike body sections, it carries only `% bpmrc: X` structural tags — never `% claim:` tags — and the PreToolUse hook rejects any `% claim:` tag or citation in an abstract (the `_abstract` stem is in `UNPROTECTED_SLUGS` and `CITATION_FREE_SLUGS`). Do NOT create `.writing/claims/section_00_abstract.md`; drafting would try to bind abstract paragraphs to it and the hook would block those writes. The BPMRC bullets in `outline.md` distill the body's claims for framing; they are not themselves bound to evidence. (See `superpower-writing:outlining` §"Abstract is citation-free".)
 
 ## Draft requirement
 

@@ -1,7 +1,7 @@
 ---
-description: Archive a completed submission snapshot into .writing/archive/<date>/.
+description: Archive a completed .writing/ snapshot into .writing/archive/<date>/.
 ---
 
-Invoke the `superpower-writing:submission` skill's post-archive flow directly, without running the freeze gate (assumes the user has already submitted and wants to snapshot state).
+Invoke the `superpower-writing:archiving` skill to snapshot the current `.writing/` state into `.writing/archive/<date>/` and consolidate findings into the archive summary.
 
-Prefer `/writing:submit` for the full pre-submission workflow. Use this command only when the submission has already happened externally and you just want the freeze copy.
+Use this when the evidence-backed skeleton is ready to hand to the human author (or the work has already been taken further externally) and you want a frozen copy before resetting `.writing/` for the next paper.

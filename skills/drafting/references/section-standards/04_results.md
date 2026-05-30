@@ -10,7 +10,7 @@ The §Results section reports the empirical findings the paper's contribution pr
 
 **Slug convention.** Keep the manuscript filename as `NN_results.tex` regardless of the rendered section title. The orchestrator matches `results` by slug-ending; a paper rendered as "§5 Evaluation" still authors as `.writing/manuscript/04_results.tex` with `## Results` as the outline heading.
 
-**Scope.** CS / ML / NLP / CV / systems / databases / graphics. Clinical and biology papers follow CONSORT / STROBE / PRISMA reporting conventions, not this file — those are handled by upstream `peer-review`.
+**Scope.** CS / ML / NLP / CV / systems / databases / graphics. Clinical and biology papers follow CONSORT / STROBE / PRISMA reporting conventions, not this file; those are out of scope for this plugin.
 
 **Discussion boundary.** §Results states facts; §Discussion interprets them. Do NOT write "this demonstrates that our approach is superior" in §Results — that belongs in §Discussion. §Results may use neutral comparative language ("X outperforms Y by 3.2 pp") but never causal or evaluative language ("X is better because…"). The only exception is the `[T]` Takeaways element, which allows a tight one-paragraph synthesis of headline findings without explanation.
 

@@ -12,7 +12,7 @@ The §Discussion section is where §Results' numbers become arguments. Readers a
 
 **Merged form.** Some CS venues (NeurIPS, ICML, ICLR, some short systems workshops) routinely merge §Discussion and §Conclusion into a single section titled "Discussion and Conclusion" or "Concluding Remarks". When the paper opts for the merged form, keep this file's structure for the Discussion half and append the three-sentence Conclusion (RSF pattern — see `conclusion.md`) at the end. In the merged case, the RSF `[F]` Forward-look is redundant with ILFS `[F]` Future work; drop one to avoid duplication (usually drop the Conclusion's forward-look and keep Discussion's `[F]` paragraph as the canonical future-work statement).
 
-**Scope.** CS / ML / systems / DB / graphics. Clinical and biology papers follow different Discussion conventions (BARS, PRISMA-flavored discussion templates); those are handled upstream by `peer-review`, not by this file.
+**Scope.** CS / ML / systems / DB / graphics. Clinical and biology papers follow different Discussion conventions (BARS, PRISMA-flavored discussion templates), which are out of scope for this plugin.
 
 **Hard constraint: do not re-report §Results numbers.** A §Discussion paragraph that opens with "Our approach achieved 85.3% accuracy, a 3.2 pp improvement…" is duplicating §Results. Instead, reference the result abstractly ("The 3-point accuracy gain on ImageNet") and move directly into *why* it happened or *what it implies*. The single exception: the `[I]` Interpretation paragraph may restate a headline number *once* as the anchor for its causal explanation; everything else should reference numbers by description.
 

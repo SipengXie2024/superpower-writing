@@ -5,7 +5,7 @@
 set -uo pipefail
 
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
-OUTPUT="$("$PLUGIN_ROOT/scripts/check-deps.sh" 2>&1)" || true
+OUTPUT="$("$PLUGIN_ROOT/scripts/check-deps.sh" 2>&1)"
 STATUS=$?
 
 if [[ $STATUS -ne 0 ]]; then
@@ -14,7 +14,7 @@ if [[ $STATUS -ne 0 ]]; then
 $OUTPUT
 
 Do not invoke any superpower-writing skill (main, outlining, writing-plans,
-drafting, claim-verification, revision, submission) until the missing
+drafting, claim-verification) until the missing
 dependencies are installed."
 else
   BODY="superpower-writing deps OK. Bundled domain skills detected."

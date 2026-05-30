@@ -218,12 +218,12 @@ python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/marketplace
 python3 -c "import json; json.load(open('$PLUGIN_ROOT/hooks/hooks.json'))" && pass "hooks.json valid"
 
 echo "== 6. skill + command + hook presence =="
-for name in main outlining writing-plans drafting claim-verification revision submission scientific-visualization; do
+for name in main outlining writing-plans drafting claim-verification executing-plans scientific-visualization; do
   [[ -f "$PLUGIN_ROOT/skills/$name/SKILL.md" ]] \
     && pass "skills/$name/SKILL.md" \
     || fail "missing skills/$name/SKILL.md"
 done
-for cmd in outline draft revise submit check-deps stash archive; do
+for cmd in outline draft check-deps stash archive; do
   [[ -f "$PLUGIN_ROOT/commands/$cmd.md" ]] \
     && pass "commands/$cmd.md" \
     || fail "missing commands/$cmd.md"
@@ -233,10 +233,22 @@ for h in enforce-claims.sh enforce-claims.py enforce-terms.sh enforce-terms.py c
     && pass "hooks/$h" \
     || fail "missing hooks/$h"
 done
-for a in section-drafter manuscript-reviewer citation-auditor rebuttal-auditor; do
+for a in section-drafter spec-reviewer manuscript-reviewer citation-auditor; do
   [[ -f "$PLUGIN_ROOT/agents/$a.md" ]] \
     && pass "agents/$a.md" \
     || fail "missing agents/$a.md"
+done
+
+echo "== 6b. output style + deletion audit =="
+[[ -f "$PLUGIN_ROOT/output-styles/academic-research-assistant.md" ]] \
+  && pass "output-styles/academic-research-assistant.md" \
+  || fail "missing output-styles/academic-research-assistant.md"
+for gone in skills/submission skills/revision skills/peer-review skills/verification \
+            skills/finishing-branch skills/lightweight-execute skills/subagent-driven \
+            skills/team-driven commands/submit.md commands/revise.md agents/rebuttal-auditor.md; do
+  [[ ! -e "$PLUGIN_ROOT/$gone" ]] \
+    && pass "removed: $gone" \
+    || fail "deleted component still present: $gone"
 done
 
 echo "== 7. section-standards presence =="
