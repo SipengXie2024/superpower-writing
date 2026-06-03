@@ -38,6 +38,7 @@ Read the design doc (from brainstorming) or user-specified document. Identify in
 Use the `AskUserQuestion` tool for ALL questions. Never ask questions in plain text.
 
 **Questioning principles:**
+- Self-resolve first: if a gap can be answered from the existing draft, references, outline, or codebase, explore and fill it yourself instead of spending a question on it
 - Ask deep questions, not obvious ones
 - 1-2 related questions per round (use AskUserQuestion's multi-question support)
 - Follow up on vague answers until you get concrete details
@@ -89,6 +90,7 @@ If invoked standalone (user manually triggered), simply end after committing the
 
 | Mistake | Correct Approach |
 |---------|-----------------|
+| Asking what the draft already answers | Self-resolve from draft/references/codebase first; only ask what genuinely needs the user |
 | Asking obvious questions | Ask about scenarios the user hasn't considered |
 | Too many questions at once | 1-2 related questions per AskUserQuestion call |
 | Accepting vague answers | Follow up until you get concrete details |
