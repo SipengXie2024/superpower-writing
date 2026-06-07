@@ -46,6 +46,7 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/archive-search.sh "<keyword>"
 
 - [ ] Preconditions verified: `.writing/outline.md`, `.writing/metadata.yaml` (no TODO), `claims/section_*.md` all exist
 - [ ] File structure locked: manuscript/ filenames enumerated with their stems matching claims/
+- [ ] Structure confirmed with user (write set + section choices) before authoring tasks — skip the prompt only for small unambiguous outlines
 - [ ] Per-section tasks written (draft + verify-claims + internal-review triplet per section)
 - [ ] Per-figure tasks written (one per schematic; delegates to `scientific-schematics`)
 - [ ] Per-table tasks written
@@ -97,6 +98,16 @@ Before task decomposition, list the exact manuscript files the plan will write t
 Optional sections (Supplementary, Acknowledgments, Data Availability Statement) appear only if the outline calls for them; IMRAD-strict medical/biology papers omit Background and Related Work. Each `NN_slug.tex` pairs 1:1 with `claims/section_NN_<slug>.md` — stems match exactly. File-structure pass output goes into the plan header so readers see the write set before tasks.
 
 Design units with clear boundaries. Each file should have one clear responsibility. Prefer smaller, focused files over large files that do too much. Split by responsibility (a section is a claim set + prose), not by technical layer.
+
+### Step 2b: Confirm structure before committing the plan
+
+The write set and section structure are the load-bearing decisions of the whole plan — every task, dependency edge, and parallelism group derives from them. Before authoring the full task decomposition (Steps 4–11), surface them for a quick user confirmation so structural mistakes are caught while they are still cheap to fix:
+
+1. Present the proposed manuscript file write set (the `NN_slug.tex` list from Step 2), the reporting guideline detected in `metadata.yaml`, and any non-default section choices (Background included/omitted, Related Work placement, optional sections, graphical abstract present/absent).
+2. Confirm via `AskUserQuestion` — offer "Proceed with this structure" and "Adjust structure first" — unless the outline is small and unambiguous (≤3 sections, no optional sections, default IMRAD layout), in which case state the structure in one line and proceed without a prompt to avoid friction.
+3. If the user adjusts, revise the write set and re-run this confirmation before continuing.
+
+This is a structural gate only — do not draft prose, resolve claims, or write task bodies here; that work belongs to Steps 4–11. The end-of-skill Execution Handoff (Step 12) remains the separate, mandatory gate over *how* the plan executes.
 
 ### Step 3: Auto-create `.writing/`
 
