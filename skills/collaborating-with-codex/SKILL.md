@@ -19,6 +19,15 @@ description: Use when delegating coding work — prototyping, debugging, bug ana
 > `CODEX_BRIDGE_SKIP_BWRAP_PROBE=1` to bypass the probe when you know the host is fine. The
 > default `danger-full-access` mode never runs the probe.
 
+## Workflow
+
+Every delegation follows the same four steps. The recipe blocks below are variations on this spine.
+
+1. **Brief.** Write a precise `--PROMPT`: state the goal, the relevant file paths, the constraints, and an explicit acceptance check (a test to pass, a diff to return, a path to save). Pick `--cd` (absolute workspace root). *In → task intent; out → a self-contained prompt string.*
+2. **Invoke in the background.** Call `codex_bridge.py` via the Bash tool with `run_in_background: true` (MANDATORY). Add flags as needed (`--skip-git-repo-check`, `--return-all-messages`, `--image`). *In → prompt + flags; out → a background task that returns on its own — do not poll.*
+3. **Capture `SESSION_ID`.** When the JSON returns, check `success`; if `false` or `error` is set, read the error and re-brief. Save `SESSION_ID` for any follow-up turn. *In → JSON response; out → session handle + agent_messages.*
+4. **Verify the deliverable yourself.** Read the returned diff, run the test, or inspect the saved file. Codex's summary states intent, not proof — never report success on its word alone. *In → claimed result; out → confirmed (or re-briefed) result.*
+
 ## Quick Start
 
 ```bash
