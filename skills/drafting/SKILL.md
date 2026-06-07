@@ -104,7 +104,16 @@ Whichever execution path runs (dynamic workflow or manual batch), it layers its 
 
 Systems papers usually carry at least one schematic figure (architecture / data-flow / pipeline). A graphical abstract is **optional** — include one only when the venue or author explicitly requests it; most CS/systems venues omit it. Do not attempt to draw either with prose tools.
 
-- For the graphical abstract (when the paper includes one):
+- For structural figures referenced in Methods or Results (architecture / flowchart / pipeline / sequence — the common case):
+
+  ```
+  Skill(skill="superpower-writing:tikz-figures")
+  Output: .writing/figures/<slug>.tex (+ compiled .pdf), \input into the manuscript
+  ```
+
+  One invocation per figure. The skill compiles and verifies the figure, shows two layout candidates for the user to pick, then iterates to publication quality. The prose paragraph that introduces the figure still needs a `% claim: id` tag pointing at whatever claim the figure supports (usually a mechanism or pipeline claim). Figure files are not subject to the PreToolUse hook (the matcher only covers `manuscript/*.tex`).
+
+- For the graphical abstract (when the paper includes one), pictorial concept art, design-direction exploration (3 parallel drafts, user picks), or any figure the user prefers as a polished PNG:
 
   ```
   Skill(skill="superpower-writing:scientific-schematics")
@@ -112,11 +121,7 @@ Systems papers usually carry at least one schematic figure (architecture / data-
   Caption: write into .writing/figures/graphical_abstract.md (caption only)
   ```
 
-  Treat this as its own "section task" in the plan, not a sub-step of a prose section. Route it through whichever mode was chosen in step 1 — the `scientific-schematics` call is the implementer's responsibility, not this skill's.
-
-- For additional schematics referenced in Methods or Results:
-
-  One `scientific-schematics` invocation per figure. The prose paragraph that introduces the figure still needs a `% claim: id` tag pointing at whatever claim the figure supports (usually a mechanism or pipeline claim). The figure file itself goes to `.writing/figures/<slug>.pdf` (LaTeX prefers PDF/EPS vector formats) and is not subject to the PreToolUse hook (the matcher only covers `manuscript/*.tex`).
+  Treat this as its own "section task" in the plan, not a sub-step of a prose section. Route it through whichever mode was chosen in step 1 — the figure-skill call is the implementer's responsibility, not this skill's.
 
 ### 4. Progress tracking after each section
 
@@ -148,7 +153,7 @@ The Zotero-first / network-fallback / optional auto-push flow is fully specified
 
 **Zotero miss is not a failure.** A DOI absent from the user's Zotero library just means the user has not yet vetted it. Network fallback is normal and expected. The only failure mode is "no credible source anywhere", which must be escalated.
 
-**Figures are first-class tasks.** A graphical abstract is optional (systems papers usually omit it), but whenever the paper includes a graphical abstract or schematic, do not inline its generation into a prose section — route it through `superpower-writing:scientific-schematics` as its own task.
+**Figures are first-class tasks.** A graphical abstract is optional (systems papers usually omit it), but whenever the paper includes a graphical abstract or schematic, do not inline its generation into a prose section — route it through `superpower-writing:tikz-figures` (structural figures) or `superpower-writing:scientific-schematics` (pictorial concept art) as its own task.
 
 **Progress dashboard is the handoff contract.** `claim-verification` and the human author read `.writing/progress.md` to know what has been drafted, verified, or reviewed. A section is not "drafted" until its row is updated and committed.
 
@@ -178,7 +183,8 @@ At a glance:
 - `superpower-writing:claim-verification` — downstream; consumes `.writing/manuscript/*.tex` and confirms every claim tag.
 - `superpower-writing:executing-plans` — manual-batch execution fallback; the primary path is a Claude Code dynamic workflow that drafts sections in parallel and reviews them in a pipeline.
 - Plugin-local `writing-principles.md` — voice and structure rules.
-- Plugin-local `superpower-writing:scientific-schematics` — graphical abstract + schematics.
+- Plugin-local `superpower-writing:tikz-figures` — structural vector figures (default route).
+- Plugin-local `superpower-writing:scientific-schematics` — graphical abstract + pictorial concept art.
 - Plugin-local `superpower-writing:research-lookup`, `superpower-writing:citation-management` — evidence resolution (network).
 - Plugin-level `.mcp.json` `zotero` server — Zotero Web API tools. Search: `zotero_search_items` (DOI / title lookup), `zotero_semantic_search` (AI similarity search with paragraph-level matching over PDF fulltext). Read: `zotero_get_item_metadata` (markdown or BibTeX), `zotero_get_item_fulltext` (server-side PDF text — use sparingly, often 70K+ chars; prefer `zotero_semantic_search` to find relevant chunks first). Write: `zotero_add_by_doi` (auto-fetches metadata + open-access PDF). Collection nav: `zotero_get_collections`, `zotero_get_collection_items`.
 - Hook `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` — PreToolUse enforcement of the claim-first protocol.

@@ -188,7 +188,7 @@ When `zotero.enabled: false` (default), the pipeline runs network-only.
     08_acknowledgments.tex  # exempt (optional)
   claims/
     section_<NN>_<slug>.md  # YAML list of {id, CLAIM, EVIDENCE[], STATUS}
-  figures/                  # diagrams via scientific-schematics; data plots via scientific-visualization
+  figures/                  # structural diagrams via tikz-figures; concept art via scientific-schematics; data plots via scientific-visualization
     graphical_abstract.pdf  # optional — systems papers usually omit it
   reviews/                  # internal spec + manuscript review notes
     internal_<date>.md
@@ -242,7 +242,8 @@ skills/                  # writing-domain + planning skills
   literature-review/     # structured lit synthesis
   research-lookup/       # paper/abstract retrieval for evidence resolution
   citation-management/   # citation formatting, DOI resolution, bibliography assembly
-  scientific-schematics/ # graphical abstracts + schematic figures (via Codex image_gen)
+  tikz-figures/          # structural vector figures in LaTeX/TikZ (compile-verified, two-candidate preview)
+  scientific-schematics/ # raster concept art / pictorial figures (via Codex image_gen)
   scientific-visualization/ # publication-ready data plots + venue figure conventions
   polish/                # prose polish pass
   polish-by-diff/        # diff-scoped polish for near-final prose

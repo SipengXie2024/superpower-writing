@@ -1,6 +1,6 @@
 ---
 name: scientific-schematics
-description: Create publication-quality scientific diagrams (neural-network architectures, system/architecture diagrams, data-flow pipelines, conceptual schematics) by delegating generation to Codex's native image_gen via the collaborating-with-codex bridge. Codex runs its imagegen-scientific-schematics skill for design and visual review; this skill supplies the writing-side entry point, prompt guidance, and publication checklist.
+description: Generate scientific figures as raster PNG via Codex's native image_gen (collaborating-with-codex bridge). Two roles — (1) design exploration, generating several diverse direction drafts in parallel for the user to pick from; the chosen draft is either used directly (manuscript, slides/PPT rework) or handed to tikz-figures as a replication reference, at the user's choice; (2) final raster output for pictorial figures (lighting/texture/3D/hand-drawn concept art, graphical abstracts) or whenever the user prefers a polished PNG. Codex runs its imagegen-scientific-schematics skill for design and visual review; this skill supplies the writing-side entry point, prompt guidance, and publication checklist.
 allowed-tools: Read Write Edit Bash
 license: MIT license
 metadata:
@@ -38,16 +38,56 @@ than editable vector source.
 
 ## When to Use This Skill
 
-Use this skill when creating:
-- Neural-network architecture diagrams (Transformers, CNNs, RNNs, etc.)
-- System architectures, data-flow diagrams, and request-processing pipelines
-- Algorithm workflows, state machines, and build/deploy flows
-- Network topologies and hierarchical structures
-- Conceptual frameworks, theoretical models, and block diagrams for technical papers
+This skill plays two distinct roles. Decide which one applies before invoking.
 
-For data plots (CDFs, training curves, ablation bars, speedups, Pareto fronts) use
-`superpower-writing:scientific-visualization` instead. For figures that must be editable
-vector source compiled with LaTeX, use TikZ/pgfplots.
+**Role 1 — Design exploration (on demand).** When the design direction of a figure is
+unclear — a novel figure type with no obvious layout, several plausible ways to organize
+the information, or the user explicitly asks to "explore directions" — use `image_gen`
+as a fast divergent sketcher: generate **3 direction drafts in parallel** (different
+layouts / information organization, not color variants), show all three to the user,
+and let them pick. After picking, the user also chooses the delivery form: use the PNG
+directly (in the manuscript, or as material for a slides/PPT rework), iterate it to
+final quality in the same Codex session, or hand it to
+`superpower-writing:tikz-figures` as a replication reference (`ref.png`) for a vector
+rendition. See "Exploration Mode" below.
+
+**Role 2 — Final raster output.** When the deliverable is a PNG:
+- Illustrative concept art with lighting, texture, 3D rendering, or hand-drawn style
+- Photorealistic or semi-realistic scene compositions
+- Graphical abstracts with strong pictorial elements
+- Any figure where the user prefers a polished PNG over vector source
+
+**Routing for everything else:** routine structural diagrams with a clear design
+(architecture diagrams, flowcharts, pipelines, sequence diagrams) default to
+`superpower-writing:tikz-figures` — its own two-candidate preview covers the layout
+choice, and vector source keeps formulas and fonts consistent with the body text.
+That is a default, not a rule: a high-quality `image_gen` PNG is a legitimate
+deliverable whenever the user prefers it. For data plots (CDFs, training curves,
+ablation bars, speedups, Pareto fronts) use
+`superpower-writing:scientific-visualization` instead.
+
+## Exploration Mode (Role 1)
+
+1. Write one shared figure brief (components, labels, flow), then derive **3 prompts
+   that differ in layout or information organization** — e.g. horizontal pipeline vs
+   layered stack vs central-hero-with-panels. Style/color variants do not count as
+   directions.
+2. Dispatch all 3 as **parallel background bridge calls in one message** (each with
+   `run_in_background: true` and a distinct output path
+   `.writing/figures/explore/<slug>-{a,b,c}.png`).
+3. When all return, Read the three PNGs, show them to the user, and ask which direction
+   to develop (AskUserQuestion, one option per draft with a one-line layout summary).
+4. Ask the user how to develop the chosen draft (same AskUserQuestion or a follow-up):
+   - **Use the PNG directly** — iterate it to final quality in the same Codex session
+     (`SESSION_ID` continuation), move it to `.writing/figures/<slug>.png`, reference
+     with `\includegraphics`. Also the right choice when the user plans a manual
+     slides/PPT rework from it.
+   - **Vector rendition** — hand off to `superpower-writing:tikz-figures` with the
+     chosen PNG as the replication reference. This satisfies tikz-figures'
+     two-candidate requirement (its 复刻 exemption applies); `figure-diff.py` SSIM
+     verifies the TikZ rendition against the chosen draft.
+5. Keep all drafts under `.writing/figures/explore/` until the figure ships — the
+   runner-up directions often get revisited.
 
 **Graphical abstracts are OPTIONAL.** Systems papers typically do not include one.
 Generate only when the venue explicitly requests it.
@@ -215,6 +255,7 @@ Before submitting diagrams, verify:
 
 ## Integration with Other Skills
 
+- **`superpower-writing:tikz-figures`** — structural vector diagrams compiled with LaTeX; the default route for paper figures.
 - **`superpower-writing:collaborating-with-codex`** — the bridge this skill delegates to.
 - **`superpower-writing:scientific-visualization`** — data plots (matplotlib/seaborn/plotly).
 - **Drafting / Methods** — the architecture-overview figure is a first-class drafting task.

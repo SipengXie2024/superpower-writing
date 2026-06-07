@@ -5,6 +5,16 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.13.0] — 2026-06-07
+
+### Added
+
+- **`tikz-figures` skill** — structural vector figures in LaTeX/TikZ, vendored from [0xE1337/thesis-figure-skill](https://github.com/0xE1337/thesis-figure-skill) (MIT) and adapted: draw.io output path removed (LaTeX-only manuscripts), default complexity tier set to medium for systems papers, and a mandatory two-candidate layout preview added — both candidates compile to PNG, the user picks one before the deep visual-review loop starts. Ships the upstream compile-verify pipeline (xelatex + pdftoppm + 7-class overlap checker + adversarial multi-lens review gate), 21 snippet templates with previews, 6 figure skeletons, and the accumulated lessons base. Checker scripts run via `uv run --with` when system pip is absent.
+
+### Changed
+
+- **`scientific-schematics` repositioned as exploration + raster output.** Two roles: (1) design exploration — when a figure's direction is unclear, 3 parallel image_gen drafts with distinct layouts are shown to the user, who picks one and chooses the delivery form (use the PNG directly, iterate it in the same Codex session, or hand it to `tikz-figures` as a `ref.png` replication reference, which satisfies the two-candidate requirement); (2) final PNG output for pictorial figures (concept art, graphical abstracts) or whenever the user prefers a polished PNG. Routine structural diagrams with a clear design default to `tikz-figures` (vector is the default, not a rule). Routing updated across `main`, `drafting`, and the Methods section standard.
+
 ## [0.12.0] — 2026-05-30
 
 ### Changed

@@ -39,7 +39,7 @@ Run:
 ${CLAUDE_PLUGIN_ROOT}/scripts/check-deps.sh
 ```
 
-This probes the plugin's own `skills/` directory first (the bundled domain skills ship there), then legacy Agent Skills install locations for back-compat. Required: `literature-review`, `citation-management`, `research-lookup`, `scientific-schematics`, `scientific-visualization`, plus a PyYAML probe for the claim hook.
+This probes the plugin's own `skills/` directory first (the bundled domain skills ship there), then legacy Agent Skills install locations for back-compat. Required: `literature-review`, `citation-management`, `research-lookup`, `tikz-figures`, `scientific-schematics`, `scientific-visualization`, plus a PyYAML probe for the claim hook.
 
 **On non-zero exit:** refuse all subsequent superpower-writing skill invocations and surface the script's output verbatim — it names the missing dependency and the fix. A missing bundled skill means the plugin install is incomplete (re-clone or reinstall the plugin); a missing `pyyaml` is fixed with:
 
@@ -169,7 +169,8 @@ Plugin-local domain skills (invoked with `superpower-writing:` prefix):
 | `literature-review` | outlining, drafting, claim-verification | Structured lit synthesis. |
 | `research-lookup` | drafting, claim-verification | Paper/abstract retrieval for evidence resolution. |
 | `citation-management` | drafting, claim-verification | Citation formatting, DOI resolution, bibliography assembly. |
-| `scientific-schematics` | drafting | Graphical abstracts and schematic figures (architecture / data-flow / pipeline diagrams). |
+| `tikz-figures` | drafting | Structural vector figures in LaTeX/TikZ (architecture / flowchart / pipeline / sequence / geometry diagrams). Compile-verified; two-candidate preview for the user to pick from. Default route for paper figures. |
+| `scientific-schematics` | drafting | Raster figures via Codex image_gen. Two roles: design exploration (3 parallel direction drafts, user picks; chosen draft used directly or fed to tikz-figures as ref.png) and final PNG output (concept art, graphical abstracts, or whenever the user prefers a polished PNG). |
 | `scientific-visualization` | drafting | Publication-ready data plots (CDFs, throughput curves, training curves, ablation bars, Pareto fronts) for IEEE / ACM / USENIX / NeurIPS / ICML / ICLR. CS-tailored. |
 | `zotero-mcp` (MCP) | drafting, claim-verification, outlining | All Zotero calls when `zotero.enabled: true`. Registered in `.mcp.json`. Core tools: `zotero_search_items` (DOI / title / author lookup), `zotero_get_item_metadata` (markdown or BibTeX export), `zotero_get_item_fulltext` (server-side extracted PDF text, web-API mode supported), `zotero_semantic_search` (AI similarity search over the chunked library — paragraph-level matches when paper bodies are indexed), `zotero_advanced_search`, `zotero_get_collections` / `zotero_get_collection_items`, `zotero_add_by_doi` (auto-fetches metadata + open-access PDF). Scite citation intelligence via `scite_enrich_item` / `scite_enrich_search` / `scite_check_retractions`. |
 

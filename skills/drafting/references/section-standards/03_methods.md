@@ -141,7 +141,7 @@ Rules:
 
 - Subsection titles (`\subsection{Overview}`) are editorial --- rename freely (`\subsection{System Architecture}` / `\subsection{Algorithm Design}` / `\subsection{Correctness}`). The `% methods: X` tag on paragraphs is what the structural self-review tracks, not the heading text.
 - Put `% methods: X` on the line immediately above `% claim: id`. Both tags are required on every load-bearing paragraph.
-- The **Overview paragraph SHOULD reference a figure** via `Figure~\ref{fig:pipeline}` (use `~` tie before \ref to prevent line breaks). This is a reviewer expectation for CS papers; Methods without an architecture figure reads as under-illustrated. Use `scientific-schematics` to draw it; `\includegraphics` the resulting PDF.
+- The **Overview paragraph SHOULD reference a figure** via `Figure~\ref{fig:pipeline}` (use `~` tie before \ref to prevent line breaks). This is a reviewer expectation for CS papers; Methods without an architecture figure reads as under-illustrated. Use `tikz-figures` to draw it; `\input` the resulting .tex (or `\includegraphics` its compiled PDF).
 - **Pseudocode goes in `[C]` paragraphs** via the `algorithm` + `algorithmic` environments (algorithmicx package). Label with `\label{alg:<name>}` and reference as `Algorithm~\ref{alg:<name>}`.
 - **Equations go in `[F]`, `[C]`, and `[A]` paragraphs** --- inline via `$...$`, display via `\[ ... \]` or `\begin{equation} ... \end{equation}`. Label only equations referenced later (`\label{eq:foo}` + `\eqref{eq:foo}`).
 - **The Analysis paragraph's rigor scales with claim strength.** Empirical claims ("our approach is faster") need §Experiments, not §Methods §A. Theoretical claims ("runs in $O(n \log n)$ time", "converges to a local minimum") need a theorem statement and proof sketch in §Methods §A (use `\begin{theorem}` / `\begin{proof}`); the full proof may move to an appendix.
@@ -165,7 +165,7 @@ Rules:
 ## Common failure modes
 
 - **Missing overview.** Methods opens directly with Algorithm 1 or a formal definition. Symptom: reviewer writes "hard to follow the high-level approach". Fix: add a §3.1 Overview paragraph with a pipeline figure before any algorithm or equation.
-- **Overview without a figure.** §3.1 is a prose-only paragraph describing the architecture. Symptom: reviewer writes "consider adding an overview figure". Fix: invoke `scientific-schematics` to produce a pipeline diagram and reference it in the overview paragraph.
+- **Overview without a figure.** §3.1 is a prose-only paragraph describing the architecture. Symptom: reviewer writes "consider adding an overview figure". Fix: invoke `tikz-figures` to produce a pipeline diagram and reference it in the overview paragraph.
 - **Formalization left implicit.** Paper uses symbols that were not defined in §Background §N or §Methods §F. Symptom: readers flip back hunting for definitions. Fix: write §F explicitly, even when the problem seems standard; include input / output types, objective, and constraints.
 - **Core without pseudocode.** §Core describes the algorithm in prose only. Symptom: reviewer writes "the algorithm is not precisely specified, reimplementation is ambiguous". Fix: add at least one pseudocode block (Algorithm 1) showing the main procedure.
 - **Analysis deferred to appendix without a summary.** §A says "See Appendix B for the proof" with no in-paper claim. Symptom: reviewer without time to read the appendix cannot verify the headline complexity claim. Fix: state the theorem and a one-paragraph proof sketch in §A; the appendix carries the full proof.

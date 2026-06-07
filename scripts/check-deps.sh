@@ -8,6 +8,7 @@ REQUIRED=(
   literature-review
   citation-management
   research-lookup
+  tikz-figures
   scientific-schematics
   scientific-visualization
 )

@@ -1,7 +1,7 @@
 {
   "name": "superpower-writing",
-  "description": "Self-contained plugin for drafting a detailed, evidence-backed CS/systems/ML paper skeleton for a human author to refine. Ships domain skills (research lookup, citation management, literature review, scientific schematics/visualization, prose polish, humanizer) and reference files (writing principles, style cautions, figures & tables). Claim-first drafting enforced by a PreToolUse hook, citation-reliability verification, and persistent .writing/ state; large parallel drafting and review run as Claude Code dynamic workflows. Ships an Academic Research Assistant output style.",
-  "version": "0.12.1",
+  "description": "Self-contained plugin for drafting a detailed, evidence-backed CS/systems/ML paper skeleton for a human author to refine. Ships domain skills (research lookup, citation management, literature review, TikZ figures, scientific schematics/visualization, prose polish, humanizer) and reference files (writing principles, style cautions, figures & tables). Claim-first drafting enforced by a PreToolUse hook, citation-reliability verification, and persistent .writing/ state; large parallel drafting and review run as Claude Code dynamic workflows. Ships an Academic Research Assistant output style.",
+  "version": "0.13.0",
   "author": {
     "name": "sipeng"
   },
