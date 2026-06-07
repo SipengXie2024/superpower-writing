@@ -21,7 +21,9 @@ Read target doc → Identify gaps → Ask deep questions (AskUserQuestion) → I
 
 ### Step 1: Read and Analyze
 
-Read the design doc (from brainstorming) or user-specified document. Identify information gaps across these dimensions:
+Read the design doc (from brainstorming) or user-specified document. If no target doc is named, or the file is missing or empty, ask which document to refine (offer brainstorming-first as an option) instead of interviewing against nothing.
+
+Once the doc is in hand, identify information gaps across these dimensions:
 
 | Dimension | Focus Areas |
 |-----------|-------------|
@@ -77,6 +79,7 @@ After the interview is complete, integrate all clarifications back into the orig
 - Preserve existing structure, fill in missing details
 - Annotate key decisions with their rationale
 - List identified risks and mitigations
+- Before overwriting, show the user the proposed changes (a diff or a summary of what each interview answer altered) and confirm; do not silently replace their document
 - Commit the updated document
 - Also persist key findings (rejected alternatives, risk assessments, non-obvious decisions) to `.writing/findings.md`
 
