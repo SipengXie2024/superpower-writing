@@ -51,6 +51,16 @@ For detailed guidance on creating schematics, refer to the scientific-schematics
 
 ---
 
+## User Checkpoints (Confirm Before Proceeding)
+
+This workflow runs many autonomous phases. **Pause for user confirmation at three gates** before taking consequential, hard-to-reverse actions. Present a concise summary and wait for an explicit go-ahead; do not silently barrel through.
+
+- **Gate 1 — Scope lock (end of Phase 1):** Before running any searches, present the research question, review type, databases selected, and inclusion/exclusion criteria. Confirm these with the user, since they determine everything downstream. If the user has already specified them, restate and proceed.
+- **Gate 2 — Included-study set (end of Phase 3):** Before extraction and writing, present the screening tallies (PRISMA counts) and the final list of included studies. Confirm the set is right, since the synthesis is built entirely on it. Flag any borderline inclusions/exclusions for the user to rule on.
+- **Gate 3 — Pre-generation review (start of Phase 7):** Before generating the PDF, confirm the markdown draft, citation style, and whether figures are wanted. Surface any unresolved citation failures rather than shipping over them.
+
+Between gates, proceed autonomously. When the user has explicitly delegated the full run or constrained scope (e.g. "just synthesize these papers"), honor that: collapse or skip gates that no longer apply rather than forcing the full pipeline.
+
 ## Core Workflow
 
 Literature reviews follow a structured, multi-phase workflow:
@@ -78,6 +88,8 @@ Literature reviews follow a structured, multi-phase workflow:
    - Publication types (peer-reviewed, preprints, reviews)
    - Study designs (RCTs, observational, in vitro, etc.)
    - Document all criteria clearly
+
+> **Gate 1 — Scope lock:** Confirm question, review type, databases, and inclusion/exclusion criteria with the user before searching.
 
 ### Phase 2: Systematic Literature Search
 
@@ -184,6 +196,8 @@ Literature reviews follow a structured, multi-phase workflow:
    └─ Included in review: n = B
    ```
 
+> **Gate 2 — Included-study set:** Present PRISMA counts and the final included-study list for user confirmation before extraction and writing.
+
 ### Phase 4: Data Extraction and Quality Assessment
 
 1. **Extract Key Data** from each included study:
@@ -273,6 +287,8 @@ Literature reviews follow a structured, multi-phase workflow:
    - Ensure in-text citations match reference list format
 
 ### Phase 7: Document Generation
+
+> **Gate 3 — Pre-generation review:** Confirm the draft, citation style, and figure choices with the user; surface any unresolved citation failures before generating the PDF.
 
 1. **Generate PDF**:
    ```bash
