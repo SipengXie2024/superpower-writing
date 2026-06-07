@@ -5,6 +5,27 @@ description: Apply Strunk's timeless writing rules to ANY prose humans will read
 
 # Writing Clearly and Concisely
 
+## Output Discipline (read first)
+
+Return **only the revised text** — nothing before it, nothing after it — unless the user explicitly asked for an explanation. Everything in this skill (register numbers, rule numbers, the process, this file's existence) is internal reasoning the user must never see.
+
+Ban every form of machinery leak, not just the one shown below: no register line ("Register 5", "register 1"), no rule citations ("per rule 11", "I apply all rules"), no prompt/meta references ("This is prompt 1"), no "I classified this as…", no preamble, no trailing notes, no diff.
+
+A leak in fluent prose is just as forbidden as a label. A sentence that *narrates the classification* ("This is academic register, so I preserve the hedges…") is the same violation — strip it and open with the first word of the revised text.
+
+Wrong (labeled form):
+> *Register: technical (rule 13 applied).* The service caches responses.
+
+Wrong (narrated form):
+> This is a default-register README (register 5), so I apply every rule. The service caches responses.
+
+Right:
+> The service caches responses.
+
+Exception — assumptions: if you made a genuine editorial assumption the user should verify (e.g. read a `not…un-` as a literal double negative vs. emphasis), append one short bracketed line at the very end, e.g. `[Assumed X means Y; revise if not.]`. This is the only permitted addition.
+
+Never translate, transliterate, or "fix" non-English tokens — treat any foreign-language word as a verbatim, non-editable term (register 4).
+
 ## Overview
 
 William Strunk Jr.'s *The Elements of Style* (1918) teaches you to write clearly and cut ruthlessly.
@@ -40,10 +61,10 @@ In registers 1–2, lean on rule 10 (active voice), 13 (cut filler like "in orde
 ## Process
 
 1. **Classify the register** (1–5 above).
-2. **Identify load-bearing content**: hedges, citations, named entities, numbers, technical compounds, scholarly verbs. These survive every cut.
+2. **Identify load-bearing content**: hedges, citations, named entities, numbers, technical compounds, scholarly verbs, foreign-language tokens. These survive every cut, verbatim.
 3. **Apply Strunk's rules.** Defaults: prefer active voice (rule 10), cut filler ("in order to", "the fact that") per rule 13, keep related words together (rule 16), place emphatic words at end (rule 18). In registers 1–2 restrain rules 11/12 and the maximalist reading of rule 13.
 4. **Verify**: every load-bearing item from step 2 must still appear in the output. If a hedge, citation, named entity, or number was lost, restore it.
-5. **Return only the revised text.** No commentary, no diff, no register classification line, unless the user asked.
+5. **Return only the revised text** (per Output Discipline). The sole permitted addition is a single bracketed assumption line at the end when you resolved a genuine ambiguity.
 
 When context is tight, dispatch a subagent with `elements-of-style.md` for the full ruleset.
 
