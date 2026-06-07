@@ -207,6 +207,14 @@ If a figure is reused across paper / poster / slides, render at multiple sizes f
 
 ## Workflow inside this plugin
 
+**Confirmation gates — pause for the user before these three points:**
+
+1. **Before writing a generator script**, confirm the target venue, the column width (single vs full), and the data source path. If any is unknown, ask rather than assume a default — guessing the venue silently produces a figure sized for the wrong template.
+2. **Never invent measurements.** If `.writing/figures/data/<fig_id>.{csv,jsonl}` is missing or the user hasn't supplied numbers, stop and ask for the data. Do not synthesize plausible-looking benchmark values, error bars, or trend lines to fill a plot — a polished figure built on fabricated data is worse than no figure. Placeholder values are acceptable only when the user explicitly asks for a layout mock-up and the figure is labeled as such.
+3. **Before overwriting an existing `.writing/figures/<fig_id>.pdf`**, confirm with the user (or note that you are about to replace it) so a prior camera-ready figure isn't clobbered silently.
+
+Then proceed:
+
 1. **Plan from the outline.** Each figure listed in `.writing/plan.md` should have a one-line claim it supports (`fig:cdf-latency` → "our system has a 2.4× lower p99 than the baseline at 32 clients").
 2. **Write a generator script** in `.writing/figures/src/<fig_id>.py`. The script reads from `.writing/figures/data/<fig_id>.{csv,jsonl}` and writes `.writing/figures/<fig_id>.pdf`. This separation lets reviewers (and you) regenerate figures from raw data.
 3. **Apply this skill's style** at the top of the script — copy the bundled `.mplstyle` file or use the inline rcParams snippet from Quick Start.
