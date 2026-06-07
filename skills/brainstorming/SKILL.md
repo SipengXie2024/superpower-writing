@@ -44,8 +44,10 @@ You MUST create a task for each of these items and complete them in order:
    - Update `.writing/findings.md` with new discoveries after each cycle (2-Action Rule)
 
    **Stop when:** 3+ high-relevance files identified AND no critical context gaps remain, OR 3 cycles completed. Don't over-explore — 3 deeply understood files beats 10 skimmed ones.
+
+   **Empty sweep (greenfield / no relevant context found):** if Cycle 1 surfaces no relevant files (empty repo, brand-new module, or the request targets a toolchain not present in the workspace), do NOT fabricate `findings.md` entries or invent a context that isn't there. Record what IS true ("greenfield — no existing implementation; target toolchain X not present"), then move to step 3 and let the user's answers supply the missing context. State the gap to the user plainly before asking.
 2. **Scope check** — before refining details, determine whether the request actually describes multiple independent subsystems. If yes, propose decomposition first.
-3. **Ask clarifying questions** — ask one question at a time via `AskUserQuestion` to understand purpose, constraints, success criteria. Record key user answers and decisions to `.writing/findings.md`.
+3. **Ask clarifying questions** — ask one question at a time via `AskUserQuestion` to understand purpose, constraints, success criteria. Record key user answers and decisions to `.writing/findings.md`. **If the user stalls, gives up, or says "just decide" mid-dialogue:** don't loop indefinitely or abandon the design. Summarize what's decided so far, make explicit defaulted assumptions for the open questions (each marked `[ASSUMED]`), and present a provisional design built on them for a single approval — the user can correct the assumptions instead of answering every question.
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation, presented via `AskUserQuestion` for user to choose.
 5. **Present design** — in sections scaled to complexity, get user approval after each section via `AskUserQuestion`.
 6. **Write design doc** — save to `.writing/design.md` (initialize `.writing/` first if needed).
