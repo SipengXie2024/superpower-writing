@@ -15,6 +15,25 @@ Manage citations systematically throughout the research and writing process. Thi
 
 Critical for maintaining citation accuracy, avoiding reference errors, and ensuring reproducible research. Integrates seamlessly with the literature-review skill for comprehensive research workflows.
 
+## Output Discipline (read first)
+
+The bundled scripts are the preferred path, but the user's deliverable comes first. Apply these rules to every response:
+
+1. **Always ship the best available deliverable.** If the scripts are not installed, dependencies are missing, the network/API is unavailable, or the request is a single quick conversion, do not refuse and do not defer to "run this script later." Produce the BibTeX directly from the metadata you already have, then note that running the validation scripts would confirm it. A finished, clearly-caveated entry beats an empty answer that points at a script.
+
+2. **Label what you could not verify.** Any field you could not confirm against CrossRef/PubMed/arXiv (a guessed page range, an unresolved DOI, a PMID you have not looked up) must be marked inline, e.g. `pages = {1--?}, % UNVERIFIED` or a `% UNVERIFIED: confirm via extract_metadata.py` comment. Never silently fabricate a value, but never withhold the whole entry because one field is unknown.
+
+3. **Do not state citation-style rules you are not certain of.** This skill produces BibTeX, not rendered APA/MLA/Chicago strings. If asked about a specific style rule (author-count thresholds for "et al.", ampersand vs "and", title case), only assert it if you are sure; otherwise say it depends on the style version and point to the style manual rather than guessing a number.
+
+4. **Keep skill machinery out of the output.** The user wants citations, not a tour of your internal process. Never expose this skill's own framing: do not write phrases like "Per the skill's Output Discipline...", "rather than running the search-and-BibTeX pipeline", "this skill would call...", or any reference to the skill, its rules, or its scripts as the reason for what you are doing. Just deliver the result. Mention a script only when recommending a concrete next command the user can run.
+
+   - Wrong: "Per the skill's Output Discipline, I'll ship the BibTeX directly rather than running the search-and-BibTeX pipeline."
+   - Right: "Here is the BibTeX. The DOI is unverified — run `python scripts/extract_metadata.py --doi <doi>` to confirm the fields."
+
+5. **State unknown fields once, cleanly.** When a field is unverified, mark it a single time and move on. Do not assert a value and then retract it in the same sentence (e.g. naming a PMID and then saying you cannot confirm it). Either give the value with a `% UNVERIFIED` marker, or omit it with one note that it needs lookup — never both in a way that contradicts itself.
+
+6. **Confirm before any destructive .bib edit.** Operations that rewrite or discard data — `--auto-fix`, `--deduplicate`, and anything that overwrites the user's original `.bib` — must not silently clobber the input. Default to writing the result to a *new* file (`--output clean_references.bib`), never in place over the source. When `--deduplicate` or `--auto-fix` will drop entries or pick a "best" version among near-duplicates, surface what will be removed and which version is kept, and ask the user to confirm before applying — do not let the script choose silently. The original file stays untouched until the user approves the change.
+
 ## When to Use This Skill
 
 Use this skill when:
