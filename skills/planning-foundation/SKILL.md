@@ -43,9 +43,9 @@ Lifecycle directories:
 
 Before ANY complex task:
 
-1. **Create `.writing/` directory** with init script or manually
-2. **Create `progress.md`** — Use [templates/progress.md](templates/progress.md) (includes Task Status Dashboard)
-3. **Create `findings.md`** — Use [templates/findings.md](templates/findings.md) as reference
+1. **Create `.writing/` directory** — run `bash "${CLAUDE_PLUGIN_ROOT}/scripts/init-writing-dir.sh"` (it creates `.writing/` with `progress.md` + `findings.md` seeded from the templates), or create the dir and seed the two files manually
+2. **Create `progress.md`** — copy [../../templates/progress.md](../../templates/progress.md) (includes Task Status Dashboard)
+3. **Create `findings.md`** — copy [../../templates/findings.md](../../templates/findings.md) as reference
 4. **Re-read plan before decisions** — Refreshes goals in attention window
 5. **Update after each phase** — Mark complete, log errors
 
@@ -187,30 +187,32 @@ The orchestrator aggregates agent findings into top-level `.writing/findings.md`
 
 ## Templates
 
-- [templates/findings.md](templates/findings.md) — Research storage
-- [templates/progress.md](templates/progress.md) — Session logging
-- [templates/agent-context.md](templates/agent-context.md) — Planning rules to inject into subagent prompts
+- [../../templates/findings.md](../../templates/findings.md) — Research storage (shared plugin-root template)
+- [../../templates/progress.md](../../templates/progress.md) — Session logging (shared plugin-root template)
+- [templates/agent-context.md](templates/agent-context.md) — Planning rules to inject into subagent prompts (skill-local)
 
 ## Scripts
 
+These live at the plugin root, not in the skill dir. Invoke each as `bash "${CLAUDE_PLUGIN_ROOT}/scripts/<name>"` (the variable resolves at runtime; the relative path is `../../scripts/<name>`).
+
 **Planning lifecycle:**
-- `scripts/init-writing-dir.sh` — Initialize `.writing/` with findings.md and progress.md
-- `scripts/writing-reset.sh` — Reset active state, preserve archive/ and stash/
-- `scripts/check-writing-state.sh` — Check state: missing | empty | active | complete
-- `scripts/snapshot-save.sh` — Copy active project files to a target directory (shared by stash/archive)
+- `init-writing-dir.sh` — Initialize `.writing/` with findings.md and progress.md
+- `writing-reset.sh` — Reset active state, preserve archive/ and stash/
+- `check-writing-state.sh` — Check state: missing | empty | active | complete
+- `snapshot-save.sh` — Copy active project files to a target directory (shared by stash/archive)
 
 **Stash/archive:**
-- `scripts/stash-list.sh` — List available stashes (directory + legacy format)
-- `scripts/stash-restore.sh` — Restore stash to active .writing/ state
-- `scripts/archive-search.sh` — Search archives by keyword
-- `scripts/unique-filename.sh` — Generate unique dated filename/dirname
+- `stash-list.sh` — List available stashes (directory + legacy format)
+- `stash-restore.sh` — Restore stash to active .writing/ state
+- `archive-search.sh` — Search archives by keyword
+- `unique-filename.sh` — Generate unique dated filename/dirname
 
 **Agent orchestration:**
-- `scripts/aggregate-agent-findings.sh` — Merge agent "Critical for Orchestrator" items into top-level files
+- `aggregate-agent-findings.sh` — Merge agent "Critical for Orchestrator" items into top-level files
 
 **Project detection:**
-- `scripts/detect-base-branch.sh` — Detect main/master/develop
-- `scripts/detect-test-command.sh` — Detect project test command
+- `detect-base-branch.sh` — Detect main/master/develop
+- `detect-test-command.sh` — Detect project test command
 
 ## Anti-Patterns
 
