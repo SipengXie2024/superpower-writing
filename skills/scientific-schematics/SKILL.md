@@ -120,6 +120,32 @@ Codex saves generated images under `~/.codex/generated_images/<session>/` by def
 only copies the selected one into the workspace when the prompt asks. Always give an
 explicit in-project output path, or the asset is stranded outside the repo.
 
+## Failure and Recovery
+
+When delegation does not converge, do not loop indefinitely or fabricate a result —
+fall back to one of these explicit branches.
+
+- **Bridge call fails or times out.** If the background call returns a non-zero exit,
+  an error, or no `SESSION_ID`, retry **once** as a fresh call (not a session
+  continuation, since no session exists). If the second attempt also fails, stop and
+  report the failure plainly to the user with the bridge's error text; do not invent a
+  saved path or claim an image exists.
+- **Bridge returns but no PNG at the reported path.** Re-read Codex's report for an
+  alternate path (often the `~/.codex/generated_images/` default). If found, move it to
+  the intended `.writing/figures/` path. If no image was produced at all, treat it as a
+  failed call and apply the retry-once rule above.
+- **Labels will not converge.** Raster generation can misspell dense text. Allow at most
+  **3 targeted fix iterations** in the same session. If a label is still wrong after the
+  third, stop iterating and either hand the draft to `superpower-writing:tikz-figures`
+  for a vector rendition (where text is exact), or deliver the PNG with a note that the
+  caption must correct the affected label. Endless re-prompting on one label is the
+  failure mode to avoid.
+- **All 3 exploration drafts rejected.** If the user dislikes every direction, do not
+  silently regenerate the same three. Ask (AskUserQuestion) what was wrong — wrong layout
+  family, wrong emphasis, missing component — then derive a new brief from that feedback
+  and dispatch one fresh round. After two full rejected rounds, switch to a direct
+  conversation about the intended structure before spending more generation budget.
+
 ## Writing the Delegation Prompt
 
 The quality of the figure tracks the quality of the prompt. Prepend these scientific
