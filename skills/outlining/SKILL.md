@@ -43,6 +43,7 @@ Do NOT use this skill for:
 - [ ] Intro and Discussion are narrative-consistent: every Introduction gap/question has a Discussion bullet addressing it, and vice versa.
 - [ ] Upstream `literature-review` has been invoked at least once; key references are recorded in `.writing/findings.md` under Research Findings.
 - [ ] Scope check done: no bullet falls outside the paper's stated contribution.
+- [ ] User confirmed the outline skeleton before claim stubs were materialized (see Step 3 confirmation gate).
 - [ ] If `metadata.yaml` has `zotero.enabled: true` and a `collection_key` is set, EVIDENCE entries have been optionally seeded from that Zotero collection.
 
 # Process
@@ -238,6 +239,16 @@ Not every venue uses canonical IMRAD (I-M-R-D-C as separate sections). When gene
 - **ML conference format.** NeurIPS/ICML/ICLR papers typically use Introduction-Method-Experiments-Conclusion with Related Work in appendix. The Experiments section combines Results and Discussion (see "Combined Results and Discussion" above), and Related Work may be shortened or moved to supplementary material.
 
 When in doubt, check the target venue's author guidelines or recent publications from the same venue. The outline skeleton should match the venue's section structure before claim stubs are materialized.
+
+### Confirmation gate before materializing stubs
+
+The skeleton is the cheap, reviewable artifact; the claim files are the expensive, hard-to-undo one (a 6-section outline expands into 20–30+ YAML stubs across many files). Before proceeding to Step 4, **show the user the outline skeleton and stop for confirmation**. Present a compact summary, not the full file:
+
+- the section list with the standard applied and bullet count per section (e.g. `Methods (OFCA): 6 bullets`),
+- the venue variation chosen (combined R&D? merged Conclusion? Motivation opted in?),
+- the projected claim-stub total (sum of bullets, minus Abstract which gets no claim file).
+
+Then ask via `AskUserQuestion`: "Materialize this outline into claim stubs, or revise the skeleton first?" Only proceed to Step 4 once the user confirms. If the user wants changes, edit the skeleton in place and re-show the summary — do not generate stub files speculatively. This keeps a single decision point between the lightweight outline and the bulk file generation, so a wrong section set or scope is caught before it fans out into dozens of files.
 
 ## Step 4: Materialize claim stubs
 
