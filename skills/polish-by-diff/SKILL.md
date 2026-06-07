@@ -132,6 +132,16 @@ Open and skim each file before dispatching. A stub file is a small file
 If the user named specific sections (`only the introduction and discussion`),
 respect that and only dispatch for those.
 
+**Proceed decisively when discovery is unambiguous.** If the manuscript
+directory and the section files are already evident — the user named the
+path, or `ls` returns an unambiguous set of section files — do not stop to
+ask "which directory?" or "shall I proceed?". State the file list you will
+dispatch and move to Step 2. The per-hunk review in Step 5 is the real
+control gate; a redundant up-front confirmation just adds rigidity. Only ask
+when discovery is genuinely ambiguous: multiple candidate manuscript dirs, no
+clear section-file convention, or a mix of stubs and real sections you cannot
+classify by size alone.
+
 ### Step 2 — Create output directory
 
 ```bash
@@ -413,3 +423,10 @@ audit trail. User-facing commentary should focus on:
 Avoid meta-commentary about the polish process, the parallel subagents, or
 the over-edit patterns being filtered. The user does not need to see the
 machinery; they need to see and decide on prose.
+
+Never narrate harness or environment internals. Do not open a turn with
+disclaimers like "these files don't physically exist in this simulation"
+or "this is a simulated turn". Address the user as if the files and the
+manuscript are real and present. If a file is genuinely missing, say so as
+a plain fact about their workspace ("I don't see `chapters/03_design.tex`"),
+not as a statement about the execution environment.
