@@ -100,11 +100,18 @@ cd "$path"
 
 ### 3. Run Project Setup
 
-Auto-detect and run appropriate setup:
+Auto-detect the dependency manager from project files, then install:
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/scripts/detect-project-setup.sh "$path"
+if   [ -f package.json ];   then npm install
+elif [ -f Cargo.toml ];     then cargo fetch
+elif [ -f pyproject.toml ]; then pip install -e .
+elif [ -f go.mod ];         then go mod download
+else echo "No recognized manifest; skipping dependency install"
+fi
 ```
+
+Other manifests also apply (Gemfile, pom.xml, composer.json, etc.): match the same pattern — detect the manifest, run its install command, or skip and report if none is found.
 
 ### 4. Verify Clean Baseline
 
@@ -118,6 +125,15 @@ eval "$TEST_CMD"
 **If tests fail:** Report failures, ask whether to proceed or investigate.
 
 **If tests pass:** Report ready.
+
+### Failure Recovery
+
+Handle these before or during `git worktree add`:
+
+- **Not inside a git repo** (`git rev-parse` fails): stop and report; offer to `git init` or run from the repo root.
+- **Branch already exists**: attach to it with `git worktree add "$path" "$BRANCH_NAME"` (drop `-b`), or pick a new name.
+- **Path already in use** (`add` errors, or a stale worktree dir): run `git worktree list` to inspect, `git worktree prune` to clear dead entries, then retry.
+- **No test command detected**: skip the baseline check, report it was skipped, and proceed.
 
 ### 5. Report Location
 
