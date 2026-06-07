@@ -28,7 +28,14 @@ For each task:
 1. Mark as in_progress
 2. Follow each step exactly (plan has bite-sized steps)
 3. Run verifications as specified
-4. **Record discoveries** — After each task, append any unexpected findings, decisions, or technical insights to `.writing/findings.md`
+4. **Record discoveries** — After each task, append unexpected findings, decisions, or technical insights to `.writing/findings.md`, one entry per finding:
+   ```
+   ## [Task N] <short title>
+   - **What:** <the discovery/decision in one line>
+   - **Why it matters:** <impact on later tasks or the plan>
+   - **Action:** <kept / changed approach / needs user input>
+   ```
+   The schema is a format, not a scope filter — still record decisions, surprises, and consolidated batch-level insights (Step 3), not only per-task findings.
 5. Mark as completed
 
 ### Step 3: Report and Update Progress
@@ -37,7 +44,7 @@ When batch complete:
 - Show verification output
 - **Update `.writing/progress.md`** (if `.writing/` exists):
   - Mark completed tasks as `complete` in the Task Status Dashboard
-  - Append batch summary to the session log section
+  - Append a batch summary to the session log section: `Batch <n>: tasks <ids> complete | verified: <command/result> | open: <blockers or none>`
 - **Update `.writing/findings.md`** — Consolidate any discoveries, decisions, or surprises from this batch
 - Say: "Ready for feedback."
 
