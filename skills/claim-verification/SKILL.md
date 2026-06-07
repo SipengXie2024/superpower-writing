@@ -165,6 +165,8 @@ Write `.writing/verify-report.md` with exact structure:
 
 ### Step 5: Update Claim STATUS
 
+**Confirmation gate (mutating step).** Steps 5 and the `auto_push_new_citations` write-back in 2b are the only two actions that mutate state outside the report — `STATUS: evidence_ready → verified` and pushing a network-resolved citation into the user's Zotero collection. Before performing either, present the full list of eligible claims to flip and citations to push, then get explicit user confirmation. This mirrors the soft-fail override requirement: no green-lit mutation lands silently. If the user declines or wants to inspect first, leave STATUS at `evidence_ready` and the report on disk — verification is re-runnable and the audit trail is already written. Exception: when the user opened this run with an explicit "verify and flip" / "verify and push" instruction, that standing instruction is the confirmation — do not re-prompt.
+
 For each claim where its passes PASS (Pass 1 + Pass 2, plus Pass 3 when run):
 
 1. Locate the claim entry in its `claims/section_*.md` file.
