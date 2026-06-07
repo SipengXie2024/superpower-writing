@@ -20,6 +20,31 @@ This skill provides real-time research information lookup with **intelligent bac
 
 The skill automatically detects query type and routes to the optimal backend.
 
+## Output Discipline (read first)
+
+The user wants research results, not a narration of how this skill works. On the happy path:
+
+- **Just run the search and deliver findings.** Do not preface output with routing rationale, prerequisite checks, or a backend-selection explanation. Pick the backend silently and go.
+- **No meta-commentary.** Never write phrases like "per the skill's routing logic", "this query routes to parallel-cli because…", or "as the prerequisites require". Report findings and cite sources; keep the machinery invisible.
+- **One exception — confirm before the slow path.** Only the Parallel Chat API deep-research backend (60s–5min, higher cost) gets a one-line confirmation before launch (e.g. "This needs deep research (~1–5 min, higher cost) — proceed?"). Fast parallel-cli and Perplexity searches run without asking.
+- **If you cannot execute** (no parallel-cli, missing key, no network), say so in one line and deliver the best direct answer from your own knowledge, clearly labeled as un-searched — do not stall or fabricate search output or DOIs.
+
+Negative example — do **not** open with this:
+> *This is a scientific query, so per the routing logic it goes to parallel-cli search. First I'll verify parallel-cli is installed and PARALLEL_API_KEY is set, then run two searches (academic + general)...*
+
+Instead, run the searches and lead with the findings.
+
+## Workflow (the ordered procedure)
+
+Run these steps in order. Routing details, command flags, and save patterns referenced here are specified in the sections below.
+
+1. **Check sources first.** `ls sources/` — if a saved file already covers this topic, re-read it instead of querying. Skip the rest.
+2. **Detect query type → pick backend.** Academic keywords (papers, DOI, journal, peer-reviewed…) → Perplexity. Explicit "deep/exhaustive research" → Parallel Chat API. Everything else → parallel-cli search (default). On a query matching both academic AND deep-research signals, treat deep-research as higher precedence and surface the choice to the user.
+3. **Confirm only the slow path.** If the chosen backend is the Parallel Chat API, ask one line before launching ("This needs deep research, ~1–5 min, higher cost — proceed?"). Fast parallel-cli and Perplexity run without asking.
+4. **Run the search.** For scientific parallel-cli queries, run the two-search pattern (academic `--include-domains` + general). Single search for non-scientific. Always pass `-o sources/...`.
+5. **Save to `sources/`.** Every result is written under `sources/` with the filename pattern for that backend (see MANDATORY: Save section). Non-negotiable.
+6. **Deliver findings.** Lead with synthesized results and inline citations, academic sources first. No routing narration, no prerequisite recap (see Output Discipline). If you could not execute, deliver the best un-searched answer labeled as such — never fabricate sources or DOIs.
+
 ## When to Use This Skill
 
 Use this skill when you need:
