@@ -5,6 +5,19 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.14.0] — 2026-06-08
+
+### Changed
+
+- **Corpus-wide skill quality pass (darwin 8-dimension optimizer, full-subagent A/B evaluation).** 16 of 23 skills improved with zero regressions; mean skill score 75.7 → 79.2. Every change was validated by re-running test prompts with and without the skill and kept only if it strictly beat the prior score. Highlights:
+  - `scientific-visualization` (+10.3) — venue/width/data confirmation gates plus a never-fabricate-data rule before any plot is generated or PDF overwritten.
+  - `citation-management` (+9.8) — ship caveated BibTeX directly when scripts/network are unavailable instead of deferring; confirm-before-overwrite gate on `--auto-fix`/`--deduplicate`.
+  - `writing-clearly-and-concisely` (+7.5) and `polish-by-diff` (+5.0) — output discipline hardened so the deliverable is returned without skill-machinery or process meta-commentary.
+  - `research-lookup` (+7.3), `collaborating-with-codex` (+6.3) — added single authoritative numbered workflows.
+  - `literature-review` (+6.0), `writing-plans` (+3.2), `spec-interview` (+3.4), `outlining` (+0.2), `claim-verification` (+0.7) — user-confirmation checkpoints before autonomous multi-phase generation or state mutation.
+  - `planning-foundation` (+6.0), `git-worktrees` (+4.5) — fixed broken resource-path references; added failure-recovery branches.
+  - `brainstorming` (+4.5), `scientific-schematics` (+2.0), `executing-plans` (+2.8) — greenfield/empty-context recovery, bridge-failure fallbacks, concrete findings/batch-summary schemas.
+
 ## [0.13.0] — 2026-06-07
 
 ### Added
