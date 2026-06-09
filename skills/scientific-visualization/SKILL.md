@@ -165,6 +165,61 @@ for i, ax in enumerate(axes):
             transform=ax.transAxes, fontsize=10, fontweight='bold', va='top')
 ```
 
+#### Multi-panel anti-redundancy checklist
+
+A multi-panel figure should read as one figure where each panel earns its space. Covering any one panel must leave a gap the others cannot fill. Run this before finalizing a composite:
+
+- [ ] Every panel answers a **distinct question**. Write the one-line question each panel answers; if two lines are the same, one panel is redundant.
+- [ ] No panel **re-displays a subset of another panel's data** in a different visual form. A bar of per-method accuracy plus a heatmap of the same accuracies is the same data twice.
+- [ ] No panel is a **slice of another**. A "method X only" bar that is just one group pulled out of the grouped-bar panel adds nothing; replace it with a relationship view (scatter, trade-off).
+- [ ] Each panel has its **own axis vocabulary** (different x/y quantities), not the same axes recomputed.
+
+Common redundancy traps and the fix:
+
+| Trap | CS example | Fix |
+|------|-----------|-----|
+| Absolute + absolute | Grouped-bar accuracy + heatmap of the same accuracies | Replace the heatmap with a deviation view (per-method delta vs baseline) |
+| Subset of parent | "Ours-only" latency bar that is one column of the grouped bar | Swap for a scatter: latency vs throughput across methods |
+| Two rankings | Two ranked bars on accuracy and on F1 (highly correlated) | Replace one with an accuracy-vs-F1 scatter |
+| Same slice, different chart | Pie plus stacked bar of one breakdown | Merge, or replace one with a trade-off plot |
+
+When a panel shows absolute values, a good companion panel shows **what is atypical** (a signed deviation from a baseline or mean, on a diverging colormap like `RdBu_r`) rather than the same absolutes again. A third panel that reveals **co-variation** between two of the quantities (a scatter or bubble plot, with reference lines at the medians) adds a dimension the first two lack.
+
+#### Three generalizable multi-panel techniques
+
+These transfer to almost any CS composite:
+
+- **Luminance-based in-bar text color.** When you print values inside bars, pick black or white text by the bar's luminance so the number stays readable on both light and dark fills:
+
+  ```python
+  for bar, value in zip(bars, values):
+      r, g, b = bar.get_facecolor()[:3]
+      luminance = 0.299 * r + 0.587 * g + 0.114 * b   # 0..1
+      ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height(),
+              f'{value:.2f}', ha='center', va='bottom',
+              color='white' if luminance < 0.5 else 'black')
+  ```
+
+- **Dynamic y-limit tightening.** Never leave `0–100` when the values sit in a narrow band (e.g. accuracies of 80–95). A fixed wide range flattens the differences the figure exists to show. Tighten to the data with a small margin:
+
+  ```python
+  lo, hi = data.min(), data.max()
+  margin = 0.05 * (hi - lo)
+  ax.set_ylim(lo - margin, hi + margin)
+  ```
+
+  For a bar chart this trades off against the "bars must start at zero" rule (see Common pitfalls): if you tighten a bar-chart axis, add a broken-axis indicator so the truncation is honest.
+
+- **Dedicated legend-only subplot.** For a multi-axis figure where one shared legend serves all panels, reserve the last cell for the legend alone instead of crowding one panel or repeating legends:
+
+  ```python
+  ax_legend = fig.add_subplot(gs[-1])
+  ax_legend.legend(handles, labels, loc='center', frameon=False)
+  ax_legend.set_axis_off()
+  ```
+
+  Prefer one shared legend strip (or direct labels on stable regions) over repeating a legend inside every axis.
+
 ## Common CS Figure Patterns
 
 Reference implementations live in `references/matplotlib_examples.md`. The patterns covered:
@@ -215,7 +270,7 @@ If a figure is reused across paper / poster / slides, render at multiple sizes f
 
 Then proceed:
 
-1. **Plan from the outline.** Each figure listed in `.writing/plan.md` should have a one-line claim it supports (`fig:cdf-latency` → "our system has a 2.4× lower p99 than the baseline at 32 clients").
+1. **Plan from the outline.** Each figure listed in `.writing/plan.md` should have a one-line claim it supports (`fig:cdf-latency` → "our system has a 2.4× lower p99 than the baseline at 32 clients"). For a figure that doubles as the paper's results-storytelling figure (the headline result a reviewer sees first), check `tikz-figures/references/figure-rhetoric.md`: it covers the three-figure storytelling model, the Figure-1 performance-teaser paradigm and its avoid-condition (do not teaser a marginal gain, it shows the weakness unkindly), and the 30-second comprehension test. That reference is venue-agnostic across our figure skills.
 2. **Write a generator script** in `.writing/figures/src/<fig_id>.py`. The script reads from `.writing/figures/data/<fig_id>.{csv,jsonl}` and writes `.writing/figures/<fig_id>.pdf`. This separation lets reviewers (and you) regenerate figures from raw data.
 3. **Apply this skill's style** at the top of the script — copy the bundled `.mplstyle` file or use the inline rcParams snippet from Quick Start.
 4. **Verify before commit.** Open the PDF in a viewer at 100 % zoom and at the column width it will appear at in the paper. If text is cramped at column width, the font sizes are wrong.
@@ -253,15 +308,39 @@ Then proceed:
 
 ## Final Checklist
 
-Before adding `\includegraphics{...}` to the paper, confirm:
+**Frame this as defect-hunting, not confirmation.** Before adding `\includegraphics{...}`,
+open the rendered PDF at the column width it will print at and actively look for what is
+*wrong*, rather than ticking boxes to confirm the figure is fine. Walk the items below,
+write a short defect list, and tag each finding `high` / `medium` / `low`. Fix every `high`
+and every `medium` you can fix cheaply; list `low` items but do not block on them. Findings
+are advisory: surface them to the user and let the user decide, never silently redraw a
+camera-ready figure or overwrite it.
 
-- PDF format (or PNG at ≥ 300 DPI for raster)
-- `figsize` matches the target column width
-- Axis labels include units; tick labels readable at print size
-- Colorblind-safe palette; redundant encoding beyond color
-- Figure interpretable in grayscale (`convert -colorspace gray foo.pdf foo_gray.pdf`)
-- Error bars present with definition in caption (or single-run noted)
-- Panel labels present and consistent (a / b / c, lowercase parenthesized)
-- No top / right spines, no chart junk, no 3D, no jet colormap
-- Method colors consistent across every figure in the paper
-- Embedded fonts (`pdffonts foo.pdf` shows "yes" under "emb")
+`high`: misleads the reader or makes the figure look broken:
+
+- Non-PDF vector output where vector was expected, or a PNG below 300 DPI going to camera-ready.
+- A truncated / non-zero-baseline axis that exaggerates the gain with no broken-axis indicator.
+- Fabricated or unsupported data: invented error bars, a synthesized trend, zero-width error bars standing in for "single run".
+- Colorblind-unsafe palette or color-only encoding (jet / rainbow, red-green pairs); figure unreadable in grayscale.
+- Key labels or tick labels illegible at print size, or text clipped.
+- A `figsize` that does not match the target column width, so LaTeX rescales and distorts fonts.
+
+`medium`: reduces professionalism or comprehension:
+
+- Chartjunk: 3D effects, decorative gridlines, drop shadows, top / right spines left on.
+- Missing units on axis labels, or inconsistent SI / IEC prefixes.
+- Panel labels missing or inconsistent (`(a) (b) (c)`, lowercase parenthesized).
+- Method colors not pinned consistently across every figure in the paper.
+- Redundant panels in a composite: re-run the multi-panel anti-redundancy checklist in §5.
+- Error-bar definition missing from the caption (or single-run not noted).
+
+`low`: cosmetic, does not affect comprehension:
+
+- Minor alignment or spacing imperfections.
+- Palette or typography refinements.
+- Non-embedded fonts where the venue tolerates it (still prefer `pdffonts foo.pdf` showing "yes" under "emb").
+
+This severity framing aligns with `tikz-figures` mode-C, which already runs the strongest
+form of defect-hunting (independent multi-lens adversarial review). For data plots there is
+no independent reviewer pass; the discipline is the same, but the final oracle is the user
+looking at the rendered PDF.

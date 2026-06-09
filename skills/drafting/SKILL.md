@@ -15,6 +15,8 @@ Drafting is the stage where claims become sentences. The hard rule is **claim-fi
 
 > Claim-first protocol: see `superpower-writing:main` §Claim-First Protocol.
 
+**Build the terminology ledger before any section drafts.** A paper must use one name for one thing; a term that drifts across sections reads as careless work and erodes reviewer trust. Before dispatching the first section, read [`skills/_shared/core/terminology-ledger.md`](../_shared/core/terminology-ledger.md) and extract every recurring load-bearing term (systems, models, datasets, metrics, notation, acronyms, named contributions) into the canonical-term table it specifies. Present the table to the user, flag every collision, and lock the canonical forms before prose starts. The ledger is the single source of truth every section drafter consults instead of re-deciding a name per section. It is advisory: surface collisions and let the user pick the canonical form, never coin a name to fill a gap. When the project opts into `.writing/glossary.md`, materialize each load-bearing ledger row into one glossary entry so the `enforce-terms.py` gate can check define-before-use ordering.
+
 This skill only shapes the per-section prompt and the bookkeeping. Orchestration is picked by mode:
 
 - **workflow** → a Claude Code dynamic workflow drafts independent sections in parallel with the `section-drafter` agent, then runs the two-stage review as a pipeline (`spec-reviewer` for outline/claim alignment, then `manuscript-reviewer` for writing quality). Default for multi-section papers.
@@ -37,6 +39,7 @@ Skip this skill if the user only wants to copy-edit existing prose (use `polish`
 
 Before dispatching any section:
 
+- [ ] Terminology ledger built from `skills/_shared/core/terminology-ledger.md`, presented to the user, collisions flagged, canonical forms locked.
 - [ ] `.writing/plan.md` exists and lists draft tasks.
 - [ ] `.writing/claims/section_<NN>_<slug>.md` exists for every section listed.
 - [ ] `.writing/metadata.yaml` has been read; note `zotero.enabled` and `zotero.auto_push_new_citations`.
@@ -183,6 +186,7 @@ At a glance:
 - `superpower-writing:claim-verification` — downstream; consumes `.writing/manuscript/*.tex` and confirms every claim tag.
 - `superpower-writing:executing-plans` — manual-batch execution fallback; the primary path is a Claude Code dynamic workflow that drafts sections in parallel and reviews them in a pipeline.
 - Plugin-local `writing-principles.md` — voice and structure rules.
+- Plugin-local `skills/_shared/core/terminology-ledger.md`: canonical-term table built before drafting; one name per thing across sections.
 - Plugin-local `superpower-writing:tikz-figures` — structural vector figures (default route).
 - Plugin-local `superpower-writing:scientific-schematics` — graphical abstract + pictorial concept art.
 - Plugin-local `superpower-writing:research-lookup`, `superpower-writing:citation-management` — evidence resolution (network).

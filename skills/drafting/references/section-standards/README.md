@@ -20,6 +20,27 @@ All standards files use the canonical `NN_slug.md` naming scheme. The numeric pr
 
 Canonical numbering assumes no §Motivation, late-placed §Related Work, and Abstract/Introduction/Background/Methods/Results/Discussion/Conclusion as contiguous §0–§6. When §Motivation is opted in, Background shifts to `03_background.md` in the manuscript while the standards file keeps its `02_background.md` name; the match rule reconciles the offset automatically.
 
+There are also companion files with no canonical slot. `01_introduction_examples.md` holds annotated LaTeX intro skeletons and is read alongside `01_introduction.md` rather than matched to a manuscript stem of its own. The `benchmark_*.md` files form the benchmark/dataset-paper variant; they match benchmark-specific manuscript slugs (see the next subsection).
+
+### Benchmark / dataset-paper variant (`benchmark_*.md`)
+
+A benchmark or dataset paper uses a different section skeleton from the default technique-paper layout, so it has its own standards files. These sit at the directory top level with a `benchmark_` filename prefix and resolve through the **same slug-ending match rule**: the file's slug-ending is the part of its name after `benchmark_`. None of these slugs collide with the shared slugs above, so the slug-ending scan returns exactly one match for each.
+
+| Standards file | Manuscript slug it governs | Pillar |
+|----------------|----------------------------|--------|
+| `benchmark_README.md` | (none, routing/overview doc, not drafter-consumed) | five-pillar map + paper-type switch |
+| `benchmark_evaluation_framework.md` | any `manuscript/NN_evaluation_framework.tex` | Evaluation Framework (problem definition IS the contribution) |
+| `benchmark_construction.md` | any `manuscript/NN_construction.tex` | Construction Pipeline (three construction paradigms) |
+| `benchmark_findings.md` | any `manuscript/NN_findings.tex` | Empirical Findings (bolded "Finding X:" convention) |
+
+Worked resolution (manuscript `.tex` stem → matched standards `.md`):
+
+- `manuscript/02_evaluation_framework.tex` → step 1 miss (no `02_evaluation_framework.md`), step 2 finds `benchmark_evaluation_framework.md` (slug-ending `_evaluation_framework`) → use it.
+- `manuscript/03_construction.tex` → step 1 miss, step 2 finds `benchmark_construction.md` (slug-ending `_construction`) → use it.
+- `manuscript/05_findings.tex` → step 1 miss, step 2 finds `benchmark_findings.md` (slug-ending `_findings`) → use it.
+
+A benchmark paper reuses the shared files for its other sections: `01_introduction.md` (CARS, with benchmark framing), `03_methods.md` (OFCA, compressed, for an optional Companion Method), `05_discussion.md`, `06_conclusion.md`, and `07_related_work.md`. `benchmark_README.md` documents the full layout, the five pillars, the "problem definition IS the contribution" principle, and which paper-type uses which skeleton. The technique-vs-benchmark selection is made during outlining; until that switch routes a paper to the benchmark skeleton, the default technique-paper standards apply everywhere.
+
 ### Match rule (two-level fallback, slug-ending match)
 
 The orchestrator takes the manuscript file's **stem** (e.g., `02_background` from `.writing/manuscript/02_background.tex`) and resolves it to a standards file in `section-standards/` (which contains `.md` instruction files that the drafter agent reads verbatim). The scan target is **always the `section-standards/` directory, not `manuscript/`** — the `.md` extension below refers to the standards file's extension, not the manuscript's.

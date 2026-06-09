@@ -174,6 +174,43 @@ Numbering and captions are added in LaTeX.
 system diagram" does not. State the figure type, every component, the flow direction,
 the exact labels, and the visual semantics (what each color/shape/arrow style means).
 
+### The 6-section prompt contract
+
+For any non-trivial diagram, structure the description handed to Codex as six named
+sections in this order. A flat one-paragraph prompt produces a generic figure; the named
+structure forces you to fix the style and spell out every label before generation. Codex's
+`imagegen-scientific-schematics` skill expects equivalent structure, so write it explicitly.
+
+1. **FRAMING (about 5 lines).** "A `<style-name>`-style technical diagram for a `<venue>`
+   paper. It should feel `<adjectives: clean, authoritative, minimal>`." Name the venue
+   (NeurIPS / OSDI / NSDI / SOSP) so the tone matches.
+2. **VISUAL STYLE (about 20 to 30 lines), the most important section.** Describe line
+   quality, fills, corner radius, shadow, arrow weight, typography, and whitespace
+   concretely. **Without this block the model defaults to a generic corporate look**:
+   rounded blue gradient boxes with drop shadows that scream "stock template". Pick one
+   style and keep it identical across every figure in the paper. For systems / ML papers
+   default to a flat, minimal, light-background style (no gradients, no 3D, thin dark-gray
+   arrows, sans-serif labels inside boxes).
+3. **COLOR PALETTE (about 10 lines).** Exact hex codes for every color. Use a
+   colorblind-safe set (Okabe-Ito) and assign one accent per logical group.
+4. **LAYOUT (50 to 150 lines).** Every component, box, and zone with its exact text and
+   spatial arrangement. Be exhaustively specific about positions and grouping.
+5. **CONNECTIONS (30 to 80 lines).** Every arrow individually: source, target, style
+   (solid / dashed), label, and routing direction.
+6. **CONSTRAINTS (about 10 lines).** What NOT to include: no figure number, no caption, no
+   clip art, no 3D, no decorative gradients. Adapt per style.
+
+Two rules govern the whole contract:
+
+- **SPELL EXACTLY.** Raster generators misspell and rearrange dense text. List every label
+  verbatim and add a literal "SPELL ALL LABELS EXACTLY AS WRITTEN, do not rephrase or
+  abbreviate" line. This is the single most common avoidable defect.
+- **Always 3 attempts; quality varies between runs.** The same prompt yields visibly
+  different quality on each generation. Ask Codex to produce at least three attempts and
+  select the best, rather than accepting the first. This pairs with the at-most-three
+  targeted fix iterations in "Failure and Recovery": three fresh attempts up front, then
+  bounded fixes on the chosen one.
+
 ## Prompt Locks for Complex Figures
 
 Two failure modes recur on multi-view figures and have slipped past automated review with
@@ -281,6 +318,12 @@ Before submitting diagrams, verify:
 
 ## Integration with Other Skills
 
+- **Figure rhetoric (design judgment).** Before generating, decide *whether the paper needs
+  this figure and which kind*. The three-figure storytelling model (motivated example /
+  solution overview / results), the three Figure-1 paradigms with their avoid-conditions,
+  and the design rituals (30-second test, real entities only, one running example
+  throughout) live in `tikz-figures/references/figure-rhetoric.md`. Read it when the figure
+  is a Figure-1 or solution-overview candidate; it is venue-agnostic across our figure skills.
 - **`superpower-writing:tikz-figures`** — structural vector diagrams compiled with LaTeX; the default route for paper figures.
 - **`superpower-writing:collaborating-with-codex`** — the bridge this skill delegates to.
 - **`superpower-writing:scientific-visualization`** — data plots (matplotlib/seaborn/plotly).

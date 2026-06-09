@@ -132,6 +132,32 @@ out=$(payload_write "$WORK/.writing/manuscript/00_abstract.tex" \
       | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
 [[ -z "$out" ]] && pass "abstract BPMRC-only allows" || fail "abstract BPMRC-only blocked: $out"
 
+echo "   4o. symlinked manuscript dir, untagged prose -> block (realpath gating)"
+# A symlink whose NAME is not 'manuscript' but whose TARGET is the real
+# manuscript dir. The hook resolves symlinks (Path.resolve) before the
+# 'manuscript' parts match, so a write through the link to a protected stem is
+# still gated. Untagged prose blocks independent of any claim STATUS mutated by
+# earlier cases. The non-symlinked control in 4e (same untagged shape, /tmp
+# path, allowed) proves the block here is the symlink resolving into
+# manuscript/, not a blanket deny. Guards against a lexical-only path check.
+ln -s "$WORK/.writing/manuscript" "$WORK/.writing/linkdir"
+out=$(payload_write "$WORK/.writing/linkdir/03_methods.tex" "unmarked prose via symlink" \
+      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh" || true)
+echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
+  && pass "symlinked manuscript path still gated" || fail "symlink bypassed hook: $out"
+rm -f "$WORK/.writing/linkdir"
+
+echo "   4p. edit hooks/*.py in non-drafting context -> allow (self-lockout inert)"
+# Infra self-protection is OFF by default. With no opt-in env var and no active
+# drafting session, editing a hooks/ enforcement file must NOT be blocked, so a
+# plain plugin-development session never locks itself out. Unset both signals in
+# a subshell to assert the inert default regardless of the caller's environment.
+out=$(unset SUPERPOWER_WRITING_PROTECT_INFRA CLAUDE_PROJECT_DIR
+      payload_write "$PLUGIN_ROOT/hooks/enforce-claims.py" "# edited" \
+      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
+[[ -z "$out" ]] && pass "hooks/ edit allowed by default (no self-lockout)" \
+  || fail "self-lockout guard fired in non-drafting context: $out"
+
 echo "== 4.5 term enforcement (LaTeX, opt-in via glossary.md) =="
 
 echo "   4.5a. no glossary -> allow arbitrary term tags"
@@ -257,6 +283,22 @@ for std in 00_abstract 01_introduction 02_background 03_methods 04_results 05_di
     && pass "section-standards/$std.md" \
     || fail "missing section-standards/$std.md"
 done
+
+echo "== 8. skill linter (ratchet) =="
+# lint_skills.py exits 0 when clean or every error is grandfathered in
+# scripts/lint_skills_baseline.txt; exits 1 on a NEW violation. Run from the
+# plugin root so it discovers skills/ and the baseline beside it.
+(cd "$PLUGIN_ROOT" && python3 scripts/lint_skills.py) \
+  && pass "lint_skills.py clean (no new violations)" \
+  || fail "lint_skills.py reported NEW violation(s); run: python3 scripts/lint_skills.py"
+
+echo "== 9. eval-harness fixture self-test =="
+# run.py --check-fixtures lints every scenario then asserts each good/bad
+# fixture grades to its expected status. No model call. Exits non-zero on any
+# mismatch, missing fixture, or orphan.
+(cd "$PLUGIN_ROOT" && python3 tests/eval-harness/run.py --check-fixtures) \
+  && pass "eval-harness fixtures match expectations" \
+  || fail "eval-harness --check-fixtures failed; run: python3 tests/eval-harness/run.py --check-fixtures"
 
 echo ""
 echo "ALL SMOKE TESTS PASSED"

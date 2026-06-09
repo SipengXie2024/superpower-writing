@@ -58,7 +58,15 @@ Before any IMRAD structure, lock down:
 
 Write these three into `.writing/findings.md` under the Requirements section.
 
-If the idea is still exploratory, stop and route to `superpower-writing:brainstorming` first. Outlining assumes the contribution is already decided; brainstorming is where it gets decided. Don't force a half-formed idea through IMRAD — it produces a fake outline that masks missing thinking.
+Outlining assumes the contribution is already decided. If it is not, do not force a half-formed idea through IMRAD; that produces a fake outline that masks missing thinking. Route to the idea phase first and run the three idea-phase skills in order:
+
+1. `Skill(skill="superpower-writing:research-ideation")`. It generates 15-20 candidate directions through named lenses, scores them with a FINER rubric, and surfaces a ranked slate. Use it when the research area is chosen but no single contribution is.
+2. `Skill(skill="superpower-writing:novelty-gap-check")`. It adjudicates the leading direction against prior work and emits an advisory PROCEED / PROCEED-WITH-CAUTION / ABANDON verdict with a per-claim delta table.
+3. `Skill(skill="superpower-writing:idea-evaluator")`. It evaluates the surviving idea against a top-venue bar (NeurIPS / ICML / ICLR / OSDI / NSDI / SOSP) and returns an advisory Strong-Accept / Accept-with-Revisions / Reject-and-Pivot verdict after a fatal-flaws audit.
+
+All three verdicts are advisory. Surface them and let the user pick the surviving idea; never auto-reject a direction or skip ahead on a CAUTION. The one idea that survives this chain becomes the **core contribution** sentence at the top of Step 1, and its target venue and unit of evidence feed the next two bullets. For open-ended design exploration of an already-chosen contribution (not idea selection), `superpower-writing:brainstorming` is the lighter alternative.
+
+When the contribution is already decided (the common case for a returning paper), skip the idea phase and proceed straight to the three-field capture above.
 
 ## Step 2: Iterative literature retrieval
 
@@ -88,6 +96,25 @@ Two or three retrieval passes is normal. A single sweep usually misses something
 
 ## Step 3: Draft the IMRAD outline
 
+### Paper-type switch (run before choosing the skeleton)
+
+Two paper types use two different section skeletons. Pick the type before writing any bullets, the same way the venue picks the IMRAD vs medical variant below.
+
+- **Technique paper.** The contribution is a new method, mechanism, or system that solves an existing problem. This is the default. It uses the standard skeleton: §Introduction (CARS), §Background (DNPL), §Methods (OFCA), §Results (RSRT), §Discussion (ILFS), §Conclusion (RSF), plus §Related Work and optional §Motivation. All per-section standards listed below apply.
+- **Benchmark / dataset paper.** The contribution is a benchmark, dataset, or evaluation framework, not a new method. Signals: the title names a benchmark; the core artifact is data plus an evaluation protocol; experiments map model capability boundaries rather than proving one method beats baselines. Typical venues: NeurIPS Datasets and Benchmarks Track, ICML, ICLR, SIGMOD, VLDB.
+
+When the paper is a benchmark/dataset paper, the skeleton changes. §Methods and §Results are replaced by benchmark-specific sections governed by their own standards under `skills/drafting/references/section-standards/`:
+
+| Benchmark section | Manuscript stem (example) | Standard file | Pillar |
+|-------------------|---------------------------|---------------|--------|
+| Task + Design Goals + Evaluation Framework | `02_evaluation_framework.tex` | `benchmark_evaluation_framework.md` | Evaluation Framework |
+| Construction Pipeline | `03_construction.tex` | `benchmark_construction.md` | Construction Pipeline |
+| Experiments / Empirical Findings | `05_findings.tex` | `benchmark_findings.md` | Empirical Findings |
+
+The benchmark paper reuses the shared standards for its other sections: §Introduction keeps `01_introduction.md` (CARS, with benchmark framing), an optional §Companion Method reuses `03_methods.md` (OFCA, compressed), and §Discussion / §Conclusion / §Related Work reuse `05_discussion.md`, `06_conclusion.md`, `07_related_work.md`. The routing map, the five-pillar scaffold, and the "problem definition IS the contribution" principle live in `skills/drafting/references/section-standards/benchmark_README.md`. Read it before outlining a benchmark paper. Do not mix the two skeletons in one paper.
+
+Ask the user via `AskUserQuestion` when the type is not obvious: "Is this a technique paper (new method) or a benchmark/dataset paper (new evaluation)?" The rest of Step 3 assumes a technique paper unless the benchmark variant was chosen.
+
 Open `.writing/outline.md` (created by `init-writing-dir.sh`; initially empty). Write the IMRAD skeleton with 3-7 bullets per section. Each bullet is a **claim** — an assertion the paper will make, not a topic heading. "We show X" is a claim; "Overview of methods" is not.
 
 Recommended bullet counts:
@@ -116,7 +143,7 @@ Use short imperative claims. Numeric values that belong in prose (e.g., sample s
 - **Default CS / ML / systems**: add Background and Related Work. Motivation remains opt-in — only include it if the paper genuinely needs a dedicated motivating-example section (see `08_motivation.md` for the trigger conditions).
 - **Related Work placement:** decide §2 (early) vs. near-end based on the target venue's norm. The standards file applies identically regardless of position; only the manuscript stem number changes.
 
-**Section-specific standards.** For every section listed above, check whether a matching file exists under `skills/drafting/references/section-standards/`. Resolution is by **two-level match (slug-ending)**: first try `<NN>_<slug>.md` for exact stem; if miss, scan `section-standards/` for any file ending in `_<slug>.md` and use the single match. Canonical filenames today: `00_abstract.md`, `01_introduction.md`, `02_background.md`, `03_methods.md`, `04_results.md`, `05_discussion.md`, `06_conclusion.md`, `07_related_work.md`, `08_motivation.md`. If one is found, it is binding — read it now and shape the bullets to satisfy its outline requirements before moving to Step 4. The standards files codify conventions drafting will also enforce, so an outline that disagrees with its standard guarantees rework at drafting time.
+**Section-specific standards.** For every section listed above, check whether a matching file exists under `skills/drafting/references/section-standards/`. Resolution is by **two-level match (slug-ending)**: first try `<NN>_<slug>.md` for exact stem; if miss, scan `section-standards/` for any file ending in `_<slug>.md` and use the single match. Canonical technique-paper filenames: `00_abstract.md`, `01_introduction.md`, `02_background.md`, `03_methods.md`, `04_results.md`, `05_discussion.md`, `06_conclusion.md`, `07_related_work.md`, `08_motivation.md`. When the benchmark variant was chosen in the paper-type switch, the benchmark-specific filenames also apply: `benchmark_evaluation_framework.md` (slug-ending `_evaluation_framework`), `benchmark_construction.md` (slug-ending `_construction`), `benchmark_findings.md` (slug-ending `_findings`), routed by `benchmark_README.md`. If one is found, it is binding. Read it now and shape the bullets to satisfy its outline requirements before moving to Step 4. The standards files codify conventions drafting will also enforce, so an outline that disagrees with its standard guarantees rework at drafting time.
 
 - `00_abstract.md` (canonical slot — §0/§1 fixed): requires the **5-bullet BPMRC structure** above. Prefix each Abstract bullet with `[B]`, `[P]`, `[M]`, `[R]`, or `[C]` in that order:
 
@@ -362,7 +389,7 @@ Ask the user for any field you cannot infer. Do not fabricate author names, ORCI
 
 ## Step 7: Self-review
 
-Before handing off, spec-review the outline against four checks (mirrors `superpower-writing:writing-plans` self-review pattern):
+Before handing off, spec-review the outline against five checks (mirrors `superpower-writing:writing-plans` self-review pattern):
 
 1. **Placeholder scan** — grep outline.md and claims/*.md for `TODO`, `xxxx`, `[NEEDS-EVIDENCE]`. Any hit that is not an intentional evidence placeholder (e.g., `doi: 10.xxxx/...`) must be resolved or explicitly annotated with `[NEEDS-EVIDENCE]` plus rationale.
 
@@ -384,6 +411,15 @@ Before handing off, spec-review the outline against four checks (mirrors `superp
    - Additional sections: apply the same pattern — read the standards file's "Outline bullet requirement" section and verify its specific rule.
 
    If a check fails, fix the outline and re-run; do not advance to writing-plans with a structural mismatch. Sections without a matching standards file are exempt.
+
+5. **Challenge → module → contribution consistency.** This is the same one-to-one invariant `01_introduction.md` enforces at drafting Step C, checked here at outline level so a broken spine is caught before stubs fan out. The introduction's logical spine must close end to end. Walk and grep-check each link (technique papers with §Introduction + §Methods; benchmark papers map §Methods to §Construction modules):
+
+   - **Limitation → challenge.** Each `^- \[N\]` niche bullet in §Introduction raises a prior-work limitation that maps to a technical challenge the paper addresses. A limitation with no challenge is noise; drop it or promote it.
+   - **Challenge → module (one-to-one).** Each challenge in the `^- \[O\]` bullets corresponds to exactly one §Methods core module (`^- \[C\]` bullet). The mapping is one-to-one, not one-to-many and not many-to-one. Count the distinct challenges and the `[C]` core modules; if the counts differ, one side is mis-stated. Reconcile before drafting.
+   - **Module → contribution (one-to-one).** Each `^- \[C\]` core module surfaces as a contribution in the `^- \[O\]` bullets (or a clearly grouped subset). A module with no contribution under-sells the work; a contribution with no module over-claims.
+   - **Contribution → section.** Each contribution maps to a planned section in the outline (the section that will carry its `\S\ref{...}` at drafting time). A contribution with no section is overreach; flag it.
+
+   Grep aid: count `grep -cE '^- \[C\]' .writing/outline.md` (core modules) against the distinct challenges enumerated in the `^- \[O\]` bullets, and confirm each `[C]` module has a matching `[O]` contribution. Treat any broken link as a blocking defect, not a stylistic note. A paper whose challenges, modules, and contributions do not line up one-to-one reads as incoherent regardless of how strong any single piece is. For a benchmark paper, substitute the §Construction pillar modules for `[C]` and the four benchmark contributions (the benchmark, the construction innovation, the evaluation, the headline findings) for the `[O]` contributions.
 
 If any check fails, fix and re-run. Record any unresolvable items as `[NEEDS-EVIDENCE]` in `.writing/findings.md` under Decisions — they must be resolved before submission but are not a blocker for advancing to writing-plans.
 

@@ -5,6 +5,40 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+## [0.15.0] — 2026-06-09
+
+### Added
+
+Borrowed and adapted techniques from five upstream skill collections, retargeted to this plugin's CS / systems / ML LaTeX focus, house style, and claim-first / never-fabricate / advisory-verdict ethos. Sources: [Imbad0202/academic-research-skills](https://github.com/Imbad0202/academic-research-skills) (r1), [wanshuiyin/Auto-claude-code-research-in-sleep](https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep) ("ARIS", r2), [brycewang-stanford/Auto-Empirical-Research-Skills](https://github.com/brycewang-stanford/Auto-Empirical-Research-Skills) ("AERS", r3), [HKUSTDial/Supervisor-Skills](https://github.com/HKUSTDial/Supervisor-Skills) (r4), and [Yuan1z0825/nature-skills](https://github.com/Yuan1z0825/nature-skills) (r5). No content was copied verbatim; economics / social-science / biology venue examples were retargeted to NeurIPS / ICML / ICLR / OSDI / NSDI / SOSP and peers.
+
+**Idea phase (before outlining).**
+
+- **`research-ideation` skill** — idea-generation phase that turns a research area into a slate of 15-20 candidate directions through five named lenses (method-transfer, contradiction, untested-assumption, scaling-regime, diagnostic), scores survivors with a FINER rubric, runs a cross-model adversarial pass for the taste calls, raises a non-blocking advisory on AI-typical wording, and hands one user-selected direction to `outlining`. Optional Socratic-coaching mode. Writes `.writing/ideation.md` and `.writing/ideation-brief.md`. Adapts the idea-generation and Socratic-dialogue work in r2 (idea-discovery / idea-creator) and r1 (Socratic plan flow), plus r4's idea framing. The iron rule (full slate before any critique) and the generation-versus-verdict separation are this plugin's framing.
+- **`novelty-gap-check` skill** — adjudicates novelty and emits an advisory go/no-go (查新). Decomposes an idea into three to five atomic technical claims, searches prior work per claim via the existing `research-lookup` / `literature-review` skills with a six-month arXiv recency floor, then emits a per-claim HIGH/MED/LOW delta table and an overall PROCEED / PROCEED-WITH-CAUTION / ABANDON call with suggested positioning. Method-novelty versus finding-novelty is called explicitly. Adapts r2's novelty-check and the novelty kill-gate in r4's idea-evaluator.
+- **`idea-evaluator` skill** — evaluates one idea against a top-venue bar (NeurIPS / ICML / ICLR / OSDI / NSDI / SOSP) and returns advisory Strong-Accept / Accept-with-Revisions / Reject-and-Pivot. Runs a fatal-flaws audit first and short-circuits on any CRITICAL flaw before scoring, then scores five idea-framing dimensions (Higher / Faster / Stronger / Cheaper / Broader), a FINER gate, and a feasibility check, with an anti-inflation default-to-5 rule. Adapts r4's `idea-evaluator`; consumes `novelty-gap-check`'s verdict on its novelty axis.
+
+**Writing / verification.**
+
+- **Research-integrity gate** (`skills/claim-verification/references/research-integrity-gate.md`) — optional, advisory pass for experiment-bearing papers, run alongside Pass 3. Goes beyond prose-matches-table to probe whether the numbers reflect reality (best-seed cherry-pick, delta-arithmetic error, caption-table mismatch, seed-count versus result directories, suspicious round constants), returning a three-way CLEAR / SUSPECTED / INSUFFICIENT verdict per heuristic. Never auto-rejects, never flips `STATUS`, never edits prose. Adapts the AI-research failure-mode and experiment-audit work in r2.
+
+**Review.**
+
+- **`adversarial-review` skill** — kill-argument pass. One fresh reviewer thread writes the single strongest rejection argument in ~200 words; a second fresh adjudicator thread rules each atomic point `answered_by_current_text` / `partially` / `unresolved`; a helper (`scripts/compute_verdict.py`) maps the rulings to an advisory PASS / WARN / FAIL the adjudicator cannot self-grade, with a `pass` / `needs revision` / `needs NEW experiment` recommended action. Type-B by the plugin's gate doctrine. Adapts r2's kill-argument workflow and the three-way action vocabulary in r5's paper-review.
+- **`external-review` skill** — cross-model critique by a different-family critic, routed through the Codex bridge in `collaborating-with-codex`. The critic reads primary artifacts itself (never a pre-digested brief) and returns a venue-calibrated review plus concrete deliverables: a mock venue review with score and confidence, a results-to-claims matrix, and a minimal-experiment plan ranked by acceptance lift per GPU-week. Verdict-bearing, so it must not be wrapped in `/loop`. Adapts the ARIS (r2) cross-model jury doctrine and its optional zero-API manual-review MCP fallback.
+- **`rebuttal` skill** — turns reviewer comments into a grounded, fabrication-free response package. Atomizes every comment into an `ISSUE_BOARD` with a fixed eight-label action vocabulary, drafts in strict R-A-C form with page cross-references, and runs three finalize-blocking gates (provenance, commitment, coverage) before any `STATUS: final` flip. `AUTHOR_INPUT_NEEDED` is the rebuttal analog of `[NEEDS-EVIDENCE]`. Reads but never edits the manuscript. Merges r2's response modes with r5's nature-response action labels into one vocabulary. Moves reviewer-response/rebuttal drafting from out-of-scope into scope.
+
+**Drawing (figures).**
+
+- **Figure-rhetoric guidance** (`skills/tikz-figures/references/figure-rhetoric.md`) — design-judgment layer that decides which figures a paper needs (the three-figure storytelling model, the three Figure-1 paradigms) and whether a proposed figure earns its place, with tool routing across `tikz-figures` / `scientific-schematics` / `scientific-visualization`. Advisory; never blocks a figure. Ports the figure-storytelling and Figure-1 models from r2 (figure-spec / figure-description) and r4's figure-designer.
+- **Figure-audit mode** (the `tikz-figures` Ψ review channel) — reviews an existing, user-supplied figure against the 18-item visual-review checklist and returns an advisory report without drawing a new figure, distinct from replication. Strengthens the existing tikz-figures audit lane with the figure-rhetoric judgment criteria above.
+
+**Mechanics (CI and evaluation).**
+
+- **SKILL.md linter** (`scripts/lint_skills.py`) — CI-grade structural linter enforcing the plugin's house conventions on every `skills/*/SKILL.md` and its sibling `references/*.md`: frontmatter `name` equals the directory slug, `description` is 40-80 words and contains a "Use when" clause, no em-dash, a SKILL.md LOC ceiling (warn above 500, error above 700), and single-level `references/`. Baseline-ratcheted (`lint_skills_baseline.txt`) so it exits 0 on the current tree but fails the moment a new violation appears. Stdlib-only; no PyYAML dependency.
+- **Prose-output eval harness** (`tests/eval-harness/`) — scores skill output against machine-checkable rubrics, since skills are prompt context rather than executable code. Seeded scenarios pin the never-fabricate behaviors (no invented DOI or arXiv id, `[UNVERIFIED]` discipline, refuse-to-invent missing figure data) against the skills that claim them, each with good and bad fixtures. A `--check-fixtures` self-test is wired into `tests/smoke.sh`; full skill eval is an on-demand agent-run step. Necessary-not-sufficient by design: a green machine score means "did not trip a known wire", not "certified correct". Stdlib-only.
+
 ## [0.14.0] — 2026-06-08
 
 ### Changed

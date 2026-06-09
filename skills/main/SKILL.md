@@ -6,7 +6,7 @@ description: Router and dependency gate for superpower-writing. Loaded at sessio
 <EXTREMELY-IMPORTANT>
 If there is even a 1% chance a writing skill applies to your task, you MUST invoke it. No exceptions, no rationalizations.
 
-This plugin is self-contained. Domain content (writing principles, figures/tables, citation styles) lives in plugin-local reference files under `skills/drafting/references/`. Skills that were previously upstream (`research-lookup`, `citation-management`, `literature-review`, `scientific-schematics`, `scientific-visualization`) now ship as plugin-local skills invoked with the `superpower-writing:` prefix — e.g. `Skill(skill="superpower-writing:research-lookup")`.
+This plugin is self-contained. Domain content (writing principles, figures/tables, citation styles) lives in plugin-local reference files under `skills/drafting/references/`. Skills that were previously upstream (`research-lookup`, `citation-management`, `literature-review`, `scientific-schematics`, `scientific-visualization`) now ship as plugin-local skills invoked with the `superpower-writing:` prefix, for example `Skill(skill="superpower-writing:research-lookup")`. The lifecycle now spans idea to reviewer response: `research-ideation`, `novelty-gap-check`, and `idea-evaluator` run before outlining; `adversarial-review`, `external-review`, and `rebuttal` run after the skeleton is drafted. All are plugin-local and prefixed the same way.
 </EXTREMELY-IMPORTANT>
 
 ## Announce on Entry
@@ -90,26 +90,44 @@ When `.writing/` already exists at session start:
 
 # Stage Gate Routing
 
-The writing lifecycle (skeleton-first — the plugin produces a detailed, evidence-backed skeleton for the human author to refine, not a submission-ready paper):
+The writing lifecycle (idea-to-rebuttal). The plugin decides the contribution, produces a detailed evidence-backed skeleton for the human author to refine, then helps stress-test it and respond to reviewers:
 
 ```
-(dep-check) -> outlining -> writing-plans -> drafting -> claim-verification
-                                                              |
-                                            (skeleton ready for human refinement)
+(dep-check) -> [research-ideation -> novelty-gap-check / idea-evaluator] -> outlining
+            -> writing-plans -> drafting -> claim-verification
+                                                  |
+                                (skeleton ready for human refinement)
+                                                  |
+            [adversarial-review / external-review] -> rebuttal
 ```
 
-Each stage writes a dashboard row to `.writing/progress.md`. Route by inspecting the dashboard:
+The bracketed idea phase runs only when the contribution is undecided; skip straight to outlining when the user already has a settled, novel contribution. The bracketed review phase runs on demand after a stable draft exists. Each stage writes a dashboard row to `.writing/progress.md`. Route by inspecting the dashboard:
 
 | Current state in `.writing/progress.md` | Missing artifact | Next skill to invoke |
 |------------------------------------------|------------------|----------------------|
+| Area chosen, contribution undecided, no `ideation-brief.md` | a ranked, selected research direction | `superpower-writing:research-ideation` |
+| A candidate direction exists, novelty unconfirmed | per-claim novelty delta + go/no-go | `superpower-writing:novelty-gap-check` |
+| A direction exists, user wants a top-venue sanity check | Strong-Accept / Accept-with-Revisions / Reject-and-Pivot read | `superpower-writing:idea-evaluator` |
 | No dashboard yet, `outline.md` empty | outline + claims stubs | `superpower-writing:outlining` |
 | Outline present, `metadata.yaml` still has TODOs | metadata completeness | `superpower-writing:outlining` (complete metadata before advancing) |
 | Outline + metadata complete, no `plan.md` | per-section/figure plan | `superpower-writing:writing-plans` |
 | `plan.md` present, `manuscript/*.tex` empty or partial | prose | `superpower-writing:drafting` |
 | Draft complete, no `verify-report.md` or report has failures | evidence audit | `superpower-writing:claim-verification` |
 | All sections drafted, claim-verification PASS, no unresolved `[NEEDS-EVIDENCE]` or `% draft-only` | skeleton ready | done — hand the evidence-backed skeleton to the human author for refinement |
+| Stable draft, user wants a pre-submission stress-test | worst-case reviewer argument / cross-model critique | `superpower-writing:adversarial-review` and/or `superpower-writing:external-review` |
+| Reviewer comments received, response needed | grounded R-A-C response letter | `superpower-writing:rebuttal` |
 
-Skipping a gate (e.g., jumping from outline directly to drafting without writing-plans) requires explicit user override, surfaced as a warning.
+Skipping a gate (e.g., jumping from outline directly to drafting without writing-plans) requires explicit user override, surfaced as a warning. The idea phase is ordered: when running it, prefer `research-ideation` to widen and rank directions first, then `novelty-gap-check` (查新) and `idea-evaluator` to gate the survivor before it reaches outlining. Each verdict is advisory; the user picks what to carry forward.
+
+# Idea-Phase Routing
+
+This phase runs before outlining, only when the contribution is not yet decided. The three idea skills are ordered: generate and rank first, then gate the survivor.
+
+- **"Find me a research idea", "brainstorm directions", "what can we work on", "explore this area"** → `superpower-writing:research-ideation`. It needs a specific area (a problem, a setting, a constraint), not a bare field name. It produces 15-20 lensed candidates, FINER scores, a cross-model adversarial pass, and one user-selected survivor written to `.writing/ideation-brief.md`. That brief is the input to outlining Step 1.
+- **"Is this novel?", "查新", "has anyone done this?", "novelty gate before I commit scope"** → `superpower-writing:novelty-gap-check`. It decomposes the idea into atomic claims, searches prior work per claim, and returns an advisory PROCEED / PROCEED-WITH-CAUTION / ABANDON with positioning.
+- **"Evaluate this idea", "score this idea", "would a reviewer buy this?", "sanity-check before I commit"** → `superpower-writing:idea-evaluator`. It runs a fatal-flaws short-circuit, then five-dimension and FINER scoring against a top-venue bar, and returns Strong-Accept / Accept-with-Revisions / Reject-and-Pivot.
+
+When the user has a vague hunch with no stated contribution, start with `research-ideation` (or `brainstorming` for a system/feature design). When they have one concrete idea and want it checked, run `novelty-gap-check` and `idea-evaluator`. All three verdicts are advisory: surface scores and objections, let the user choose, never auto-reject or auto-mutate `.writing/` state. Once a direction survives, hand off to `outlining`.
 
 # Planning Approach Routing
 
@@ -142,6 +160,16 @@ When the user says "execute the plan", "start drafting", "write the paper", "imp
 
 Drafting mechanics (the per-section claim-first prompt, the Zotero-first evidence loop, the graphical-abstract dispatch) live in `superpower-writing:drafting`, which both paths invoke per section.
 
+# Review and Rebuttal Routing
+
+This phase runs on demand after a stable draft exists. These skills are distinct from drafting's two-stage spec-then-quality review, which fires per section during drafting.
+
+- **"Stress-test this paper", "what's the worst reviewer argument", "kill-argument pass"** → `superpower-writing:adversarial-review`. It commits one strongest-rejection memo, adjudicates it in a fresh independent thread, and a helper maps the rulings to an advisory PASS / WARN / FAIL the adjudicator cannot self-grade. Run once on a whole stable draft.
+- **"Review my paper", "get an external review", "second opinion", "mock venue review"** → `superpower-writing:external-review`. It routes a different-model critic over the primary artifacts via the Codex bridge and returns a venue-calibrated review, a results-to-claims matrix, and a minimal-experiment plan. Verdict-bearing, so never wrap it in `/loop`, `/schedule`, or `CronCreate`.
+- **"Rebuttal", "respond to reviewers", "reply to reviews", "OpenReview response", "ICML/NeurIPS rebuttal", "answer reviewer 2"** → `superpower-writing:rebuttal`. It atomizes comments into an issue board, drafts R-A-C replies, and runs three finalize-blocking gates before any `STATUS: final` flip.
+
+`claim-verification` and these review skills are complementary, not overlapping. `claim-verification` proves citations resolve and abstracts support claims (evidence reliability); `adversarial-review` and `external-review` judge whether the contribution is novel and sufficient (research substance). All three review skills are advisory and detect-only. They never edit manuscript prose, never flip claim STATUS, and never auto-reject. The user owns every decision.
+
 # Stash / Resume Routing
 
 - **Stash current paper:** when the user says pause / set aside / switch papers / come back later → move everything except `.writing/archive/` into `.writing/stash/<paper-name>/`. Use `superpower-writing:stashing` for the mechanics; the `<paper-name>` label should match `metadata.yaml` `title` (slugified) or the user-provided name.
@@ -157,10 +185,16 @@ Skills in this plugin (all invoked as `superpower-writing:<name>`):
 | Skill | Purpose |
 |-------|---------|
 | `superpower-writing:main` | This router. Loaded at session start. Dep gate + stage routing. |
+| `superpower-writing:research-ideation` | Research area → slate of 15-20 candidate directions through named lenses, FINER scores, cross-model adversarial pass; one user-selected survivor hands off to outlining. Runs **before** outlining when the contribution is undecided. Writes `.writing/ideation.md` + `.writing/ideation-brief.md`. |
+| `superpower-writing:novelty-gap-check` | One idea → advisory PROCEED / PROCEED-WITH-CAUTION / ABANDON. Decomposes into 3-5 atomic claims, searches prior work per claim (delegates to `research-lookup` / `literature-review`), emits a per-claim HIGH/MED/LOW delta table. The 查新 gate. Verdict is advisory. |
+| `superpower-writing:idea-evaluator` | One idea vs a top-venue bar (NeurIPS / ICML / ICLR / OSDI / NSDI / SOSP) → advisory Strong-Accept / Accept-with-Revisions / Reject-and-Pivot. Fatal-flaws short-circuit first, then 5-dimension + FINER scoring. Reads but never writes `.writing/`. |
 | `superpower-writing:outlining` | Idea → IMRAD outline + per-section claim stubs + populated `metadata.yaml`. Combines design-exploration and spec-writing. |
 | `superpower-writing:writing-plans` | Approved outline → executable per-section/per-figure/per-table task plan with dependency graph. Writes `.writing/plan.md`. |
 | `superpower-writing:drafting` | Section-by-section prose writing via a dynamic workflow (parallel sections) or a manual batch session. Enforces claim-first protocol: each section subagent resolves EVIDENCE via `research-lookup` / `citation-management` **before** writing tagged prose. |
-| `superpower-writing:claim-verification` | Evidence-reliability check. Walks every `% claim: id` LaTeX line comment, confirms `\cite{}` citekeys resolve against `.writing/refs.bib`, runs semantic match against abstracts to catch hallucinated or mismatched citations, optionally checks numeric/table consistency. Run on demand or when the skeleton is ready for the human author. |
+| `superpower-writing:claim-verification` | Evidence-reliability check. Walks every `% claim: id` LaTeX line comment, confirms `\cite{}` citekeys resolve against `.writing/refs.bib`, runs semantic match against abstracts to catch hallucinated or mismatched citations, optionally checks numeric/table consistency and an opt-in research-integrity gate. Run on demand or when the skeleton is ready for the human author. |
+| `superpower-writing:adversarial-review` | Stable draft → one committed kill-argument memo + independent adjudication → non-self-graded advisory PASS / WARN / FAIL. Run once before submission for the single worst-case reviewer argument. Detect-only; never edits prose. |
+| `superpower-writing:external-review` | Stable draft / idea / result → cross-model critique by a different-family critic via the Codex bridge. Returns a mock venue review, results-to-claims matrix, and minimal-experiment plan. Advisory; verdict-bearing, never wrap in `/loop`. |
+| `superpower-writing:rebuttal` | Reviewer comments → grounded R-A-C response letter under `.writing/reviews/`. Atomizes comments into an issue board with a fixed action vocabulary, runs three finalize-blocking gates (provenance, commitment, coverage). Reads but never edits the manuscript. |
 
 Plugin-local domain skills (invoked with `superpower-writing:` prefix):
 

@@ -40,6 +40,10 @@ If the user provides a writing sample (their own previous writing), analyze it b
 
 3. **When no sample is provided,** fall back to the default behavior (natural, varied, opinionated voice from the PERSONALITY AND SOUL section below).
 
+### Priority hierarchy when matching voice
+
+Voice matching is a soft guide, never an override of a venue requirement. Apply three tiers in order. Discipline conventions are HARD and cannot be violated: if a CS/systems/ML venue expects third-person plural "we", an author's first-person habit yields. Target-journal conventions are STRONG and outrank personal style: Nature short paragraphs override an author long-paragraph habit, and an ICML/NeurIPS page-limited density override beats an author's expansive cadence. Author personal style is SOFT, applied only where it does not conflict with the first two tiers (preferred transitions, hedging words, sentence-length variability). When a personal habit clashes with a discipline or venue norm, follow the norm and note the conflict once. This is still NOT a detector-evasion tool: the goal is text the author would have written, not text engineered to fool a classifier.
+
 ### How to provide a sample
 - Inline: "Humanize this text. Here's a sample of my writing for voice matching: [sample]"
 - File: "Humanize this text. Use my writing style from [file path] as a reference."
@@ -564,6 +568,16 @@ After the audit, rate the final version 1 to 10 on each dimension, then sum. Sco
 | Register fidelity | Does it stay in the input's register? | scholarly verbs informalized, person switched, voice injected, domain compounds stripped (Register Awareness, rules 4a, 26) |
 
 Below 35/50: revise the weak dimensions and re-score before delivering. The total is a prompt to look again, not a stopping rule. A 40 with one glaring tell still needs the fix.
+
+## Self-Check
+
+Before delivering, confirm each item. Tags mark who can confirm it. `[inspection]` the agent can confirm this from its own output; `[attestation]` the agent ran the procedure but the user owns final confirmation; `[user-attest]` a user-side rule the agent cannot confirm.
+
+- [inspection] A register classification line is present and names one register.
+- [inspection] The five Self-Scoring dimensions are each scored 1 to 10 and summed; a sum below 35 triggered a re-score pass.
+- [inspection] The input-to-final diff was scanned for register-shifting edits; each one found is listed, or "No register-shifting edits flagged" is stated.
+- [attestation] The final version reads naturally in its register and matches any voice sample, without overriding a discipline or venue convention.
+- [user-attest] The user chose whether to keep each flagged edit; in batch mode the agent reverted flagged edits and said so.
 
 ## Output Format
 

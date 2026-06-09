@@ -33,7 +33,9 @@ Rules:
 from __future__ import annotations
 
 import json
+import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -72,6 +74,65 @@ def find_writing_root(p: Path) -> Path | None:
         if ancestor.name == ".writing" and ancestor.is_dir():
             return ancestor
     return None
+
+
+def plugin_root() -> Path:
+    """Canonical plugin root. Prefer CLAUDE_PLUGIN_ROOT (set when the hook runs
+    under Claude Code); fall back to this script's grandparent (hooks/ -> root).
+    Resolve symlinks so the comparison below is filesystem-true, not lexical."""
+    env_root = os.environ.get("CLAUDE_PLUGIN_ROOT")
+    if env_root:
+        return Path(env_root).resolve()
+    return Path(__file__).resolve().parent.parent
+
+
+def is_plugin_enforcement_file(target: Path) -> bool:
+    """True if `target` is one of this plugin's enforcement files: any file
+    directly under the plugin's hooks/ directory whose suffix is .py, or
+    hooks.json. `target` must already be realpath-resolved (symlinks + `..`
+    collapsed). We compare the resolved hooks/ dir against the target's parent
+    so a symlinked hooks/ still matches and a sibling path named hooks cannot."""
+    hooks_dir = plugin_root() / "hooks"
+    try:
+        hooks_dir = hooks_dir.resolve()
+    except OSError:
+        return False
+    if target.parent != hooks_dir:
+        return False
+    return target.suffix == ".py" or target.name == "hooks.json"
+
+
+def drafting_is_active(payload: dict) -> bool:
+    """True when a manuscript-drafting session is in progress, per the plugin's
+    own state script. The drafting project root is the session cwd (where
+    .writing/ lives), available as CLAUDE_PROJECT_DIR or the payload `cwd`.
+    Delegates to scripts/check-writing-state.sh (single source of truth; we do
+    not reimplement its `active` logic). Any error means "not active" so this
+    signal can only ever ENABLE protection, never spuriously disable a write."""
+    project_root = os.environ.get("CLAUDE_PROJECT_DIR") or payload.get("cwd") or ""
+    if not project_root:
+        return False
+    script = plugin_root() / "scripts" / "check-writing-state.sh"
+    if not script.exists():
+        return False
+    try:
+        result = subprocess.run(
+            ["bash", str(script), project_root],
+            capture_output=True, text=True, timeout=5,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return result.stdout.strip() == "active"
+
+
+def infra_protection_enabled(payload: dict) -> bool:
+    """Master switch for infra self-protection. OFF by default. ON only on an
+    explicit opt-in signal: SUPERPOWER_WRITING_PROTECT_INFRA=1, or an active
+    drafting session. Kept narrow on purpose so a plain plugin-development
+    session (no env var, no .writing/) can freely edit hooks/."""
+    if os.environ.get("SUPERPOWER_WRITING_PROTECT_INFRA") == "1":
+        return True
+    return drafting_is_active(payload)
 
 
 def apply_edit(content: str, old: str, new: str, replace_all: bool) -> str:
@@ -196,7 +257,27 @@ def main() -> None:
     if not raw_path:
         _allow()
 
+    # Resolve symlinks AND `..` together in true filesystem order BEFORE any
+    # scope match. Path.resolve() does this; never abspath() first. abspath()
+    # collapses `..` LEXICALLY, so `symlinked_manuscript_dir/../escape.tex`
+    # would resolve to a sibling of the symlink NAME before the symlink is
+    # followed, letting traversal slip past the matcher. resolve() follows the
+    # symlink first, so the matcher always sees the real target.
     file_path = Path(raw_path).resolve()
+
+    # Infra self-protection (opt-in, OFF by default). Runs BEFORE the manuscript
+    # scope match because the protected files (hooks/*.py, hooks/hooks.json) are
+    # not manuscript .tex files. Only fires when explicitly enabled, so a normal
+    # plugin-development session can still edit hooks/ freely (no self-lockout).
+    if infra_protection_enabled(payload) and is_plugin_enforcement_file(file_path):
+        _block(
+            f"{file_path.name} is a superpower-writing enforcement file and infra "
+            f"self-protection is active (drafting session or "
+            f"SUPERPOWER_WRITING_PROTECT_INFRA=1). To edit the plugin's hooks, pause "
+            f"drafting or unset SUPERPOWER_WRITING_PROTECT_INFRA, then retry. This "
+            f"guard is advisory; it never mutates state."
+        )
+
     if "manuscript" not in file_path.parts or file_path.suffix.lower() != ".tex":
         _allow()
 

@@ -32,14 +32,17 @@ Do NOT use during initial drafting to flip claims green — that is drafting's j
 
 Run in order. Stop at first failing pass only if the user requests fail-fast; otherwise collect all failures into the report.
 
-- [ ] Confirm `.writing/` exists and `metadata.yaml` is populated (no `TODO` except YAGNI fields)
-- [ ] Pass 1 — Claim Completeness
-- [ ] Pass 2 — Citation Resolution (Zotero first, network fallback, semantic match)
-- [ ] Pass 3 — Numeric/Table Consistency (optional; run when tables/numbers are settled)
-- [ ] Write `.writing/verify-report.md` with per-claim PASS/FAIL
-- [ ] Update `.writing/verify-cache.json` with resolved DOIs
-- [ ] Flip eligible claim `STATUS` from `evidence_ready` to `verified` (only when its passes succeed — Pass 1 + Pass 2, plus Pass 3 when run)
-- [ ] Update `.writing/progress.md` Verification Evidence row with command + exit status + report path
+- [ ] Confirm `.writing/` exists and `metadata.yaml` is populated (no `TODO` except YAGNI fields) `[inspection]`
+- [ ] Pass 1: Claim Completeness `[inspection]`
+- [ ] Pass 2: Citation Resolution (Zotero first, network fallback, semantic match) `[attestation]` (semantic match is Type-B; see §Type-A vs Type-B below)
+- [ ] Pass 3: Numeric/Table Consistency (optional; run when tables/numbers are settled) `[inspection]`
+- [ ] Optional research-integrity gate (experiment-bearing papers; opt-in), see §Optional research-integrity gate `[attestation]`
+- [ ] Write `.writing/verify-report.md` with per-claim PASS/FAIL `[inspection]`
+- [ ] Update `.writing/verify-cache.json` with resolved DOIs `[inspection]`
+- [ ] Flip eligible claim `STATUS` from `evidence_ready` to `verified` (only when its passes succeed: Pass 1 + Pass 2, plus Pass 3 when run) `[user-attest]` (gated by user confirmation per Step 5)
+- [ ] Update `.writing/progress.md` Verification Evidence row with command + exit status + report path `[inspection]`
+
+Enforceability classes: `[inspection]` the agent confirms it from its own output; `[attestation]` the agent ran the procedure but the user owns final confirmation; `[user-attest]` a user-side rule the agent cannot confirm. Type-A checks are `[inspection]`; Type-B checks are `[attestation]` or `[user-attest]`.
 
 ## Process
 
@@ -52,7 +55,7 @@ Before running any pass:
 3. Read `.writing/verify-cache.json` if present; treat as read-through cache keyed by DOI. Cache entries expire never within a session; user must manually delete to force re-resolution.
 4. List all `.writing/manuscript/*.tex` files and their paired `.writing/claims/section_*.md` files.
 
-### Step 1: Pass 1 — Claim Completeness
+### Step 1: Pass 1: Claim Completeness
 
 Goal: every load-bearing paragraph is tagged and backed.
 
@@ -72,7 +75,7 @@ For each `.writing/manuscript/*.tex`:
 
 **Allow-list is configurable.** Support `.writing/verify-config.yaml` with key `allowlist_sections: [<filename>, ...]` — if present, those filenames extend the hook's default exemption set for this skill's checks.
 
-### Step 2: Pass 2 — Citation Resolution (dual source of truth)
+### Step 2: Pass 2: Citation Resolution (dual source of truth)
 
 This is the most consequential pass. Implements design.md §14.3 exactly.
 
@@ -116,7 +119,7 @@ For EVIDENCE entries with `type: dataset`, `type: figure`, `type: table`, etc.: 
 
 When the user requests a deep audit (`--deep` flag, or when a thorough citation audit is wanted before handing off the skeleton), dispatch the `superpower-writing:citation-auditor` agent in a fresh context with the full manuscript and `.writing/verify-cache.json`. The agent adds six judgment layers Pass 2 does not: over-citation, under-citation, circular/self-citation, staleness, relevance drift (abstract supports claim but not *this* claim), and seminal-work omission. Its findings are advisory — they merge into `verify-report.md` under an "Advisory" block, and the user decides whether to act on each item.
 
-### Step 3: Pass 3 — Numeric/Table Consistency (optional)
+### Step 3: Pass 3: Numeric/Table Consistency (optional)
 
 Purpose: catch copy-paste drift between prose and tables. Skip during early skeleton stages when tables and numbers are not yet settled; run it once the evaluation numbers stabilize.
 
@@ -129,6 +132,12 @@ Purpose: catch copy-paste drift between prose and tables. Skip during early skel
 3. For each prose number, confirm it appears verbatim in the ground-truth pool. FAIL otherwise.
 4. Support `.writing/verify-config.yaml` `numeric_overrides: [<number>, ...]` for narrative numbers that are not table-backed (e.g., round references like "a 2018 cohort"). Numbers in this list skip the check.
 5. Per-claim attribution: a FAIL on number `1,247` inside a paragraph tagged `% claim: meth-c1` attaches to claim `meth-c1` in the report.
+
+### Optional research-integrity gate (experiment-bearing papers)
+
+For papers that report their own experiments, run this OPTIONAL pass alongside Pass 3. Pass 3 confirms prose numbers match tables; the integrity gate goes further and probes whether the numbers reflect reality. It catches a broken pipeline whose constant leaks identically into prose and table, a surprise that may be a bug, a stated seed count that exceeds the result directories on disk, and number-tracing failures (best-seed cherry-pick, delta-arithmetic error, caption-table mismatch, scope overclaim). Each heuristic returns CLEAR, SUSPECTED, or INSUFFICIENT.
+
+Run it only when the user opts in and has experiment artifacts on disk. Skip it for theory, position, and survey papers with no first-party experimental numbers. SUSPECTED is advisory: it surfaces to the user under the report's "Advisory: Research Integrity" block and never auto-rejects, never flips `STATUS`, never edits prose. See `references/research-integrity-gate.md` for the heuristics, the three-way verdict contract, and the Type-A/Type-B split.
 
 ### Step 4: Emit Report
 
@@ -198,6 +207,14 @@ DOI resolution is expensive and rate-limited. `.writing/verify-cache.json` keyed
 ### Semantic match is advisory, not gatekeeping
 
 LLM-based semantic match has FP/FN rates that make hard auto-rejection brittle (design.md §11). Treat Pass 2c failures as soft failures: surface in the report, require explicit user override before claim STATUS flips to `verified`. Do not hide these — a silent false negative is worse than a false positive the user sees.
+
+### Verb strength tracks EVIDENCE type
+
+A claim's verb must match the strength of its EVIDENCE entries (see outlining for the `type` field). Strong evidence (a direct measurement, a reproduced result, a settled citation) earns `demonstrate`, `show`, `establish`. Moderate evidence earns `indicate`, `suggest`, `support`. Limited or associative evidence earns `are consistent with`, `may reflect`, `raise the possibility`. The binding rule: a claim whose EVIDENCE is `type: analysis` on one workload must not say "establishes". One workload supports "is consistent with" or "suggests", not a general establishment claim. When Pass 1 or the optional integrity gate surfaces a verb that outruns its evidence tier, flag it as advisory for the human author; this skill never rewrites prose.
+
+### Type-A vs Type-B
+
+Could a script with no taste answer this gate? Yes, Type-A: the model may self-judge (e.g. a claim tag is present, a DOI resolves, an abstract is citation-free, prose numbers match a table). No, it needs taste, Type-B: route to an independent or cross-model reviewer thread and never reply in place. A loop may DRIVE its own iteration but may not ACQUIT its own Type-B verdict. Pass 1 completeness, Pass 2 DOI resolution, and Pass 3 number matching are Type-A. Pass 2c semantic match and the taste-bearing integrity heuristics are Type-B; route them per `planning-foundation/references/review-loop-protocol.md` rather than self-clearing.
 
 ### Fail-loud on missing metadata
 

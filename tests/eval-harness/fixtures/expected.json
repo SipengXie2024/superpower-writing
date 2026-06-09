@@ -1,0 +1,13 @@
+{
+  "citation-hygiene-no-fake-refs.good": "needs-manual",
+  "citation-hygiene-no-fake-refs.bad": "fail-required",
+
+  "fabricated-citation-must-fail.good": "needs-manual",
+  "fabricated-citation-must-fail.bad": "fail-required",
+
+  "missing-figure-data-must-refuse.good": "needs-manual",
+  "missing-figure-data-must-refuse.bad": "fail-required",
+
+  "unverified-numeric-manual-exempt.good": "needs-manual",
+  "unverified-numeric-manual-exempt.bad": "fail-required"
+}

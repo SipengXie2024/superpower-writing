@@ -99,6 +99,10 @@ than guessing and burning a full pass on the wrong text.
 
 Follow these steps exactly. Do not skip, reorder, or merge them.
 
+### Step 0: Build a canonical-term table (consistency anchor)
+
+Before polishing, build a canonical-term table so both passes keep terminology stable. List each load-bearing term once with its single preferred surface form, then hold every rewrite to that form. This stops the humanizer pass from synonym-cycling a fixed term and stops the Strunk pass from collapsing a precise term into a bland one. See `skills/_shared/core/terminology-ledger.md` for the ledger format and rules. For a short input, a mental table is enough; for a section or longer, write the table down so it survives chunking.
+
 ### Step 1 — Capture the source text
 
 Get the exact text to polish. Read from a file if needed. If the user gave a
@@ -154,6 +158,20 @@ email, marketing copy, docstring), check one thing before returning: does the
 register still fit? A Strunk pass will sometimes strip academic hedging too
 aggressively for a peer-review context. Restore register-appropriate hedging
 before returning.
+
+## Self-Check
+
+Before returning the polished text, confirm each item. Tags mark who can
+confirm it. `[inspection]` the agent can confirm this from its own output;
+`[attestation]` the agent ran the procedure but the user owns final
+confirmation; `[user-attest]` a user-side rule the agent cannot confirm.
+
+- [inspection] A canonical-term table exists and every load-bearing term keeps its single preferred surface form across the output (no synonym cycling, no bland collapse).
+- [inspection] Both passes ran in order: humanizer first, then writing-clearly-and-concisely.
+- [inspection] Every markup token, claim tag, citation, named entity, and number from the input survives verbatim in the output.
+- [attestation] Meaning is preserved at the claim level; no factual claim or author-intended hedge was lost or weakened.
+- [attestation] The register still fits the document's frame; register-appropriate hedging was restored where a Strunk cut stripped it.
+- [user-attest] Any low-confidence override of an upstream pass was surfaced briefly so the user can spot-check it.
 
 ## A worked example — what each pass does
 

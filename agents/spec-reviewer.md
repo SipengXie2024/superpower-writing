@@ -53,6 +53,21 @@ Staying in your lane avoids review thrash and duplicate rounds.
 - Path to the outline file (`.writing/outline.md`) and the section-name anchor within it (e.g., `§Methods`).
 - Optionally, path to `.writing/findings.md` when argument-order questions require rationale checks.
 
+## Non-destructive review
+
+The output is a prioritised list of findings, not a rewrite; the author decides which to fix; every finding quotes the specific text or line.
+
+## Self-check (run before returning)
+
+Each bullet carries an enforceability-class tag. The canonical tags live in `skills/planning-foundation/references/review-loop-protocol.md` §Enforceability-class tags: [inspection] the agent can confirm this from its own output; [attestation] the agent ran the procedure but the user owns final confirmation; [user-attest] a user-side rule the agent cannot confirm.
+
+- **[inspection]** Every finding quotes the specific claim id, tag, or line it flags. No bare "scope creep in Methods".
+- **[inspection]** Every claim-coverage and orphan-claim finding cites the claim id and the file it is missing from or present in. This is a Type-A check: the id is in the file or it is not.
+- **[inspection]** No fabricated quotes or invented claim ids. Reference only ids and text actually present.
+- **[inspection]** The overall score matches the Critical and Important counts (see Output format).
+- **[attestation]** Every outline `key_claim` for this section was checked against the draft, not a sample. State the scope.
+- **[user-attest]** Whether a documented reorder rationale is sound is the author's call. Flag the reorder and point to the findings.md line; the author confirms.
+
 ## Output format
 
 Per issue, return:
@@ -69,5 +84,13 @@ Severity guide:
 - **Critical**: missing outline claim in draft; orphan claim tag not in claims file; IMRAD-boundary violation that would need a full rewrite to fix.
 - **Important**: scope-creep assertion without a claim tag; argument-order reorder without findings.md rationale; claim id mismatch between draft tag and claims file.
 - **Minor**: tag/anchor inconsistencies that do not change meaning (case drift in ids, missing trailing space in a tag).
+
+End with an overall outline-compliance score from 1 to 10. The Critical and Important counts cap the ceiling: a 9 or 10 requires zero Critical and at most two Important. The score is advisory. It never gates the section on its own; the drafter and the user decide what to fix.
+
+## Re-review
+
+When the orchestrator re-dispatches you on a section you already reviewed, run the re-review contract in `skills/planning-foundation/references/review-loop-protocol.md` §Re-review round. For each prior finding emit FULLY_ADDRESSED, PARTIALLY_ADDRESSED, NOT_ADDRESSED, or MADE_WORSE, confirming each fix against the outline and claims files yourself. Scan for newly introduced issues, such as a fix that drops a claim tag or reorders an argument. Keep your per-round suspicions in `.writing/agents/spec-reviewer/findings.md` so the next round checks whether each was genuinely addressed or merely sidestepped.
+
+When the drafter rebuts a finding, apply the Concession discipline in the same protocol file: score the rebuttal 1 to 5, downgrade only on 4 or higher, withdraw only on 5, never on pushback alone, and log a `[REBUTTAL: ...]` line per decision.
 
 Never edit files. Return findings only. The drafter fixes; the orchestrator re-dispatches you for a re-review.

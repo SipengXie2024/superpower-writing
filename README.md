@@ -1,14 +1,17 @@
 # superpower-writing
 
-> Self-contained Claude Code plugin that drafts a detailed, evidence-backed
-> paper skeleton for a human author to refine. It is not a one-shot paper
-> generator. Domain skills (IMRAD section standards, citation management,
-> figure generation, literature lookup, data-plot visualization, prose
-> polish) and the claim-first drafting pipeline ship inside this plugin's
-> `skills/` directory. Large parallel drafting and cross-section review run
-> as Claude Code dynamic workflows rather than bundled orchestration skills.
-> The earlier hard dependency on `K-Dense-AI/scientific-agent-skills` was
-> dissolved in v0.7.0.
+> Self-contained Claude Code plugin that runs a research paper from idea to
+> reviewer response. It generates and ranks research directions, gates them on
+> novelty, drafts a detailed evidence-backed IMRAD skeleton for a human author
+> to refine, and helps respond to reviewers. It is not a one-shot paper
+> generator. Domain skills (idea generation, novelty adjudication, idea
+> scoring, IMRAD section standards, citation management, figure generation,
+> literature lookup, data-plot visualization, prose polish, cross-model review,
+> rebuttal drafting) and the claim-first drafting pipeline ship inside this
+> plugin's `skills/` directory. Large parallel drafting and cross-section
+> review run as Claude Code dynamic workflows rather than bundled orchestration
+> skills. The earlier hard dependency on `K-Dense-AI/scientific-agent-skills`
+> was dissolved in v0.7.0.
 
 <!-- This README is written to be agent-executable. Every install step, every
      check, and every troubleshooting recipe is a literal command you can run
@@ -23,10 +26,12 @@
 
 ## TL;DR — what this plugin does
 
-1. Persists your paper state in `.writing/` (outline, claims, manuscript, metadata, reviews, archive).
-2. Forces **claim-first writing**: every load-bearing paragraph in `manuscript/NN_*.tex` must carry `% claim: id` bound to a claim with `STATUS: evidence_ready` (or `% draft-only` for exploration). A `PreToolUse` hook hard-blocks writes that violate this.
-3. Resolves citations **Zotero first → network fallback** (when Zotero is enabled). Pushes new DOIs back to your library if configured.
-4. Checks reliability before handoff: `claim-verification` confirms every `\cite{}` resolves against `refs.bib` and that the cited abstract actually supports the claim (catching hallucinated or mismatched citations), and flags any `draft-only` or `[NEEDS-EVIDENCE]` left in the skeleton.
+1. **Decides the contribution before structure.** `research-ideation` generates 15 to 20 candidate directions through named lenses, scores them with a FINER rubric, and runs a cross-model adversarial pass so one survivor hands off to outlining. `novelty-gap-check` and `idea-evaluator` gate that survivor on novelty and a top-venue bar before drafting starts.
+2. Persists your paper state in `.writing/` (ideation, outline, claims, manuscript, metadata, reviews, archive).
+3. Forces **claim-first writing**: every load-bearing paragraph in `manuscript/NN_*.tex` must carry `% claim: id` bound to a claim with `STATUS: evidence_ready` (or `% draft-only` for exploration). A `PreToolUse` hook hard-blocks writes that violate this.
+4. Resolves citations **Zotero first → network fallback** (when Zotero is enabled). Pushes new DOIs back to your library if configured.
+5. Checks reliability before handoff: `claim-verification` confirms every `\cite{}` resolves against `refs.bib` and that the cited abstract actually supports the claim (catching hallucinated or mismatched citations), flags any `draft-only` or `[NEEDS-EVIDENCE]` left in the skeleton, and runs an optional research-integrity gate on experiment-bearing papers.
+6. **Reviews and rebuts.** `adversarial-review` commits the single worst-case reviewer argument and adjudicates it; `external-review` routes a different-model critic over the work; `rebuttal` turns reviewer comments into a grounded, gated response letter. Every verdict is advisory: it surfaces to you and never auto-rejects or auto-mutates state.
 
 ## Agent install checklist
 
@@ -126,12 +131,17 @@ Each row is keyed to what the **user** says. The **agent** picks the slash comma
 ## Stage gates
 
 ```
-(dep-check) → outlining → writing-plans → drafting → claim-verification
-                                                          │
-                                        (skeleton ready for human refinement)
+(dep-check) → research-ideation → novelty-gap-check / idea-evaluator → outlining
+                  → writing-plans → drafting → claim-verification
+                                                     │
+                                   (skeleton ready for human refinement)
+                                                     │
+            adversarial-review · external-review (advisory pre-submission read)
+                                                     │
+                          rebuttal (grounded response to reviewers)
 ```
 
-Each gate updates `.writing/progress.md` Task Dashboard. Skipping requires explicit user override. The plugin stops at an evidence-backed skeleton; final refinement, submission, and reviewer responses are the human author's job.
+The idea phase runs in order when the contribution is undecided: `research-ideation` generates and ranks directions, then `novelty-gap-check` (查新, per-claim delta) and `idea-evaluator` (top-venue bar, fatal-flaw short-circuit) gate the survivor. Both gates are advisory; the user picks what to carry into outlining. Each gate updates `.writing/progress.md` Task Dashboard. Skipping requires explicit user override. The plugin produces an evidence-backed skeleton, then helps the human author stress-test it (`adversarial-review`, `external-review`) and respond to reviewers (`rebuttal`). Final prose refinement and the submission upload itself remain the human author's job.
 
 ## Output style
 
@@ -172,6 +182,8 @@ When `zotero.enabled: false` (default), the pipeline runs network-only.
 
 ```
 .writing/
+  ideation.md               # candidate slate + FINER scores + adversarial pass + rejected list (research-ideation)
+  ideation-brief.md         # the selected research direction, formatted for outlining Step 1
   outline.md                # IMRAD + per-section claim lists
   findings.md               # research synthesis, decisions, reviewer context
   progress.md               # Task Status Dashboard
@@ -190,8 +202,16 @@ When `zotero.enabled: false` (default), the pipeline runs network-only.
     section_<NN>_<slug>.md  # YAML list of {id, CLAIM, EVIDENCE[], STATUS}
   figures/                  # structural diagrams via tikz-figures; concept art via scientific-schematics; data plots via scientific-visualization
     graphical_abstract.pdf  # optional — systems papers usually omit it
-  reviews/                  # internal spec + manuscript review notes
+  reviews/                  # internal spec + manuscript review notes + rebuttal/review artifacts
     internal_<date>.md
+    REVIEWS_RAW.md          # reviewer comments verbatim (rebuttal)
+    ISSUE_BOARD.md          # atomized comments + fixed action labels (rebuttal)
+    RESPONSE_DRAFT.md       # R-A-C response letter (rebuttal)
+    REVISION_PLAN.md        # one checklist line per promised edit (rebuttal)
+    REBUTTAL_STATE.md       # phase + three-gate status (rebuttal)
+    external-review-<date>.md  # cross-model critique + results-to-claims matrix (external-review)
+  adversarial-review.md     # committed kill-argument memo + adjudication (adversarial-review)
+  novelty-report.md         # optional, per-claim novelty delta (novelty-gap-check)
   archive/                  # frozen snapshots of completed work
   stash/<paper-name>/       # when you multiplex papers
   verify-report.md          # produced by claim-verification
@@ -229,20 +249,27 @@ scripts/
   init-writing-dir.sh    # bootstraps .writing/
   check-deps.sh          # 7-root probe for upstream skills
   check-zotero.sh        # Zotero API auth probe (never echoes key)
+  lint_skills.py         # CI-grade SKILL.md linter (name=slug, 40-80-word "Use when" description, no em-dash, LOC ceiling, single-level references); baseline-ratcheted
 commands/                # /writing:outline /writing:draft /writing:check-deps /writing:stash /writing:archive
 output-styles/
   academic-research-assistant.md  # rigorous academic-research persona (see ## Output style)
 skills/                  # writing-domain + planning skills
   main/                  # router + dep gate (authoritative Claim-First Protocol section)
+  research-ideation/     # idea generation before outlining: 15-20 lensed candidates, FINER scoring, cross-model adversarial pass
+  novelty-gap-check/     # per-claim novelty delta + advisory PROCEED / PROCEED-WITH-CAUTION / ABANDON (查新)
+  idea-evaluator/        # one idea vs a top-venue bar; fatal-flaw short-circuit then 5-dimension + FINER scoring
   outlining/             # IMRAD outline + claim stubs + metadata.yaml
   writing-plans/         # per-section/figure/table task decomposition
   drafting/              # claim-first drafting; orchestration via dynamic workflow or manual batch
-  claim-verification/    # evidence-reliability check (claim completeness + citation/semantic match)
+  claim-verification/    # evidence-reliability check (claim completeness + citation/semantic match + optional research-integrity gate)
+  adversarial-review/    # committed kill-argument memo + external adjudication + non-self-graded PASS/WARN/FAIL
+  external-review/       # cross-model critique via Codex bridge (mock venue review, results-to-claims matrix)
+  rebuttal/              # reviewer comments → grounded R-A-C response with provenance/commitment/coverage gates
   executing-plans/       # manual-batch drafting fallback when dynamic workflows are unavailable
   literature-review/     # structured lit synthesis
   research-lookup/       # paper/abstract retrieval for evidence resolution
   citation-management/   # citation formatting, DOI resolution, bibliography assembly
-  tikz-figures/          # structural vector figures in LaTeX/TikZ (compile-verified, two-candidate preview)
+  tikz-figures/          # structural vector figures in LaTeX/TikZ (compile-verified, two-candidate preview); references/figure-rhetoric.md picks which figures the paper needs, AUDIT mode reviews an existing figure against the 18-item checklist
   scientific-schematics/ # raster concept art / pictorial figures (via Codex image_gen)
   scientific-visualization/ # publication-ready data plots + venue figure conventions
   polish/                # prose polish pass
@@ -259,6 +286,7 @@ skills/                  # writing-domain + planning skills
 templates/               # copied into .writing/ on init by scripts/init-writing-dir.sh
 tests/
   smoke.sh               # end-to-end checks (76 PASS lines)
+  eval-harness/          # prose-output eval: scores skill output against machine-checkable rubrics (no-fabricated-DOI, [UNVERIFIED] discipline, refuse-missing-figure-data); stdlib-only, fixture self-test wired into smoke.sh
 CHANGELOG.md             # user-facing release notes
 .env.example
 .gitignore
@@ -267,9 +295,9 @@ README.md
 
 ## Scope (v1 YAGNI)
 
-**In scope**: single-author CS/systems/ML IMRAD paper skeletons, claim-first drafting, citation-reliability verification (`citation-management` / `research-lookup` + semantic match against the cited abstract), optional Zotero dual-source-of-truth, prose polish and AI-trace reduction.
+**In scope**: single-author CS/systems/ML IMRAD paper skeletons across the full lifecycle. Idea generation and ranking (`research-ideation`), novelty adjudication (`novelty-gap-check`) and top-venue idea scoring (`idea-evaluator`) before structure; claim-first drafting; citation-reliability verification (`citation-management` / `research-lookup` + semantic match against the cited abstract) with an optional research-integrity gate on experiment-bearing papers; optional Zotero dual-source-of-truth; prose polish and AI-trace reduction; pre-submission stress-testing (`adversarial-review` kill-argument, `external-review` cross-model critique); and grounded reviewer-response/rebuttal drafting (`rebuttal`). All verdicts are advisory and never fabricate.
 
-**Out of scope** (the human author's job, or deferred): final prose refinement and journal submission, reviewer-response/rebuttal drafting, reporting-guideline checklists (CONSORT/STROBE/PRISMA for clinical/biology venues), multi-author collaboration, non-IMRAD formats, LaTeX compile. Large parallel drafting and cross-checked audit are delegated to Claude Code dynamic workflows rather than bundled in the plugin.
+**Out of scope** (the human author's job, or deferred): final prose refinement and the journal submission upload itself, reporting-guideline checklists (CONSORT/STROBE/PRISMA for clinical/biology venues), multi-author collaboration, non-IMRAD formats, LaTeX compile. Large parallel drafting and cross-checked audit are delegated to Claude Code dynamic workflows rather than bundled in the plugin.
 
 ## Development
 
