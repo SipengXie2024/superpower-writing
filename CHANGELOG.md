@@ -7,6 +7,12 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.16.0] — 2026-06-11
+
+### Added
+
+- **`academic-citation-workflow` skill** — reliable reference search, verification, and budget management for manuscripts, distilled from a live IEEE TIFS submission round (one screen cutting 17 weak references, one enrichment admitting 8 web-verified ones). Encodes: admission criteria fixed before any search; per-category research agents that may only return URL-fetched candidates; one adversarial existence/fit verifier per candidate (also audits surrounding content — caught a mischaracterized system in the paper's own comparison table); weak-citation screening with a recorded reserve tier for weak-for-strong swaps; page-budget line arithmetic (one entry ≈ 4–6 lines; cut whole entries, not prose); novelty-risk scanning of discovered competitors; and comparison-table admission rules (a row or citation enters only if it takes a real value in every column). Includes a Workflow-tool pipeline skeleton.
+
 ## [0.15.0] — 2026-06-09
 
 ### Added

@@ -1,7 +1,7 @@
 {
   "name": "superpower-writing",
   "description": "Self-contained plugin that runs a CS/systems/ML research paper from idea to reviewer response. Generates and ranks research directions (research-ideation, FINER + cross-model adversarial pass), adjudicates novelty (novelty-gap-check) and scores ideas against a top-venue bar (idea-evaluator), then drafts a detailed evidence-backed IMRAD skeleton for a human author to refine. Ships domain skills (research lookup, citation management, literature review, TikZ figures with figure-rhetoric, scientific schematics/visualization, prose polish, humanizer) and reference files (writing principles, style cautions, figures & tables). Claim-first drafting enforced by a PreToolUse hook; citation-reliability verification with an optional research-integrity gate; persistent .writing/ state; large parallel drafting and review run as Claude Code dynamic workflows. Pre-submission stress-testing (adversarial-review kill-argument, external-review cross-model critique) and grounded rebuttal drafting close the loop. All verdicts are advisory and never fabricate. Ships an Academic Research Assistant output style, a SKILL.md linter, and a prose-output eval harness.",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "author": {
     "name": "sipeng"
   },
