@@ -7,6 +7,17 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.17.0] — 2026-06-11
+
+### Added
+
+- **`game-based-security-proof` skill** — formal game-based security proofs for cryptographic primitives: game sequences and hopping, reduction proofs from standard assumptions (DDH, CDH, RSA, LWE), negligible-advantage bounds, tightness accounting, and LaTeX macros plus proof templates for displayed definitions, theorems, and proofs. Promoted from a user-level skill and brought to house spec (description expanded to the 40-80 word "Use when" format, em-dashes removed, tables of contents added to the three long reference files).
+- **`simulation-security-proofs` skill** — simulation-based and UC security proofs for protocols (MPC, zero-knowledge, oblivious transfer, commitments, garbled circuits): simulator-construction patterns, hybrid arguments, corruption models, composition theorems, and LaTeX proof templates. Promoted from a user-level skill and brought to house spec (same treatment; four reference files gained tables of contents).
+
+### Changed
+
+- **`academic-citation-workflow`** — description rewritten to the 40-80 word "Use when" lint format and em-dashes removed from the SKILL.md body, closing the violations it would otherwise have introduced against the v0.15.0 skill linter.
+
 ## [0.16.0] — 2026-06-11
 
 ### Added

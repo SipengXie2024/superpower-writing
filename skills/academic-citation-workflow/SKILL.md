@@ -1,6 +1,6 @@
 ---
 name: academic-citation-workflow
-description: Reliable literature workflow for academic papers — multi-agent reference search with mandatory URL verification, per-candidate adversarial existence checks, weak-citation screening under page budgets, and comparison-table citation management. Use whenever the user asks to find or add references, enrich a related-work section or comparison table, cut/screen weak citations, fit a page limit by trimming references, or verify that cited works actually exist — including Chinese phrasings like 找文献、筛引用、删弱引用、补充对比表、文献核验. Trigger even when the user just says references "feel thin" or "feel bloated" for a manuscript.
+description: Reliable literature workflow for academic papers, covering multi-agent reference search with mandatory URL verification, per-candidate adversarial existence checks, weak-citation screening under page budgets, and comparison-table citation management. Use when the user asks to find or add references, enrich a related-work section or comparison table, cut weak citations, fit a page limit by trimming references, verify cited works exist, or says references feel thin or bloated. Chinese triggers include 找文献, 筛引用, 删弱引用, 补充对比表, 文献核验.
 ---
 
 # Academic Citation Workflow
@@ -16,7 +16,7 @@ Write the criteria into the search prompts themselves, before launching: domain 
 Run a three-stage pipeline: per-category research agents, then one adversarial verifier per candidate, then synthesis.
 
 - Research agents get one category each and a hard rule: a candidate may only be returned together with a URL the agent actually fetched and read. This single constraint removes most hallucination risk at the source. Prefer recent top-venue papers and widely deployed industrial systems with official documentation.
-- Verifiers re-search from scratch and do not trust the researcher's URL. Each verifier checks four things: the work exists with the claimed title/venue/year; it actually does what the summary claims; it genuinely fits the claim or table row it would support; the BibTeX metadata is correct (authors, venue, year). Have verifiers also audit the surrounding existing content while they are there — independent verifiers catch the paper's own pre-existing errors (a mischaracterized system, a wrong table cell), which is free review.
+- Verifiers re-search from scratch and do not trust the researcher's URL. Each verifier checks four things: the work exists with the claimed title/venue/year; it actually does what the summary claims; it genuinely fits the claim or table row it would support; the BibTeX metadata is correct (authors, venue, year). Have verifiers also audit the surrounding existing content while they are there, since independent verifiers catch the paper's own pre-existing errors (a mischaracterized system, a wrong table cell), which is free review.
 - Cite industrial systems as `@misc` with the official docs URL, a double-braced corporate author, and an accessed-year note. Their citation value is proving that a design class is deployed in practice, so the official page beats a third-party writeup.
 
 Minimal Workflow-tool skeleton for the pipeline:
@@ -35,7 +35,7 @@ const results = await pipeline(CATEGORIES,
 
 Judge each citation by the load it carries, not by its fame. Never cut the sole support of a specific stated fact, the paper's foundational baseline or attack study, systems compared in tables, or formal foundations actually used. Good cut candidates: members of grouped citation lists (4+ keys on one clause), references redundant with a stronger co-cite on the same subtopic, and weak sources (blog or product page) duplicating an academic co-cite.
 
-Verify every proposed cut adversarially before executing: would removal break a claim, force deleting a descriptive phrase the sentence needs, or drop work a reviewer would expect to see? Then record a reserve tier — cut-worthy candidates kept for now, with the exact edit each cut entails. The reserve pays for future strong additions via weak-for-strong swaps.
+Verify every proposed cut adversarially before executing: would removal break a claim, force deleting a descriptive phrase the sentence needs, or drop work a reviewer would expect to see? Then record a reserve tier, the cut-worthy candidates kept for now, with the exact edit each cut entails. The reserve pays for future strong additions via weak-for-strong swaps.
 
 ## Page-budget arithmetic
 
@@ -43,7 +43,7 @@ One reference entry costs roughly 4 to 6 lines in the rendered reference list. B
 
 ## Novelty-risk scanning
 
-Every literature search doubles as competitor discovery. When a found system overlaps the paper's claims, immediately re-read the paper's gap and novelty sentences and check whether they remain accurate as scoped; usually the fix is sharpening the claim's scope, not ignoring the find. Surface such discoveries to the user prominently and flag them for co-authors — finding the overlap before a reviewer does is the point.
+Every literature search doubles as competitor discovery. When a found system overlaps the paper's claims, immediately re-read the paper's gap and novelty sentences and check whether they remain accurate as scoped; usually the fix is sharpening the claim's scope, not ignoring the find. Surface such discoveries to the user prominently and flag them for co-authors, since finding the overlap before a reviewer does is the point.
 
 ## Comparison-table admission
 
