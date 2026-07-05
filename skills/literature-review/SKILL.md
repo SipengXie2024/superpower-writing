@@ -1,6 +1,6 @@
 ---
 name: literature-review
-description: Conduct comprehensive, systematic literature reviews using multiple academic databases (PubMed, arXiv, bioRxiv, Semantic Scholar, etc.). This skill should be used when conducting systematic literature reviews, meta-analyses, research synthesis, or comprehensive literature searches across biomedical, scientific, and technical domains. Creates professionally formatted markdown documents and PDFs with verified citations in multiple citation styles (APA, Nature, Vancouver, etc.).
+description: Conduct comprehensive, systematic literature reviews using multiple academic databases (arXiv, DBLP, Semantic Scholar, Google Scholar, etc.). This skill should be used when conducting systematic literature reviews, meta-analyses, research synthesis, or comprehensive literature searches across computer science and related technical domains. Creates professionally formatted markdown documents and PDFs with verified citations in multiple citation styles (APA, ACM, IEEE, etc.).
 allowed-tools: Read Write Edit Bash
 license: MIT license
 metadata:
@@ -13,7 +13,7 @@ metadata:
 
 Conduct systematic, comprehensive literature reviews following rigorous academic methodology. Search multiple literature databases, synthesize findings thematically, verify all citations for accuracy, and generate professional output documents in markdown and PDF formats.
 
-This skill uses the **parallel-web skill** (`parallel-cli search`) as the primary web search tool for broad academic literature discovery, supplemented by specialized database access skills (gget, bioservices, datacommons-client). It provides specialized tools for citation verification, result aggregation, and document generation.
+This skill uses the **parallel-web skill** (`parallel-cli search`) as the primary web search tool for broad academic literature discovery, supplemented by direct API access to CS bibliographic sources (arXiv, DBLP, Semantic Scholar, CrossRef). It provides specialized tools for citation verification, result aggregation, and document generation.
 
 ## When to Use This Skill
 
@@ -67,8 +67,8 @@ Literature reviews follow a structured, multi-phase workflow:
 
 ### Phase 1: Planning and Scoping
 
-1. **Define Research Question**: Use PICO framework (Population, Intervention, Comparison, Outcome) for clinical/biomedical reviews
-   - Example: "What is the efficacy of CRISPR-Cas9 (I) for treating sickle cell disease (P) compared to standard care (C)?"
+1. **Define Research Question**: State a focused question and break it into 2-4 core concepts (problem/setting, method/technique, baseline, metric)
+   - Example: "How do attention-approximation methods (method) affect training throughput (metric) versus full attention (baseline) for long-context transformers (problem)?"
 
 2. **Establish Scope and Objectives**:
    - Define clear, specific research questions
@@ -85,8 +85,8 @@ Literature reviews follow a structured, multi-phase workflow:
 4. **Set Inclusion/Exclusion Criteria**:
    - Date range (e.g., last 10 years: 2015-2024)
    - Language (typically English, or specify multilingual)
-   - Publication types (peer-reviewed, preprints, reviews)
-   - Study designs (RCTs, observational, in vitro, etc.)
+   - Publication types (peer-reviewed, preprints, surveys)
+   - Study types (empirical evaluations, systems benchmarks, theoretical analyses, etc.)
    - Document all criteria clearly
 
 > **Gate 1 — Scope lock:** Confirm question, review type, databases, and inclusion/exclusion criteria with the user before searching.
@@ -104,7 +104,7 @@ Literature reviews follow a structured, multi-phase workflow:
    # Academic-focused search across scholarly sources
    parallel-cli search "your research topic" -q "keyword1" -q "keyword2" \
      --json --max-results 10 --excerpt-max-chars-total 27000 \
-     --include-domains "scholar.google.com,arxiv.org,pubmed.ncbi.nlm.nih.gov,semanticscholar.org,biorxiv.org,medrxiv.org,ncbi.nlm.nih.gov,nature.com,science.org,ieee.org,acm.org,springer.com,wiley.com,cell.com,pnas.org,nih.gov" \
+     --include-domains "scholar.google.com,arxiv.org,dblp.org,semanticscholar.org,openreview.net,dl.acm.org,usenix.org,ieee.org,springer.com,openalex.org" \
      -o sources/litreview_<topic>-academic.json
 
    # General search for supplementary sources
@@ -117,36 +117,27 @@ Literature reviews follow a structured, multi-phase workflow:
    parallel-cli extract "https://arxiv.org/abs/XXXX.XXXXX" --json
    ```
 
-   **Biomedical & Life Sciences:**
-   - Use `gget` skill: `gget search pubmed "search terms"` for PubMed/PMC
-   - Use `gget` skill: `gget search biorxiv "search terms"` for preprints
-   - Use `bioservices` skill for ChEMBL, KEGG, UniProt, etc.
-
-   **General Scientific Literature:**
-   - Search arXiv via direct API (preprints in physics, math, CS, q-bio)
+   **Computer Science Databases:**
+   - Search arXiv via direct API (preprints in cs.*, stat.ML)
+   - Use DBLP for canonical CS venue and author metadata
    - Search Semantic Scholar via API (200M+ papers, cross-disciplinary)
    - Use Google Scholar for comprehensive coverage (manual or careful scraping)
-
-   **Specialized Databases:**
-   - Use `gget alphafold` for protein structures
-   - Use `gget cosmic` for cancer genomics
-   - Use `datacommons-client` for demographic/statistical data
-   - Use specialized databases as appropriate for the domain
+   - Use CrossRef for DOI resolution and metadata verification
 
 2. **Document Search Parameters**:
    ```markdown
    ## Search Strategy
 
-   ### Database: PubMed
+   ### Database: arXiv
    - **Date searched**: 2024-10-25
    - **Date range**: 2015-01-01 to 2024-10-25
    - **Search string**:
      ```
-     ("CRISPR"[Title] OR "Cas9"[Title])
-     AND ("sickle cell"[MeSH] OR "SCD"[Title/Abstract])
-     AND 2015:2024[Publication Date]
+     (ti:"self-attention" OR ti:transformer)
+     AND (abs:"long context" OR abs:"efficient")
+     AND cat:cs.LG
      ```
-   - **Results**: 247 articles
+   - **Results**: 247 papers
    ```
 
    Repeat for each database searched.
@@ -209,11 +200,11 @@ Literature reviews follow a structured, multi-phase workflow:
    - Funding sources and conflicts of interest
 
 2. **Assess Study Quality**:
-   - **For RCTs**: Use Cochrane Risk of Bias tool
-   - **For observational studies**: Use Newcastle-Ottawa Scale
-   - **For systematic reviews**: Use AMSTAR 2
-   - Rate each study: High, Moderate, Low, or Very Low quality
-   - Consider excluding very low-quality studies
+   - **Venue**: Peer-reviewed at a strong conference or journal? (see venue tiers below)
+   - **Reproducibility**: Are code, data, and an artifact released? Did the venue run artifact evaluation?
+   - **Evaluation rigor**: Realistic baselines, ablations, multiple seeds or error bars, honest limitations
+   - Rate each paper: High, Moderate, Low, or Very Low confidence
+   - Consider excluding very low-quality work
 
 3. **Organize by Themes**:
    - Identify 3-5 major themes across studies
@@ -221,6 +212,8 @@ Literature reviews follow a structured, multi-phase workflow:
    - Note patterns, consensus, and controversies
 
 ### Phase 5: Synthesis and Analysis
+
+> **Writing diagnostics (read first)**: `references/synthesis-writing.md` gives domain-neutral rules for turning retrieved papers into a synthesis that *argues* rather than *lists*: the first-sentence test (synthesis vs annotated bibliography), prose over a bulleted bibliography, walking the citation graph both ways (backward references plus forward cited-by), and a retraction check via CrossRef `update-to`. Retargeted to CS venues; it complements the thematic structure below.
 
 1. **Create Review Document** from template:
    ```bash
@@ -236,13 +229,13 @@ Literature reviews follow a structured, multi-phase workflow:
 
    Example structure:
    ```markdown
-   #### 3.3.1 Theme: CRISPR Delivery Methods
+   #### 3.3.1 Theme: Approximating Attention for Long Contexts
 
-   Multiple delivery approaches have been investigated for therapeutic
-   gene editing. Viral vectors (AAV) were used in 15 studies^1-15^ and
-   showed high transduction efficiency (65-85%) but raised immunogenicity
-   concerns^3,7,12^. In contrast, lipid nanoparticles demonstrated lower
-   efficiency (40-60%) but improved safety profiles^16-23^.
+   Multiple approaches reduce the quadratic cost of self-attention. Sparse
+   attention was used in 15 studies [1]-[15] and preserved accuracy within
+   1-2% of full attention while cutting memory sharply [3], [7], [12]. In
+   contrast, linear-attention variants scaled better at very long contexts
+   but lost more accuracy on retrieval-heavy tasks [16]-[23].
    ```
 
 3. **Critical Analysis**:
@@ -253,7 +246,7 @@ Literature reviews follow a structured, multi-phase workflow:
 
 4. **Write Discussion**:
    - Interpret findings in broader context
-   - Discuss clinical, practical, or research implications
+   - Discuss practical, engineering, or research implications
    - Acknowledge limitations of the review itself
    - Compare with previous reviews if applicable
    - Propose specific future research directions
@@ -282,7 +275,7 @@ Literature reviews follow a structured, multi-phase workflow:
 
 3. **Format Citations Consistently**:
    - Choose one citation style and use throughout (see `references/citation_styles.md`)
-   - Common styles: APA, Nature, Vancouver, Chicago, IEEE
+   - Common styles: APA, ACM, Chicago, IEEE
    - Use verification script output to format citations correctly
    - Ensure in-text citations match reference list format
 
@@ -298,7 +291,7 @@ Literature reviews follow a structured, multi-phase workflow:
    ```
 
    Options:
-   - `--citation-style`: apa, nature, chicago, vancouver, ieee
+   - `--citation-style`: apa, acm, chicago, ieee
    - `--no-toc`: Disable table of contents
    - `--no-numbers`: Disable section numbering
    - `--check-deps`: Check if pandoc/xelatex are installed
@@ -324,52 +317,34 @@ Literature reviews follow a structured, multi-phase workflow:
 
 ## Database-Specific Search Guidance
 
-### PubMed / PubMed Central
-
-Access via `gget` skill:
-```bash
-# Search PubMed
-gget search pubmed "CRISPR gene editing" -l 100
-
-# Search with filters
-# Use PubMed Advanced Search Builder to construct complex queries
-# Then execute via gget or direct Entrez API
-```
-
-**Search tips**:
-- Use MeSH terms: `"sickle cell disease"[MeSH]`
-- Field tags: `[Title]`, `[Title/Abstract]`, `[Author]`
-- Date filters: `2020:2024[Publication Date]`
-- Boolean operators: AND, OR, NOT
-- See MeSH browser: https://meshb.nlm.nih.gov/search
-
-### bioRxiv / medRxiv
-
-Access via `gget` skill:
-```bash
-gget search biorxiv "CRISPR sickle cell" -l 50
-```
-
-**Important considerations**:
-- Preprints are not peer-reviewed
-- Verify findings with caution
-- Check if preprint has been published (CrossRef)
-- Note preprint version and date
-
 ### arXiv
 
 Access via direct API or WebFetch:
 ```python
 # Example search categories:
-# q-bio.QM (Quantitative Methods)
-# q-bio.GN (Genomics)
-# q-bio.MN (Molecular Networks)
 # cs.LG (Machine Learning)
+# cs.CL (Computation and Language)
+# cs.DC (Distributed, Parallel, and Cluster Computing)
+# cs.DB (Databases)
+# cs.PL (Programming Languages)
 # stat.ML (Machine Learning Statistics)
 
 # Search format: category AND terms
-search_query = "cat:q-bio.QM AND ti:\"single cell sequencing\""
+search_query = "cat:cs.LG AND ti:\"self-attention\""
 ```
+
+**Important considerations**:
+- Preprints are not peer-reviewed
+- Verify findings with caution
+- Check whether the preprint has a later peer-reviewed version (CrossRef, DBLP)
+- Note the preprint version and date
+
+### DBLP
+
+Access via direct API or web (https://dblp.org):
+- Authoritative index of CS conferences and journals
+- Use to confirm the canonical peer-reviewed venue for a paper or preprint
+- Retrieve complete, disambiguated author publication lists
 
 ### Semantic Scholar
 
@@ -378,16 +353,6 @@ Access via direct API (requires API key, or use free tier):
 - Excellent for cross-disciplinary searches
 - Provides citation graphs and paper recommendations
 - Use for finding highly influential papers
-
-### Specialized Biomedical Databases
-
-Use appropriate skills:
-- **ChEMBL**: `bioservices` skill for chemical bioactivity
-- **UniProt**: `gget` or `bioservices` skill for protein information
-- **KEGG**: `bioservices` skill for pathways and genes
-- **COSMIC**: `gget` skill for cancer mutations
-- **AlphaFold**: `gget alphafold` for protein structures
-- **PDB**: `gget` or direct API for experimental structures
 
 ### Citation Chaining
 
@@ -399,7 +364,7 @@ Expand search via citation networks:
      parallel-cli search "papers citing [Author et al. Year] [paper title]" \
        -q "citing" -q "[key author]" \
        --json --max-results 10 --excerpt-max-chars-total 27000 \
-       --include-domains "scholar.google.com,semanticscholar.org,arxiv.org,pubmed.ncbi.nlm.nih.gov" \
+       --include-domains "scholar.google.com,semanticscholar.org,arxiv.org,dblp.org" \
        -o sources/litreview_forward_citations.json
      ```
    - Use Google Scholar "Cited by"
@@ -423,13 +388,13 @@ Detailed formatting guidelines are in `references/citation_styles.md`. Quick ref
 - In-text: (Smith et al., 2023)
 - Reference: Smith, J. D., Johnson, M. L., & Williams, K. R. (2023). Title. *Journal*, *22*(4), 301-318. https://doi.org/10.xxx/yyy
 
-### Nature
-- In-text: Superscript numbers^1,2^
-- Reference: Smith, J. D., Johnson, M. L. & Williams, K. R. Title. *Nat. Rev. Drug Discov.* **22**, 301-318 (2023).
+### ACM (ACM Reference Format)
+- In-text: Numbered brackets [1], [2] (or author-date)
+- Reference: Jane D. Smith, Mary L. Johnson, and Karen R. Williams. 2023. Title. *ACM Trans. Mach. Learn.* 1, 4 (2023), 301-318.
 
-### Vancouver
-- In-text: Superscript numbers^1,2^
-- Reference: Smith JD, Johnson ML, Williams KR. Title. Nat Rev Drug Discov. 2023;22(4):301-18.
+### IEEE
+- In-text: Numbered brackets [1], [2]
+- Reference: [1] J. D. Smith, M. L. Johnson, and K. R. Williams, "Title," *IEEE Trans. Neural Netw. Learn. Syst.*, vol. 34, no. 4, pp. 301-318, 2023.
 
 **Always verify citations** with verify_citations.py before finalizing.
 
@@ -454,10 +419,10 @@ Use citation counts to identify the most impactful papers:
 
 Prioritize papers from higher-tier venues:
 
-- **Tier 1 (Always Prefer):** Nature, Science, Cell, NEJM, Lancet, JAMA, PNAS, Nature Medicine, Nature Biotechnology
-- **Tier 2 (Strong Preference):** High-impact specialized journals (IF>10), top conferences (NeurIPS, ICML for ML/AI)
-- **Tier 3 (Include When Relevant):** Respected specialized journals (IF 5-10)
-- **Tier 4 (Use Sparingly):** Lower-impact peer-reviewed venues
+- **Tier 1 (Always Prefer):** NeurIPS, ICML, ICLR (ML); OSDI, SOSP, NSDI, USENIX ATC (systems); SIGMOD, VLDB (databases); PLDI, POPL (PL)
+- **Tier 2 (Strong Preference):** Strong specialized venues (EMNLP, CVPR, EuroSys, ICSE, JMLR, TOPLAS)
+- **Tier 3 (Include When Relevant):** Respected field-specific conferences and journals
+- **Tier 4 (Use Sparingly):** Non-archival workshops and lower-tier venues
 
 #### Author Reputation Assessment
 
@@ -472,7 +437,7 @@ Prefer papers from:
 For any topic, identify foundational work by:
 1. **High citation count** (typically 500+ for papers 5+ years old)
 2. **Frequently cited by other included studies** (appears in many reference lists)
-3. **Published in Tier-1 venues** (Nature, Science, Cell family)
+3. **Published in Tier-1 venues** (NeurIPS, OSDI, SIGMOD, PLDI, etc.)
 4. **Written by field pioneers** (often cited as establishing concepts)
 
 ## Best Practices
@@ -524,34 +489,35 @@ For any topic, identify foundational work by:
 4. **Unverified citations**: Leads to errors; always run verify_citations.py
 5. **Too broad search**: Yields thousands of irrelevant results; refine with specific terms
 6. **Too narrow search**: Misses relevant papers; include synonyms and related terms
-7. **Ignoring preprints**: Misses latest findings; include bioRxiv, medRxiv, arXiv
+7. **Ignoring preprints**: Misses latest findings; include arXiv preprints
 8. **No quality assessment**: Treats all evidence equally; assess and report quality
 9. **Publication bias**: Only positive results published; note potential bias
 10. **Outdated search**: Field evolves rapidly; clearly state search date
 
 ## Example Workflow
 
-Complete workflow for a biomedical literature review:
+Complete workflow for a CS literature review:
 
 ```bash
 # 1. Create review document from template
-cp assets/review_template.md crispr_sickle_cell_review.md
+cp assets/review_template.md efficient_attention_review.md
 
 # 2. Start with parallel-web for broad academic search
-parallel-cli search "CRISPR Cas9 sickle cell disease gene therapy efficacy" \
-  -q "CRISPR" -q "sickle cell" -q "gene therapy" \
+parallel-cli search "efficient long-context attention transformers throughput accuracy" \
+  -q "self-attention" -q "long context" -q "efficiency" \
   --json --max-results 10 --excerpt-max-chars-total 27000 \
-  --include-domains "scholar.google.com,arxiv.org,pubmed.ncbi.nlm.nih.gov,semanticscholar.org,biorxiv.org,nature.com,science.org,cell.com,pnas.org,nih.gov" \
-  -o sources/litreview_crispr_scd-academic.json
+  --include-domains "scholar.google.com,arxiv.org,dblp.org,semanticscholar.org,openreview.net,dl.acm.org,usenix.org,ieee.org" \
+  -o sources/litreview_efficient_attention-academic.json
 
-parallel-cli search "CRISPR sickle cell disease clinical trials treatment" \
-  -q "CRISPR" -q "sickle cell" \
+parallel-cli search "sparse linear attention long sequence benchmarks" \
+  -q "sparse attention" -q "linear attention" \
   --json --max-results 10 --excerpt-max-chars-total 27000 \
-  -o sources/litreview_crispr_scd-general.json
+  -o sources/litreview_efficient_attention-general.json
 
-# 3. Search specialized databases using appropriate skills
-# - Use gget skill for PubMed, bioRxiv
-# - Use direct API access for arXiv, Semantic Scholar
+# 3. Search CS databases via direct API access
+# - Use the arXiv API for cs.* preprints
+# - Use DBLP for canonical venue and author metadata
+# - Use the Semantic Scholar API for citation graphs
 # - Export results in JSON format
 
 # 4. Aggregate and process results (combine parallel-cli + database results)
@@ -578,18 +544,18 @@ python scripts/search_databases.py combined_results.json \
 # - Clear conclusions
 
 # 7. Verify all citations
-python scripts/verify_citations.py crispr_sickle_cell_review.md
+python scripts/verify_citations.py efficient_attention_review.md
 
 # Review the citation report
-cat crispr_sickle_cell_review_citation_report.json
+cat efficient_attention_review_citation_report.json
 
 # Fix any failed citations and re-verify
-python scripts/verify_citations.py crispr_sickle_cell_review.md
+python scripts/verify_citations.py efficient_attention_review.md
 
 # 8. Generate professional PDF
-python scripts/generate_pdf.py crispr_sickle_cell_review.md \
-  --citation-style nature \
-  --output crispr_sickle_cell_review.pdf
+python scripts/generate_pdf.py efficient_attention_review.md \
+  --citation-style acm \
+  --output efficient_attention_review.pdf
 
 # 9. Review final PDF and markdown outputs
 ```
@@ -601,18 +567,13 @@ This skill works seamlessly with other scientific skills:
 ### Web Search & Extraction (parallel-web skill — PRIMARY)
 - **parallel-cli search**: Broad academic and general web search with domain filtering — use for initial scoping, finding papers, citation chaining, and supplementary searches
 - **parallel-cli extract**: Fetch full content from paper URLs, journal websites, and preprint servers — use for reading abstracts, extracting reference lists, and verifying paper details
-- **parallel-cli search --include-domains**: Academic-focused search across scholarly domains (arxiv.org, pubmed, nature.com, etc.)
+- **parallel-cli search --include-domains**: Academic-focused search across scholarly domains (arxiv.org, dblp.org, semanticscholar.org, etc.)
 
-### Database Access Skills
-- **gget**: PubMed, bioRxiv, COSMIC, AlphaFold, Ensembl, UniProt
-- **bioservices**: ChEMBL, KEGG, Reactome, UniProt, PubChem
-- **datacommons-client**: Demographics, economics, health statistics
-
-### Analysis Skills
-- **pydeseq2**: RNA-seq differential expression (for methods sections)
-- **scanpy**: Single-cell analysis (for methods sections)
-- **anndata**: Single-cell data (for methods sections)
-- **biopython**: Sequence analysis (for background sections)
+### Database Access
+- **arXiv API**: cs.* preprints
+- **DBLP API**: canonical CS venue and author metadata
+- **Semantic Scholar API**: cross-disciplinary papers and citation graphs
+- **CrossRef API**: DOI resolution and metadata verification
 
 ### Visualization Skills
 - **matplotlib**: Generate figures and plots for review
@@ -632,8 +593,9 @@ This skill works seamlessly with other scientific skills:
 - `scripts/search_databases.py`: Process, deduplicate, and format search results
 
 **References:**
-- `references/citation_styles.md`: Detailed citation formatting guide (APA, Nature, Vancouver, Chicago, IEEE)
+- `references/citation_styles.md`: Detailed citation formatting guide (APA, ACM, Chicago, IEEE)
 - `references/database_strategies.md`: Comprehensive database search strategies
+- `references/synthesis-writing.md`: Domain-neutral writing diagnostics (synthesis vs bibliography via a first-sentence test, citation-graph expansion, retraction checks); retargeted to CS venues
 
 **Assets:**
 - `assets/review_template.md`: Complete literature review template with all sections
@@ -642,18 +604,16 @@ This skill works seamlessly with other scientific skills:
 
 **Guidelines:**
 - PRISMA (Systematic Reviews): http://www.prisma-statement.org/
-- Cochrane Handbook: https://training.cochrane.org/handbook
-- AMSTAR 2 (Review Quality): https://amstar.ca/
 
 **Tools:**
-- MeSH Browser: https://meshb.nlm.nih.gov/search
-- PubMed Advanced Search: https://pubmed.ncbi.nlm.nih.gov/advanced/
-- Boolean Search Guide: https://www.ncbi.nlm.nih.gov/books/NBK3827/
+- DBLP: https://dblp.org/
+- arXiv (cs listings): https://arxiv.org/list/cs/recent
+- Semantic Scholar: https://www.semanticscholar.org/
 
 **Citation Styles:**
 - APA Style: https://apastyle.apa.org/
-- Nature Portfolio: https://www.nature.com/nature-portfolio/editorial-policies/reporting-standards
-- NLM/Vancouver: https://www.nlm.nih.gov/bsd/uniform_requirements.html
+- ACM Reference Format: https://www.acm.org/publications/authors/reference-formatting
+- IEEE Reference Guide: https://ieeeauthorcenter.ieee.org/
 
 ## Dependencies
 
@@ -692,7 +652,7 @@ This literature-review skill provides:
 
 1. **Systematic methodology** following academic best practices
 2. **Parallel-web powered search** using `parallel-cli search` for fast, broad academic literature discovery with scholarly domain filtering
-3. **Multi-database integration** via existing scientific skills (gget, bioservices, datacommons-client)
+3. **Multi-database integration** across CS sources (arXiv, DBLP, Semantic Scholar, CrossRef)
 4. **Citation verification** ensuring accuracy and credibility
 5. **Professional output** in markdown and PDF formats
 6. **Comprehensive guidance** covering the entire review process

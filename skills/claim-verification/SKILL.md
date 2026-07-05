@@ -15,9 +15,9 @@ The most valuable check for an AI-drafted skeleton is Pass 2: it catches halluci
 
 **Iron law:** No `STATUS: verified` flip without fresh pass evidence recorded in the report.
 
-**Relation to the PreToolUse hook:** the hook (see `superpower-writing:main` §Claim-First Protocol) already blocks prose writes against stub-status claims during drafting — drafting flips `STATUS` to `evidence_ready` when evidence is found. This skill is what flips `evidence_ready` → `verified` after the passes succeed. Never edit `STATUS` to `verified` manually: the audit trail lives in `.writing/verify-report.md`.
+**Relation to the Claim-First Protocol:** during drafting, the claim-first discipline (see `superpower-writing:main` §Claim-First Protocol) requires resolving a claim's evidence before writing prose against it — do not draft against a stub-status claim. Drafting flips `STATUS` to `evidence_ready` when evidence is found. This skill is what flips `evidence_ready` → `verified` after the passes succeed. Never edit `STATUS` to `verified` manually: the audit trail lives in `.writing/verify-report.md`.
 
-**Optional term-ordering hook.** If the project opted into `.writing/glossary.md`, a companion hook at `hooks/enforce-terms.sh` already blocked any write where a `% define:` tag landed in the wrong section or a `% use:` tag referenced a term whose `defined_in` sits later in the paper. This verification skill does **not** re-run those checks; they are edit-time invariants, not verification-gate invariants. If you suspect a term ordering drifted after manual edits outside Claude, sweep manually with `grep -n '% \(define\|use\):' .writing/manuscript/*.tex` and cross-reference `.writing/glossary.md`.
+**Optional term-ordering discipline.** If the project opted into `.writing/glossary.md`, drafting must keep every term defined before it is used: a `% define:` tag belongs in the right section, and no `% use:` tag may reference a term whose `defined_in` sits later in the paper. This verification skill does **not** re-run those checks; they are edit-time invariants, not verification-gate invariants. If you suspect a term ordering drifted after manual edits, sweep manually with `grep -n '% \(define\|use\):' .writing/manuscript/*.tex` and cross-reference `.writing/glossary.md`.
 
 ## When to Use
 
@@ -69,11 +69,11 @@ For each `.writing/manuscript/*.tex`:
    - **STATUS: stub** → FAIL: `claim '<id>' still stub; drafting did not resolve EVIDENCE`.
    - **STATUS: evidence_ready** → PASS Pass 1 (it advances through Pass 2, plus Pass 3 when run, to become `verified`).
    - **STATUS: verified** → PASS Pass 1 (already verified in prior run; Pass 2 — and Pass 3 when run — may re-validate via cache).
-5. For each paragraph that neither has `% claim:` nor `% draft-only`: check if section is allow-listed. The PreToolUse hook exempts any stem ending in `_<slug>` for slug ∈ `UNPROTECTED_SLUGS` (`abstract`, `references`, `acknowledgments`) from paragraph-tag enforcement. All other `manuscript/NN_*.tex` files require every load-bearing paragraph to carry `% claim: id` or `% draft-only`. Always-skipped within any file: LaTeX line comments (lines starting with `%`), blank lines, structural LaTeX commands (lines starting with `\section`, `\subsection`, `\begin`, `\end`, `\label`, `\caption`, etc. — the full list is in `hooks/enforce-claims.py` `STRUCTURAL_LATEX_CMDS`). Anything else fails with: `paragraph in <file>:<line> lacks % claim: id or % draft-only marker`.
+5. For each paragraph that neither has `% claim:` nor `% draft-only`: check if section is allow-listed. Any stem ending in `_<slug>` for slug ∈ {`abstract`, `references`, `acknowledgments`} (the unprotected slugs) is exempt from paragraph-tag enforcement. All other `manuscript/NN_*.tex` files require every load-bearing paragraph to carry `% claim: id` or `% draft-only`. Always-skipped within any file: LaTeX line comments (lines starting with `%`), blank lines, structural LaTeX commands (lines starting with `\section`, `\subsection`, `\begin`, `\end`, `\label`, `\caption`, etc.). Anything else fails with: `paragraph in <file>:<line> lacks % claim: id or % draft-only marker`.
 
-6. **Abstract citation-free check.** For every `manuscript/*.tex` whose stem ends in `_abstract` (slug-ending match against `CITATION_FREE_SLUGS`), grep for any LaTeX citation command (`\\[a-zA-Z]*cite[a-zA-Z]*\b` — covers `\cite`, `\citep`, `\citet`, `\nocite`, `\parencite`, `\textcite`, `\autocite`, `\footcite`, `\citeauthor`, `\citeyear`, `\citealt`, `\citealp`, etc.) and for any `% claim:` tag. Any hit is a FAIL: `abstract must not contain citations or claim tags; found <token> at <file>:<line>`. This mirrors the PreToolUse hook's `CITATION_FREE_SLUGS` rule and catches files written before the hook was installed or edited outside Claude.
+6. **Abstract citation-free check.** For every `manuscript/*.tex` whose stem ends in `_abstract`, grep for any LaTeX citation command (`\\[a-zA-Z]*cite[a-zA-Z]*\b` — covers `\cite`, `\citep`, `\citet`, `\nocite`, `\parencite`, `\textcite`, `\autocite`, `\footcite`, `\citeauthor`, `\citeyear`, `\citealt`, `\citealp`, etc.) and for any `% claim:` tag. Any hit is a FAIL: `abstract must not contain citations or claim tags; found <token> at <file>:<line>`. Abstracts must stay citation-free; this catches files that drifted from that rule during manual edits.
 
-**Allow-list is configurable.** Support `.writing/verify-config.yaml` with key `allowlist_sections: [<filename>, ...]` — if present, those filenames extend the hook's default exemption set for this skill's checks.
+**Allow-list is configurable.** Support `.writing/verify-config.yaml` with key `allowlist_sections: [<filename>, ...]` — if present, those filenames extend the default exemption set (the unprotected slugs above) for this skill's checks.
 
 ### Step 2: Pass 2: Citation Resolution (dual source of truth)
 
@@ -96,10 +96,10 @@ For each claim that passed Pass 1 with `type: citation` EVIDENCE entries:
 
 1. Check `.writing/verify-cache.json` for the DOI. If present AND `source` field indicates successful prior resolution, use cached abstract_hash to confirm abstract still matches (re-fetch abstract only if hash mismatch or cache entry absent).
 2. On cache miss / mismatch, invoke `Skill(skill="superpower-writing:citation-management")` with the DOI. This resolves the DOI against Crossref and returns canonical metadata.
-3. On failure or ambiguity, invoke `Skill(skill="superpower-writing:research-lookup")` with the DOI and the CLAIM text. research-lookup queries Crossref/PubMed and returns abstract + metadata.
+3. On failure or ambiguity, invoke `Skill(skill="superpower-writing:research-lookup")` with the DOI and the CLAIM text. research-lookup queries Crossref (and optionally Semantic Scholar / arXiv / DBLP for CS) and returns abstract + metadata.
 4. **Network hit:** record `source: network` in the claim EVIDENCE entry.
 5. **`auto_push_new_citations: true` behavior:** if Zotero is enabled AND auto_push is true AND network (not Zotero) returned the hit, push the resolved item to `zotero.collection_key` by calling `zotero_add_by_doi(doi=<DOI>, collection_key=<key>)` from the `zotero` MCP server. The tool dedupes by DOI internally. Update EVIDENCE `source` to `both` and record the returned item key as `zotero_item_key`.
-6. **Network miss AND Zotero miss:** FAIL: `DOI <doi> for claim '<id>' unresolvable via Zotero or Crossref/PubMed`.
+6. **Network miss AND Zotero miss:** FAIL: `DOI <doi> for claim '<id>' unresolvable via Zotero or Crossref`.
 
 #### 2c. Semantic match
 
@@ -108,7 +108,7 @@ Once an abstract is in hand (from Zotero or network):
 1. Compute abstract hash and store in `.writing/verify-cache.json` keyed by DOI: `{source, resolved_at, abstract_hash, abstract_excerpt}`.
 2. Perform an LLM-based semantic match: does the abstract plausibly support the CLAIM text? Use a strict rubric: the claim must not contradict the abstract; the abstract's findings/methods must overlap with the claim's substantive content.
 3. **Match PASS:** record PASS in report with excerpt of supporting abstract sentence.
-4. **Match FAIL:** record FAIL with reason (e.g., "abstract describes mouse model; claim is about human cohort"). This is a soft failure — surface to user for manual review rather than auto-rejecting (semantic match has known FP/FN issues). User confirms or overrides in report before the claim is marked verified.
+4. **Match FAIL:** record FAIL with reason (e.g., "abstract describes CIFAR-10 results; claim is about ImageNet"). This is a soft failure — surface to user for manual review rather than auto-rejecting (semantic match has known FP/FN issues). User confirms or overrides in report before the claim is marked verified.
 5. **Abstract ambiguous, body lookup:** if the abstract neither clearly supports nor contradicts the claim AND `source: zotero*`, call `zotero_semantic_search(query=<CLAIM text>, filters={"parent_item_key": <key>}, limit=3)` to surface the three most-relevant chunks from the paper body. Re-run the semantic match against those chunks' `matched_text`. Only escalate to fetching full body via `zotero_get_item_fulltext(item_key=<key>)` if the chunk-level check remains ambiguous — fulltext returns the whole paper (often 70K+ chars) and must be read with narrow grep / offset-limit windows, not loaded wholesale into context.
 
 #### 2d. Non-citation EVIDENCE
@@ -130,7 +130,7 @@ Purpose: catch copy-paste drift between prose and tables. Skip during early skel
    Capture `n=`, percentages, p-values, confidence intervals, plain counts.
 2. Build a ground-truth number pool from all tables (LaTeX `tabular` rows — cells separated by `&`, rows terminated by `\\`) across manuscript/*.tex and all figure captions (`\caption{...}` inside `figure` environments).
 3. For each prose number, confirm it appears verbatim in the ground-truth pool. FAIL otherwise.
-4. Support `.writing/verify-config.yaml` `numeric_overrides: [<number>, ...]` for narrative numbers that are not table-backed (e.g., round references like "a 2018 cohort"). Numbers in this list skip the check.
+4. Support `.writing/verify-config.yaml` `numeric_overrides: [<number>, ...]` for narrative numbers that are not table-backed (e.g., round references like "a 2018 benchmark"). Numbers in this list skip the check.
 5. Per-claim attribution: a FAIL on number `1,247` inside a paragraph tagged `% claim: meth-c1` attaches to claim `meth-c1` in the report.
 
 ### Optional research-integrity gate (experiment-bearing papers)
@@ -159,7 +159,7 @@ Write `.writing/verify-report.md` with exact structure:
 - Pass 3: PASS (numbers 1247, 0.03 confirmed in Table 1) — or n/a if not run
 
 ### claim '<id>' — FAIL
-- Pass 2: FAIL — DOI 10.xxxx/zzz unresolvable via Zotero or Crossref/PubMed
+- Pass 2: FAIL — DOI 10.xxxx/zzz unresolvable via Zotero or Crossref
 - Action: add citation to Zotero collection '<key>' or fix DOI
 
 ### claim '<id>' — SOFT-FAIL (semantic match)
@@ -222,7 +222,7 @@ Verification depends on `metadata.yaml` being complete. If claim-verification en
 
 ### Never auto-edit the manuscript
 
-This skill reads `.writing/manuscript/*.tex` and writes `.writing/claims/*.md` STATUS fields and the report. It does not touch manuscript prose. Manuscript changes go through drafting (or the human author's manual edits), which pass the PreToolUse hook's claim gate.
+This skill reads `.writing/manuscript/*.tex` and writes `.writing/claims/*.md` STATUS fields and the report. It does not touch manuscript prose. Manuscript changes go through drafting (or the human author's manual edits), which follow the claim-first drafting discipline.
 
 ### Report is the audit trail
 

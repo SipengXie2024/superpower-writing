@@ -76,22 +76,6 @@ EOF
   exit 1
 fi
 
-# The PreToolUse hook (hooks/enforce-claims.py) requires PyYAML. Probe both
-# import AND a real parse so a broken/partial install fails at SessionStart
-# rather than at the first manuscript Edit.
-if ! python3 -c "import yaml; yaml.safe_load('a: 1')" 2>/dev/null; then
-  cat >&2 <<EOF
-[superpower-writing] Dependency check FAILED.
-
-Bundled skills OK, but PyYAML is missing or broken. The PreToolUse hook
-parses YAML claim files and will block every manuscript write until it is
-installed and parsing correctly:
-
-    pip install --user --upgrade pyyaml
-EOF
-  exit 1
-fi
-
 # ── Figure-generation backend (Codex CLI) — warning only ────────────────
 # scientific-schematics delegates diagram generation to Codex's native
 # image_gen via the collaborating-with-codex bridge. The bridge needs the
@@ -107,5 +91,5 @@ Everything else in the plugin works without it.
 EOF
 fi
 
-echo "[superpower-writing] deps OK (skills at $found_root; PyYAML present)"
+echo "[superpower-writing] deps OK (skills at $found_root)"
 exit 0

@@ -57,7 +57,7 @@ Each labeled bullet seeds a claim stub in `.writing/claims/section_<NN>_backgrou
 
 ## Draft requirement
 
-The matching `.writing/manuscript/<NN>_background.tex` MUST be structured as **4–6 paragraphs** matching the outline's element ordering. Each paragraph MUST be preceded by a LaTeX line comment marking its element. §Background's stem does NOT end in an unprotected slug, so every paragraph also needs a `% claim: id` (or `% draft-only`) tag for the PreToolUse hook:
+The matching `.writing/manuscript/<NN>_background.tex` MUST be structured as **4–6 paragraphs** matching the outline's element ordering. Each paragraph MUST be preceded by a LaTeX line comment marking its element. §Background's stem does NOT end in an unprotected slug, so every paragraph also needs a `% claim: id` (or `% draft-only`) tag (claim-first discipline):
 
 ```latex
 \section{Background}

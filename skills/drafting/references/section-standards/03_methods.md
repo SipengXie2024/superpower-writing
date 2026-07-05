@@ -74,7 +74,7 @@ Each labeled bullet seeds a claim stub in `.writing/claims/section_<NN>_methods.
 
 ## Draft requirement
 
-The matching `.writing/manuscript/<NN>_methods.tex` is typically organized as multiple subsections (\subsection{Overview}, \subsection{Formalization}, \subsection{Core Design}, etc.), each spanning one or more paragraphs. The LaTeX-comment-tag rule applies at the **paragraph** level, not the subsection level: at least one paragraph per element type carries the matching `% methods: X` tag, in addition to the `% claim: id` tag required by the PreToolUse hook (§Methods stem does not end in an unprotected slug).
+The matching `.writing/manuscript/<NN>_methods.tex` is typically organized as multiple subsections (\subsection{Overview}, \subsection{Formalization}, \subsection{Core Design}, etc.), each spanning one or more paragraphs. The LaTeX-comment-tag rule applies at the **paragraph** level, not the subsection level: at least one paragraph per element type carries the matching `% methods: X` tag, in addition to the `% claim: id` tag required by the claim-first discipline (§Methods stem does not end in an unprotected slug).
 
 ```latex
 \section{Methods}

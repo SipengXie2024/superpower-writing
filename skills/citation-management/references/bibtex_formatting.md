@@ -43,22 +43,22 @@ This guide covers all common entry types and formatting rules.
   volume  = {10},
   number  = {3},
   pages   = {123--145},
-  doi     = {10.1234/journal.2024.123456},
+  doi     = {10.1145/journal.2024.123456},
   month   = jan
 }
 ```
 
 **Example**:
 ```bibtex
-@article{Jumper2021,
-  author  = {Jumper, John and Evans, Richard and Pritzel, Alexander and others},
-  title   = {Highly Accurate Protein Structure Prediction with {AlphaFold}},
-  journal = {Nature},
-  year    = {2021},
-  volume  = {596},
-  number  = {7873},
-  pages   = {583--589},
-  doi     = {10.1038/s41586-021-03819-2}
+@article{Krizhevsky2017,
+  author  = {Krizhevsky, Alex and Sutskever, Ilya and Hinton, Geoffrey E.},
+  title   = {{ImageNet} Classification with Deep Convolutional Neural Networks},
+  journal = {Communications of the {ACM}},
+  year    = {2017},
+  volume  = {60},
+  number  = {6},
+  pages   = {84--90},
+  doi     = {10.1145/3065386}
 }
 ```
 
@@ -95,14 +95,14 @@ This guide covers all common entry types and formatting rules.
 
 **Example**:
 ```bibtex
-@book{Kumar2021,
-  author    = {Kumar, Vinay and Abbas, Abul K. and Aster, Jon C.},
-  title     = {Robbins and Cotran Pathologic Basis of Disease},
-  publisher = {Elsevier},
-  year      = {2021},
-  edition   = {10},
-  address   = {Philadelphia, PA},
-  isbn      = {978-0-323-53113-9}
+@book{Cormen2009,
+  author    = {Cormen, Thomas H. and Leiserson, Charles E. and Rivest, Ronald L. and Stein, Clifford},
+  title     = {Introduction to Algorithms},
+  publisher = {{MIT} Press},
+  year      = {2009},
+  edition   = {3},
+  address   = {Cambridge, MA},
+  isbn      = {978-0-262-03384-8}
 }
 ```
 
@@ -192,15 +192,15 @@ This guide covers all common entry types and formatting rules.
 
 **Example**:
 ```bibtex
-@incollection{Brown2020,
-  author    = {Brown, Peter O. and Botstein, David},
-  title     = {Exploring the New World of the Genome with {DNA} Microarrays},
-  booktitle = {DNA Microarrays: A Molecular Cloning Manual},
-  editor    = {Eisen, Michael B. and Brown, Patrick O.},
-  publisher = {Cold Spring Harbor Laboratory Press},
-  year      = {2020},
-  pages     = {1--45},
-  address   = {Cold Spring Harbor, NY}
+@incollection{Lamport2019,
+  author    = {Lamport, Leslie},
+  title     = {The {Part-Time} Parliament},
+  booktitle = {Concurrency: The Works of Leslie Lamport},
+  editor    = {Malkhi, Dahlia},
+  publisher = {{ACM}},
+  year      = {2019},
+  pages     = {277--317},
+  address   = {New York, NY}
 }
 ```
 
@@ -237,7 +237,7 @@ This guide covers all common entry types and formatting rules.
 ```bibtex
 @phdthesis{Johnson2023,
   author  = {Johnson, Mary L.},
-  title   = {Novel Approaches to Cancer Immunotherapy Using {CRISPR} Technology},
+  title   = {Efficient Training of Deep {CNN} Architectures on {GPU} Clusters},
   school  = {Stanford University},
   year    = {2023},
   type    = {{PhD} dissertation},
@@ -289,9 +289,8 @@ This guide covers all common entry types and formatting rules.
   author       = {Last, First},
   title        = {Preprint Title},
   year         = {2024},
-  howpublished = {bioRxiv},
-  doi          = {10.1101/2024.01.01.123456},
-  note         = {Preprint}
+  howpublished = {arXiv},
+  note         = {arXiv:1810.04805}
 }
 ```
 
@@ -401,11 +400,11 @@ This guide covers all common entry types and formatting rules.
 
 **Examples**:
 ```bibtex
-Smith2024protein
+Smith2024neural
 Doe2023machine
-JohnsonWilliams2024cancer  % Multiple authors, no space
-NatureEditorial2024        % No author, use publication
-WHO2024guidelines          % Organization author
+JohnsonWilliams2024consensus  % Multiple authors, no space
+CACMEditorial2024             % No author, use publication
+W3C2024guidelines             % Organization author
 ```
 
 **Rules**:
@@ -448,15 +447,15 @@ author = {Smith, John and Doe, Jane and Johnson, Mary and others}
 author = {King, Jr., Martin Luther}
 
 % Organization as author
-author = {{World Health Organization}}
+author = {{Association for Computing Machinery}}
 % Note: Double braces keep as single entity
 
 % Multiple surnames
 author = {Garc{\'i}a-Mart{\'i}nez, Jos{\'e}}
 
 % Particles (van, von, de, etc.)
-author = {van der Waals, Johannes}
-author = {de Broglie, Louis}
+author = {van Rossum, Guido}
+author = {de Moura, Leonardo}
 ```
 
 **Wrong formats** (don't use):
@@ -473,10 +472,10 @@ author = {Smith J}             % No comma
 
 ```bibtex
 % Proper nouns, acronyms, formulas
-title = {{AlphaFold}: Protein Structure Prediction}
-title = {Machine Learning for {DNA} Sequencing}
-title = {The {Ising} Model in Statistical Physics}
-title = {{CRISPR-Cas9} Gene Editing Technology}
+title = {{BERT}: Pre-training of Deep Transformers}
+title = {Machine Learning for {SQL} Query Optimization}
+title = {Training {ResNet} on {ImageNet}}
+title = {{LSTM} Networks for Sequence Modeling}
 ```
 
 **Reason**: Citation styles may change capitalization. Braces protect.
@@ -484,12 +483,12 @@ title = {{CRISPR-Cas9} Gene Editing Technology}
 **Examples**:
 ```bibtex
 % Good
-title = {Advances in {COVID-19} Treatment}
+title = {Advances in {GPU} Computing}
 title = {Using {Python} for Data Analysis}
-title = {The {AlphaFold} Protein Structure Database}
+title = {The {ImageNet} Large Scale Visual Recognition Challenge}
 
 % Will be lowercase in title case styles
-title = {Advances in COVID-19 Treatment}  % covid-19
+title = {Advances in GPU Computing}  % gpu
 title = {Using Python for Data Analysis}  % python
 ```
 
@@ -505,7 +504,7 @@ title = {{This Entire Title Keeps Its Capitalization}}
 ```bibtex
 pages = {123--145}     % Correct
 pages = {1234--1256}   % Correct
-pages = {e0123456}     % Article ID (PLOS, etc.)
+pages = {42}           % Article number (ACM journals)
 pages = {123}          % Single page
 ```
 
@@ -553,11 +552,11 @@ month = {January}
 **Full name** (not abbreviated):
 
 ```bibtex
-journal = {Nature}
-journal = {Science}
-journal = {Cell}
-journal = {Proceedings of the National Academy of Sciences}
-journal = {Journal of the American Chemical Society}
+journal = {Communications of the {ACM}}
+journal = {Journal of the {ACM}}
+journal = {{IEEE} Transactions on Computers}
+journal = {Journal of Machine Learning Research}
+journal = {{ACM} Computing Surveys}
 ```
 
 **Bibliography style** will handle abbreviation if needed.
@@ -565,15 +564,15 @@ journal = {Journal of the American Chemical Society}
 **Avoid manual abbreviation**:
 ```bibtex
 % Don't do this in BibTeX file
-journal = {Proc. Natl. Acad. Sci. U.S.A.}
+journal = {{IEEE} Trans. Pattern Anal. Mach. Intell.}
 
 % Do this instead
-journal = {Proceedings of the National Academy of Sciences}
+journal = {{IEEE} Transactions on Pattern Analysis and Machine Intelligence}
 ```
 
 **Exception**: If style requires abbreviations, use full abbreviated form:
 ```bibtex
-journal = {Proc. Natl. Acad. Sci. U.S.A.}  % If required by style
+journal = {{IEEE} Trans. Pattern Anal. Mach. Intell.}  % If required by style
 ```
 
 ### DOI Formatting
@@ -581,13 +580,13 @@ journal = {Proc. Natl. Acad. Sci. U.S.A.}  % If required by style
 **URL format** (preferred):
 
 ```bibtex
-doi = {10.1038/s41586-021-03819-2}
+doi = {10.1145/3065386}
 ```
 
 **Not**:
 ```bibtex
-doi = {https://doi.org/10.1038/s41586-021-03819-2}  % Don't include URL
-doi = {doi:10.1038/s41586-021-03819-2}              % Don't include prefix
+doi = {https://doi.org/10.1145/3065386}  % Don't include URL
+doi = {doi:10.1145/3065386}              % Don't include prefix
 ```
 
 **LaTeX** will format as URL automatically.
@@ -608,8 +607,8 @@ url = {https://www.example.com/article}
 **Don't duplicate**:
 ```bibtex
 % Don't include both if DOI URL is same as url
-doi = {10.1038/nature12345}
-url = {https://doi.org/10.1038/nature12345}  % Redundant!
+doi = {10.1145/journal.2024.123456}
+url = {https://doi.org/10.1145/journal.2024.123456}  % Redundant!
 ```
 
 ### Special Characters
@@ -630,15 +629,15 @@ author = {García, José}
 
 **Mathematical symbols**:
 ```bibtex
-title = {The $\alpha$-helix Structure}
-title = {$\beta$-sheet Prediction}
+title = {An $O(n \log n)$ Complexity Bound}
+title = {$\epsilon$-Greedy Exploration}
 ```
 
-**Chemical formulas**:
+**Superscripts and subscripts**:
 ```bibtex
-title = {H$_2$O Molecular Dynamics}
-% Or with chemformula package:
-title = {\ce{H2O} Molecular Dynamics}
+title = {The $\lambda$-Calculus}
+% Superscripts and subscripts in math mode:
+title = {Balanced $B^{+}$ Trees with $O(\log n)$ Height}
 ```
 
 ### Field Order
@@ -686,9 +685,9 @@ Always include:
 ### 3. Protect Capitalization
 
 Use braces for:
-- Proper nouns: `{AlphaFold}`
-- Acronyms: `{DNA}`, `{CRISPR}`
-- Formulas: `{H2O}`
+- Proper nouns: `{ImageNet}`
+- Acronyms: `{BERT}`, `{CNN}`
+- Mixed case: `{ResNet}`
 - Names: `{Python}`, `{R}`
 
 ### 4. Complete Author Lists
@@ -802,39 +801,39 @@ pages = {123--145}
 
 **Wrong**:
 ```bibtex
-doi = {https://doi.org/10.1038/nature12345}
-doi = {doi:10.1038/nature12345}
+doi = {https://doi.org/10.1145/journal.2024.123456}
+doi = {doi:10.1145/journal.2024.123456}
 ```
 
 **Correct**:
 ```bibtex
-doi = {10.1038/nature12345}
+doi = {10.1145/journal.2024.123456}
 ```
 
 ## Example Complete Bibliography
 
 ```bibtex
 % Journal article
-@article{Jumper2021,
-  author  = {Jumper, John and Evans, Richard and Pritzel, Alexander and others},
-  title   = {Highly Accurate Protein Structure Prediction with {AlphaFold}},
-  journal = {Nature},
-  year    = {2021},
-  volume  = {596},
-  number  = {7873},
-  pages   = {583--589},
-  doi     = {10.1038/s41586-021-03819-2}
+@article{Krizhevsky2017,
+  author  = {Krizhevsky, Alex and Sutskever, Ilya and Hinton, Geoffrey E.},
+  title   = {{ImageNet} Classification with Deep Convolutional Neural Networks},
+  journal = {Communications of the {ACM}},
+  year    = {2017},
+  volume  = {60},
+  number  = {6},
+  pages   = {84--90},
+  doi     = {10.1145/3065386}
 }
 
 % Book
-@book{Kumar2021,
-  author    = {Kumar, Vinay and Abbas, Abul K. and Aster, Jon C.},
-  title     = {Robbins and Cotran Pathologic Basis of Disease},
-  publisher = {Elsevier},
-  year      = {2021},
-  edition   = {10},
-  address   = {Philadelphia, PA},
-  isbn      = {978-0-323-53113-9}
+@book{Cormen2009,
+  author    = {Cormen, Thomas H. and Leiserson, Charles E. and Rivest, Ronald L. and Stein, Clifford},
+  title     = {Introduction to Algorithms},
+  publisher = {{MIT} Press},
+  year      = {2009},
+  edition   = {3},
+  address   = {Cambridge, MA},
+  isbn      = {978-0-262-03384-8}
 }
 
 % Conference paper
@@ -847,43 +846,41 @@ doi = {10.1038/nature12345}
 }
 
 % Book chapter
-@incollection{Brown2020,
-  author    = {Brown, Peter O. and Botstein, David},
-  title     = {Exploring the New World of the Genome with {DNA} Microarrays},
-  booktitle = {DNA Microarrays: A Molecular Cloning Manual},
-  editor    = {Eisen, Michael B. and Brown, Patrick O.},
-  publisher = {Cold Spring Harbor Laboratory Press},
-  year      = {2020},
-  pages     = {1--45}
+@incollection{Lamport2019,
+  author    = {Lamport, Leslie},
+  title     = {The {Part-Time} Parliament},
+  booktitle = {Concurrency: The Works of Leslie Lamport},
+  editor    = {Malkhi, Dahlia},
+  publisher = {{ACM}},
+  year      = {2019},
+  pages     = {277--317}
 }
 
 % PhD thesis
 @phdthesis{Johnson2023,
   author  = {Johnson, Mary L.},
-  title   = {Novel Approaches to Cancer Immunotherapy},
+  title   = {Efficient Training of Deep {CNN} Architectures on {GPU} Clusters},
   school  = {Stanford University},
   year    = {2023},
   type    = {{PhD} dissertation}
 }
 
 % Preprint
-@misc{Zhang2024,
-  author       = {Zhang, Yi and Chen, Li and Wang, Hui},
-  title        = {Novel Therapeutic Targets in {Alzheimer}'s Disease},
-  year         = {2024},
-  howpublished = {bioRxiv},
-  doi          = {10.1101/2024.01.001},
-  note         = {Preprint}
+@misc{Devlin2019,
+  author       = {Devlin, Jacob and Chang, Ming-Wei and Lee, Kenton and Toutanova, Kristina},
+  title        = {{BERT}: Pre-training of Deep Bidirectional Transformers for Language Understanding},
+  year         = {2019},
+  howpublished = {arXiv},
+  note         = {arXiv:1810.04805}
 }
 
 % Dataset
-@misc{AlphaFoldDB2021,
-  author       = {{DeepMind} and {EMBL-EBI}},
-  title        = {{AlphaFold} Protein Structure Database},
-  year         = {2021},
-  howpublished = {Database},
-  url          = {https://alphafold.ebi.ac.uk/},
-  doi          = {10.1093/nar/gkab1061}
+@misc{ImageNet2009,
+  author       = {{Stanford Vision Lab} and {Princeton University}},
+  title        = {{ImageNet}: A Large-Scale Hierarchical Image Database},
+  year         = {2009},
+  howpublished = {Dataset},
+  url          = {https://www.image-net.org/}
 }
 ```
 

@@ -34,7 +34,7 @@ Use this checklist to ensure your citations are accurate, complete, and properly
 - [ ] Page ranges use double hyphen (--) not single (-)
 - [ ] No "pp." prefix in pages field
 - [ ] Author names use "and" separator (not semicolon or ampersand)
-- [ ] Capitalization protected in titles ({AlphaFold}, {CRISPR}, etc.)
+- [ ] Capitalization protected in titles ({BERT}, {ResNet}, etc.)
 - [ ] Month names use standard abbreviations if included
 - [ ] Citation keys follow consistent format
 
@@ -160,13 +160,6 @@ For your most important citations, manually verify:
 
 ## Field-Specific Checks
 
-### Biomedical Sciences
-
-- [ ] PubMed Central ID (PMCID) included when available
-- [ ] MeSH terms appropriate (if using)
-- [ ] Clinical trial registration number included (if applicable)
-- [ ] All references to treatments/drugs accurately cited
-
 ### Computer Science
 
 - [ ] arXiv ID included for preprints
@@ -265,11 +258,8 @@ python scripts/extract_metadata.py --doi CORRECT_DOI
 # Extract from DOI
 python scripts/extract_metadata.py --doi 10.xxxx/yyyy
 
-# Or from PMID (biomedical)
-python scripts/extract_metadata.py --pmid 12345678
-
 # Or from arXiv
-python scripts/extract_metadata.py --arxiv 2103.12345
+python scripts/extract_metadata.py --arxiv 1706.03762
 ```
 
 ### Duplicate Entries
@@ -321,13 +311,12 @@ python scripts/validate_citations.py fixed_references.bib
 
 ```bash
 # From DOI
-python scripts/doi_to_bibtex.py 10.1038/nature12345
+python scripts/doi_to_bibtex.py 10.1145/3065386
 
 # From multiple sources
 python scripts/extract_metadata.py \
-  --doi 10.1038/nature12345 \
-  --pmid 12345678 \
-  --arxiv 2103.12345 \
+  --doi 10.1145/3065386 \
+  --arxiv 1706.03762 \
   --output references.bib
 ```
 

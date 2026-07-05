@@ -449,7 +449,7 @@
 - **发现日期**：2026-05-18
 
 #### [通用] 窄 box 内的多词标签必须量字符数 vs 宽度
-- **问题/发现 (R3-100 Batch 2, fig15 protein structures β-sheet 面板)**：4 个标签 "side chain (R)" / "antiparallel sheet" / "R groups alternate above/below sheet" / "twist (slight)" 在 ~2-2.5cm 宽的色块标签内**明显被切断**（PNG 渲染看得清清楚楚），但 sub-agent 自评 T4 "标签不被截断" 给的是 Y，35/35 全 Y。
+- **问题/发现 (R3-100 Batch 2, fig15 transformer block 面板)**：4 个标签 "multi-head attention" / "position-wise FFN" / "residual + layer norm around sublayer" / "dropout (p=0.1)" 在 ~2-2.5cm 宽的色块标签内**明显被切断**（PNG 渲染看得清清楚楚），但 sub-agent 自评 T4 "标签不被截断" 给的是 Y，35/35 全 Y。
 - **根因**：T4 抽象问题"被截断吗"对长标签的自评不可靠——视觉上看 box，文字"看起来差不多塞进去了"。**实际溢出在 PDF 边界外，PNG 渲染时被裁掉**。自评看不到溢出部分。
 - **解决方案**：T4 强化为**强制度量**——对每个 text width < 3cm 的标签盒，自评必须写 "label X (Ncm) in box (Mcm) → fit ✓/✗"。中文每字 ~0.4cm，英文每字 ~0.2cm。已更新 visual-review-checklist.md T4 语言。
 - **触发场景**：右栏 annotation 标签盒、legend 项、emoji-style 色块标签
@@ -565,7 +565,7 @@
 > Batch 6: Latex tip + rounded corners + hero no side-dep 等 Batch 5 规则全部被 sub-agent 主动应用。但用户红框点出 **9/10 张图**仍有问题，主要 3 类：重叠、路径不连续、虚线非 90°。**承认**：箭头末端规则迭代 4 轮（Stealth → scale → shape → ...）仍未根治，可能需要 concrete code template 而非更多 rules。
 
 #### [重叠] S3 自评不可靠 — 必须强制枚举每处重叠
-- **问题/发现 (R3-100 Batch 6, fig55 ATP / fig58 CLIP / fig60 CRISPR)**：3 张图 sub-agent 自评 S3=Y，用户全部能看到重叠。S3 "节点框不重叠" 是抽象问题，被印象判断滑过
+- **问题/发现 (R3-100 Batch 6, fig55 cache hierarchy / fig58 CLIP / fig60 MapReduce)**：3 张图 sub-agent 自评 S3=Y，用户全部能看到重叠。S3 "节点框不重叠" 是抽象问题，被印象判断滑过
 - **重叠类型**：(a) box vs box，(b) text vs line，(c) leader vs unrelated element，(d) annotation vs background zone
 - **S3 强化**：sub-agent 自评必须**逐一扫描整图标出每处视觉重叠**，写出 "N 处重叠：位置 / 类型" 或 "0 处重叠"。禁止"看起来没重叠"印象判断
 - **发现日期**：2026-05-18
@@ -719,9 +719,9 @@
 - **发现日期**：2026-05-20
 
 #### [Batch 12 用户复审] Fan-in canonical 缺失 + 颜色不一致 + 孤立 legend 点
-- **问题/发现 (R3-100 Batch 12, fig120 CRISPR-Cas9 用户截图)**：
-  1. **Y-junction "><绿尖"** (crRNA + tracrRNA → sgRNA)：两条 incoming 用 `\draw[arrow]` 都带 tip 在汇合点（"><"），且 incoming 蓝色 / outgoing 青色 — 颜色不一致 + 双 tip 对撞
-  2. **fan-out spine 黑 + stub 彩** (DSB → NHEJ/HDR)：spine `color=black!70` 1.4pt vs stub `color=acaPurpleLine/acaGreenLine` 1.2pt → 折角处看上去断 + 颜色突变
+- **问题/发现 (R3-100 Batch 12, fig120 consensus protocol 用户截图)**：
+  1. **Y-junction "><绿尖"** (voteA + voteB → quorum)：两条 incoming 用 `\draw[arrow]` 都带 tip 在汇合点（"><"），且 incoming 蓝色 / outgoing 青色 — 颜色不一致 + 双 tip 对撞
+  2. **fan-out spine 黑 + stub 彩** (leader → follower1 / follower2)：spine `color=black!70` 1.4pt vs stub `color=acaPurpleLine/acaGreenLine` 1.2pt → 折角处看上去断 + 颜色突变
   3. **4 个孤立彩色圆点漂浮**（蓝/橙/灰/红）无 label 无 leader — sub-agent 大概想画 legend 标记但忘了 label
 - **根因（skill 5 处漏洞）**：
   - **E3 只有 fan-out canonical，没有 fan-in canonical** — sub-agent 不知道 N→1 怎么画，模仿 fan-out 反过来 → 错

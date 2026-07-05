@@ -15,7 +15,7 @@ This skill does NOT run experiments, edit the manuscript prose, generate new the
 
 **Iron law:** No `STATUS: final` flip on the response without all three gates passing in `.writing/reviews/REBUTTAL_STATE.md`.
 
-**Relation to the claim-first hook.** During drafting, a PreToolUse hook (see `superpower-writing:main` Claim-First Protocol) blocks prose writes that lack a backed claim. The rebuttal Provenance gate is the same discipline pointed at the response letter. Where the hook asks "does this manuscript paragraph have a backed claim?", the gate asks "does this response sentence have a source?". Same answer when neither has one: blocked.
+**Relation to the claim-first discipline.** During drafting, the claim-first protocol (see `superpower-writing:main` Claim-First Protocol) requires that prose only be written against a backed claim. The rebuttal Provenance gate is the same discipline pointed at the response letter. Where the protocol asks "does this manuscript paragraph have a backed claim?", the gate asks "does this response sentence have a source?". Same answer when neither has one: blocked.
 
 **AUTHOR_INPUT_NEEDED is the [NEEDS-EVIDENCE] of rebuttals.** In drafting, `[NEEDS-EVIDENCE]` marks a claim whose support is not yet on disk. In a rebuttal, `AUTHOR_INPUT_NEEDED` marks a response whose facts the author has not yet supplied. Both are visible placeholders that block finalization, never silent gaps. Both surface to the user; neither is fabricated away.
 
@@ -213,7 +213,7 @@ Alongside the draft, write `.writing/reviews/REVISION_PLAN.md`: one atomic check
 
 These are the finalize blockers. Run all three. If any fails, surface the failures to the user and do not flip `STATUS: final`. Record the result in `REBUTTAL_STATE.md`.
 
-**Gate 1: Provenance.** Walk every factual sentence in `RESPONSE_DRAFT.md`. Each must map to one basis: `paper`, `verified_claim`, `user_confirmed_result`, `user_confirmed_derivation`, or `future_work`. A sentence with no source is BLOCKED. This is the rebuttal analog of the claim-first hook: no source, no sentence. Surface each unsourced sentence as a blocker with its line.
+**Gate 1: Provenance.** Walk every factual sentence in `RESPONSE_DRAFT.md`. Each must map to one basis: `paper`, `verified_claim`, `user_confirmed_result`, `user_confirmed_derivation`, or `future_work`. A sentence with no source is BLOCKED. This is the rebuttal analog of the claim-first discipline: no source, no sentence. Surface each unsourced sentence as a blocker with its line.
 
 **Gate 2: Commitment.** Walk every promise in the draft. Each must map to one state: `already_done`, `approved_for_rebuttal`, or `future_work_only`. A promise the user did not approve is BLOCKED. Then cross-check: every paper-edit promise in the draft appears as a `REVISION_PLAN.md` line, and every plan line maps back to a draft promise. Orphans on either side are a violation.
 
@@ -247,7 +247,7 @@ When a new reviewer comment arrives after the first response:
 
 ## Key Principles
 
-**Provenance is the claim-first hook for rebuttals.** The manuscript hook blocks an untagged paragraph at write time. The Provenance gate blocks an unsourced response sentence at finalize time. The discipline is identical: a factual statement earns its place by pointing at a source. Treat a blocked sentence as a signal to find the source or soften the claim, not an obstacle to route around.
+**Provenance is the claim-first discipline for rebuttals.** The manuscript discipline forbids an untagged paragraph at write time. The Provenance gate blocks an unsourced response sentence at finalize time. The discipline is identical: a factual statement earns its place by pointing at a source. Treat a blocked sentence as a signal to find the source or soften the claim, not an obstacle to route around.
 
 **AUTHOR_INPUT_NEEDED mirrors [NEEDS-EVIDENCE].** Both are visible, on-disk placeholders for a gap the author must fill. Both block finalization. Neither is ever fabricated away. When you do not have the fact, mark it and surface it; do not invent a plausible-looking number.
 

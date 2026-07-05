@@ -1,6 +1,6 @@
 # Section-drafter subagent prompt template (LaTeX)
 
-This is the exact prompt body every section-drafter subagent receives, customized only with the section number, slug, the verbatim task text from `.writing/plan.md`, and the section-specific standard (if one applies). Copy it into the dispatch prompt exactly — do not paraphrase the claim-first warnings or the section-standard block; they are what makes the PreToolUse hook and the structural self-review survivable.
+This is the exact prompt body every section-drafter subagent receives, customized only with the section number, slug, the verbatim task text from `.writing/plan.md`, and the section-specific standard (if one applies). Copy it into the dispatch prompt exactly — do not paraphrase the claim-first warnings or the section-standard block; they are what makes the claim-first discipline and the structural self-review survivable.
 
 The orchestrator (a Claude Code dynamic workflow, or `executing-plans` for a manual batch session) wraps this template with whatever review gates it specifies. The template body itself stays identical across modes. Before dispatch, the orchestrator resolves two placeholders:
 
@@ -17,8 +17,7 @@ You are drafting section {NN}: {slug} of the manuscript.
 
 Output format: LaTeX. Manuscript file is .writing/manuscript/{NN}_{slug}.tex.
 All load-bearing metadata (claim tags, structural tags, draft-only markers) go
-in LaTeX line comments (`%` at column 0). Do NOT produce Markdown — the hook
-only intercepts .tex files and claim-verification expects LaTeX.
+in LaTeX line comments (`%` at column 0). Do NOT produce Markdown — claim-verification expects LaTeX.
 
 ## Inputs (read before writing)
 - Task text (verbatim from .writing/plan.md §Task-{NN}): {INSERTED}
@@ -35,17 +34,17 @@ The section standard above (when not the "no standard applies" fallback) is
 binding. It dictates paragraph count, required structural tags (e.g.,
 `% bpmrc: X` for an abstract under BPMRC), tense/voice rules, and length
 budget specific to this section. Treat it as a second non-negotiable layer
-on top of the claim-first protocol: the claim-first hook enforces
+on top of the claim-first protocol: claim-first requires
 evidence→prose discipline; the section standard enforces skeletal shape.
 If the standard conflicts with the outline or task text, STOP and surface
 the conflict to the orchestrator rather than silently picking one.
 
 ## Claim-first protocol (NON-NEGOTIABLE)
 You MUST resolve every claim's EVIDENCE (Step A) BEFORE writing any prose
-(Step B). The PreToolUse hook will block your Write tool call otherwise — see
-superpower-writing:main §Claim-First Protocol for the block rules. Do NOT
-fight the hook: read the decision JSON on stderr, fix the claim file or the
-prose tag, retry.
+(Step B). Writing prose against a stub claim violates the claim-first
+protocol — see superpower-writing:main §Claim-First Protocol for the rules.
+Do NOT skip Step A: resolve the claim's evidence, or fix the prose tag,
+before writing.
 
 ## Step A — Evidence resolution (required before any prose)
 For each claim in .writing/claims/section_{NN}_{slug}.md with STATUS=stub:
@@ -91,12 +90,12 @@ Abstract sections are citation-free and have no claims file:
     `.writing/claims/section_{NN}_{slug}.md` — it does not exist by contract.
   - Do NOT emit any `\cite{...}`, `\citep{...}`, `\citet{...}`, `\nocite{...}`,
     `\parencite{...}`, `\textcite{...}`, `\autocite{...}`, `\footcite{...}`,
-    or any `\*cite*` LaTeX command in the abstract. The PreToolUse hook's
-    `CITATION_FREE_SLUGS` rule will block the write otherwise.
-  - Do NOT emit `% claim: id` tags in the abstract. The hook rejects them.
+    or any `\*cite*` LaTeX command in the abstract. Abstracts are
+    citation-free by rule.
+  - Do NOT emit `% claim: id` tags in the abstract; abstracts carry no claims.
   - You MUST still emit BPMRC structural tags (`% bpmrc: B`, `% bpmrc: P`,
     `% bpmrc: M`, `% bpmrc: R`, `% bpmrc: C`) per the section standard.
-    Those are not citations or claim tags; the hook allows them.
+    Those are not citations or claim tags, so they belong in a citation-free abstract.
   - Write the abstract as plain prose restating the body sections' findings
     in your own words. If a specific number or phrase anchors the claim,
     carry it over without any citation — the body is where the evidence
@@ -117,8 +116,8 @@ Structure rules:
   - Every load-bearing paragraph MUST carry a LaTeX line-comment tag on its
     own line at column 0 (allowing leading whitespace):
       * `% claim: id` for paragraphs asserting a claim backed by EVIDENCE.
-      * `% draft-only` for scaffolding / placeholder notes the hook should
-        let through (remove these before claim-verification).
+      * `% draft-only` for scaffolding / placeholder notes exempt from
+        claim-first (remove these before claim-verification).
     Place the tag on the line immediately above the paragraph it applies to.
   - One primary claim per paragraph is the norm; if a paragraph genuinely
     asserts two claims, include two tag lines back-to-back:
@@ -145,11 +144,11 @@ Structure rules:
           <paragraph prose>
       * Honor the standard's tense/voice/length rules; they refine — never
         contradict — the writing-principles.md rules.
-      * If the standard's tags appear in a section stem that is claim-enforced
-        (anything whose slug is NOT `abstract` / `references` /
+      * If the standard's tags appear in a section stem that requires claim
+        tags (anything whose slug is NOT `abstract` / `references` /
         `acknowledgments`), each paragraph still needs either `% claim: id`
-        or `% draft-only` for the hook. UNPROTECTED slugs are exempt from
-        claim-tag enforcement but must still emit the structural tags their
+        or `% draft-only`. UNPROTECTED slugs are exempt from
+        claim-tag requirements but must still emit the structural tags their
         standard requires.
 
 LaTeX syntax rules:
@@ -218,8 +217,8 @@ LaTeX syntax rules:
   - A claim has no credible source after both Zotero and network lookup.
   - The section task text in .writing/plan.md conflicts with the outline.
   - A prior section's claims are needed but that section is still stub.
-  - PreToolUse hook keeps blocking after 2 honest attempts to fix — the hook or
-    the claim parser may be misconfigured; surface to the orchestrator.
+  - The claim-first self-review keeps failing after 2 honest attempts to fix the
+    claim file or prose tag — the claim parser may be misconfigured; surface to the orchestrator.
   - The section standard conflicts with the outline or task text (e.g., BPMRC
     demands 5 bullets but the outline provides only 3). Do NOT pick one and
     proceed; surface the conflict so the user or orchestrator can resolve.

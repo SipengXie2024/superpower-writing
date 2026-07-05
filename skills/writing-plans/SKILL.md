@@ -65,7 +65,7 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/archive-search.sh "<keyword>"
 - "Precede each load-bearing paragraph with a `% claim: <id>` LaTeX line comment" — step
 - "Commit" — step
 
-The claim-first protocol is the writing-domain analog of test-first: each draft task's Step 1 is *always* "resolve claim evidence"; the Write tool call only appears after evidence is ready. The PreToolUse enforcement hook at `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` blocks writes against stub-status claims at the harness level, so a plan that sequences writes ahead of evidence resolution will fail at execution time — preempt that here.
+The claim-first protocol is the writing-domain analog of test-first: each draft task's Step 1 is *always* "resolve claim evidence"; the Write tool call only appears after evidence is ready. The claim-first discipline forbids writing prose against stub-status claims, so a plan that sequences writes ahead of evidence resolution breaks the discipline at execution time — preempt that here.
 
 ## Process
 
@@ -133,7 +133,7 @@ Use this exact header template:
 
 **Goal:** Draft a detailed, evidence-backed IMRAD manuscript skeleton (for the human author to refine) covering <one-sentence paper thesis from outline.md>.
 
-**Architecture:** Section-per-file under `.writing/manuscript/`, claim-first drafting enforced by PreToolUse hook `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh`, figures delegated to `superpower-writing:scientific-schematics`, citations resolved through the Zotero→network dual source of truth configured in `metadata.yaml`.
+**Architecture:** Section-per-file under `.writing/manuscript/`, claim-first drafting discipline (resolve evidence before prose), figures delegated to `superpower-writing:scientific-schematics`, citations resolved through the Zotero→network dual source of truth configured in `metadata.yaml`.
 
 **Reporting guideline:** <CONSORT | STROBE | PRISMA | ARRIVE | none> (from metadata.yaml).
 
@@ -269,7 +269,7 @@ If any check fails, fix inline. No need to re-review — just fix and move on. I
 
 After saving the plan and completing the self-review, present the execution strategy via `AskUserQuestion`. Both options always shown.
 
-- **Claude Code Dynamic Workflow** (recommended for multi-section papers) — ask Claude to run a workflow that executes `.writing/plan.md` (include the word "workflow" in the request so Claude writes one), or turn on `/effort ultracode`. The workflow drafts independent sections in parallel with the `superpower-writing:section-drafter` agent, then runs the two-stage review as a pipeline: `superpower-writing:spec-reviewer` for outline/claim alignment, then `superpower-writing:manuscript-reviewer` for writing quality. It reads `.writing/plan.md`, `.writing/outline.md`, and `.writing/findings.md`, and writes drafted prose, progress, and findings back into `.writing/`. The claim-first PreToolUse hook fires on every section write.
+- **Claude Code Dynamic Workflow** (recommended for multi-section papers) — ask Claude to run a workflow that executes `.writing/plan.md` (include the word "workflow" in the request so Claude writes one), or turn on `/effort ultracode`. The workflow drafts independent sections in parallel with the `superpower-writing:section-drafter` agent, then runs the two-stage review as a pipeline: `superpower-writing:spec-reviewer` for outline/claim alignment, then `superpower-writing:manuscript-reviewer` for writing quality. It reads `.writing/plan.md`, `.writing/outline.md`, and `.writing/findings.md`, and writes drafted prose, progress, and findings back into `.writing/`. The claim-first discipline governs every section write.
 - **Manual Batch Session** → `superpower-writing:executing-plans`. A separate or manual session that drafts plan batches and stops at checkpoints. Best when workflows are unavailable or the user wants explicit per-batch review.
 
 **Recommendation logic** (add "(Recommended)" to the best option's label, but never remove options):
@@ -286,7 +286,7 @@ Writing plans think in sections, figures, and tables — each is a research arti
 
 ### Claim-first is the test-first analog — bake it in
 
-Every draft task's Step 1 must be "resolve claim evidence" before Step 2 "write prose". The PreToolUse hook enforces this at the harness level, but a good plan preempts it by sequencing evidence resolution ahead of the Write tool call. A plan that lists Step 1 as "write Methods prose" will be blocked by the hook and the user will blame the plan, not their skipped evidence work.
+Every draft task's Step 1 must be "resolve claim evidence" before Step 2 "write prose". The claim-first discipline requires this, and a good plan preempts it by sequencing evidence resolution ahead of the Write tool call. A plan that lists Step 1 as "write Methods prose" violates the discipline and the user will blame the plan, not their skipped evidence work.
 
 ### Dependencies encode causal order, not just file order
 

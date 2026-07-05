@@ -673,6 +673,8 @@ python3 references/pdf-overlap-checker.py file.pdf --json > "$(dirname file.pdf)
 | 触发条件 | 文件 |
 |---------|------|
 | 进入步骤①（设计判断：该不该画 / 画哪种 / Figure-1 范式） | `references/figure-rhetoric.md` |
+| 整篇论文图组就绪、投稿前跑一次整组图叙事审查（editor pass） | `references/figure-rhetoric.md` §5 |
+| 一张 figure 内含多个子图，需规划面板并对拼合后的整图整体审查（compose 多面板图） | `references/figure-rhetoric.md` §6 |
 | 进入步骤① | `references/step1-instructions.md` |
 | AUDIT 模式（Ψ 审查通道） | `references/figure-audit.md` + `references/visual-review-checklist.md`（18 项） |
 | 步骤②（任何 TikZ 图，**必加载**） | `references/lessons.md` + `references/visual-patterns.md` |

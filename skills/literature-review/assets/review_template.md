@@ -3,7 +3,7 @@
 **Authors**: [Author Names and Affiliations]
 **Date**: [Date]
 **Review Type**: [Narrative / Systematic / Scoping / Meta-Analysis / Umbrella Review]
-**Review Protocol**: [PROSPERO ID if registered, or state "Not registered"]
+**Review Protocol**: [OSF registration DOI if registered, or state "Not registered"]
 **PRISMA Compliance**: [Yes/No/Partial - specify which guidelines]
 
 ---
@@ -15,7 +15,7 @@
 **Methods**: [Databases, dates, selection criteria, quality assessment]  
 **Results**: [n studies included; key findings by theme]  
 **Conclusions**: [Main conclusions and implications]  
-**Registration**: [PROSPERO ID or "Not registered"]  
+**Registration**: [OSF DOI or "Not registered"]  
 **Keywords**: [5-8 keywords]
 
 ---
@@ -45,19 +45,19 @@
 
 ### 2.1 Protocol and Registration
 
-**Protocol**: [PROSPERO ID / OSF link / Not registered]  
+**Protocol**: [OSF registration / Not registered]  
 **Deviations**: [Document any protocol deviations]  
 **PRISMA**: [Checklist in Appendix B]
 
 ### 2.2 Search Strategy
 
-**Databases:** [PubMed, Scopus, Web of Science, bioRxiv, etc.]  
+**Databases:** [arXiv, DBLP, Semantic Scholar, Google Scholar, etc.]  
 **Supplementary:** [Citation chaining, grey literature, trial registries]
 
 **Search String Example:**
 ```
-("CRISPR"[Title/Abstract] OR "Cas9"[Title/Abstract]) AND 
-("disease"[MeSH Terms]) AND ("2015/01/01"[Date] : "2024/12/31"[Date])
+(ti:"self-attention" OR ti:transformer) AND
+(abs:"long context") AND cat:cs.LG
 ```
 
 **Dates:** [YYYY-MM-DD to YYYY-MM-DD] | **Executed:** [Date]  
@@ -76,11 +76,11 @@
 - [Criterion 1: e.g., Published between 2015-2024]
 - [Criterion 2: e.g., Peer-reviewed articles and preprints]
 - [Criterion 3: e.g., English language]
-- [Criterion 4: e.g., Human or animal studies]
+- [Criterion 4: e.g., Empirical evaluation or systems benchmark]
 - [Criterion 5: e.g., Original research or systematic reviews]
 
 **Exclusion Criteria:**
-- [Criterion 1: e.g., Case reports with n<5]
+- [Criterion 1: e.g., Non-archival workshop papers superseded by a full version]
 - [Criterion 2: e.g., Conference abstracts without full text]
 - [Criterion 3: e.g., Editorials and commentaries]
 - [Criterion 4: e.g., Duplicate publications]
@@ -105,15 +105,15 @@ Title/abstract screened: n=[Y] → Full-text assessed: n=[Z] → Included: n=[N]
 **Method:** [Standardized form (Appendix E); pilot-tested on n studies]  
 **Extractors:** [n independent] | **Verification:** [Double-checked]
 
-**Items:** Study ID, design, population, interventions/exposures, outcomes, statistics, funding, COI, bias domains
+**Items:** Study ID, design, task/dataset, method, baselines, metrics, results, artifacts, funding, limitations
 
 **Missing data:** [Author contact protocol]
 
 ### 2.7 Quality Assessment
 
-**Tool:** [Cochrane RoB 2.0 / ROBINS-I / Newcastle-Ottawa / AMSTAR 2 / JBI]  
+**Signals:** [Venue tier / Artifact availability / Reproducibility / Evaluation rigor]  
 **Method:** [2 independent reviewers; third for conflicts]  
-**Rating:** [Low/Moderate/High risk of bias]  
+**Rating:** [Low/Moderate/High confidence]  
 **Publication bias:** [Funnel plots, Egger's test - if meta-analysis]
 
 ### 2.8 Synthesis and Analysis
@@ -121,7 +121,7 @@ Title/abstract screened: n=[Y] → Full-text assessed: n=[Z] → Included: n=[N]
 **Approach:** [Narrative / Meta-analysis / Both]  
 **Statistics** (if meta-analysis): Effect measures, heterogeneity (I², τ²), sensitivity analyses, subgroups  
 **Software:** [RevMan, R, Stata]  
-**Certainty:** [GRADE framework; factors: bias, inconsistency, indirectness, imprecision]
+**Certainty:** [Strength of evidence; factors: study quality, consistency across studies, directness, precision]
 
 ---
 
@@ -130,7 +130,7 @@ Title/abstract screened: n=[Y] → Full-text assessed: n=[Z] → Included: n=[N]
 ### 3.1 Study Selection
 
 **Summary:** [X records → Y deduplicated → Z full-text → N included (M in meta-analysis)]  
-**Study types:** [RCTs: n=X, Observational: n=Y, Reviews: n=Z]  
+**Study types:** [Empirical: n=X, Systems: n=Y, Theory: n=Z]  
 **Years:** [Range; peak year]  
 **Geography:** [Countries represented]  
 **Source:** [Peer-reviewed: n=X, Preprints: n=Y]
@@ -143,9 +143,9 @@ Title/abstract screened: n=[Y] → Full-text assessed: n=[Z] → Included: n=[N]
 
 | Study | Year | Design | Sample Size | Key Methods | Main Findings | Quality |
 |-------|------|--------|-------------|-------------|---------------|---------|
-| First Author et al. | 2023 | [Type] | n=[X] | [Methods] | [Brief findings] | [Low/Mod/High RoB] |
+| First Author et al. | 2023 | [Type] | n=[X] | [Methods] | [Brief findings] | [Low/Mod/High conf.] |
 
-**Quality:** Low RoB: n=X ([%]); Moderate: n=Y ([%]); High: n=Z ([%])
+**Quality:** High confidence: n=X ([%]); Moderate: n=Y ([%]); Low: n=Z ([%])
 
 ### 3.4 Thematic Synthesis
 
@@ -156,7 +156,7 @@ Title/abstract screened: n=[Y] → Full-text assessed: n=[Z] → Included: n=[N]
 **Findings:** [Synthesis of key findings from multiple studies]  
 **Supporting studies:** [X, Y, Z]  
 **Contradictory evidence:** [If any]  
-**Certainty:** [GRADE rating if applicable]
+**Certainty:** [Strength of evidence rating if applicable]
 
 ### 3.5 Methodological Approaches
 
@@ -238,7 +238,7 @@ Title/abstract screened: n=[Y] → Full-text assessed: n=[Z] → Included: n=[N]
 3. [Gap/future direction conclusion]
 
 **Evidence certainty:** [High/Moderate/Low/Very Low]  
-**Translation readiness:** [Ready / Needs more research / Preliminary]
+**Deployment readiness:** [Ready / Needs more research / Preliminary]
 
 ---
 
@@ -254,7 +254,7 @@ Title/abstract screened: n=[Y] → Full-text assessed: n=[Z] → Included: n=[N]
 [Author-specific declarations] OR [None]
 
 ### Data Availability
-**Protocol:** [PROSPERO/OSF ID or "Not registered"]  
+**Protocol:** [OSF ID or "Not registered"]  
 **Data/Code:** [Repository URL/DOI or "Available upon request"]  
 **Materials:** [Search strategies (Appendix A), PRISMA checklist (Appendix B), extraction form (Appendix E)]
 
@@ -265,15 +265,15 @@ Title/abstract screened: n=[Y] → Full-text assessed: n=[Z] → Included: n=[N]
 
 ## 7. References
 
-[Use consistent style: APA / Nature / Vancouver]
+[Use consistent style: APA / ACM / IEEE]
 
 **Format examples:**
 
 APA: Author, A. A., & Author, B. B. (Year). Title. *Journal*, *volume*(issue), pages. https://doi.org/xx.xxxx
 
-Nature: Author, A. A. & Author, B. B. Title. *J. Name* **volume**, pages (year).
+ACM: Author A. A. and Author B. B. Year. Title. *Journal* volume, issue (Year), pages. https://doi.org/xx.xxxx
 
-Vancouver: Author AA, Author BB. Title. J Abbrev. Year;volume(issue):pages. doi:xx.xxxx
+IEEE: [1] A. A. Author and B. B. Author, "Title," *Abbrev. Journal*, vol. x, no. x, pp. xxx-xxx, Year.
 
 1. [First reference]
 2. [Second reference]
@@ -285,12 +285,12 @@ Vancouver: Author AA, Author BB. Title. J Abbrev. Year;volume(issue):pages. doi:
 
 ### Appendix A: Search Strings
 
-**PubMed** (Date: YYYY-MM-DD; Results: n)
+**arXiv** (Date: YYYY-MM-DD; Results: n)
 ```
-[Complete search string with operators and MeSH terms]
+[Complete search string with operators and arXiv categories]
 ```
 
-[Repeat for each database: Scopus, Web of Science, bioRxiv, etc.]
+[Repeat for each database: DBLP, Semantic Scholar, Google Scholar, etc.]
 
 ### Appendix B: PRISMA Checklist
 
@@ -299,7 +299,7 @@ Vancouver: Author AA, Author BB. Title. J Abbrev. Year;volume(issue):pages. doi:
 | Title | Identify as systematic review | Yes/No | # |
 | Abstract | Structured summary | Yes/No | # |
 | Methods | Eligibility, sources, search, selection, data, quality | Yes/No | # |
-| Results | Selection, characteristics, risk of bias, syntheses | Yes/No | # |
+| Results | Selection, characteristics, quality assessment, syntheses | Yes/No | # |
 | Discussion | Interpretation, limitations, conclusions | Yes/No | # |
 | Other | Registration, support, conflicts, availability | Yes/No | # |
 
@@ -313,7 +313,7 @@ Vancouver: Author AA, Author BB. Title. J Abbrev. Year;volume(issue):pages. doi:
 
 ### Appendix D: Quality Assessment
 
-**Tool:** [Cochrane RoB 2.0 / ROBINS-I / Newcastle-Ottawa / etc.]
+**Signals:** [Venue tier / Artifact availability / Reproducibility / etc.]
 
 | Study | Domain 1 | Domain 2 | Domain 3 | Overall |
 |-------|----------|----------|----------|---------|
@@ -324,12 +324,12 @@ Vancouver: Author AA, Author BB. Title. J Abbrev. Year;volume(issue):pages. doi:
 
 ```
 STUDY: Author______ Year______ DOI______
-DESIGN: □RCT □Cohort □Case-Control □Cross-sectional □Other______
-POPULATION: n=_____ Age_____ Setting_____
-INTERVENTION/EXPOSURE: _____
+DESIGN: □Empirical □Systems □Benchmark □Simulation □Theory □Other______
+SCALE: dataset/n=_____ hardware_____ setting_____
+METHOD: _____
 OUTCOMES: Primary_____ Secondary_____
-RESULTS: Effect size_____ 95%CI_____ p=_____
-QUALITY: □Low □Moderate □High RoB
+RESULTS: Metric_____ Baseline_____ Improvement_____
+QUALITY: □Low □Moderate □High confidence
 FUNDING/COI: _____
 ```
 
@@ -355,7 +355,7 @@ FUNDING/COI: _____
 [If applicable]
 
 **Tables:** S1 (Full study characteristics), S2 (Quality scores), S3 (Subgroups), S4 (Sensitivity)  
-**Figures:** S1 (PRISMA diagram), S2 (Risk of bias), S3 (Funnel plot), S4 (Forest plots), S5 (Networks)  
+**Figures:** S1 (PRISMA diagram), S2 (Quality assessment), S3 (Funnel plot), S4 (Forest plots), S5 (Networks)  
 **Data:** S1 (Extraction file), S2 (Search results), S3 (Analysis code), S4 (PRISMA checklist)  
 **Repository:** [OSF/GitHub/Zenodo URL with DOI]
 
@@ -388,7 +388,7 @@ FUNDING/COI: _____
 **Key principles:**
 1. Remove all [bracketed placeholders]
 2. Follow PRISMA 2020 guidelines
-3. Pre-register when feasible (PROSPERO/OSF)
+3. Pre-register when feasible (OSF)
 4. Use thematic synthesis, not study-by-study
 5. Be transparent and reproducible
 6. Verify all DOIs before submission
@@ -403,9 +403,8 @@ FUNDING/COI: _____
 
 **Resources:**
 - PRISMA 2020: http://prisma-statement.org/
-- PROSPERO: https://www.crd.york.ac.uk/prospero/
-- Cochrane Handbook: https://training.cochrane.org/handbook
-- GRADE: https://www.gradeworkinggroup.org/
+- OSF Registries: https://osf.io/registries
+- DBLP: https://dblp.org/
 
 **DELETE THIS SECTION FROM YOUR FINAL REVIEW**
 

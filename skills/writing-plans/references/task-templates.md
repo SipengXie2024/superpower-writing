@@ -14,7 +14,7 @@ Do NOT write prose in the plan itself — the plan enumerates tasks; drafting wr
 - Write: `.writing/manuscript/03_methods.tex`
 
 **Preconditions:**
-- Every claim in `claims/section_03_methods.md` is STATUS=evidence_ready (drafting flips stub → evidence_ready; PreToolUse hook blocks writes otherwise).
+- Every claim in `claims/section_03_methods.md` is STATUS=evidence_ready (drafting flips stub → evidence_ready; claim-first discipline forbids writing otherwise).
 
 - [ ] **Step 1: Resolve evidence for each stub claim**
 
@@ -37,7 +37,7 @@ Do NOT write prose in the plan itself — the plan enumerates tasks; drafting wr
   - claims: <load claims/section_03_methods.md>
   - metadata: `.writing/metadata.yaml`
 
-  Each load-bearing paragraph MUST be preceded by a `% claim: <id>` LaTeX line comment matching a claim id. Exploratory text uses `% draft-only`. The PreToolUse hook will block the Write tool if a paragraph references a stub-status claim.
+  Each load-bearing paragraph MUST be preceded by a `% claim: <id>` LaTeX line comment matching a claim id. Exploratory text uses `% draft-only`. Claim-first discipline: do not write a paragraph that references a stub-status claim.
 
 - [ ] **Step 3: Commit**
 
@@ -76,7 +76,7 @@ Do NOT write prose in the plan itself — the plan enumerates tasks; drafting wr
 
 - [ ] **Step 2: Apply the agreed fixes, then re-verify**
 
-  Address Major issues by re-drafting the affected paragraphs (the claim-first hook still applies), then re-run claim-verification on the touched claims. Leave non-blocking comments in the review file for the human author to weigh during refinement.
+  Address Major issues by re-drafting the affected paragraphs (the claim-first discipline still applies), then re-run claim-verification on the touched claims. Leave non-blocking comments in the review file for the human author to weigh during refinement.
 
 - [ ] **Step 3: Commit review file**
 

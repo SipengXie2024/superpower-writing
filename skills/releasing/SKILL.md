@@ -33,7 +33,7 @@ Run all three checks from the plugin root. Each must exit 0. Stop the release on
 bash tests/smoke.sh
 ```
 
-This exercises directory init, the claim and term enforcement hooks (allow and block paths, including the symlinked-manuscript and self-lockout cases), manifest JSON validity, and file presence for every shipping skill, command, hook, and agent. The smoke test itself now invokes the next two checks, so running it covers them. Run them standalone too when you want a faster signal on a specific gate.
+This exercises directory init, dependency and Zotero-credential messaging, manifest JSON validity, and file presence for every shipping skill, command, and agent (plus a deletion audit of removed components). The smoke test itself now invokes the next two checks, so running it covers them. Run them standalone too when you want a faster signal on a specific gate.
 
 ### 2. Skill linter
 

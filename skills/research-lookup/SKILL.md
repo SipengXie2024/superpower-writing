@@ -26,10 +26,10 @@ The user wants research results, not a narration of how this skill works. On the
 
 - **Just run the search and deliver findings.** Do not preface output with routing rationale, prerequisite checks, or a backend-selection explanation. Pick the backend silently and go.
 - **No meta-commentary.** Never write phrases like "per the skill's routing logic", "this query routes to parallel-cli because…", or "as the prerequisites require". Report findings and cite sources; keep the machinery invisible.
-- **One exception — confirm before the slow path.** Only the Parallel Chat API deep-research backend (60s–5min, higher cost) gets a one-line confirmation before launch (e.g. "This needs deep research (~1–5 min, higher cost) — proceed?"). Fast parallel-cli and Perplexity searches run without asking.
-- **If you cannot execute** (no parallel-cli, missing key, no network), say so in one line and deliver the best direct answer from your own knowledge, clearly labeled as un-searched — do not stall or fabricate search output or DOIs.
+- **One exception, confirm before the slow path.** Only the Parallel Chat API deep-research backend (60s–5min, higher cost) gets a one-line confirmation before launch (e.g. "This needs deep research (~1–5 min, higher cost), proceed?"). Fast parallel-cli and Perplexity searches run without asking.
+- **If you cannot execute** (no parallel-cli, missing key, no network), say so in one line and deliver the best direct answer from your own knowledge, clearly labeled as un-searched, do not stall or fabricate search output or DOIs.
 
-Negative example — do **not** open with this:
+Negative example, do **not** open with this:
 > *This is a scientific query, so per the routing logic it goes to parallel-cli search. First I'll verify parallel-cli is installed and PARALLEL_API_KEY is set, then run two searches (academic + general)...*
 
 Instead, run the searches and lead with the findings.
@@ -38,12 +38,12 @@ Instead, run the searches and lead with the findings.
 
 Run these steps in order. Routing details, command flags, and save patterns referenced here are specified in the sections below.
 
-1. **Check sources first.** `ls sources/` — if a saved file already covers this topic, re-read it instead of querying. Skip the rest.
+1. **Check sources first.** `ls sources/`, if a saved file already covers this topic, re-read it instead of querying. Skip the rest.
 2. **Detect query type → pick backend.** Academic keywords (papers, DOI, journal, peer-reviewed…) → Perplexity. Explicit "deep/exhaustive research" → Parallel Chat API. Everything else → parallel-cli search (default). On a query matching both academic AND deep-research signals, treat deep-research as higher precedence and surface the choice to the user.
-3. **Confirm only the slow path.** If the chosen backend is the Parallel Chat API, ask one line before launching ("This needs deep research, ~1–5 min, higher cost — proceed?"). Fast parallel-cli and Perplexity run without asking.
+3. **Confirm only the slow path.** If the chosen backend is the Parallel Chat API, ask one line before launching ("This needs deep research, ~1–5 min, higher cost, proceed?"). Fast parallel-cli and Perplexity run without asking.
 4. **Run the search.** For scientific parallel-cli queries, run the two-search pattern (academic `--include-domains` + general). Single search for non-scientific. Always pass `-o sources/...`.
 5. **Save to `sources/`.** Every result is written under `sources/` with the filename pattern for that backend (see MANDATORY: Save section). Non-negotiable.
-6. **Deliver findings.** Lead with synthesized results and inline citations, academic sources first. No routing narration, no prerequisite recap (see Output Discipline). If you could not execute, deliver the best un-searched answer labeled as such — never fabricate sources or DOIs.
+6. **Deliver findings.** Lead with synthesized results and inline citations, academic sources first. No routing narration, no prerequisite recap (see Output Discipline). If you could not execute, deliver the best un-searched answer labeled as such, never fabricate sources or DOIs.
 
 ## When to Use This Skill
 
@@ -63,7 +63,7 @@ Use this skill when you need:
 
 If your document does not already contain schematics or diagrams:
 - Invoke `Skill(skill="superpower-writing:scientific-schematics")` and describe the diagram in natural language. That skill is the single source of truth for the image-generation backend (Codex's native `image_gen` via the `collaborating-with-codex` bridge, with Codex visual review). It writes outputs to `.writing/figures/`.
-- For data plots (CDFs, training curves, ablation bars, Pareto fronts) invoke `Skill(skill="superpower-writing:scientific-visualization")` instead — that skill ships matplotlib presets for IEEE / ACM / USENIX / NeurIPS / ICML / ICLR.
+- For data plots (CDFs, training curves, ablation bars, Pareto fronts) invoke `Skill(skill="superpower-writing:scientific-visualization")` instead, that skill ships matplotlib presets for IEEE / ACM / USENIX / NeurIPS / ICML / ICLR.
 
 ---
 
@@ -96,7 +96,7 @@ For scientific/technical queries, run two searches to ensure academic coverage:
 # 1. Academic-focused search
 parallel-cli search "your research query" -q "keyword1" -q "keyword2" \
   --json --max-results 10 --excerpt-max-chars-total 27000 \
-  --include-domains "scholar.google.com,arxiv.org,pubmed.ncbi.nlm.nih.gov,semanticscholar.org,biorxiv.org,medrxiv.org,ncbi.nlm.nih.gov,nature.com,science.org,ieee.org,acm.org,springer.com,wiley.com,cell.com,pnas.org,nih.gov" \
+  --include-domains "scholar.google.com,arxiv.org,semanticscholar.org,dblp.org,dl.acm.org,ieee.org,openreview.net,aclanthology.org" \
   -o sources/research_<topic>-academic.json
 
 # 2. General search (catches non-academic sources)
@@ -126,7 +126,7 @@ All other queries route here by default, including:
 Queries containing these terms are routed to Perplexity for academic-focused search:
 
 - Paper finding: `find papers`, `find articles`, `research papers on`, `published studies`
-- Citations: `cite`, `citation`, `doi`, `pubmed`, `pmid`
+- Citations: `cite`, `citation`, `doi`
 - Academic sources: `peer-reviewed`, `journal article`, `scholarly`, `arxiv`, `preprint`
 - Review types: `systematic review`, `meta-analysis`, `literature search`
 - Paper quality: `foundational papers`, `seminal papers`, `landmark papers`, `highly cited`
@@ -154,31 +154,31 @@ python research_lookup.py "your query" --force-backend perplexity
 
 ## Core Capabilities
 
-### 1. General Research Queries (parallel-cli search — DEFAULT)
+### 1. General Research Queries (parallel-cli search, DEFAULT)
 
 **Primary backend.** Fast, cost-effective web search with academic source prioritization via the parallel-web skill.
 
 ```
 Query Examples:
-- "Recent advances in CRISPR gene editing 2025"
-- "Compare mRNA vaccines vs traditional vaccines for cancer treatment"
-- "AI adoption in healthcare industry statistics"
-- "Global renewable energy market trends and projections"
-- "Explain the mechanism underlying gut microbiome and depression"
+- "Recent advances in transformer attention mechanisms 2025"
+- "Compare Raft vs Paxos for distributed consensus"
+- "LLM inference latency optimization techniques"
+- "Cache replacement policy trends and benchmarks"
+- "Explain the trade-offs in distributed training data parallelism"
 ```
 
 ```bash
-# Example: research on CRISPR advances
-parallel-cli search "Recent advances in CRISPR gene editing 2025" \
-  -q "CRISPR" -q "gene editing" -q "2025" \
+# Example: research on transformer attention advances
+parallel-cli search "Recent advances in transformer attention mechanisms 2025" \
+  -q "transformer" -q "attention" -q "2025" \
   --json --max-results 10 --excerpt-max-chars-total 27000 \
-  --include-domains "scholar.google.com,arxiv.org,pubmed.ncbi.nlm.nih.gov,nature.com,science.org,cell.com,pnas.org,nih.gov" \
-  -o sources/research_crispr_advances-academic.json
+  --include-domains "scholar.google.com,arxiv.org,semanticscholar.org,dblp.org,dl.acm.org,ieee.org,openreview.net,aclanthology.org" \
+  -o sources/research_transformer_attention-academic.json
 
-parallel-cli search "Recent advances in CRISPR gene editing 2025" \
-  -q "CRISPR" -q "gene editing" \
+parallel-cli search "Recent advances in transformer attention mechanisms 2025" \
+  -q "transformer" -q "attention" \
   --json --max-results 10 --excerpt-max-chars-total 27000 \
-  -o sources/research_crispr_advances-general.json
+  -o sources/research_transformer_attention-general.json
 ```
 
 **Response includes:**
@@ -195,9 +195,9 @@ parallel-cli search "Recent advances in CRISPR gene editing 2025" \
 Query Examples:
 - "Find papers on transformer attention mechanisms in NeurIPS 2024"
 - "Foundational papers on quantum error correction"
-- "Systematic review of immunotherapy in non-small cell lung cancer"
+- "Survey of cache replacement policies in modern processors"
 - "Cite the original BERT paper and its most influential follow-ups"
-- "Published studies on CRISPR off-target effects in clinical trials"
+- "Published studies on Raft consensus in production systems"
 ```
 
 **Response includes:**
@@ -207,14 +207,14 @@ Query Examples:
 - Key statistics and methodology highlights
 - Research gaps and future directions
 
-### 3. Deep Research (Parallel Chat API — on request only)
+### 3. Deep Research (Parallel Chat API, on request only)
 
 **Used only when user explicitly requests deep/exhaustive research.** Provides comprehensive, multi-source synthesis via the Chat API (`core` model). 60s-5min latency.
 
 ```
 Query Examples:
 - "Deep research on the current state of quantum computing error correction"
-- "Exhaustive analysis of mRNA vaccine platforms for cancer immunotherapy"
+- "Exhaustive analysis of LLM serving systems for low-latency inference"
 ```
 
 ### 4. Technical and Methodological Information
@@ -222,10 +222,10 @@ Query Examples:
 Use parallel-cli search (default) for quick lookups:
 
 ```bash
-parallel-cli search "Western blot protocol for protein detection" \
-  -q "western blot" -q "protocol" \
+parallel-cli search "Query optimization techniques for distributed databases" \
+  -q "query optimization" -q "distributed database" \
   --json --max-results 10 --excerpt-max-chars-total 27000 \
-  -o sources/research_western_blot.json
+  -o sources/research_query_optimization.json
 ```
 
 ### 5. Statistical and Market Data
@@ -260,17 +260,18 @@ parallel-cli search "Global AI market size and growth projections 2025" \
 ### Venue Quality Tiers
 
 **Tier 1 - Premier Venues** (Always prefer):
-- **General Science**: Nature, Science, Cell, PNAS
-- **Medicine**: NEJM, Lancet, JAMA, BMJ
-- **Field-Specific**: Nature Medicine, Nature Biotechnology, Nature Methods
-- **Top CS/AI**: NeurIPS, ICML, ICLR, ACL, CVPR
+- **ML / AI**: NeurIPS, ICML, ICLR
+- **Systems**: OSDI, SOSP, NSDI, USENIX ATC
+- **Databases**: VLDB, SIGMOD
+- **PL / Compilers**: PLDI, POPL
 
 **Tier 2 - High-Impact Specialized** (Strong preference):
-- Journals with Impact Factor > 10
-- Top conferences in subfields (EMNLP, NAACL, ECCV, MICCAI)
+- **NLP / Vision**: ACL, EMNLP, CVPR
+- Strong conferences in subfields (NAACL, ECCV, ICCV, KDD, SIGCOMM, EuroSys, FAST, ASPLOS, ISCA, MICRO)
+- Top journals (JMLR, TOCS, TODS, PACMPL, TPAMI)
 
 **Tier 3 - Respected Specialized** (Include when relevant):
-- Journals with Impact Factor 5-10
+- Other peer-reviewed conferences, journals, and workshops
 
 ---
 
@@ -328,15 +329,15 @@ export OPENROUTER_API_KEY="your_openrouter_api_key"
 ### Command-Line Usage
 
 ```bash
-# Fast web search via parallel-cli (DEFAULT — recommended) — ALWAYS save to sources/
+# Fast web search via parallel-cli (DEFAULT, recommended), ALWAYS save to sources/
 parallel-cli search "your query" -q "keyword1" -q "keyword2" \
   --json --max-results 10 --excerpt-max-chars-total 27000 \
   -o sources/research_<topic>.json
 
-# Academic-focused search via parallel-cli — ALWAYS save to sources/
+# Academic-focused search via parallel-cli, ALWAYS save to sources/
 parallel-cli search "your query" -q "keyword1" \
   --json --max-results 10 --excerpt-max-chars-total 27000 \
-  --include-domains "scholar.google.com,arxiv.org,pubmed.ncbi.nlm.nih.gov,semanticscholar.org,biorxiv.org,medrxiv.org,nature.com,science.org,cell.com,pnas.org,nih.gov" \
+  --include-domains "scholar.google.com,arxiv.org,semanticscholar.org,dblp.org,dl.acm.org,ieee.org,openreview.net,aclanthology.org" \
   -o sources/research_<topic>-academic.json
 
 # Time-sensitive search via parallel-cli
@@ -347,16 +348,16 @@ parallel-cli search "your query" -q "keyword" \
 # Extract full content from a specific URL (use parallel-web extract)
 parallel-cli extract "https://example.com/paper" --json
 
-# Force Parallel Deep Research (slow, exhaustive) — via research_lookup.py
+# Force Parallel Deep Research (slow, exhaustive), via research_lookup.py
 python research_lookup.py "your query" --force-backend parallel -o sources/research_<topic>.md
 
-# Force Perplexity academic search — via research_lookup.py
+# Force Perplexity academic search, via research_lookup.py
 python research_lookup.py "your query" --force-backend perplexity -o sources/papers_<topic>.md
 
-# Auto-routed via research_lookup.py (legacy) — ALWAYS save to sources/
+# Auto-routed via research_lookup.py (legacy), ALWAYS save to sources/
 python research_lookup.py "your query" -o sources/research_YYYYMMDD_HHMMSS_<topic>.md
 
-# Batch queries via research_lookup.py — ALWAYS save to sources/
+# Batch queries via research_lookup.py, ALWAYS save to sources/
 python research_lookup.py --batch "query 1" "query 2" "query 3" -o sources/batch_research_<topic>.md
 ```
 
@@ -384,29 +385,29 @@ This is non-negotiable. Research results are expensive to obtain and critical fo
 **CRITICAL: Saved files MUST preserve all citations, source URLs, and DOIs.**
 
 ```bash
-# parallel-cli search (DEFAULT) — save JSON to sources/
-parallel-cli search "Recent advances in CRISPR gene editing 2025" \
-  -q "CRISPR" -q "gene editing" \
+# parallel-cli search (DEFAULT), save JSON to sources/
+parallel-cli search "Recent advances in transformer attention mechanisms 2025" \
+  -q "transformer" -q "attention" \
   --json --max-results 10 --excerpt-max-chars-total 27000 \
-  --include-domains "scholar.google.com,arxiv.org,pubmed.ncbi.nlm.nih.gov,nature.com,science.org,cell.com,pnas.org,nih.gov" \
-  -o sources/research_crispr_advances-academic.json
+  --include-domains "scholar.google.com,arxiv.org,semanticscholar.org,dblp.org,dl.acm.org,ieee.org,openreview.net,aclanthology.org" \
+  -o sources/research_transformer_attention-academic.json
 
-parallel-cli search "Recent advances in CRISPR gene editing 2025" \
-  -q "CRISPR" -q "gene editing" \
+parallel-cli search "Recent advances in transformer attention mechanisms 2025" \
+  -q "transformer" -q "attention" \
   --json --max-results 10 --excerpt-max-chars-total 27000 \
-  -o sources/research_crispr_advances-general.json
+  -o sources/research_transformer_attention-general.json
 
-# Academic paper search via Perplexity — save to sources/
+# Academic paper search via Perplexity, save to sources/
 python research_lookup.py "Find papers on transformer attention mechanisms in NeurIPS 2024" \
   -o sources/papers_20250217_143500_transformer_attention.md
 
-# Deep research via Parallel Chat API — save to sources/
+# Deep research via Parallel Chat API, save to sources/
 python research_lookup.py "AI regulation landscape" --force-backend parallel \
   -o sources/research_20250217_144000_ai_regulation.md
 
-# Batch queries — save to sources/
-python research_lookup.py --batch "mRNA vaccines efficacy" "mRNA vaccines safety" \
-  -o sources/batch_research_20250217_144500_mrna_vaccines.md
+# Batch queries, save to sources/
+python research_lookup.py --batch "Raft consensus performance" "Raft consensus correctness" \
+  -o sources/batch_research_20250217_144500_raft_consensus.md
 ```
 
 ### Citation Preservation in Saved Files
@@ -415,8 +416,8 @@ Each output format preserves citations differently:
 
 | Format | Citations Included | When to Use |
 |--------|-------------------|-------------|
-| parallel-cli JSON (default) | Full result objects: `title`, `url`, `publish_date`, `excerpts` | Standard use — structured, parseable, fast |
-| Text (research_lookup.py) | `Sources (N):` section with `[title] (date) + URL` + `Additional References (N):` with DOIs and academic URLs | Deep research / Perplexity — human-readable |
+| parallel-cli JSON (default) | Full result objects: `title`, `url`, `publish_date`, `excerpts` | Standard use, structured, parseable, fast |
+| Text (research_lookup.py) | `Sources (N):` section with `[title] (date) + URL` + `Additional References (N):` with DOIs and academic URLs | Deep research / Perplexity, human-readable |
 | JSON (`--json` via research_lookup.py) | Full citation objects: `url`, `title`, `date`, `snippet`, `doi`, `type` | When you need maximum citation metadata from deep research |
 
 **For parallel-cli search**, saved JSON files include: full search results with title, URL, publish date, and content excerpts for each result.
@@ -452,7 +453,7 @@ If a prior lookup covers the same topic, re-read the saved file instead of makin
 When saving research results, always log:
 
 ```
-[HH:MM:SS] SAVED: Research lookup to sources/research_20250217_143000_crispr_advances.md (3,800 words, 8 citations)
+[HH:MM:SS] SAVED: Research lookup to sources/research_20250217_143000_transformer_attention.md (3,800 words, 8 citations)
 [HH:MM:SS] SAVED: Paper search to sources/papers_20250217_143500_transformer_attention.md (6 papers found)
 ```
 
@@ -462,11 +463,11 @@ When saving research results, always log:
 
 This skill enhances scientific writing by providing:
 
-1. **Literature Review Support**: Gather current research for introduction and discussion — **save to `sources/`**
-2. **Methods Validation**: Verify protocols against current standards — **save to `sources/`**
-3. **Results Contextualization**: Compare findings with recent similar studies — **save to `sources/`**
-4. **Discussion Enhancement**: Support arguments with latest evidence — **save to `sources/`**
-5. **Citation Management**: Provide properly formatted citations — **save to `sources/`**
+1. **Literature Review Support**: Gather current research for introduction and discussion, **save to `sources/`**
+2. **Methods Validation**: Verify protocols against current standards, **save to `sources/`**
+3. **Results Contextualization**: Compare findings with recent similar studies, **save to `sources/`**
+4. **Discussion Enhancement**: Support arguments with latest evidence, **save to `sources/`**
+5. **Citation Management**: Provide properly formatted citations, **save to `sources/`**
 
 ## Complementary Tools
 
@@ -478,7 +479,7 @@ This skill enhances scientific writing by providing:
 | Deep research (exhaustive) | `research-lookup` via Parallel Chat API or `parallel-web` deep research |
 | Academic paper search | `research-lookup` (auto-routes to Perplexity) |
 | Google Scholar search | `citation-management` skill |
-| PubMed search | `citation-management` skill |
+| DBLP / arXiv search | `citation-management` skill |
 | DOI to BibTeX | `citation-management` skill |
 | Metadata verification | `parallel-cli extract` (parallel-web skill) |
 
@@ -514,7 +515,7 @@ This skill enhances scientific writing by providing:
 parallel-cli search "Recent advances in transformer attention mechanisms 2025" \
   -q "transformer" -q "attention" -q "2025" \
   --json --max-results 10 --excerpt-max-chars-total 27000 \
-  --include-domains "arxiv.org,semanticscholar.org,nature.com,science.org,ieee.org,acm.org" \
+  --include-domains "arxiv.org,semanticscholar.org,dblp.org,dl.acm.org,ieee.org,openreview.net" \
   -o sources/research_transformer_attention-academic.json
 
 parallel-cli search "Recent advances in transformer attention mechanisms 2025" \
@@ -527,7 +528,7 @@ parallel-cli search "Recent advances in transformer attention mechanisms 2025" \
 
 ### Example 2: Academic Paper Search (Routes to Perplexity)
 
-**Query**: "Find papers on CRISPR off-target effects in clinical trials"
+**Query**: "Find papers on cache replacement policies in modern CPU architectures"
 
 **Backend**: Perplexity sonar-pro-search (academic mode)
 
@@ -535,7 +536,7 @@ parallel-cli search "Recent advances in transformer attention mechanisms 2025" \
 
 ### Example 3: Comparative Analysis (Routes to parallel-cli search)
 
-**Query**: "Compare and contrast mRNA vaccines vs traditional vaccines for cancer treatment"
+**Query**: "Compare and contrast Raft vs Paxos for distributed consensus"
 
 **Backend**: parallel-cli search (default, fast)
 
@@ -543,16 +544,16 @@ parallel-cli search "Recent advances in transformer attention mechanisms 2025" \
 
 ### Example 4: Market Data (Routes to parallel-cli search)
 
-**Query**: "Global AI adoption in healthcare statistics 2025"
+**Query**: "Global GPU market size and growth projections for AI training 2025"
 
 **Backend**: parallel-cli search (default, fast)
 
 ```bash
-parallel-cli search "Global AI adoption in healthcare statistics 2025" \
-  -q "AI healthcare" -q "adoption statistics" \
+parallel-cli search "Global GPU market size and growth projections for AI training 2025" \
+  -q "GPU market" -q "AI training" \
   --json --max-results 10 --excerpt-max-chars-total 27000 \
   --after-date 2024-01-01 \
-  -o sources/research_ai_healthcare_adoption.json
+  -o sources/research_gpu_market.json
 ```
 
 **Response**: Current market data, adoption rates, growth projections, and regional analysis with source citations.

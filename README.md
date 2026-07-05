@@ -28,7 +28,7 @@
 
 1. **Decides the contribution before structure.** `research-ideation` generates 15 to 20 candidate directions through named lenses, scores them with a FINER rubric, and runs a cross-model adversarial pass so one survivor hands off to outlining. `novelty-gap-check` and `idea-evaluator` gate that survivor on novelty and a top-venue bar before drafting starts.
 2. Persists your paper state in `.writing/` (ideation, outline, claims, manuscript, metadata, reviews, archive).
-3. Forces **claim-first writing**: every load-bearing paragraph in `manuscript/NN_*.tex` must carry `% claim: id` bound to a claim with `STATUS: evidence_ready` (or `% draft-only` for exploration). A `PreToolUse` hook hard-blocks writes that violate this.
+3. Follows **claim-first writing**: every load-bearing paragraph in `manuscript/NN_*.tex` must carry `% claim: id` bound to a claim with `STATUS: evidence_ready` (or `% draft-only` for exploration). Resolving a claim's evidence before writing its paragraph is a required drafting discipline.
 4. Resolves citations **Zotero first → network fallback** (when Zotero is enabled). Pushes new DOIs back to your library if configured.
 5. Checks reliability before handoff: `claim-verification` confirms every `\cite{}` resolves against `refs.bib` and that the cited abstract actually supports the claim (catching hallucinated or mismatched citations), flags any `draft-only` or `[NEEDS-EVIDENCE]` left in the skeleton, and runs an optional research-integrity gate on experiment-bearing papers.
 6. **Reviews and rebuts.** `adversarial-review` commits the single worst-case reviewer argument and adjudicates it; `external-review` routes a different-model critic over the work; `rebuttal` turns reviewer comments into a grounded, gated response letter. Every verdict is advisory: it surfaces to you and never auto-rejects or auto-mutates state.
@@ -42,10 +42,9 @@ Run these in order. Each command prints what it did; compare to "Expected".
 ```bash
 which claude && claude --version      # needs Claude Code CLI
 which gh && gh auth status             # needed only if you want to push
-python3 -c "import yaml; yaml.safe_load('a: 1')"  # hook uses PyYAML
 ```
 
-Expected: no command fails. If the PyYAML probe errors, run `pip install --user --upgrade pyyaml`.
+Expected: no command fails.
 
 ### 1. Install this plugin
 
@@ -71,9 +70,9 @@ cd /path/to/superpower-writing
 bash scripts/check-deps.sh
 ```
 
-Expected (success): `[superpower-writing] deps OK (skills at <root>; PyYAML present)`.
+Expected (success): `[superpower-writing] deps OK (skills at <root>)`.
 
-If FAIL, the script names the missing dependency and prints a fix recipe (re-clone or reinstall the plugin when a bundled skill is missing; `pip install --user --upgrade pyyaml` when PyYAML is the gap) plus the candidate skill roots it searched. Follow it and re-run.
+If FAIL, the script names the missing dependency and prints a fix recipe (re-clone or reinstall the plugin when a bundled skill is missing) plus the candidate skill roots it searched. Follow it and re-run.
 
 ### 3. (Optional) Enable Zotero integration
 
@@ -113,7 +112,7 @@ zotero:
 bash tests/smoke.sh
 ```
 
-Expected final line: `ALL SMOKE TESTS PASSED`. The test exercises `.writing/` init, dep-check and Zotero-creds failure messaging, the claim-enforcement allow/block cases, term-ordering enforcement, manifest JSON sanity (plugin.json / marketplace.json / hooks.json), a file-presence audit of the shipped skills, commands, hooks, agents, output style, and section standards, and a deletion audit confirming the removed components stay gone.
+Expected final line: `ALL SMOKE TESTS PASSED`. The test exercises `.writing/` init, dep-check and Zotero-creds failure messaging, manifest JSON sanity (plugin.json / marketplace.json), a file-presence audit of the shipped skills, commands, agents, output style, and section standards, and a deletion audit confirming removed components (including the former enforcement hooks) stay gone.
 
 ## Agent usage — lifecycle by user intent
 
@@ -163,7 +162,7 @@ Or escapes enforcement for early exploration:
 Rough notes about what this section might say.
 ```
 
-The hook `hooks/enforce-claims.sh` runs on every `Edit`/`Write`/`MultiEdit` targeting `**/manuscript/*.tex` and refuses the write if any `% claim: id` references a claim whose `STATUS` is not `evidence_ready` or `verified`. **Exemption is by slug-ending** — any file whose stem ends in `_abstract`, `_references`, or `_acknowledgments` bypasses paragraph-tag enforcement (so `00_abstract.tex`, `09_references.tex`, `10_acknowledgments.tex` all work). Any other stem (including new additions like `11_appendix.tex`) must tag every load-bearing paragraph. `.md` files under `manuscript/` are not intercepted — the plugin operates on LaTeX only.
+Claim-first discipline: every `% claim: id` paragraph in `**/manuscript/*.tex` must reference a claim whose `STATUS` is `evidence_ready` or `verified` — writing prose against a stub-status claim is a violation to fix, not to route around. **Exemption is by slug-ending** — any file whose stem ends in `_abstract`, `_references`, or `_acknowledgments` is exempt from paragraph tagging (so `00_abstract.tex`, `09_references.tex`, `10_acknowledgments.tex` all work). Any other stem (including new additions like `11_appendix.tex`) tags every load-bearing paragraph. `.md` files under `manuscript/` are out of scope — the plugin operates on LaTeX only.
 
 Any `% draft-only` marker still present at `claim-verification` is flagged as a failure to resolve before the skeleton is handed off.
 
@@ -188,8 +187,8 @@ When `zotero.enabled: false` (default), the pipeline runs network-only.
   findings.md               # research synthesis, decisions, reviewer context
   progress.md               # Task Status Dashboard
   metadata.yaml             # authors + preregistration + data/code availability + reporting guideline + zotero block
-  manuscript/               # LaTeX only — the hook enforces .tex
-    00_abstract.tex         # exempt from claim enforcement (citation-free)
+  manuscript/               # LaTeX only — claim-first tagging applies to .tex
+    00_abstract.tex         # exempt from claim tagging (citation-free)
     01_introduction.tex
     02_background.tex       # CS / ML / systems default; omit for IMRAD-strict
     03_methods.tex
@@ -226,8 +225,6 @@ When `zotero.enabled: false` (default), the pipeline runs network-only.
 | `check-zotero.sh` exits 1 "API key not set"     | `.env` missing or incomplete                                    | `cp .env.example .env` then fill in the two required fields                          |
 | `check-zotero.sh` HTTP 403                      | key lacks required scope                                        | regenerate at zotero.org/settings/keys with read+write on the library                |
 | `check-zotero.sh` HTTP 404                      | wrong `ZOTERO_LIBRARY_ID` or `ZOTERO_LIBRARY_TYPE`              | `curl -sS https://api.zotero.org/keys/<YOUR_KEY>` → read `userID` field (use that as `ZOTERO_LIBRARY_ID` with `ZOTERO_LIBRARY_TYPE=user`) |
-| Hook blocks a legitimate write                  | claim referenced but no such `id` in `claims/section_...md`     | Add the claim entry and set `STATUS: evidence_ready` after evidence is resolved      |
-| Hook blocks an exploratory paragraph            | untagged prose in a protected section                           | Either tag `% draft-only` or write a proper `claim` entry                            |
 | `smoke.sh` fails                                | read the specific `FAIL: ...` line                              | Each check is independent; fix what's listed                                         |
 
 ## Layout
@@ -236,10 +233,6 @@ When `zotero.enabled: false` (default), the pipeline runs network-only.
 .claude-plugin/
   plugin.json
   marketplace.json
-hooks/
-  hooks.json             # PreToolUse enforce-claims + SessionStart check-deps
-  enforce-claims.{sh,py} # claim-first enforcer
-  check-deps.sh          # SessionStart wrapper
 agents/                  # used as agentType in dynamic-workflow drafting/review
   section-drafter.md     # implementer: IMRAD-aware drafter with claim-first + Zotero-first evidence resolution
   spec-reviewer.md       # reviewer: outline/claim compliance vs the plan
@@ -285,7 +278,7 @@ skills/                  # writing-domain + planning skills
   git-worktrees/         # thin guide around Claude Code native worktree isolation
 templates/               # copied into .writing/ on init by scripts/init-writing-dir.sh
 tests/
-  smoke.sh               # end-to-end checks (76 PASS lines)
+  smoke.sh               # end-to-end checks
   eval-harness/          # prose-output eval: scores skill output against machine-checkable rubrics (no-fabricated-DOI, [UNVERIFIED] discipline, refuse-missing-figure-data); stdlib-only, fixture self-test wired into smoke.sh
 CHANGELOG.md             # user-facing release notes
 .env.example
@@ -302,7 +295,7 @@ README.md
 ## Development
 
 ```bash
-bash tests/smoke.sh       # 76 PASS lines across 7 sections, ending in ALL SMOKE TESTS PASSED
+bash tests/smoke.sh       # end-to-end checks, ending in ALL SMOKE TESTS PASSED
 cat CHANGELOG.md          # release notes
 ```
 

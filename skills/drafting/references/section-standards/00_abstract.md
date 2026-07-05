@@ -38,7 +38,7 @@ The abstract MUST follow the **BPMRC** structure: Background → Problem → Met
 
 Outlining self-review (Step 7 of `superpower-writing:outlining`) MUST grep `^- \[B\]`, `^- \[P\]`, `^- \[M\]`, `^- \[R\]`, `^- \[C\]` against the Abstract block and fail if any label is missing, duplicated, or out of order. The earlier "3–7 bullets" heuristic from the generic outlining table does NOT apply to Abstract — BPMRC fixes the count at 5.
 
-The abstract does **not** get a claims file. Unlike body sections, it carries only `% bpmrc: X` structural tags — never `% claim:` tags — and the PreToolUse hook rejects any `% claim:` tag or citation in an abstract (the `_abstract` stem is in `UNPROTECTED_SLUGS` and `CITATION_FREE_SLUGS`). Do NOT create `.writing/claims/section_00_abstract.md`; drafting would try to bind abstract paragraphs to it and the hook would block those writes. The BPMRC bullets in `outline.md` distill the body's claims for framing; they are not themselves bound to evidence. (See `superpower-writing:outlining` §"Abstract is citation-free".)
+The abstract does **not** get a claims file. Unlike body sections, it carries only `% bpmrc: X` structural tags — never `% claim:` tags — and the claim-first discipline forbids any `% claim:` tag or citation in an abstract (the abstract is both claim-exempt and citation-free). Do NOT create `.writing/claims/section_00_abstract.md`; drafting would try to bind abstract paragraphs to it, which the abstract's claim-exempt rule forbids. The BPMRC bullets in `outline.md` distill the body's claims for framing; they are not themselves bound to evidence. (See `superpower-writing:outlining` §"Abstract is citation-free".)
 
 ## Draft requirement
 
@@ -63,7 +63,7 @@ The abstract does **not** get a claims file. Unlike body sections, it carries on
 \end{abstract}
 ```
 
-**Hook interaction.** The stem `00_abstract` matches the `_abstract` slug in `UNPROTECTED_SLUGS` inside `hooks/enforce-claims.py`, so the PreToolUse hook does NOT require `% claim: id` tags here. But the `% bpmrc: X` tags ARE required. The `section-drafter` Step C self-review runs `grep -cE '^\s*% bpmrc: [BPMRC]' .writing/manuscript/00_abstract.tex` against the draft and fails the section if the count is not exactly 5 or if any of B/P/M/R/C is missing.
+**Tag rules.** The stem `00_abstract` is claim-exempt, so the claim-first discipline does NOT require `% claim: id` tags here. But the `% bpmrc: X` tags ARE required. The `section-drafter` Step C self-review runs `grep -cE '^\s*% bpmrc: [BPMRC]' .writing/manuscript/00_abstract.tex` against the draft and fails the section if the count is not exactly 5 or if any of B/P/M/R/C is missing.
 
 **Paragraph merging is forbidden.** A common anti-pattern is collapsing Background + Problem into one paragraph, or Method + Result into one. Do not do this. Each element owns its own paragraph even when its contribution is one sentence. Reviewers parse abstracts structurally; merged paragraphs force them to re-segment the text and increase triage-reject risk.
 
@@ -99,7 +99,7 @@ A well-balanced abstract gives Method and Result the most real estate; Backgroun
 
 - **Missing problem statement.** Background flows directly into Method; reviewers flag "unclear motivation" or "the contribution is not justified". Fix: always write the P paragraph, even if it feels redundant with B.
 - **Result buried in interpretation.** "We demonstrate that X is effective" is Conclusion phrasing, not Result phrasing. Results must be quantitative and descriptive; Conclusion is where you may interpret.
-- **Conclusion overreaches.** Claiming implications that exceed what the Result supports (e.g., "This will transform clinical practice" when the study had N=30 in one center). Keep Conclusion bounded by the evidence in Result.
+- **Conclusion overreaches.** Claiming implications that exceed what the Result supports (e.g., "This will transform production systems" when the evaluation ran on N=30 workloads on a single cluster). Keep Conclusion bounded by the evidence in Result.
 - **Numbers without units or CIs.** Triggers reviewer suspicion even when the paper's body has the full numbers. Carry the full quantitative claim into the abstract.
 - **Method buried inside Background.** A sentence like "To address this, we conducted a randomized trial in 3,000 adults" belongs in M, not B. If Background ends with "we did X", split it.
 - **Five elements smashed into one paragraph.** Produces an unstructured blob that defeats the whole skeleton. The `% bpmrc: X` tag enforcement exists to catch this.

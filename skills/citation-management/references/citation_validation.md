@@ -28,10 +28,10 @@ Validation should be performed:
 
 **DOI format**:
 ```
-Valid:   10.1038/s41586-021-03819-2
-Valid:   10.1126/science.aam9317
-Invalid: 10.1038/invalid
-Invalid: doi:10.1038/... (should omit "doi:" prefix in BibTeX)
+Valid:   10.1109/CVPR.2016.90
+Valid:   10.1145/3065386
+Invalid: 10.1109/invalid
+Invalid: doi:10.1109/... (should omit "doi:" prefix in BibTeX)
 ```
 
 **DOI resolution**:
@@ -49,7 +49,7 @@ Invalid: doi:10.1038/... (should omit "doi:" prefix in BibTeX)
 
 **Manual check**:
 1. Copy DOI from BibTeX
-2. Visit https://doi.org/10.1038/nature12345
+2. Visit https://doi.org/10.1145/3065386
 3. Verify it redirects to correct article
 4. Check metadata matches
 
@@ -80,7 +80,7 @@ python scripts/validate_citations.py references.bib --check-dois
 **Missing DOIs**:
 - Older articles may not have DOIs
 - Acceptable for pre-2000 publications
-- Add URL or PMID instead
+- Add URL or arXiv ID instead
 
 ### 2. Required Fields
 
@@ -141,7 +141,7 @@ year    % REQUIRED
 author  % REQUIRED
 title   % REQUIRED
 year    % REQUIRED
-howpublished  % Recommended (bioRxiv, Zenodo, etc.)
+howpublished  % Recommended (arXiv, Zenodo, etc.)
 doi OR url    % At least one required
 ```
 
@@ -207,7 +207,7 @@ author = {de Broglie, Louis}
 
 **Organizations as authors**:
 ```bibtex
-author = {{World Health Organization}}
+author = {{Association for Computing Machinery}}
 % Double braces treat as single author
 ```
 
@@ -215,7 +215,7 @@ author = {{World Health Organization}}
 
 **Automated validation**:
 ```bash
-python scripts/validate_citations.py references.bib --check-authors
+python scripts/validate_citations.py references.bib
 ```
 
 **Checks for**:
@@ -233,8 +233,8 @@ python scripts/validate_citations.py references.bib --check-authors
 **Valid years**:
 ```bibtex
 year = {2024}    % Current/recent
-year = {1953}    % Watson & Crick DNA structure (historical)
-year = {1665}    % Hooke's Micrographia (very old)
+year = {1948}    % Shannon information theory (historical)
+year = {1837}    % Babbage Analytical Engine (very old)
 ```
 
 **Invalid years**:
@@ -270,7 +270,7 @@ number = {Issue 3}   % Should be just number
 **Correct format**:
 ```bibtex
 pages = {123--145}    % En-dash (two hyphens)
-pages = {e0123456}    % PLOS-style article ID
+pages = {e0123456}    % Article-ID style (some e-journals)
 pages = {123}         % Single page
 ```
 
@@ -291,8 +291,8 @@ pages = {123–145}     % Unicode en-dash (may cause issues)
 
 **Valid**:
 ```bibtex
-url = {https://www.nature.com/articles/nature12345}
-url = {https://arxiv.org/abs/2103.14030}
+url = {https://dl.acm.org/doi/10.1145/3065386}
+url = {https://arxiv.org/abs/1706.03762}
 ```
 
 **Questionable**:
@@ -311,12 +311,12 @@ url = {bit.ly/...}  % URL shortener (not permanent)
 **Exact duplicates** (same DOI):
 ```bibtex
 @article{Smith2024a,
-  doi = {10.1038/nature12345},
+  doi = {10.1145/3065386},
   ...
 }
 
 @article{Smith2024b,
-  doi = {10.1038/nature12345},  % Same DOI!
+  doi = {10.1145/3065386},  % Same DOI!
   ...
 }
 ```
@@ -324,12 +324,12 @@ url = {bit.ly/...}  % URL shortener (not permanent)
 **Near duplicates** (similar title/authors):
 ```bibtex
 @article{Smith2024,
-  title = {Machine Learning for Drug Discovery},
+  title = {Machine Learning for Query Optimization},
   ...
 }
 
 @article{Smith2024method,
-  title = {Machine learning for drug discovery},  % Same, different case
+  title = {Machine learning for query optimization},  % Same, different case
   ...
 }
 ```
@@ -337,14 +337,14 @@ url = {bit.ly/...}  % URL shortener (not permanent)
 **Preprint + Published**:
 ```bibtex
 @misc{Smith2023arxiv,
-  title = {AlphaFold Results},
+  title = {Transformer Attention Results},
   howpublished = {arXiv},
   ...
 }
 
 @article{Smith2024,
-  title = {AlphaFold Results},  % Same paper, now published
-  journal = {Nature},
+  title = {Transformer Attention Results},  % Same paper, now published
+  journal = {Communications of the ACM},
   ...
 }
 % Keep published version only
@@ -373,8 +373,8 @@ python scripts/validate_citations.py references.bib --check-duplicates
 **Output**:
 ```
 Warning: Possible duplicate entries:
-  - Smith2024a (DOI: 10.1038/nature12345)
-  - Smith2024b (DOI: 10.1038/nature12345)
+  - Smith2024a (DOI: 10.1145/3065386)
+  - Smith2024b (DOI: 10.1145/3065386)
   Recommendation: Keep one entry, remove the other.
 ```
 
@@ -448,7 +448,7 @@ title = {Title with {Protected} Text}
 **Special characters**:
 - `{` and `}` for grouping
 - `\` for LaTeX commands
-- Protect capitalization: `{AlphaFold}`
+- Protect capitalization: `{ResNet}`
 - Accents: `{\"u}`, `{\'e}`, `{\aa}`
 
 #### Validation
@@ -500,7 +500,7 @@ Examine validation report:
     {
       "entry": "Doe2023",
       "error": "invalid_doi",
-      "doi": "10.1038/broken",
+      "doi": "10.1109/broken",
       "severity": "high"
     }
   ],
@@ -516,7 +516,7 @@ Examine validation report:
     {
       "entries": ["Smith2024a", "Smith2024b"],
       "reason": "same_doi",
-      "doi": "10.1038/nature12345"
+      "doi": "10.1145/3065386"
     }
   ]
 }
@@ -729,14 +729,14 @@ Check journal author guidelines!
 
 **Cause**:
 - Accented characters (é, ü, ñ)
-- Chemical formulas (H₂O)
+- Subscripts and superscripts (x₂, B⁺)
 - Math symbols (α, β, ±)
 
 **Solution**:
 ```bibtex
 % Use LaTeX commands
 author = {M{\"u}ller, Hans}  % Müller
-title = {Study of H\textsubscript{2}O}  % H₂O
+title = {Analysis of B\textsuperscript{+} Trees}  % B+ trees
 % Or use UTF-8 with proper LaTeX packages
 ```
 
@@ -752,7 +752,7 @@ title = {Study of H\textsubscript{2}O}  % H₂O
 **Solution**:
 1. Check original article
 2. Manually add missing fields
-3. Use alternative source (PubMed vs CrossRef)
+3. Use alternative source (DBLP vs CrossRef)
 
 ### Issue 4: Cannot Find Duplicate
 

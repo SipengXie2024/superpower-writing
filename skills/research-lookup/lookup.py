@@ -96,39 +96,34 @@ def _detect_venue_tier(url: str) -> Optional[str]:
     
     # Tier 1 - Premier venues
     tier1_indicators = {
-        "nature.com": "Nature (Tier 1)",
-        "science.org": "Science (Tier 1)",
-        "cell.com": "Cell Press (Tier 1)",
-        "nejm.org": "NEJM (Tier 1)",
-        "thelancet.com": "Lancet (Tier 1)",
-        "jamanetwork.com": "JAMA (Tier 1)",
-        "pnas.org": "PNAS (Tier 1)",
+        "neurips.cc": "NeurIPS (Tier 1)",
+        "icml.cc": "ICML (Tier 1)",
+        "iclr.cc": "ICLR (Tier 1)",
+        "openreview.net": "Top ML Conference (Tier 1)",
+        "usenix.org": "USENIX OSDI/NSDI/ATC (Tier 1)",
+        "vldb.org": "VLDB (Tier 1)",
     }
-    
+
     # Tier 2 - High-impact specialized
     tier2_indicators = {
-        "neurips.cc": "NeurIPS (Tier 2 - Top ML)",
-        "icml.cc": "ICML (Tier 2 - Top ML)",
-        "openreview.net": "Top ML Conference (Tier 2)",
-        "aacrjournals.org": "AACR Journals (Tier 2)",
-        "ahajournals.org": "AHA Journals (Tier 2)",
-        "bloodjournal.org": "Blood (Tier 2)",
-        "jci.org": "JCI (Tier 2)",
+        "aclanthology.org": "ACL Anthology (Tier 2)",
+        "aclweb.org": "ACL (Tier 2)",
+        "jmlr.org": "JMLR (Tier 2)",
+        "sigcomm.org": "SIGCOMM (Tier 2)",
+        "eurosys.org": "EuroSys (Tier 2)",
+        "thecvf.com": "CVF CVPR/ICCV (Tier 2)",
     }
-    
+
     # Tier 3 - Respected academic sources
     tier3_indicators = {
-        "springer.com": "Springer",
-        "wiley.com": "Wiley",
-        "elsevier.com": "Elsevier",
-        "oup.com": "Oxford University Press",
-        "arxiv.org": "arXiv (Preprint)",
-        "biorxiv.org": "bioRxiv (Preprint)",
-        "medrxiv.org": "medRxiv (Preprint)",
-        "pubmed": "PubMed",
-        "ncbi.nlm.nih.gov": "NCBI/PubMed",
-        "ieee.org": "IEEE",
+        "dl.acm.org": "ACM Digital Library",
         "acm.org": "ACM",
+        "ieeexplore.ieee.org": "IEEE Xplore",
+        "ieee.org": "IEEE",
+        "springer.com": "Springer",
+        "arxiv.org": "arXiv (Preprint)",
+        "semanticscholar.org": "Semantic Scholar",
+        "dblp.org": "DBLP",
     }
     
     for domain, label in tier1_indicators.items():
@@ -148,11 +143,12 @@ def _detect_venue_tier(url: str) -> Optional[str]:
 
 def main():
     """Main entry point for Claude Code tool."""
-    # Check for API key
-    if not os.getenv("OPENROUTER_API_KEY"):
-        print("❌ Error: OPENROUTER_API_KEY environment variable not set")
-        print("Please set it in your .env file or export it:")
-        print("  export OPENROUTER_API_KEY='your_openrouter_api_key'")
+    # Check for at least one backend API key
+    if not os.getenv("PARALLEL_API_KEY") and not os.getenv("OPENROUTER_API_KEY"):
+        print("❌ Error: no research backend API key set")
+        print("Set at least one in your .env file or export it:")
+        print("  export PARALLEL_API_KEY='...'    # primary (Parallel Chat API)")
+        print("  export OPENROUTER_API_KEY='...'  # fallback (Perplexity academic)")
         return 1
 
     # Get query from command line arguments

@@ -25,10 +25,10 @@ This skill provides real-time research information lookup using Perplexity's Son
 
 ```bash
 # Single research query
-python scripts/research_lookup.py "Recent advances in CRISPR gene editing 2024"
+python scripts/research_lookup.py "Recent advances in transformer attention mechanisms 2024"
 
 # Multiple queries with delay
-python scripts/research_lookup.py --batch "CRISPR applications" "gene therapy trials" "ethical considerations"
+python scripts/research_lookup.py --batch "Raft consensus applications" "distributed training scaling" "cache replacement policies"
 
 # Claude Code integration (called automatically)
 python lookup.py "your research query here"
@@ -41,7 +41,7 @@ The research lookup tool is automatically available in Claude Code when you:
 1. **Ask research questions:** "Research recent advances in quantum computing"
 2. **Request literature reviews:** "Find current studies on climate change impacts"
 3. **Need citations:** "What are the latest papers on transformer attention mechanisms?"
-4. **Want technical information:** "Standard protocols for flow cytometry"
+4. **Want technical information:** "Standard benchmarking methodology for distributed systems"
 
 ## Features
 
@@ -72,9 +72,9 @@ This skill **always prioritizes high-impact, influential papers** over obscure p
 
 Papers from higher-tier venues are always preferred:
 
-- **Tier 1 (Highest Priority):** Nature, Science, Cell, NEJM, Lancet, JAMA, PNAS, Nature Medicine, Nature Biotechnology
-- **Tier 2 (High Priority):** High-impact journals (IF>10), top conferences (NeurIPS, ICML, ICLR for ML/AI)
-- **Tier 3 (Good):** Respected specialized journals (IF 5-10)
+- **Tier 1 (Highest Priority):** NeurIPS, ICML, ICLR, OSDI, SOSP, NSDI, VLDB, SIGMOD, PLDI, POPL
+- **Tier 2 (High Priority):** Strong subfield venues (ACL, EMNLP, CVPR, KDD, SIGCOMM, EuroSys, ASPLOS, ISCA), top journals (JMLR, TOCS, TODS)
+- **Tier 3 (Good):** Respected specialized conferences and journals
 - **Tier 4 (Use Sparingly):** Other peer-reviewed venues
 
 ### Author Reputation
@@ -94,18 +94,18 @@ The skill prefers papers from:
 ## Query Examples
 
 ### Academic Research
-- "Recent systematic reviews on AI in medical diagnosis 2024"
-- "Meta-analysis of randomized controlled trials for depression treatment"
+- "Recent systematic reviews on retrieval-augmented generation 2024"
+- "Meta-analysis of benchmarks for distributed consensus protocols"
 - "Current state of quantum computing error correction research"
 
 ### Technical Methods
-- "Standard protocols for immunohistochemistry in tissue samples"
+- "Standard protocols for reproducible ML benchmarking"
 - "Best practices for machine learning model validation"
 - "Statistical methods for analyzing longitudinal data"
 
 ### Statistical Data
 - "Global renewable energy adoption statistics 2024"
-- "Prevalence of diabetes in different populations"
+- "Adoption statistics for cloud-native databases"
 - "Market size for autonomous vehicles industry"
 
 ## Response Format

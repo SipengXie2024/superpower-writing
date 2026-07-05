@@ -1,6 +1,6 @@
 ---
 name: drafting
-description: Orchestrates prose drafting section-by-section via a Claude Code dynamic workflow (parallel sections + two-stage review) or a manual batch session. Each section drafter must resolve claim EVIDENCE via research-lookup before writing prose (claim-first protocol; PreToolUse hook enforces this). Use after writing-plans produces .writing/plan.md.
+description: Orchestrates prose drafting section-by-section via a Claude Code dynamic workflow (parallel sections + two-stage review) or a manual batch session. Each section drafter must resolve claim EVIDENCE via research-lookup before writing prose (claim-first protocol; a required drafting discipline). Use after writing-plans produces .writing/plan.md.
 ---
 
 # Drafting
@@ -15,7 +15,7 @@ Drafting is the stage where claims become sentences. The hard rule is **claim-fi
 
 > Claim-first protocol: see `superpower-writing:main` §Claim-First Protocol.
 
-**Build the terminology ledger before any section drafts.** A paper must use one name for one thing; a term that drifts across sections reads as careless work and erodes reviewer trust. Before dispatching the first section, read [`skills/_shared/core/terminology-ledger.md`](../_shared/core/terminology-ledger.md) and extract every recurring load-bearing term (systems, models, datasets, metrics, notation, acronyms, named contributions) into the canonical-term table it specifies. Present the table to the user, flag every collision, and lock the canonical forms before prose starts. The ledger is the single source of truth every section drafter consults instead of re-deciding a name per section. It is advisory: surface collisions and let the user pick the canonical form, never coin a name to fill a gap. When the project opts into `.writing/glossary.md`, materialize each load-bearing ledger row into one glossary entry so the `enforce-terms.py` gate can check define-before-use ordering.
+**Build the terminology ledger before any section drafts.** A paper must use one name for one thing; a term that drifts across sections reads as careless work and erodes reviewer trust. Before dispatching the first section, read [`skills/_shared/core/terminology-ledger.md`](../_shared/core/terminology-ledger.md) and extract every recurring load-bearing term (systems, models, datasets, metrics, notation, acronyms, named contributions) into the canonical-term table it specifies. Present the table to the user, flag every collision, and lock the canonical forms before prose starts. The ledger is the single source of truth every section drafter consults instead of re-deciding a name per section. It is advisory: surface collisions and let the user pick the canonical form, never coin a name to fill a gap. When the project opts into `.writing/glossary.md`, materialize each load-bearing ledger row into one glossary entry so define-before-use ordering can be checked.
 
 This skill only shapes the per-section prompt and the bookkeeping. Orchestration is picked by mode:
 
@@ -51,7 +51,7 @@ Per section, before marking complete:
 - [ ] Every claim id referenced in the prose resolves to `STATUS ∈ {evidence_ready, verified}` in its claims file.
 - [ ] Every load-bearing paragraph carries `% claim: id`; drafting notes use `% draft-only` (both are LaTeX line comments at column 0).
 - [ ] If `.writing/glossary.md` exists: the first introduction of every glossary term is tagged `% define: <id>` in the section matching `defined_in`; subsequent uses in other sections that should be ordering-checked are tagged `% use: <id>`.
-- [ ] PreToolUse hook did not block any write (visible as exit-2 JSON from `enforce-claims.sh` or `enforce-terms.sh`).
+- [ ] Claim-first and define-before-use disciplines held for every write (no prose written against a stub claim; no term used before its definition site).
 - [ ] `.writing/progress.md` Task Dashboard row updated (Status, Spec Review, Manuscript Review, Claim Verification).
 
 ## Process
@@ -77,14 +77,14 @@ Recommend by heuristic:
 
 Then hand off:
 
-- **Dynamic Workflow** → ask Claude to run a workflow (include the word "workflow" in the request) or turn on `/effort ultracode`. The workflow drafts each section with the `superpower-writing:section-drafter` agent (the per-section prompt below is its task body), then pipes each drafted section through `superpower-writing:spec-reviewer` (outline/claim alignment) and `superpower-writing:manuscript-reviewer` (writing quality). Independent sections run in parallel; the claim-first PreToolUse hook fires on every write. The two-stage review contract — gate order, 3-round cap, and the plan-alignment gate — is specified in `skills/planning-foundation/references/review-loop-protocol.md`.
+- **Dynamic Workflow** → ask Claude to run a workflow (include the word "workflow" in the request) or turn on `/effort ultracode`. The workflow drafts each section with the `superpower-writing:section-drafter` agent (the per-section prompt below is its task body), then pipes each drafted section through `superpower-writing:spec-reviewer` (outline/claim alignment) and `superpower-writing:manuscript-reviewer` (writing quality). Independent sections run in parallel; the claim-first discipline applies to every write. The two-stage review contract — gate order, 3-round cap, and the plan-alignment gate — is specified in `skills/planning-foundation/references/review-loop-protocol.md`.
 - **Manual Batch** → `Skill(skill="superpower-writing:executing-plans")` in a separate or manual session, using the same `section-drafter` prompt body and the same two-stage review (`spec-reviewer` then `manuscript-reviewer`) at each batch checkpoint.
 
 The `section-drafter` agent file at `agents/section-drafter.md` already encodes the claim-first protocol and the Zotero-first evidence resolution flow; the per-section prompt (next section) layers the specific section details on top of that baseline. Inject `.writing/plan.md` task text verbatim.
 
 ### 2. Per-section subagent prompt template
 
-Every drafter subagent receives the same prompt body, customized with the section number, slug, the verbatim task text from `.writing/plan.md`, and — when a matching file exists — the section-specific writing standard. The template is the core contribution of this skill; copy it into the dispatch prompt exactly, including the claim-first warnings and the section-standard block (they are what makes the PreToolUse hook and the structural self-review survivable).
+Every drafter subagent receives the same prompt body, customized with the section number, slug, the verbatim task text from `.writing/plan.md`, and — when a matching file exists — the section-specific writing standard. The template is the core contribution of this skill; copy it into the dispatch prompt exactly, including the claim-first warnings and the section-standard block (they are what makes the claim-first discipline and the structural self-review survivable).
 
 Read the full template at [`references/section-drafter-prompt.md`](references/section-drafter-prompt.md) and resolve its two placeholders before dispatch:
 
@@ -114,7 +114,7 @@ Systems papers usually carry at least one schematic figure (architecture / data-
   Output: .writing/figures/<slug>.tex (+ compiled .pdf), \input into the manuscript
   ```
 
-  One invocation per figure. The skill compiles and verifies the figure, shows two layout candidates for the user to pick, then iterates to publication quality. The prose paragraph that introduces the figure still needs a `% claim: id` tag pointing at whatever claim the figure supports (usually a mechanism or pipeline claim). Figure files are not subject to the PreToolUse hook (the matcher only covers `manuscript/*.tex`).
+  One invocation per figure. The skill compiles and verifies the figure, shows two layout candidates for the user to pick, then iterates to publication quality. The prose paragraph that introduces the figure still needs a `% claim: id` tag pointing at whatever claim the figure supports (usually a mechanism or pipeline claim). Figure files are not subject to the claim-first tagging discipline; only `manuscript/*.tex` prose carries claim tags.
 
 - For the graphical abstract (when the paper includes one), pictorial concept art, design-direction exploration (3 parallel drafts, user picks), or any figure the user prefers as a polished PNG:
 
@@ -132,7 +132,7 @@ After each section returns (drafted and committed), the orchestrator updates `.w
 
 | Section / Figure | Status | Spec Review | Manuscript Review | Plan Align | Claim Verification | Key Outcome |
 |------------------|--------|-------------|-------------------|------------|--------------------|-------------|
-| 02_methods | drafted | PASS | PASS | PASS | 5/5 evidence_ready | 1247-patient T2D cohort described |
+| 02_methods | drafted | PASS | PASS | PASS | 5/5 evidence_ready | 1247-job cluster trace described |
 
 Set:
 
@@ -148,7 +148,7 @@ The Zotero-first / network-fallback / optional auto-push flow is fully specified
 
 ## Key Principles
 
-**Claim-first, always.** Evidence before prose is the central discipline of this plugin. The hook is the backstop, not the workflow — the workflow is Step A of the template. If drafting ever feels "fast" because a subagent skipped Step A, the hook will stop it and you will redo the work. Do it right the first time.
+**Claim-first, always.** Evidence before prose is the central discipline of this plugin. Resolving evidence first is the workflow — Step A of the template — not an optional gate to lean on later. If drafting ever feels "fast" because a subagent skipped Step A, the gap surfaces at claim-verification and you will redo the work. Do it right the first time.
 
 **Own the prompt; delegate orchestration.** This skill owns the per-section prompt template and the claim-first bookkeeping. Orchestration (parallelism, review gates, session management) is handled by a Claude Code dynamic workflow or, as a manual fallback, by `superpower-writing:executing-plans`.
 
@@ -160,11 +160,11 @@ The Zotero-first / network-fallback / optional auto-push flow is fully specified
 
 **Progress dashboard is the handoff contract.** `claim-verification` and the human author read `.writing/progress.md` to know what has been drafted, verified, or reviewed. A section is not "drafted" until its row is updated and committed.
 
-**Do not fight the hook.** If `enforce-claims.sh` blocks a write, the hook is telling you the claim-first protocol was violated. Resolve the underlying cause (missing claim entry, stub STATUS, untagged paragraph). Never propose disabling the hook or bypassing it with a sneaky `MultiEdit`.
+**Do not sidestep the claim-first protocol.** If a write would cite a stub claim (or leave a load-bearing paragraph untagged, or reference a missing claim entry), the claim-first protocol was violated. Resolve the underlying cause (missing claim entry, stub STATUS, untagged paragraph). Never work around the protocol with a sneaky `MultiEdit`.
 
 **Locked-term renames are not prose edits.** If the user or a sub-agent proposes renaming a term that is already locked in `.writing/progress.md` naming decisions, in `.writing/outline.md` bullet labels, or in prior drafted prose across multiple manuscript files, do NOT silently apply the edit. Treat it as a cross-file rename: grep every `.writing/manuscript/`, `.writing/outline.md`, and `.writing/findings.md` file for the old term, update them together in one pass, and record the rename in `.writing/findings.md` so the audit trail survives. The drafting skill handles prose within an agreed spec; renames cross the prose/spec boundary and need an audit of which files mention the old term and an explicit findings.md entry so the planning-file audit trail survives the rename. Applying a locked-term rename as if it were a single-file edit silently desynchronizes the manuscript from its naming history.
 
-**Define terms before they flow across sections.** When `.writing/glossary.md` is present, the companion `enforce-terms.sh` hook blocks writes that use a term in a section before the section declared as its definition site. The fix is the same shape as the claim protocol: add or update the glossary entry, move the `% define: <id>` to the right section, or reorder sections so the term lands before its first use. `% use: <id>` is an **opt-in** annotation — you only tag the uses you want the hook to verify. An untagged occurrence of the term is not checked, so this remains a lightweight discipline rather than a universal requirement.
+**Define terms before they flow across sections.** When `.writing/glossary.md` is present, do not use a term in a section before the section declared as its definition site. The fix is the same shape as the claim protocol: add or update the glossary entry, move the `% define: <id>` to the right section, or reorder sections so the term lands before its first use. `% use: <id>` is an **opt-in** annotation — you only tag the uses you want ordering-checked. An untagged occurrence of the term is not checked, so this remains a lightweight discipline rather than a universal requirement.
 
 ## Style cautions for section intros and argumentative prose
 
@@ -191,5 +191,3 @@ At a glance:
 - Plugin-local `superpower-writing:scientific-schematics` — graphical abstract + pictorial concept art.
 - Plugin-local `superpower-writing:research-lookup`, `superpower-writing:citation-management` — evidence resolution (network).
 - Plugin-level `.mcp.json` `zotero` server — Zotero Web API tools. Search: `zotero_search_items` (DOI / title lookup), `zotero_semantic_search` (AI similarity search with paragraph-level matching over PDF fulltext). Read: `zotero_get_item_metadata` (markdown or BibTeX), `zotero_get_item_fulltext` (server-side PDF text — use sparingly, often 70K+ chars; prefer `zotero_semantic_search` to find relevant chunks first). Write: `zotero_add_by_doi` (auto-fetches metadata + open-access PDF). Collection nav: `zotero_get_collections`, `zotero_get_collection_items`.
-- Hook `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh` — PreToolUse enforcement of the claim-first protocol.
-- Hook `${CLAUDE_PLUGIN_ROOT}/hooks/enforce-terms.sh` — opt-in PreToolUse enforcement of term-definition-before-use ordering. Activates when `.writing/glossary.md` is present.

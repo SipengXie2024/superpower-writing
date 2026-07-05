@@ -39,7 +39,7 @@ Run:
 ${CLAUDE_PLUGIN_ROOT}/scripts/check-deps.sh
 ```
 
-This probes the plugin's own `skills/` directory first (the bundled domain skills ship there), then legacy Agent Skills install locations for back-compat. Required: `literature-review`, `citation-management`, `research-lookup`, `tikz-figures`, `scientific-schematics`, `scientific-visualization`, plus a PyYAML probe for the claim hook.
+This probes the plugin's own `skills/` directory first (the bundled domain skills ship there), then legacy Agent Skills install locations for back-compat. Required: `literature-review`, `citation-management`, `research-lookup`, `tikz-figures`, `scientific-schematics`, `scientific-visualization`, plus a PyYAML probe.
 
 **On non-zero exit:** refuse all subsequent superpower-writing skill invocations and surface the script's output verbatim — it names the missing dependency and the fix. A missing bundled skill means the plugin install is incomplete (re-clone or reinstall the plugin); a missing `pyyaml` is fixed with:
 
@@ -85,7 +85,7 @@ When `.writing/` already exists at session start:
 2. Read `.writing/findings.md` — lit synthesis, prior decisions, reviewer context.
 3. Read `.writing/metadata.yaml` — authors, preregistration, data/code availability, reporting guideline, Zotero config.
 4. `git diff --stat -- .writing/` to see what changed since last session.
-5. **Foot-gun check:** run `find .writing/manuscript -maxdepth 1 -name '*.md' -type f` — any `.md` file under `manuscript/` is a drafting mistake (the hook only enforces `.tex`). Warn the user and suggest renaming to `.tex` before continuing; do NOT silently proceed, since unenforced drafts accumulate unresolved claims.
+5. **Foot-gun check:** run `find .writing/manuscript -maxdepth 1 -name '*.md' -type f` — any `.md` file under `manuscript/` is a drafting mistake (claim-first discipline covers `.tex` only). Warn the user and suggest renaming to `.tex` before continuing; do NOT silently proceed, since drafts outside that discipline accumulate unresolved claims.
 6. Update planning files with any newly recovered context, then route based on the stage below.
 
 # Stage Gate Routing
@@ -153,7 +153,7 @@ When the user says "execute the plan", "start drafting", "write the paper", "imp
 1. If no plan exists at `.writing/plan.md`, invoke `superpower-writing:writing-plans` — it produces `.writing/plan.md` directly (no further delegation; the writing-domain skill now owns the planning mechanics).
 2. If a plan exists, present the execution strategy via `AskUserQuestion`:
 
-   - **Claude Code Dynamic Workflow** (recommended for multi-section papers) — ask Claude to run a workflow that executes `.writing/plan.md` (include the word "workflow" in the request so Claude writes one), or turn on `/effort ultracode`. The workflow drafts independent sections in parallel with the `superpower-writing:section-drafter` agent, then runs the two-stage review as a pipeline — `superpower-writing:spec-reviewer` for outline/claim alignment, then `superpower-writing:manuscript-reviewer` for writing quality. It reads `.writing/plan.md`, `.writing/outline.md`, and `.writing/findings.md`, and writes drafted prose, progress, and findings back into `.writing/`. The claim-first PreToolUse hook still fires on every section write.
+   - **Claude Code Dynamic Workflow** (recommended for multi-section papers) — ask Claude to run a workflow that executes `.writing/plan.md` (include the word "workflow" in the request so Claude writes one), or turn on `/effort ultracode`. The workflow drafts independent sections in parallel with the `superpower-writing:section-drafter` agent, then runs the two-stage review as a pipeline — `superpower-writing:spec-reviewer` for outline/claim alignment, then `superpower-writing:manuscript-reviewer` for writing quality. It reads `.writing/plan.md`, `.writing/outline.md`, and `.writing/findings.md`, and writes drafted prose, progress, and findings back into `.writing/`. The claim-first discipline still governs every section write.
    - **Manual Batch Session** → `superpower-writing:executing-plans`, for a separate or manual session that drafts plan batches and stops at checkpoints. Best when workflows are unavailable or the user wants explicit per-batch review.
 
 3. Recommend based on paper shape: many loosely-coupled sections, heavy per-section lit search, or a long paper → Dynamic Workflow; the user wants manual checkpoints across days or workflow support is unavailable → Manual Batch Session.
@@ -215,21 +215,21 @@ Every load-bearing paragraph in `.writing/manuscript/*.tex` must carry a LaTeX l
 - `% claim: <id>` — links to an entry in `.writing/claims/section_<NN>_<slug>.md` with fields `id`, `CLAIM`, `EVIDENCE`, `STATUS` ∈ {`stub`, `evidence_ready`, `verified`}.
 - `% draft-only` — scratch prose that will be replaced before the next stage gate.
 
-A **PreToolUse hook** (`${CLAUDE_PLUGIN_ROOT}/hooks/enforce-claims.sh`) blocks any Edit / Write / MultiEdit / NotebookEdit targeting `**/manuscript/*.tex` when:
+**Claim-first discipline:** never write prose (Edit / Write / MultiEdit / NotebookEdit) into `**/manuscript/*.tex` when:
 
 - a `% claim: id` tag references a claim with `STATUS: stub`, or
 - the claim file is missing, or
 - untagged load-bearing prose lands in a protected section.
 
-The hook exempts any section stem whose slug is in `UNPROTECTED_SLUGS` (`abstract`, `references`, `acknowledgments`) from paragraph-tag enforcement. Slug match is by slug-ending: `00_abstract` matches `_abstract`; `09_references` matches `_references`; `10_acknowledgments` matches `_acknowledgments`. All other `manuscript/NN_*.tex` files require every load-bearing paragraph to carry `% claim: id` or `% draft-only`.
+In every such case, resolve evidence first. The paragraph-tag rule exempts any section stem whose slug is `abstract`, `references`, or `acknowledgments`. Slug match is by slug-ending: `00_abstract` matches `_abstract`; `09_references` matches `_references`; `10_acknowledgments` matches `_acknowledgments`. All other `manuscript/NN_*.tex` files require every load-bearing paragraph to carry `% claim: id` or `% draft-only`.
 
-Markdown manuscript files (`.md` under `manuscript/`) are NOT intercepted — the plugin operates on LaTeX only. If a `.md` slips into `manuscript/`, it falls through unenforced; convert to `.tex` before claim-verification.
+Markdown manuscript files (`.md` under `manuscript/`) fall outside this discipline — the plugin operates on LaTeX only. If a `.md` slips into `manuscript/`, it escapes claim tracking; convert to `.tex` before claim-verification.
 
 ## Citation Placement Rule
 
-The abstract is **citation-free**. `CITATION_FREE_SLUGS = {"abstract"}` in the hook — any stem ending in `_abstract` (e.g. `00_abstract.tex`) is blocked when the write contains any LaTeX citation command (`\cite`, `\citep`, `\citet`, `\nocite`, `\parencite`, `\textcite`, `\autocite`, `\footcite`, `\citeauthor`, `\citeyear`, `\citealt`, `\citealp`, or any `\*cite*` variant) or a `% claim: id` tag. The abstract is a self-contained summary of the paper's own findings; references belong in the body. Every body section (`01_introduction.tex`, `02_background.tex`, `03_methods.tex`, `04_results.tex`, `05_discussion.tex`, etc.) MUST back every load-bearing claim with a `\cite{citekey}` whose citekey resolves against `.writing/refs.bib`; missing citations surface as FAILs in `claim-verification` Pass 2.
+The abstract is **citation-free**: any stem ending in `_abstract` (e.g. `00_abstract.tex`) must not contain any LaTeX citation command (`\cite`, `\citep`, `\citet`, `\nocite`, `\parencite`, `\textcite`, `\autocite`, `\footcite`, `\citeauthor`, `\citeyear`, `\citealt`, `\citealp`, or any `\*cite*` variant) or a `% claim: id` tag. The abstract is a self-contained summary of the paper's own findings; references belong in the body. Every body section (`01_introduction.tex`, `02_background.tex`, `03_methods.tex`, `04_results.tex`, `05_discussion.tex`, etc.) MUST back every load-bearing claim with a `\cite{citekey}` whose citekey resolves against `.writing/refs.bib`; missing citations surface as FAILs in `claim-verification` Pass 2.
 
-Drafting and claim-verification skills must be aware of this hook and surface its block reason to the user. The fix is always: resolve EVIDENCE first (via `research-lookup` / `citation-management` / Zotero lookup), bump `STATUS` to `evidence_ready`, then write prose.
+Drafting and claim-verification skills must uphold this discipline and surface any violation to the user. The fix is always: resolve EVIDENCE first (via `research-lookup` / `citation-management` / Zotero lookup), bump `STATUS` to `evidence_ready`, then write prose.
 
 # User Instructions
 
@@ -239,4 +239,4 @@ Instructions say WHAT, not HOW. "Add a methods paragraph" or "tighten the abstra
 2. `.writing/` recovery or init.
 3. Stage-appropriate routing per the table above.
 4. Plugin-local skills for domain content and orchestration.
-5. Claim-first protocol enforced by the PreToolUse hook — don't try to bypass it.
+5. Claim-first protocol as a drafting discipline — resolve evidence before prose; don't bypass it.

@@ -8,25 +8,25 @@ This document provides detailed guidelines for formatting citations in various a
 
 **Format**: Author, A. A., Author, B. B., & Author, C. C. (Year). Title of article. *Title of Periodical*, *volume*(issue), page range. https://doi.org/xx.xxx/yyyy
 
-**Example**: Smith, J. D., Johnson, M. L., & Williams, K. R. (2023). Machine learning approaches in drug discovery. *Nature Reviews Drug Discovery*, *22*(4), 301-318. https://doi.org/10.1038/nrd.2023.001
+**Example**: Smith, J. D., Johnson, M. L., & Williams, K. R. (2023). Efficient attention mechanisms for long-context transformers. *Journal of Machine Learning Research*, *24*(4), 301-318. https://doi.org/10.5555/jmlr.2023.001
 
 ### Books
 
 **Format**: Author, A. A. (Year). *Title of work: Capital letter also for subtitle*. Publisher Name. https://doi.org/xxxx
 
-**Example**: Kumar, V., Abbas, A. K., & Aster, J. C. (2021). *Robbins and Cotran pathologic basis of disease* (10th ed.). Elsevier.
+**Example**: Cormen, T. H., Leiserson, C. E., Rivest, R. L., & Stein, C. (2022). *Introduction to algorithms* (4th ed.). MIT Press.
 
 ### Book Chapters
 
 **Format**: Author, A. A., & Author, B. B. (Year). Title of chapter. In E. E. Editor & F. F. Editor (Eds.), *Title of book* (pp. xx-xx). Publisher.
 
-**Example**: Brown, P. O., & Botstein, D. (2020). Exploring the new world of the genome with DNA microarrays. In M. B. Eisen & P. O. Brown (Eds.), *DNA microarrays: A molecular cloning manual* (pp. 1-45). Cold Spring Harbor Laboratory Press.
+**Example**: Dean, J., & Ghemawat, S. (2020). MapReduce: Simplified data processing on large clusters. In M. Kaufmann (Ed.), *Readings in distributed systems* (pp. 1-45). Morgan Kaufmann.
 
 ### Preprints
 
 **Format**: Author, A. A., & Author, B. B. (Year). Title of preprint. *Repository Name*. https://doi.org/xxxx
 
-**Example**: Zhang, Y., Chen, L., & Wang, H. (2024). Novel therapeutic targets in Alzheimer's disease. *bioRxiv*. https://doi.org/10.1101/2024.01.001
+**Example**: Zhang, Y., Chen, L., & Wang, H. (2024). Scaling laws for distributed model training. *arXiv*. https://doi.org/10.48550/arXiv.2401.00001
 
 ### Conference Papers
 
@@ -34,26 +34,24 @@ This document provides detailed guidelines for formatting citations in various a
 
 ---
 
-## Nature Style
+## ACM Style (ACM Reference Format)
 
 ### Journal Articles
 
-**Format**: Author, A. A., Author, B. B. & Author, C. C. Title of article. *J. Name* **volume**, page range (year).
+**Format**: Author, A. A., Author, B. B., and Author, C. C. Year. Title of article. *Journal Name* volume, issue (Month Year), page range. https://doi.org/xx.xxx/yyyy
 
-**Example**: Smith, J. D., Johnson, M. L. & Williams, K. R. Machine learning approaches in drug discovery. *Nat. Rev. Drug Discov.* **22**, 301-318 (2023).
+**Example**: Jane D. Smith, Mary L. Johnson, and Karen R. Williams. 2023. Efficient attention mechanisms for long-context transformers. *ACM Trans. Mach. Learn.* 1, 4 (Dec. 2023), 301-318. https://doi.org/10.1145/3591234
 
-### Books
+### Conference Papers
 
-**Format**: Author, A. A. & Author, B. B. *Book Title* (Publisher, Year).
+**Format**: Author, A. A. and Author, B. B. Year. Title of paper. In *Proceedings of the Conference (Abbrev 'YY)*. Publisher, City, page range. https://doi.org/xx.xxx/yyyy
 
-**Example**: Kumar, V., Abbas, A. K. & Aster, J. C. *Robbins and Cotran Pathologic Basis of Disease* 10th edn (Elsevier, 2021).
+**Example**: Wei Chen and Li Zhang. 2023. A fast consensus protocol for geo-replicated stores. In *Proceedings of the 29th Symposium on Operating Systems Principles (SOSP '23)*. ACM, New York, NY, 45-60. https://doi.org/10.1145/3600000
 
 ### Multiple Authors
 
-- 1-2 authors: List all
-- 3+ authors: List first author followed by "et al."
-
-**Example**: Zhang, Y. et al. Novel therapeutic targets in Alzheimer's disease. *bioRxiv* https://doi.org/10.1101/2024.01.001 (2024).
+- List all authors in full where possible.
+- Very long author lists may use the first author followed by "et al." in the in-text citation.
 
 ---
 
@@ -63,33 +61,13 @@ This document provides detailed guidelines for formatting citations in various a
 
 **Format**: Author, First Name Middle Initial. Year. "Article Title." *Journal Title* volume, no. issue (Month): page range. https://doi.org/xxxx.
 
-**Example**: Smith, John D., Mary L. Johnson, and Karen R. Williams. 2023. "Machine Learning Approaches in Drug Discovery." *Nature Reviews Drug Discovery* 22, no. 4 (April): 301-318. https://doi.org/10.1038/nrd.2023.001.
+**Example**: Smith, John D., Mary L. Johnson, and Karen R. Williams. 2023. "Efficient Attention Mechanisms for Long-Context Transformers." *Journal of Machine Learning Research* 24, no. 4 (April): 301-318. https://doi.org/10.5555/jmlr.2023.001.
 
 ### Books
 
 **Format**: Author, First Name Middle Initial. Year. *Book Title: Subtitle*. Edition. Place: Publisher.
 
-**Example**: Kumar, Vinay, Abul K. Abbas, and Jon C. Aster. 2021. *Robbins and Cotran Pathologic Basis of Disease*. 10th ed. Philadelphia: Elsevier.
-
----
-
-## Vancouver Style (Numbered)
-
-### Journal Articles
-
-**Format**: Author AA, Author BB, Author CC. Title of article. Abbreviated Journal Name. Year;volume(issue):page range.
-
-**Example**: Smith JD, Johnson ML, Williams KR. Machine learning approaches in drug discovery. Nat Rev Drug Discov. 2023;22(4):301-18.
-
-### Books
-
-**Format**: Author AA, Author BB. Title of book. Edition. Place: Publisher; Year.
-
-**Example**: Kumar V, Abbas AK, Aster JC. Robbins and Cotran pathologic basis of disease. 10th ed. Philadelphia: Elsevier; 2021.
-
-### Citation in Text
-
-Use superscript numbers in order of appearance: "Recent studies^1,2^ have shown..."
+**Example**: Cormen, Thomas H., Charles E. Leiserson, Ronald L. Rivest, and Clifford Stein. 2022. *Introduction to Algorithms*. 4th ed. Cambridge, MA: MIT Press.
 
 ---
 
@@ -99,27 +77,25 @@ Use superscript numbers in order of appearance: "Recent studies^1,2^ have shown.
 
 **Format**: [#] A. A. Author, B. B. Author, and C. C. Author, "Title of article," *Abbreviated Journal Name*, vol. x, no. x, pp. xxx-xxx, Month Year.
 
-**Example**: [1] J. D. Smith, M. L. Johnson, and K. R. Williams, "Machine learning approaches in drug discovery," *Nat. Rev. Drug Discov.*, vol. 22, no. 4, pp. 301-318, Apr. 2023.
+**Example**: [1] J. D. Smith, M. L. Johnson, and K. R. Williams, "Efficient attention mechanisms for long-context transformers," *IEEE Trans. Neural Netw. Learn. Syst.*, vol. 34, no. 4, pp. 301-318, Apr. 2023.
 
 ### Books
 
 **Format**: [#] A. A. Author, *Title of Book*, xth ed. City, State: Publisher, Year.
 
-**Example**: [2] V. Kumar, A. K. Abbas, and J. C. Aster, *Robbins and Cotran Pathologic Basis of Disease*, 10th ed. Philadelphia, PA: Elsevier, 2021.
+**Example**: [2] T. H. Cormen, C. E. Leiserson, R. L. Rivest, and C. Stein, *Introduction to Algorithms*, 4th ed. Cambridge, MA: MIT Press, 2022.
 
 ---
 
 ## Common Abbreviations for Journal Names
 
-- Nature: Nat.
-- Science: Science
-- Cell: Cell
-- Nature Reviews Drug Discovery: Nat. Rev. Drug Discov.
-- Journal of the American Chemical Society: J. Am. Chem. Soc.
-- Proceedings of the National Academy of Sciences: Proc. Natl. Acad. Sci. U.S.A.
-- PLOS ONE: PLoS ONE
-- Bioinformatics: Bioinformatics
-- Nucleic Acids Research: Nucleic Acids Res.
+- Communications of the ACM: Commun. ACM
+- Journal of the ACM: J. ACM
+- ACM Transactions on Programming Languages and Systems: ACM Trans. Program. Lang. Syst.
+- Journal of Machine Learning Research: J. Mach. Learn. Res.
+- IEEE Transactions on Neural Networks and Learning Systems: IEEE Trans. Neural Netw. Learn. Syst.
+- Proceedings of the VLDB Endowment: Proc. VLDB Endow.
+- Advances in Neural Information Processing Systems: Adv. Neural Inf. Process. Syst.
 
 ---
 
@@ -139,9 +115,9 @@ Use superscript numbers in order of appearance: "Recent studies^1,2^ have shown.
 - Smith et al. (2023) demonstrated...
 - Multiple citations: (Brown, 2022; Smith et al., 2023; Zhang, 2024)
 
-### Nature Style
-- Superscript numbers: Recent studies^1,2^ have shown...
-- Or: Recent studies (refs 1,2) have shown...
+### ACM / IEEE Style
+- Numbered brackets: Recent work [1], [2] has shown...
+- Or grouped: Recent work [1, 2] has shown...
 
 ### Chicago Style
 - (Smith, Johnson, and Williams 2023)
@@ -153,7 +129,7 @@ Use superscript numbers in order of appearance: "Recent studies^1,2^ have shown.
 
 ### By Citation Style
 - **APA, Chicago**: Alphabetical by first author's last name
-- **Nature, Vancouver, IEEE**: Numerical order of first appearance in text
+- **ACM (numbered), IEEE**: Numerical order of first appearance in text
 
 ### Hanging Indents
 Most styles use hanging indents where the first line is flush left and subsequent lines are indented.

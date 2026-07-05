@@ -19,7 +19,6 @@ skills/citation-management/references/bibtex_formatting.md::ref-toc::missing
 skills/citation-management/references/citation_validation.md::ref-toc::missing
 skills/citation-management/references/google_scholar_search.md::ref-toc::missing
 skills/citation-management/references/metadata_extraction.md::ref-toc::missing
-skills/citation-management/references/pubmed_search.md::ref-toc::missing
 skills/claim-verification/SKILL.md::description::use-when
 skills/claim-verification/SKILL.md::em-dash::body
 skills/collaborating-with-codex/SKILL.md::description::em-dash
@@ -60,7 +59,6 @@ skills/polish-by-diff/SKILL.md::description::words-high
 skills/polish-by-diff/SKILL.md::em-dash::body
 skills/polish/SKILL.md::em-dash::body
 skills/research-lookup/SKILL.md::description::use-when
-skills/research-lookup/SKILL.md::em-dash::body
 skills/scientific-schematics/SKILL.md::description::em-dash
 skills/scientific-schematics/SKILL.md::description::use-when
 skills/scientific-schematics/SKILL.md::description::words-high

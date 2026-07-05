@@ -2,21 +2,21 @@
 #
 # Opt-in companion to the claim-first protocol. Copy this file to
 # `.writing/glossary.md` (preserving the name) to activate the
-# term-ordering PreToolUse hook at hooks/enforce-terms.sh.
+# term-definition-before-use discipline.
 #
 # Format: YAML list. Each entry:
 #   - id:         kebab-case token used inside `% define: <id>` and
 #                 `% use: <id>` LaTeX line comments.
 #   - term:       human-readable phrase as it appears in prose.
-#   - definition: one-sentence meaning. Informational; the hook does
-#                 not parse it.
+#   - definition: one-sentence meaning. Informational; not used by
+#                 the ordering rule.
 #   - defined_in: stem of the .tex file where the term is first
 #                 introduced (no extension, no `.writing/manuscript/`
 #                 prefix). Ordering is by numeric prefix, so
 #                 `02_background` precedes `03_methods` regardless of
 #                 alphabetical order of the slug.
 #
-# The hook enforces:
+# The define-before-use discipline requires:
 #   1. Every `% define: <id>` appears in the file whose stem equals
 #      glossary[id].defined_in.
 #   2. Every `% use: <id>` appears in a section >= defined_in (numeric

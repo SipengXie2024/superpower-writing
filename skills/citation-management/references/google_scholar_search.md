@@ -18,9 +18,9 @@ Google Scholar provides the most comprehensive coverage of academic literature a
 Search for papers containing specific terms anywhere in the document (title, abstract, full text):
 
 ```
-CRISPR gene editing
-machine learning protein folding
-climate change impact agriculture
+transformer attention mechanism
+neural machine translation
+distributed query optimization
 quantum computing algorithms
 ```
 
@@ -36,9 +36,9 @@ Use quotation marks to search for exact phrases:
 
 ```
 "deep learning"
-"CRISPR-Cas9"
-"systematic review"
-"randomized controlled trial"
+"Raft consensus algorithm"
+"attention is all you need"
+"reinforcement learning"
 ```
 
 **When to use**:
@@ -56,13 +56,13 @@ Find papers by specific authors:
 ```
 author:LeCun
 author:"Geoffrey Hinton"
-author:Church synthetic biology
+author:Dean distributed systems
 ```
 
 **Variations**:
 - Single last name: `author:Smith`
 - Full name in quotes: `author:"Jane Smith"`
-- Author + topic: `author:Doudna CRISPR`
+- Author + topic: `author:Ousterhout Raft`
 
 **Tips**:
 - Authors may publish under different name variations
@@ -91,8 +91,8 @@ intitle:review climate change
 Search within specific journals or conferences:
 
 ```
-source:Nature
-source:"Nature Communications"
+source:OSDI
+source:"Communications of the ACM"
 source:NeurIPS
 source:"Journal of Machine Learning Research"
 ```
@@ -109,8 +109,8 @@ Exclude terms from results:
 
 ```
 machine learning -survey
-CRISPR -patent
-climate change -news
+convolutional neural networks -patent
+distributed systems -news
 deep learning -tutorial -review
 ```
 
@@ -128,8 +128,8 @@ Search for papers containing any of multiple terms:
 
 ```
 "machine learning" OR "deep learning"
-CRISPR OR "gene editing"
-"climate change" OR "global warming"
+"neural machine translation" OR "NMT"
+"convolutional neural network" OR "CNN"
 ```
 
 **Best practices**:
@@ -144,7 +144,7 @@ Use asterisk (*) as wildcard for unknown words:
 
 ```
 "machine * learning"
-"CRISPR * editing"
+"distributed * system"
 "* neural network"
 ```
 
@@ -230,7 +230,7 @@ Stay current with latest research:
 
 **Example**:
 ```bash
-python scripts/search_google_scholar.py "AlphaFold protein structure" \
+python scripts/search_google_scholar.py "LLM inference" \
   --year-start 2023 \
   --year-end 2024 \
   --limit 50
@@ -242,14 +242,14 @@ Get comprehensive overviews of a field:
 
 ```
 intitle:review "machine learning"
-"systematic review" CRISPR
+"literature review" "graph neural networks"
 intitle:survey "natural language processing"
 ```
 
 **Indicators**:
 - "review", "survey", "perspective" in title
 - Often highly cited
-- Published in review journals (Nature Reviews, Trends, etc.)
+- Published in review venues (ACM Computing Surveys, etc.)
 - Comprehensive reference lists
 
 ### Citation Chain Search
@@ -294,7 +294,7 @@ For thorough coverage (e.g., systematic reviews):
 
 3. **Combine multiple concepts**:
    ```
-   ("machine learning" OR "deep learning") ("drug discovery" OR "drug development")
+   ("machine learning" OR "deep learning") ("query optimization" OR "database indexing")
    ```
 
 4. **Search without date filters** initially:
@@ -304,7 +304,7 @@ For thorough coverage (e.g., systematic reviews):
 5. **Export results** for systematic analysis:
    ```bash
    python scripts/search_google_scholar.py \
-     '"machine learning" OR "deep learning" drug discovery' \
+     '"machine learning" OR "deep learning" query optimization' \
      --limit 500 \
      --output comprehensive_search.json
    ```
@@ -418,7 +418,7 @@ time.sleep(random.uniform(3, 7))  # Random delay 3-7 seconds
 1. **Start simple, then refine**:
    ```
    # Too specific initially
-   intitle:"deep learning" intitle:review source:Nature 2023..2024
+   intitle:"deep learning" intitle:review source:NeurIPS 2023..2024
    
    # Better approach
    deep learning review
@@ -435,13 +435,13 @@ time.sleep(random.uniform(3, 7))  # Random delay 3-7 seconds
 3. **Check spelling and variations**:
    - Color vs colour
    - Optimization vs optimisation
-   - Tumor vs tumour
+   - Modeling vs modelling
    - Try common misspellings if few results
 
 4. **Combine operators strategically**:
    ```
    # Good combination
-   author:Church intitle:"synthetic biology" 2015..2024
+   author:Bengio intitle:"deep learning" 2015..2024
    
    # Find reviews by specific author on topic in recent years
    ```
@@ -507,14 +507,14 @@ Combine multiple operators for precise searches:
 
 ```
 # Highly cited reviews on specific topic by known authors
-intitle:review "machine learning" ("drug discovery" OR "drug development")
-author:Horvath OR author:Bengio 2020..2024
+intitle:review "machine learning" ("query optimization" OR "database indexing")
+author:Dean OR author:Bengio 2020..2024
 
 # Method papers excluding reviews
-intitle:method "protein folding" -review -survey
+intitle:method "cache replacement policy" -review -survey
 
 # Papers in top journals only
-("Nature" OR "Science" OR "Cell") CRISPR 2022..2024
+("NeurIPS" OR "ICML" OR "VLDB") "deep learning" 2022..2024
 ```
 
 ### Finding Open Access Papers
@@ -525,7 +525,7 @@ machine learning
 
 # Filter by "All versions" which often includes preprints
 # Look for green [PDF] links (often open access)
-# Check arXiv, bioRxiv versions
+# Check arXiv versions
 ```
 
 **In script**:
@@ -563,11 +563,11 @@ python scripts/search_google_scholar.py "topic" \
 # arXiv papers
 source:arxiv "deep learning"
 
-# bioRxiv papers
-source:biorxiv CRISPR
+# arXiv papers on a specific topic
+source:arxiv "graph neural networks"
 
 # All preprint servers
-("arxiv" OR "biorxiv" OR "medrxiv") your topic
+("arxiv" OR "preprint") your topic
 ```
 
 **Note**: Preprints are not peer-reviewed. Always check if published version exists.
@@ -626,7 +626,7 @@ source:biorxiv CRISPR
 1. Click through to see full details
 2. Check "All versions" for better metadata
 3. Look up by DOI if available
-4. Extract metadata from CrossRef/PubMed instead
+4. Extract metadata from CrossRef/DBLP instead
 5. Manually verify from paper PDF
 
 ### Duplicate Results
@@ -649,12 +649,12 @@ source:biorxiv CRISPR
 
 **Basic search**:
 ```bash
-python scripts/search_google_scholar.py "machine learning drug discovery"
+python scripts/search_google_scholar.py "machine learning query optimization"
 ```
 
 **With year filter**:
 ```bash
-python scripts/search_google_scholar.py "CRISPR" \
+python scripts/search_google_scholar.py "transformer attention mechanism" \
   --year-start 2020 \
   --year-end 2024 \
   --limit 100
@@ -719,7 +719,7 @@ Key strategies:
 - Track citations for impact
 - Export systematically to citation manager
 - Respect rate limits and access policies
-- Verify metadata with CrossRef/PubMed
+- Verify metadata with CrossRef/DBLP
 
-For biomedical research, complement with PubMed for MeSH terms and curated metadata.
+For computer-science venues, complement with DBLP for authoritative conference and journal metadata.
 

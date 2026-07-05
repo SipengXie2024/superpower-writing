@@ -98,7 +98,7 @@ Each labeled bullet still seeds a claim stub in `.writing/claims/section_01_intr
 
 Rules:
 
-- Both tags coexist: `% cars: X` for structural self-review, `% claim: id` for the PreToolUse hook (Introduction stem does NOT end in an unprotected slug — every paragraph still needs a claim tag or `% draft-only`). Put `% cars: X` on the line immediately above `% claim: id`.
+- Both tags coexist: `% cars: X` for structural self-review, `% claim: id` for the claim-first discipline (Introduction stem does NOT end in an unprotected slug — every paragraph still needs a claim tag or `% draft-only`). Put `% cars: X` on the line immediately above `% claim: id`.
 - Moves appear in order T → N → O. All T-tagged paragraphs come first, then all N-tagged, then all O-tagged. No interleaving.
 - **T → N transition rule.** The first sentence of the first `N` paragraph MUST name, as concrete nouns, both T-side subjects whose mismatch the paragraph will pose as the gap. Do NOT open with a demonstrative anaphor ("This gap...", "This problem...", "This limitation...") --- readers scanning linearly have not yet identified which T-strand is meant, and scanning back costs them a mental re-parse of §1. Wrong: ``This gap has not been posed before.'' Right: ``The mismatch between <T1 concrete noun> and <T2 concrete noun> has not been posed as a <framing> problem before.'' Subsequent `N` paragraphs may use shorter anaphora once both T-sides have been named explicitly in the first `N` paragraph.
 - Length budget: ~400–800 words total for most venues (M1 ≈ 30–40%, M2 ≈ 15–25%, M3 ≈ 35–45%). Venues with strict word limits (Nature, Science) may push toward 300 words and 3 paragraphs (still one per Move, M1 and M3 compressed). Venues with no limits (long-form CS / social science) may push toward 1,500 words and 7 paragraphs. Do not exceed 7 paragraphs — if more material is needed, it belongs in §Related Work.
@@ -136,7 +136,7 @@ An optional trailing `% cars: O` paragraph may be added to describe paper organi
   - M1 centrality / generalization: present tense for established knowledge and general truths ("Transformer models dominate NLP benchmarks").
   - M1 prior work: simple past for specific prior studies and their findings ("Smith et al. measured…") or present perfect for cumulative findings ("Multiple studies have shown…").
   - M2 gap-indication: present perfect for unresolved state ("No prior work has addressed…"); simple present for contradictions ("These results conflict").
-  - M3 purpose + findings: simple past for what was done in this study ("We conducted a cohort study of 1,247 patients"), simple present for generalizable claims ("The approach generalizes to any…").
+  - M3 purpose + findings: simple past for what was done in this study ("We measured 1,247 production jobs"), simple present for generalizable claims ("The approach generalizes to any…").
 - **Voice:** active voice wherever possible, matching the conventions in `writing-principles.md`. First-person plural ("we") is standard for empirical sciences; some humanities-adjacent venues prefer passive or impersonal.
 - **Citations are expected** — unlike the abstract, the introduction is citation-dense, especially M1 and M2. Every factual claim about the field and every statement about prior work needs a citation. Use `\cite{citekey}` (standard LaTeX); group multiple cites in one site as `\cite{a,b,c}`.
 - **No results numbers that do not appear in Results.** Reviewers check; pre-announcing a number that does not reappear in Results erodes trust.

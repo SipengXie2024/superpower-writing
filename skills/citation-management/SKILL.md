@@ -1,6 +1,6 @@
 ---
 name: citation-management
-description: Comprehensive citation management for academic research. Search Google Scholar and PubMed for papers, extract accurate metadata, validate citations, and generate properly formatted BibTeX entries. This skill should be used when you need to find papers, verify citation information, convert DOIs to BibTeX, or ensure reference accuracy in scientific writing.
+description: Comprehensive citation management for academic research. Search Google Scholar, CrossRef, arXiv, and DBLP for papers, extract accurate metadata, validate citations, and generate properly formatted BibTeX entries. This skill should be used when you need to find papers, verify citation information, convert DOIs to BibTeX, or ensure reference accuracy in scientific writing.
 allowed-tools: Read Write Edit Bash
 license: MIT License
 metadata:
@@ -11,7 +11,7 @@ metadata:
 
 ## Overview
 
-Manage citations systematically throughout the research and writing process. This skill provides tools and strategies for searching academic databases (Google Scholar, PubMed), extracting accurate metadata from multiple sources (CrossRef, PubMed, arXiv), validating citation information, and generating properly formatted BibTeX entries.
+Manage citations systematically throughout the research and writing process. This skill provides tools and strategies for searching academic databases (Google Scholar, CrossRef, arXiv, DBLP), extracting accurate metadata from multiple sources (CrossRef, arXiv, DataCite), validating citation information, and generating properly formatted BibTeX entries.
 
 Critical for maintaining citation accuracy, avoiding reference errors, and ensuring reproducible research. Integrates seamlessly with the literature-review skill for comprehensive research workflows.
 
@@ -21,7 +21,7 @@ The bundled scripts are the preferred path, but the user's deliverable comes fir
 
 1. **Always ship the best available deliverable.** If the scripts are not installed, dependencies are missing, the network/API is unavailable, or the request is a single quick conversion, do not refuse and do not defer to "run this script later." Produce the BibTeX directly from the metadata you already have, then note that running the validation scripts would confirm it. A finished, clearly-caveated entry beats an empty answer that points at a script.
 
-2. **Label what you could not verify.** Any field you could not confirm against CrossRef/PubMed/arXiv (a guessed page range, an unresolved DOI, a PMID you have not looked up) must be marked inline, e.g. `pages = {1--?}, % UNVERIFIED` or a `% UNVERIFIED: confirm via extract_metadata.py` comment. Never silently fabricate a value, but never withhold the whole entry because one field is unknown.
+2. **Label what you could not verify.** Any field you could not confirm against CrossRef/arXiv/DBLP (a guessed page range, an unresolved DOI, an arXiv ID you have not looked up) must be marked inline, e.g. `pages = {1--?}, % UNVERIFIED` or a `% UNVERIFIED: confirm via extract_metadata.py` comment. Never silently fabricate a value, but never withhold the whole entry because one field is unknown.
 
 3. **Do not state citation-style rules you are not certain of.** This skill produces BibTeX, not rendered APA/MLA/Chicago strings. If asked about a specific style rule (author-count thresholds for "et al.", ampersand vs "and", title case), only assert it if you are sure; otherwise say it depends on the style version and point to the style manual rather than guessing a number.
 
@@ -30,15 +30,15 @@ The bundled scripts are the preferred path, but the user's deliverable comes fir
    - Wrong: "Per the skill's Output Discipline, I'll ship the BibTeX directly rather than running the search-and-BibTeX pipeline."
    - Right: "Here is the BibTeX. The DOI is unverified — run `python scripts/extract_metadata.py --doi <doi>` to confirm the fields."
 
-5. **State unknown fields once, cleanly.** When a field is unverified, mark it a single time and move on. Do not assert a value and then retract it in the same sentence (e.g. naming a PMID and then saying you cannot confirm it). Either give the value with a `% UNVERIFIED` marker, or omit it with one note that it needs lookup — never both in a way that contradicts itself.
+5. **State unknown fields once, cleanly.** When a field is unverified, mark it a single time and move on. Do not assert a value and then retract it in the same sentence (e.g. naming a DOI and then saying you cannot confirm it). Either give the value with a `% UNVERIFIED` marker, or omit it with one note that it needs lookup, never both in a way that contradicts itself.
 
 6. **Confirm before any destructive .bib edit.** Operations that rewrite or discard data — `--auto-fix`, `--deduplicate`, and anything that overwrites the user's original `.bib` — must not silently clobber the input. Default to writing the result to a *new* file (`--output clean_references.bib`), never in place over the source. When `--deduplicate` or `--auto-fix` will drop entries or pick a "best" version among near-duplicates, surface what will be removed and which version is kept, and ask the user to confirm before applying — do not let the script choose silently. The original file stays untouched until the user approves the change.
 
 ## When to Use This Skill
 
 Use this skill when:
-- Searching for specific papers on Google Scholar or PubMed
-- Converting DOIs, PMIDs, or arXiv IDs to properly formatted BibTeX
+- Searching for specific papers on Google Scholar, CrossRef, or DBLP
+- Converting DOIs or arXiv IDs to properly formatted BibTeX
 - Extracting complete metadata for citations (authors, title, journal, year, etc.)
 - Validating existing citations for accuracy
 - Cleaning and formatting BibTeX files
@@ -85,16 +85,16 @@ Google Scholar provides the most comprehensive coverage across disciplines.
 **Basic Search**:
 ```bash
 # Search for papers on a topic
-python scripts/search_google_scholar.py "CRISPR gene editing" \
+python scripts/search_google_scholar.py "transformer attention mechanism" \
   --limit 50 \
   --output results.json
 
 # Search with year filter
-python scripts/search_google_scholar.py "machine learning protein folding" \
+python scripts/search_google_scholar.py "Raft consensus algorithm" \
   --year-start 2020 \
   --year-end 2024 \
   --limit 100 \
-  --output ml_proteins.json
+  --output consensus_papers.json
 ```
 
 **Advanced Search Strategies** (see `references/google_scholar_search.md`):
@@ -112,44 +112,19 @@ python scripts/search_google_scholar.py "machine learning protein folding" \
 - Check "Cited by" to find seminal papers
 - Export top results for further analysis
 
-#### PubMed Search
+#### CrossRef and DBLP Search
 
-PubMed specializes in biomedical and life sciences literature (35+ million citations).
-
-**Basic Search**:
-```bash
-# Search PubMed
-python scripts/search_pubmed.py "Alzheimer's disease treatment" \
-  --limit 100 \
-  --output alzheimers.json
-
-# Search with MeSH terms and filters
-python scripts/search_pubmed.py \
-  --query '"Alzheimer Disease"[MeSH] AND "Drug Therapy"[MeSH]' \
-  --date-start 2020 \
-  --date-end 2024 \
-  --publication-types "Clinical Trial,Review" \
-  --output alzheimers_trials.json
-```
-
-**Advanced PubMed Queries** (see `references/pubmed_search.md`):
-- Use MeSH terms: `"Diabetes Mellitus"[MeSH]`
-- Field tags: `"cancer"[Title]`, `"Smith J"[Author]`
-- Boolean operators: `AND`, `OR`, `NOT`
-- Date filters: `2020:2024[Publication Date]`
-- Publication types: `"Review"[Publication Type]`
-- Combine with E-utilities API for automation
+CrossRef indexes DOIs across publishers; DBLP is the definitive index for computer-science venues.
 
 **Best Practices**:
-- Use MeSH Browser to find correct controlled vocabulary
-- Construct complex queries in PubMed Advanced Search Builder first
-- Include multiple synonyms with OR
-- Retrieve PMIDs for easy metadata extraction
+- Query CrossRef by title or author when you have no DOI, then confirm the returned DOI
+- Use DBLP to disambiguate conference versions from journal versions of the same paper
+- Retrieve DOIs or arXiv IDs for easy metadata extraction
 - Export to JSON or directly to BibTeX
 
 ### Phase 2: Metadata Extraction
 
-**Goal**: Convert paper identifiers (DOI, PMID, arXiv ID) to complete, accurate metadata.
+**Goal**: Convert paper identifiers (DOI, arXiv ID) to complete, accurate metadata.
 
 #### Quick DOI to BibTeX Conversion
 
@@ -157,31 +132,28 @@ For single DOIs, use the quick conversion tool:
 
 ```bash
 # Convert single DOI
-python scripts/doi_to_bibtex.py 10.1038/s41586-021-03819-2
+python scripts/doi_to_bibtex.py 10.1145/3065386
 
 # Convert multiple DOIs from a file
 python scripts/doi_to_bibtex.py --input dois.txt --output references.bib
 
 # Different output formats
-python scripts/doi_to_bibtex.py 10.1038/nature12345 --format json
+python scripts/doi_to_bibtex.py 10.1109/CVPR.2016.90 --format json
 ```
 
 #### Comprehensive Metadata Extraction
 
-For DOIs, PMIDs, arXiv IDs, or URLs:
+For DOIs, arXiv IDs, or URLs:
 
 ```bash
 # Extract from DOI
-python scripts/extract_metadata.py --doi 10.1038/s41586-021-03819-2
-
-# Extract from PMID
-python scripts/extract_metadata.py --pmid 34265844
+python scripts/extract_metadata.py --doi 10.1145/3065386
 
 # Extract from arXiv ID
-python scripts/extract_metadata.py --arxiv 2103.14030
+python scripts/extract_metadata.py --arxiv 1706.03762
 
 # Extract from URL
-python scripts/extract_metadata.py --url "https://www.nature.com/articles/s41586-021-03819-2"
+python scripts/extract_metadata.py --url "https://arxiv.org/abs/1706.03762"
 
 # Batch extraction from file (mixed identifiers)
 python scripts/extract_metadata.py --input identifiers.txt --output citations.bib
@@ -190,24 +162,18 @@ python scripts/extract_metadata.py --input identifiers.txt --output citations.bi
 **Metadata Sources** (see `references/metadata_extraction.md`):
 
 1. **CrossRef API**: Primary source for DOIs
-   - Comprehensive metadata for journal articles
+   - Comprehensive metadata for journal and conference articles
    - Publisher-provided information
-   - Includes authors, title, journal, volume, pages, dates
+   - Includes authors, title, venue, volume, pages, dates
    - Free, no API key required
 
-2. **PubMed E-utilities**: Biomedical literature
-   - Official NCBI metadata
-   - Includes MeSH terms, abstracts
-   - PMID and PMCID identifiers
-   - Free, API key recommended for high volume
-
-3. **arXiv API**: Preprints in physics, math, CS, q-bio
+2. **arXiv API**: Preprints in CS, math, physics
    - Complete metadata for preprints
    - Version tracking
    - Author affiliations
    - Free, open access
 
-4. **DataCite API**: Research datasets, software, other resources
+3. **DataCite API**: Research datasets, software, other resources
    - Metadata for non-traditional scholarly outputs
    - DOIs for datasets and code
    - Free access
@@ -217,7 +183,7 @@ python scripts/extract_metadata.py --input identifiers.txt --output citations.bi
 - **Journal articles**: journal, volume, number, pages, DOI
 - **Books**: publisher, ISBN, edition
 - **Conference papers**: booktitle, conference location, pages
-- **Preprints**: repository (arXiv, bioRxiv), preprint ID
+- **Preprints**: repository (arXiv), preprint ID
 - **Additional**: abstract, keywords, URL
 
 ### Phase 3: BibTeX Formatting
@@ -394,23 +360,23 @@ Complete workflow for creating a bibliography:
 
 ```bash
 # 1. Search for papers on your topic
-python scripts/search_pubmed.py \
-  '"CRISPR-Cas Systems"[MeSH] AND "Gene Editing"[MeSH]' \
-  --date-start 2020 \
+python scripts/search_google_scholar.py \
+  "distributed consensus Raft Paxos" \
+  --year-start 2020 \
   --limit 200 \
-  --output crispr_papers.json
+  --output consensus_papers.json
 
 # 2. Extract DOIs from search results and convert to BibTeX
 python scripts/extract_metadata.py \
-  --input crispr_papers.json \
-  --output crispr_refs.bib
+  --input consensus_papers.json \
+  --output consensus_refs.bib
 
 # 3. Add specific papers by DOI
-python scripts/doi_to_bibtex.py 10.1038/nature12345 >> crispr_refs.bib
-python scripts/doi_to_bibtex.py 10.1126/science.abcd1234 >> crispr_refs.bib
+python scripts/doi_to_bibtex.py 10.1145/1327452.1327492 >> consensus_refs.bib
+python scripts/doi_to_bibtex.py 10.1109/CVPR.2016.90 >> consensus_refs.bib
 
 # 4. Format and clean the BibTeX file
-python scripts/format_bibtex.py crispr_refs.bib \
+python scripts/format_bibtex.py consensus_refs.bib \
   --deduplicate \
   --sort year \
   --descending \
@@ -447,9 +413,9 @@ This skill complements the `literature-review` skill:
 # Verify all citations in the review document
 python scripts/validate_citations.py my_review_references.bib --report review_validation.json
 
-# Format for specific citation style if needed
+# Sort and standardize the bibliography if needed
 python scripts/format_bibtex.py my_review_references.bib \
-  --style nature \
+  --sort key \
   --output formatted_refs.bib
 ```
 
@@ -472,23 +438,23 @@ Always prioritize papers based on citation count, venue quality, and author repu
 | 7+ years | 1000+ | Foundational |
 
 **Venue Quality Tiers:**
-- **Tier 1 (Prefer):** Nature, Science, Cell, NEJM, Lancet, JAMA, PNAS
-- **Tier 2 (High Priority):** Impact Factor >10, top conferences (NeurIPS, ICML, ICLR)
-- **Tier 3 (Good):** Specialized journals (IF 5-10)
-- **Tier 4 (Sparingly):** Lower-impact peer-reviewed venues
+- **Tier 1 (Prefer):** NeurIPS, ICML, ICLR, OSDI, SOSP, NSDI, USENIX ATC, VLDB, SIGMOD, PLDI, POPL
+- **Tier 2 (High Priority):** ACL, EMNLP, CVPR, and other top-tier ACM/IEEE conferences
+- **Tier 3 (Good):** Reputable specialized conferences and journals
+- **Tier 4 (Sparingly):** Lower-tier peer-reviewed venues and workshops
 
 **Author Reputation Indicators:**
 - Senior researchers with h-index >40
 - Multiple publications in Tier-1 venues
 - Leadership at recognized institutions
-- Awards and editorial positions
+- Awards and program-committee positions
 
 **Search Strategies for High-Impact Papers:**
 - Sort by citation count (most cited first)
-- Look for review articles from Tier-1 journals for overview
+- Look for survey articles from Tier-1 venues for overview
 - Check "Cited by" for impact assessment and recent follow-up work
 - Use citation alerts for tracking new citations to key papers
-- Filter by top venues using `source:Nature` or `source:Science`
+- Filter by top venues using `source:NeurIPS` or `source:OSDI`
 - Search for papers by known field leaders using `author:LastName`
 
 **Advanced Operators** (full list in `references/google_scholar_search.md`):
@@ -504,60 +470,18 @@ OR                       # Alternative terms
 
 **Example Searches**:
 ```
-# Find recent reviews on a topic
-"CRISPR" intitle:review 2023..2024
+# Find recent surveys on a topic
+"cache replacement" intitle:survey 2023..2024
 
 # Find papers by specific author on topic
-author:Church "synthetic biology"
+author:Dean "distributed systems"
 
 # Find highly cited foundational work
 "deep learning" 2012..2015 sort:citations
 
 # Exclude surveys and focus on methods
-"protein folding" -survey -review intitle:method
+"query optimization" -survey -review intitle:method
 ```
-
-### PubMed Best Practices
-
-**Using MeSH Terms**:
-MeSH (Medical Subject Headings) provides controlled vocabulary for precise searching.
-
-1. **Find MeSH terms** at https://meshb.nlm.nih.gov/search
-2. **Use in queries**: `"Diabetes Mellitus, Type 2"[MeSH]`
-3. **Combine with keywords** for comprehensive coverage
-
-**Field Tags**:
-```
-[Title]              # Search in title only
-[Title/Abstract]     # Search in title or abstract
-[Author]             # Search by author name
-[Journal]            # Search specific journal
-[Publication Date]   # Date range
-[Publication Type]   # Article type
-[MeSH]              # MeSH term
-```
-
-**Building Complex Queries**:
-```bash
-# Clinical trials on diabetes treatment published recently
-"Diabetes Mellitus, Type 2"[MeSH] AND "Drug Therapy"[MeSH] 
-AND "Clinical Trial"[Publication Type] AND 2020:2024[Publication Date]
-
-# Reviews on CRISPR in specific journal
-"CRISPR-Cas Systems"[MeSH] AND "Nature"[Journal] AND "Review"[Publication Type]
-
-# Specific author's recent work
-"Smith AB"[Author] AND cancer[Title/Abstract] AND 2022:2024[Publication Date]
-```
-
-**E-utilities for Automation**:
-The scripts use NCBI E-utilities API for programmatic access:
-- **ESearch**: Search and retrieve PMIDs
-- **EFetch**: Retrieve full metadata
-- **ESummary**: Get summary information
-- **ELink**: Find related articles
-
-See `references/pubmed_search.md` for complete API documentation.
 
 ## Tools and Scripts
 
@@ -592,45 +516,13 @@ python scripts/search_google_scholar.py "machine learning" \
   --output ml_papers.bib
 ```
 
-### search_pubmed.py
-
-Search PubMed using E-utilities API.
-
-**Features**:
-- Complex query support (MeSH, field tags, Boolean)
-- Date range filtering
-- Publication type filtering
-- Batch retrieval with metadata
-- Export to JSON or BibTeX
-
-**Usage**:
-```bash
-# Simple keyword search
-python scripts/search_pubmed.py "CRISPR gene editing"
-
-# Complex query with filters
-python scripts/search_pubmed.py \
-  --query '"CRISPR-Cas Systems"[MeSH] AND "therapeutic"[Title/Abstract]' \
-  --date-start 2020-01-01 \
-  --date-end 2024-12-31 \
-  --publication-types "Clinical Trial,Review" \
-  --limit 200 \
-  --output crispr_therapeutic.json
-
-# Export to BibTeX
-python scripts/search_pubmed.py "Alzheimer's disease" \
-  --limit 100 \
-  --format bibtex \
-  --output alzheimers.bib
-```
-
 ### extract_metadata.py
 
 Extract complete metadata from paper identifiers.
 
 **Features**:
-- Supports DOI, PMID, arXiv ID, URL
-- Queries CrossRef, PubMed, arXiv APIs
+- Supports DOI, arXiv ID, URL
+- Queries CrossRef and arXiv APIs
 - Handles multiple identifier types
 - Batch processing
 - Multiple output formats
@@ -638,17 +530,14 @@ Extract complete metadata from paper identifiers.
 **Usage**:
 ```bash
 # Single DOI
-python scripts/extract_metadata.py --doi 10.1038/s41586-021-03819-2
-
-# Single PMID
-python scripts/extract_metadata.py --pmid 34265844
+python scripts/extract_metadata.py --doi 10.1145/3065386
 
 # Single arXiv ID
-python scripts/extract_metadata.py --arxiv 2103.14030
+python scripts/extract_metadata.py --arxiv 1706.03762
 
 # From URL
 python scripts/extract_metadata.py \
-  --url "https://www.nature.com/articles/s41586-021-03819-2"
+  --url "https://arxiv.org/abs/1706.03762"
 
 # Batch processing (file with one identifier per line)
 python scripts/extract_metadata.py \
@@ -657,8 +546,8 @@ python scripts/extract_metadata.py \
 
 # Different output formats
 python scripts/extract_metadata.py \
-  --doi 10.1038/nature12345 \
-  --format json  # or bibtex, yaml
+  --doi 10.1109/CVPR.2016.90 \
+  --format json  # or bibtex
 ```
 
 ### validate_citations.py
@@ -690,7 +579,7 @@ python scripts/validate_citations.py references.bib \
 
 # Only check DOIs
 python scripts/validate_citations.py references.bib \
-  --check-dois-only
+  --check-dois
 ```
 
 ### format_bibtex.py
@@ -743,19 +632,19 @@ Quick DOI to BibTeX conversion.
 **Usage**:
 ```bash
 # Single DOI
-python scripts/doi_to_bibtex.py 10.1038/s41586-021-03819-2
+python scripts/doi_to_bibtex.py 10.1145/3065386
 
 # Multiple DOIs
 python scripts/doi_to_bibtex.py \
-  10.1038/nature12345 \
-  10.1126/science.abc1234 \
-  10.1016/j.cell.2023.01.001
+  10.1145/1327452.1327492 \
+  10.1109/CVPR.2016.90 \
+  10.1145/3065386
 
 # From file (one DOI per line)
 python scripts/doi_to_bibtex.py --input dois.txt --output references.bib
 
 # Copy to clipboard
-python scripts/doi_to_bibtex.py 10.1038/nature12345 --clipboard
+python scripts/doi_to_bibtex.py 10.1109/CVPR.2016.90 --clipboard
 ```
 
 ## Best Practices
@@ -769,7 +658,7 @@ python scripts/doi_to_bibtex.py 10.1038/nature12345 --clipboard
 
 2. **Use multiple sources**:
    - Google Scholar for comprehensive coverage
-   - PubMed for biomedical focus
+   - DBLP for computer-science venues
    - arXiv for preprints
    - Combine results for completeness
 
@@ -848,7 +737,7 @@ python scripts/doi_to_bibtex.py 10.1038/nature12345 --clipboard
 
 ## Common Pitfalls to Avoid
 
-1. **Single source bias**: Only using Google Scholar or PubMed
+1. **Single source bias**: Only using Google Scholar or a single database
    - **Solution**: Search multiple databases for comprehensive coverage
 
 2. **Accepting metadata blindly**: Not verifying extracted information
@@ -889,10 +778,10 @@ python scripts/search_google_scholar.py "transformer neural networks" \
   --limit 50 \
   --output transformers_gs.json
 
-python scripts/search_pubmed.py "deep learning medical imaging" \
-  --date-start 2020 \
+python scripts/search_google_scholar.py "LLM inference optimization" \
+  --year-start 2020 \
   --limit 50 \
-  --output medical_dl_pm.json
+  --output inference_gs.json
 
 # Step 2: Extract metadata from search results
 python scripts/extract_metadata.py \
@@ -900,15 +789,15 @@ python scripts/extract_metadata.py \
   --output transformers.bib
 
 python scripts/extract_metadata.py \
-  --input medical_dl_pm.json \
-  --output medical.bib
+  --input inference_gs.json \
+  --output inference.bib
 
 # Step 3: Add specific papers you already know
-python scripts/doi_to_bibtex.py 10.1038/s41586-021-03819-2 >> specific.bib
-python scripts/doi_to_bibtex.py 10.1126/science.aam9317 >> specific.bib
+python scripts/doi_to_bibtex.py 10.1145/1327452.1327492 >> specific.bib
+python scripts/doi_to_bibtex.py 10.1109/CVPR.2016.90 >> specific.bib
 
 # Step 4: Combine all BibTeX files
-cat transformers.bib medical.bib specific.bib > combined.bib
+cat transformers.bib inference.bib specific.bib > combined.bib
 
 # Step 5: Format and deduplicate
 python scripts/format_bibtex.py combined.bib \
@@ -935,9 +824,9 @@ cat validation.json | grep -A 3 '"errors"'
 ```bash
 # You have a text file with DOIs (one per line)
 # dois.txt contains:
-# 10.1038/s41586-021-03819-2
-# 10.1126/science.aam9317
-# 10.1016/j.cell.2023.01.001
+# 10.1145/1327452.1327492
+# 10.1109/CVPR.2016.90
+# 10.1145/3065386
 
 # Convert all to BibTeX
 python scripts/doi_to_bibtex.py --input dois.txt --output references.bib
@@ -985,20 +874,20 @@ cat final_validation.json
 
 ```bash
 # Find highly cited papers on a topic
-python scripts/search_google_scholar.py "AlphaFold protein structure" \
-  --year-start 2020 \
+python scripts/search_google_scholar.py "attention mechanism transformers" \
+  --year-start 2017 \
   --year-end 2024 \
   --sort-by citations \
   --limit 20 \
-  --output alphafold_seminal.json
+  --output attention_seminal.json
 
 # Extract the top 10 by citation count
 # (script will have included citation counts in JSON)
 
 # Convert to BibTeX
 python scripts/extract_metadata.py \
-  --input alphafold_seminal.json \
-  --output alphafold_refs.bib
+  --input attention_seminal.json \
+  --output attention_refs.bib
 
 # The BibTeX file now contains the most influential papers
 ```
@@ -1040,14 +929,12 @@ python scripts/extract_metadata.py \
 
 **References** (in `references/`):
 - `google_scholar_search.md`: Complete Google Scholar search guide
-- `pubmed_search.md`: PubMed and E-utilities API documentation
 - `metadata_extraction.md`: Metadata sources and field requirements
 - `citation_validation.md`: Validation criteria and quality checks
 - `bibtex_formatting.md`: BibTeX entry types and formatting rules
 
 **Scripts** (in `scripts/`):
 - `search_google_scholar.py`: Google Scholar search automation
-- `search_pubmed.py`: PubMed E-utilities API client
 - `extract_metadata.py`: Universal metadata extractor
 - `validate_citations.py`: Citation validation and verification
 - `format_bibtex.py`: BibTeX formatter and cleaner
@@ -1061,17 +948,16 @@ python scripts/extract_metadata.py \
 
 **Search Engines**:
 - Google Scholar: https://scholar.google.com/
-- PubMed: https://pubmed.ncbi.nlm.nih.gov/
-- PubMed Advanced Search: https://pubmed.ncbi.nlm.nih.gov/advanced/
+- DBLP: https://dblp.org/
+- Semantic Scholar: https://www.semanticscholar.org/
 
 **Metadata APIs**:
 - CrossRef API: https://api.crossref.org/
-- PubMed E-utilities: https://www.ncbi.nlm.nih.gov/books/NBK25501/
 - arXiv API: https://arxiv.org/help/api/
+- DBLP API: https://dblp.org/faq/13501473.html
 - DataCite API: https://api.datacite.org/
 
 **Tools and Validators**:
-- MeSH Browser: https://meshb.nlm.nih.gov/search
 - DOI Resolver: https://doi.org/
 - BibTeX Format: http://www.bibtex.org/Format/
 
@@ -1087,7 +973,6 @@ python scripts/extract_metadata.py \
 # Core dependencies
 pip install requests  # HTTP requests for APIs
 pip install bibtexparser  # BibTeX parsing and formatting
-pip install biopython  # PubMed E-utilities access
 
 # Optional (for Google Scholar)
 pip install scholarly  # Google Scholar API wrapper
@@ -1107,8 +992,8 @@ pip install pylatexenc  # LaTeX special character handling
 
 The citation-management skill provides:
 
-1. **Comprehensive search capabilities** for Google Scholar and PubMed
-2. **Automated metadata extraction** from DOI, PMID, arXiv ID, URLs
+1. **Comprehensive search capabilities** for Google Scholar, CrossRef, arXiv, and DBLP
+2. **Automated metadata extraction** from DOI, arXiv ID, URLs
 3. **Citation validation** with DOI verification and completeness checking
 4. **BibTeX formatting** with standardization and cleaning tools
 5. **Quality assurance** through validation and reporting

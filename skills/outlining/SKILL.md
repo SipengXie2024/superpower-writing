@@ -11,11 +11,11 @@ This is the **spec phase** for a research paper. Output of outlining is the inpu
 2. `.writing/claims/section_<NN>_<slug>.md` — one file per manuscript section, each containing a YAML list of claim stubs that prose will later bind to.
 3. `.writing/metadata.yaml` — author, preregistration, data/code availability, reporting-guideline fields filled out.
 
-**Filename-stem contract (load-bearing).** The PreToolUse claim-first hook at `hooks/enforce-claims.py` matches slug-ending: any manuscript file whose stem ends in `_<slug>` for slug ∈ `UNPROTECTED_SLUGS` (`abstract`, `references`, `acknowledgments`) is exempt from claim-tag enforcement. Concretely `00_abstract.tex`, `09_references.tex`, and `10_acknowledgments.tex` all pass through without paragraph tags. Every other section filename MUST contain real prose tagged with `% claim: id` or the write is blocked. If you introduce a new unnumbered section (e.g. a data-availability block) whose content should be exempt, add its slug to `UNPROTECTED_SLUGS` in `hooks/enforce-claims.py`. The hook only intercepts `.tex` files; `.md` files under `manuscript/` pass through unenforced.
+**Filename-stem contract (load-bearing).** The claim-first discipline treats certain sections as unprotected by slug-ending: any manuscript file whose stem ends in `_<slug>` for slug ∈ (`abstract`, `references`, `acknowledgments`) is exempt from paragraph claim-tags. Concretely `00_abstract.tex`, `09_references.tex`, and `10_acknowledgments.tex` all pass through without paragraph tags. Every other section filename MUST contain real prose tagged with `% claim: id`. If you introduce a new unnumbered section (e.g. a data-availability block) whose content should be exempt, treat its slug as an unprotected section (exempt from paragraph claim-tags), like abstract/references/acknowledgments. The contract covers `.tex` files; `.md` files under `manuscript/` are not subject to it.
 
-**Abstract is citation-free (load-bearing).** Any stem ending in `_abstract` additionally belongs to `CITATION_FREE_SLUGS` in the hook. Writes to such files that contain any LaTeX citation command (`\cite{}`, `\citep{}`, `\citet{}`, `\nocite{}`, `\parencite{}`, or any `\*cite*` variant) or a `% claim: id` tag are blocked. The abstract summarizes the paper's own claims in prose; it cites nothing. BPMRC structural tags (`% bpmrc: B`, `% bpmrc: P`, etc.) are still required — they are not citations. Do NOT create a `claims/section_00_abstract.md` file; drafting would try to bind abstract paragraphs to it and the hook would reject those writes.
+**Abstract is citation-free (load-bearing).** Any stem ending in `_abstract` is additionally citation-free: such files must contain no LaTeX citation command (`\cite{}`, `\citep{}`, `\citet{}`, `\nocite{}`, `\parencite{}`, or any `\*cite*` variant) and no `% claim: id` tag. The abstract summarizes the paper's own claims in prose; it cites nothing. BPMRC structural tags (`% bpmrc: B`, `% bpmrc: P`, etc.) are still required — they are not citations. Do NOT create a `claims/section_00_abstract.md` file; drafting would try to bind abstract paragraphs to it via `% claim:` tags the abstract may not carry.
 
-**Optional: term-definition-before-use protocol.** A second PreToolUse hook at `hooks/enforce-terms.sh` enforces that load-bearing terminology is defined before it is used. This feature is **opt-in**: activate by copying `templates/glossary.md` to `.writing/glossary.md` and listing entries of the form `{id, term, definition, defined_in: <section_stem>}`. Once active, any `% define: <id>` comment in `manuscript/NN_<slug>.tex` must match `glossary[id].defined_in`, and any `% use: <id>` must appear in a section whose numeric prefix is ≥ the define section. Abstracts and references/acknowledgments sections are exempt (abstracts legitimately reference terms defined later in the body). When adding a new term during outlining, append its glossary entry at the same time you add the claim stub — it is cheaper than chasing `% use:` blocks later during drafting.
+**Optional: term-definition-before-use protocol.** The term-define-before-use discipline requires load-bearing terminology to be defined before it is used. This feature is **opt-in**: activate by copying `templates/glossary.md` to `.writing/glossary.md` and listing entries of the form `{id, term, definition, defined_in: <section_stem>}`. Once active, any `% define: <id>` comment in `manuscript/NN_<slug>.tex` must match `glossary[id].defined_in`, and any `% use: <id>` must appear in a section whose numeric prefix is ≥ the define section. Abstracts and references/acknowledgments sections are exempt (abstracts legitimately reference terms defined later in the body). When adding a new term during outlining, append its glossary entry at the same time you add the claim stub — it is cheaper than chasing `% use:` blocks later during drafting.
 
 All three must be complete before handing off to `superpower-writing:writing-plans`. Incomplete metadata blocks claim-verification later — fix it now while context is fresh.
 
@@ -54,7 +54,7 @@ Before any IMRAD structure, lock down:
 
 - The **core contribution** in one sentence. If the user can't state it, spend time here — everything downstream anchors to this.
 - The **target venue or venue class** (e.g., clinical journal, systems conference, ML workshop). This picks the reporting guideline (CONSORT / STROBE / PRISMA / none) which goes into `metadata.yaml`.
-- The **unit of evidence**: dataset, cohort, simulation, benchmark, proof — whichever is the study's primary thing. This determines what counts as EVIDENCE later.
+- The **unit of evidence**: dataset, trace, simulation, benchmark, proof — whichever is the study's primary thing. This determines what counts as EVIDENCE later.
 
 Write these three into `.writing/findings.md` under the Requirements section.
 
@@ -290,10 +290,10 @@ Claim YAML format (per design.md §6.1):
 
 ```yaml
 - id: meth-c1
-  CLAIM: Cohort of 1,247 T2D patients from NHANES 2018-2023
+  CLAIM: 1,247 jobs from the Google cluster trace 2019
   EVIDENCE:
     - type: dataset
-      ref: NHANES-2018-2023
+      ref: google-trace-2019
     - type: citation
       doi: 10.xxxx/...
   STATUS: stub
@@ -314,7 +314,7 @@ Rules:
 
 > Claim-first protocol: see `superpower-writing:main` §Claim-First Protocol.
 
-Outlining produces stubs on purpose: the hook blocks prose against stubs so claim files must mature before prose can reference them.
+Outlining produces stubs on purpose: the claim-first discipline forbids prose against stubs, so claim files must mature before prose can reference them.
 
 ## Step 5: Optional Zotero seeding
 
@@ -437,9 +437,9 @@ That skill decomposes the outline into executable per-section / per-figure / per
 
 # Key Principles
 
-**Claims, not topics.** An outline bullet must state an assertion. "Methods overview" is a heading, not a claim. "We enrolled 1,247 T2D patients from NHANES 2018-2023" is a claim — it has a truth value and binds to evidence. The claim-first protocol only works if outlining produces real claims.
+**Claims, not topics.** An outline bullet must state an assertion. "Methods overview" is a heading, not a claim. "We sampled 1,247 jobs from the Google cluster trace 2019" is a claim — it has a truth value and binds to evidence. The claim-first protocol only works if outlining produces real claims.
 
-**Stubs are intentional.** Every claim starts `STATUS: stub`. The PreToolUse hook blocks prose writes against stubs on purpose. That block is the feature, not a bug to work around. Drafting advances stubs to `evidence_ready` after resolving EVIDENCE — that is how the paper earns its prose.
+**Stubs are intentional.** Every claim starts `STATUS: stub`. The claim-first discipline forbids prose writes against stubs on purpose. That restraint is the feature, not a bug to work around. Drafting advances stubs to `evidence_ready` after resolving EVIDENCE — that is how the paper earns its prose.
 
 **Metadata gate now, not later.** Filling `metadata.yaml` at outlining feels bureaucratic; skipping it feels fast. But unresolved `TODO`s compound: authors keep changing, reporting-guideline choices shape verification, data-availability statements affect what can be published. Resolving this while the paper's shape is still malleable is cheap; resolving it at submission gate under deadline pressure is expensive.
 

@@ -12,9 +12,9 @@ source of truth for naming across the whole job. Consistency against a standard
 is impossible when the standard was never written down.
 
 This is the **authoring** half of terminology control. It pairs with two
-enforcement mechanisms already in the plugin. The `enforce-terms.py` glossary
-gate is opt-in, activated by `.writing/glossary.md`. It enforces
-define-before-use ordering at write time. The drafting skill's
+enforcement mechanisms already in the plugin. The term-define-before-use
+discipline is opt-in, activated by `.writing/glossary.md`. It requires
+define-before-use ordering. The drafting skill's
 locked-term-rename discipline turns any rename of a locked term into an audited
 cross-file pass. The ledger feeds both. See the "Pairing" section at the end.
 
@@ -23,7 +23,7 @@ cross-file pass. The ledger feeds both. See the "Pairing" section at the end.
 This file is a reference fragment, not a standalone skill. Sibling skills load
 it to share one ledger format and one set of rules. Outlining loads it at
 structure time, drafting at write time, polish before its two passes. It does
-not own a PreToolUse hook and never mutates state on its own. Like every verdict
+not enforce at write time and never mutates state on its own. Like every verdict
 in this plugin, a flagged collision is **advisory**. Surface it to the user and
 let the user choose the canonical form. Never auto-rename prose, never auto-edit
 the glossary, never coin a name to fill a gap.
@@ -113,11 +113,11 @@ exact drift the ledger exists to prevent.
 The ledger is authoring-time guidance. Two enforcement mechanisms turn it into
 checked invariants when the project opts in.
 
-**The `enforce-terms.py` glossary gate.** This opt-in PreToolUse hook activates
+**The term-define-before-use discipline.** This opt-in discipline activates
 when `.writing/glossary.md` exists. The glossary is a YAML list of entries of
 the form `{id, term, definition, defined_in}`. The `defined_in` field is the
-stem of the `.tex` section file that first introduces the term. The hook then
-enforces ordering across the manuscript:
+stem of the `.tex` section file that first introduces the term. The discipline
+then requires this ordering across the manuscript:
 
 - A `% define: <id>` comment must sit in the section whose stem equals
   `glossary[id].defined_in`.
@@ -133,9 +133,9 @@ The ledger and the glossary are two views of the same naming decision. Each
 ledger row that names a load-bearing term maps to one glossary entry. The
 canonical term becomes `term`. The first-use definition becomes `definition`.
 The section that introduces it becomes `defined_in`. Build the ledger first,
-then materialize the glossary from it if the project wants the gate. The hook
-checks ordering. It does not check whether the prose uses the canonical
-spelling. That last mile is the ledger's job and the author's eye.
+then materialize the glossary from it if the project wants the discipline. The
+define-before-use rule governs ordering. It does not govern whether the prose
+uses the canonical spelling. That last mile is the ledger's job and the author's eye.
 
 **The locked-term-rename discipline.** Described in section 4 above. The ledger
 supplies the list of affected sections. The drafting skill supplies the one-pass

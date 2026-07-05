@@ -270,10 +270,10 @@ If a figure is reused across paper / poster / slides, render at multiple sizes f
 
 Then proceed:
 
-1. **Plan from the outline.** Each figure listed in `.writing/plan.md` should have a one-line claim it supports (`fig:cdf-latency` → "our system has a 2.4× lower p99 than the baseline at 32 clients"). For a figure that doubles as the paper's results-storytelling figure (the headline result a reviewer sees first), check `tikz-figures/references/figure-rhetoric.md`: it covers the three-figure storytelling model, the Figure-1 performance-teaser paradigm and its avoid-condition (do not teaser a marginal gain, it shows the weakness unkindly), and the 30-second comprehension test. That reference is venue-agnostic across our figure skills.
+1. **Plan from the outline.** Each figure listed in `.writing/plan.md` should have a one-line claim it supports (`fig:cdf-latency` → "our system has a 2.4× lower p99 than the baseline at 32 clients"). For a figure that doubles as the paper's results-storytelling figure (the headline result a reviewer sees first), check `tikz-figures/references/figure-rhetoric.md`: it covers the three-figure storytelling model, the Figure-1 performance-teaser paradigm and its avoid-condition (do not teaser a marginal gain, it shows the weakness unkindly), and the 30-second comprehension test. That reference is venue-agnostic across our figure skills. When these plots form the full figure deck of a paper, run one **editor pass** over the whole deck before submission: the per-deck narrative review in `figure-rhetoric.md` §5 (hook verdict, figure arc, misplaced panels, missing panels, kill list), which is distinct from the per-figure defect hunt in the Final Checklist below. When one figure is itself multi-panel (an ablation grid, a schematic paired with its result), `figure-rhetoric.md` §6 covers outlining the panels from the claim, drawing each with the matching skill, and reviewing the composed image as one artifact with `verify_layout.py`.
 2. **Write a generator script** in `.writing/figures/src/<fig_id>.py`. The script reads from `.writing/figures/data/<fig_id>.{csv,jsonl}` and writes `.writing/figures/<fig_id>.pdf`. This separation lets reviewers (and you) regenerate figures from raw data.
 3. **Apply this skill's style** at the top of the script — copy the bundled `.mplstyle` file or use the inline rcParams snippet from Quick Start.
-4. **Verify before commit.** Open the PDF in a viewer at 100 % zoom and at the column width it will appear at in the paper. If text is cramped at column width, the font sizes are wrong.
+4. **Verify before commit.** Open the PDF in a viewer at 100 % zoom and at the column width it will appear at in the paper. If text is cramped at column width, the font sizes are wrong. For a mechanical pre-check, call `verify(fig)` from `scripts/verify_layout.py` at the end of the generator script: it flags text that collides with other text or a foreign axes spine and text clipped off the canvas, and, with `crop_dir=`, writes one PNG per panel so you (or a review agent) run the perceptual pass the geometry check cannot. Open each crop with the Read tool and check contrast, leader crossings, color-identity confusion, and legend binding.
 5. **Caption discipline.** The figure caption belongs in the `.tex` file, not on the figure itself. Repeat axes labels in the caption; spell out what error bars represent; state the sample size.
 
 ## Common pitfalls (CS-specific)
@@ -299,6 +299,7 @@ Then proceed:
 | `references/matplotlib_examples.md` | Twelve runnable patterns — CDF, throughput, training curve, Pareto, ablation, stacked-bar breakdown, heatmap, roofline, box+strip, multi-panel composition, `\columnwidth` IEEE template, `\textwidth` ACM template |
 | `scripts/style_presets.py` | `apply_publication_style(name)`, `set_color_palette(name)`, `configure_for_venue('ieee' / 'acm' / 'usenix' / 'neurips' / 'icml' / 'iclr' / 'arxiv')`. Copy into a project to pin the rcParams. |
 | `scripts/figure_export.py` | `save_publication_figure()` (multi-format), `save_for_venue()` (per-venue defaults), `check_figure_size()` (warns when figsize doesn't match the venue's column width). |
+| `scripts/verify_layout.py` | `verify(fig)`: geometric self-check (text/text + text/spine overlap, off-canvas text) plus per-panel crops for the perceptual pass. Call at the end of a generator script before committing the PDF. |
 | `assets/color_palettes.py` | Importable color constants and `apply_palette('okabe_ito' / 'wong' / 'tol_bright' / …)`. |
 | `assets/publication.mplstyle` | Generic CS publication baseline. Use when no specific venue style applies. |
 | `assets/ieee.mplstyle` | IEEE Transactions / conferences (3.5 in single column, 8 pt body). |
@@ -324,6 +325,8 @@ camera-ready figure or overwrite it.
 - Colorblind-unsafe palette or color-only encoding (jet / rainbow, red-green pairs); figure unreadable in grayscale.
 - Key labels or tick labels illegible at print size, or text clipped.
 - A `figsize` that does not match the target column width, so LaTeX rescales and distorts fonts.
+- An excluded or failed run (crashed, diverged, OOM'd, cold-start outlier) silently folded into a mean, bar, or error band, or silently dropped with no caption note. Excluded data is omitted or drawn with a distinct marker, never averaged in with the runs you kept.
+- The same quantity carrying two canonical values across figures, caption, and abstract (2.4× in one place, 2.6× in another for "the speedup"). One number per claim, everywhere. See `references/publication_guidelines.md` → Data Fidelity and Self-Consistency for both of these.
 
 `medium`: reduces professionalism or comprehension:
 

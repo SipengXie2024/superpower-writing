@@ -1,10 +1,11 @@
 ---
 name: humanizer
-version: 2.5.1
+version: 2.6.0
 description: |
   Strip signs of AI-generated writing — inflated symbolism, promotional
   language, em-dash overuse, rule-of-three, vague attribution, AI vocabulary,
-  passive voice, negative parallelism, filler phrases. Based on Wikipedia's
+  passive voice, negative parallelism, causal-tail chains, contrast-scaffold
+  density, filler phrases. Based on Wikipedia's
   "Signs of AI writing" guide. Use when editing or reviewing prose to make
   it sound natural and human-written.
 license: MIT
@@ -112,9 +113,10 @@ When the input is academic or technical, apply the following overrides:
 - **Personality and Soul section — DO NOT inject** first-person singular voice ("I keep coming back to…", "I genuinely don't know how to feel"), opinionated reactions, or casual asides. Multi-author papers use "we", and scholarly prose stays third-person. Adding voice here breaks the intended register and corrupts the authorial collective.
 - **Rule 8 (Copula avoidance) — apply selectively.** Phrases like "X represents Y" can be precise scholarly framing, not ceremonial inflation. Distinguish: strip "stands as a testament", but keep "represents a measured systems effect" — the latter is making a real claim.
 - **Rule 14 (Em dashes) — apply selectively.** Academic prose sometimes uses em dashes for parenthetical asides where commas would create syntactic ambiguity. Check whether the alternative actually reads cleaner before swapping.
-- **Rule 10 (Rule of three) — check first.** The original may genuinely list three things (three benchmarks, three contributions, three results axes). Strip the rule of three only when the trio is rhetorical filler, not when it is a real enumeration tied to the substance.
+- **Rule 10 (Rule of three) — check first.** The original may genuinely list three things (three benchmarks, three contributions, three results axes). Strip the rule of three only when the trio is rhetorical filler, not when it is a real enumeration tied to the substance. In long documents, triage in bulk: verb-phrase and abstract-noun triples are usually rhetorical, lists of three concrete artifacts are usually real, and a triple family recurring across sections is the strongest tell. Keep one canonical instance of a recurring family and vary the rest, and treat a sentence carrying two triads as a hotspot.
 - **Verb register — preserve scholarly verbs.** Do not informalize "shows / demonstrates / preserves / reports / presents" into "lands / dresses up / pulls off". Precise reporting verbs are part of the contract with the reader in research writing.
 - **Person — never switch person.** If the original uses "we", do not rewrite to "I". If it uses third-person, do not rewrite to first-person.
+- **Rules 30 and 31 (argument rhythm): thin, never strip.** Formal scope statements and definitional glosses legitimately use causal tails and contrast pairs ("this gives integrity, not confidentiality"). Judge by section-level density, keep every contrast that disambiguates, and let the Density diagnosis under Process set the keep ratio.
 
 ### Skip rules entirely for these inputs
 
@@ -525,13 +527,46 @@ The "common case / corner case" pair is the systems-paper-native rhetorical cont
 >
 > When users hit a slow page, they leave.
 
+
+## ARGUMENT-RHYTHM PATTERNS
+
+The rules above are local: a word, a phrase, one sentence. The two below live at paragraph and section scale. Each instance is grammatical and often defensible alone; the tell is density, the same argumentative move arriving sentence after sentence. Judge them with counts (see Density diagnosis under Process) and thin them toward a keep ratio, never to zero.
+
+### 30. Causal-Tail Chains
+
+**Pattern to watch:** consequence clauses chained onto claim after claim with ", so ...", ", which means ...", ", meaning that ...".
+
+**Problem:** Model argumentative prose attaches a consequence to nearly every claim: mechanism, so implication. Any one is fine. In a real 13-page systems paper the pattern appeared 42 times in about 380 sentences, one sentence in nine, and the uniform cadence reads as generated even when every individual inference is sound.
+
+**Fix:** Keep the tail where the inference is non-obvious or the sentence closes a paragraph. Rewrite the rest, varying the shape: split into two juxtaposed sentences and let the reader infer; fold the consequence into a relative clause; prepose the cause with "Because ..."; or delete a tail the main clause already implies.
+
+**Before:**
+> Only the data plane runs inside the enclave, and the client's TLS session terminates there, so the host never holds the interaction in the clear. The control call carries only numeric counters, so it cannot encode text.
+
+**After:**
+> Only the data plane runs inside the enclave, and the client's TLS session terminates there. The host never holds the interaction in the clear. The control call carries only numeric counters that cannot encode text.
+
+
+### 31. Contrast-Scaffold Density
+
+**Pattern to watch:** "A rather than B", "A, not B", "A instead of B" recurring through a section.
+
+**Problem:** The model pairs nearly every positive claim with a rejected alternative. Rule 9 catches the conversational forms ("it's not just X, it's Y"); this is the formal-register sibling, and it survives most de-AI passes because each instance reads as scholarly precision. One Results section carried 14 such pairs; at that density the contrasts stop disambiguating and become the prose's pulse.
+
+**Fix, triaged per instance:**
+- The positive clause already implies the rejected alternative: delete the tail. "paid once per session rather than per request" becomes "paid once per session".
+- The contrast separates two readings a careful reader could actually take: keep it. "application-layer, not network-layer egress confinement" draws a real boundary.
+- The contrast carries the document's thesis: keep it. "removes the capability rather than detecting its use".
+
+Cut roughly half. Cutting to zero erases boundaries the reader needs and flattens the argument.
+
 ---
 
 ## Process
 
 1. Read the input text carefully
 2. Classify the register using the Quick triage in Register Awareness
-3. Identify all instances of the patterns above, applying register overrides
+3. Identify all instances of the patterns above, applying register overrides; on documents longer than about two pages, run the Density diagnosis below before rewriting
 4. Rewrite each problematic section
 5. Ensure the revised text:
    - Sounds natural when read aloud
@@ -555,6 +590,16 @@ The "common case / corner case" pair is the systems-paper-native rhetorical cont
 
     If no such edits were made, state "No register-shifting edits flagged" and skip the question. When the user is unreachable (batch mode, automation), default to keeping the original wording for any flagged edit and note that you reverted them.
 
+### Density diagnosis (documents over about two pages)
+
+Rules 30 and 31, and rule 10 at scale, are density problems: instance-by-instance editing misjudges them because no single instance is wrong. Measure first, then edit to a target.
+
+1. Count candidate constructions with a grep pass: `, so `, `rather than`, `, not `, `instead`, and a triad pattern such as `\w+, [^,.]+, (and|or) `. Tally per section.
+2. Flag hotspots: a paragraph with three or more hits, or a sentence carrying two patterns at once. Fix hotspots first.
+3. Compute words-per-sentence mean and standard deviation per section. A standard deviation below roughly 40 percent of the mean suggests metronomic rhythm.
+4. Set a keep ratio before editing, usually 30 to 50 percent of the rhetorical instances, so the survivors are the load-bearing ones: announced enumerations, thesis contrasts, substantive disambiguations, factual artifact lists. Driving a pattern to zero is over-editing, and over-editing is its own tell.
+5. After editing, re-count, and audit the replacements. If more than about a third of the fixes share one substitute shape (all semicolon splices, say), the pattern has changed clothes, not left. Diversify: sentence splits, relative-clause folds, preposed causes, plain deletions.
+
 ## Self-Scoring
 
 After the audit, rate the final version 1 to 10 on each dimension, then sum. Score the text in its own register. Do not penalize scholarly prose for sounding scholarly, or quoted material for matching its source.
@@ -562,7 +607,7 @@ After the audit, rate the final version 1 to 10 on each dimension, then sum. Sco
 | Dimension | Question | Watch for |
 |-----------|----------|-----------|
 | Directness | Does it state claims, or announce and inflate them? | signposting, significance inflation, persuasive-authority tropes (rules 1, 27, 28) |
-| Rhythm | Varied sentence structure, or metronomic? | rule of three, negative parallelism, staccato fragments, false ranges (rules 9, 10, 12) |
+| Rhythm | Varied sentence structure, or metronomic? | rule of three, negative parallelism, staccato fragments, false ranges, causal-tail chains, contrast scaffolds (rules 9, 10, 12, 30, 31) |
 | Density | Tight, or padded? | filler, excessive hedging, -ing tails, copula detours, synonym cycling (rules 3, 8, 11, 23, 24) |
 | Specificity | Concrete sources and numbers, or vague? | vague declaratives, weasel attribution, promotional adjectives (rules 1, 4, 4a, 5) |
 | Register fidelity | Does it stay in the input's register? | scholarly verbs informalized, person switched, voice injected, domain compounds stripped (Register Awareness, rules 4a, 26) |

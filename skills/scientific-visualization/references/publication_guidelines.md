@@ -158,6 +158,22 @@ CS reviewers care about these things in roughly this priority order:
 > median of 10 runs, error bars show the 5th – 95th percentile across runs.
 > Workloads from YCSB-A; warm-up of 30 s discarded.
 
+## Data Fidelity and Self-Consistency
+
+A figure can be perfectly styled and still be *wrong*, not ugly, but making a claim the data does not support. These are correctness rules, not aesthetics: a violation is a defect to fix, not a trade-off to weigh. They bite hardest in results figures, where a reviewer who catches one silent inconsistency stops trusting every number in the paper.
+
+1. **Excluded runs never enter a summary.** A run you dropped (crashed, diverged, failed a sanity check, OOM'd, cold-start outlier) is either omitted entirely or drawn with a visually distinct marker (open, hatched) and named in the legend. It must not be folded into a mean, median, bar height, or error band shown next to the runs you kept. Silently averaging in a failed seed and silently dropping one without a caption note are both misleading; pick omit-and-say-so or mark-and-name.
+
+2. **Only comparable conditions sit as visual peers.** Bars or lines placed side by side read as measured the same way. If two methods ran on different hardware, different seed counts, different epoch budgets, or a different workload, do not plot them as peers unmarked; separate them with a facet, annotate the difference on the label, and state it once in the caption. The classic offender: "ours" at 5 seeds next to a baseline at 1 seed in the same bar style.
+
+3. **Every label, threshold, and reference line holds for every plotted point.** Before saving, walk each categorical label and each reference line back to the rule that defines it. If a bar labeled "faster" sits above the baseline line drawn through the panel, the figure contradicts itself, and the figure is wrong, not the reader.
+
+4. **A sentence-title must be true of every series it spans.** "Ours wins on every benchmark" as a panel title is tested against every bar before it ships. If it holds on 6 of 8, qualify it ("wins on 6 of 8") or downgrade it to a neutral description. A title the figure itself disproves is the fastest way to lose a reviewer.
+
+5. **State n and what was held fixed.** Every summary mark states its sample size (seeds, runs, trials) and the unit of replication; every small-multiple that pins a variable states the pinned value. Put it in the panel when space allows, in the caption when labels are tight, but never nowhere.
+
+6. **One number per claim, everywhere.** A quantitative headline ("2.4× speedup," "91.3% accuracy," "18 ms p99") has exactly one canonical value, and that value appears identically in the figure, the caption, the abstract, and the body. Define what it measures (which baseline, which workload, which percentile) and reuse that one number. Two figures quoting 2.4× and 2.6× for "the speedup" is the inconsistency a careful reviewer flags first, and it silently discredits the rest.
+
 ## Accessibility
 
 ### Colorblind

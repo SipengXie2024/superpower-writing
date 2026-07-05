@@ -96,7 +96,7 @@ broader horizon.>
 <one paragraph containing three sentences: Restate. Summary. Forward-look.>
 ```
 
-In Form 2, all three `% conclusion: X` tags are stacked above a single `% claim: id`. The PreToolUse hook will accept this --- one claim tag is sufficient for the paragraph, and the three structural tags document the internal sentence roles for self-review.
+In Form 2, all three `% conclusion: X` tags are stacked above a single `% claim: id`. This is acceptable under the claim-tagging rule --- one claim tag is sufficient for the paragraph, and the three structural tags document the internal sentence roles for self-review.
 
 Rules:
 

@@ -31,7 +31,7 @@ class ResearchLookup:
     ACADEMIC_KEYWORDS = [
         "find papers", "find paper", "find articles", "find article",
         "cite ", "citation", "citations for",
-        "doi ", "doi:", "pubmed", "pmid",
+        "doi ", "doi:",
         "journal article", "peer-reviewed",
         "systematic review", "meta-analysis",
         "literature search", "literature on",
@@ -79,9 +79,17 @@ class ResearchLookup:
     def _select_backend(self, query: str) -> str:
         """Select the best backend for a query."""
         if self.force_backend:
-            if self.force_backend == "perplexity" and self.perplexity_available:
+            if self.force_backend == "perplexity":
+                if not self.perplexity_available:
+                    raise ValueError(
+                        "Forced backend 'perplexity' requires OPENROUTER_API_KEY, which is not set."
+                    )
                 return "perplexity"
-            if self.force_backend == "parallel" and self.parallel_available:
+            if self.force_backend == "parallel":
+                if not self.parallel_available:
+                    raise ValueError(
+                        "Forced backend 'parallel' requires PARALLEL_API_KEY, which is not set."
+                    )
                 return "parallel"
 
         query_lower = query.lower()
@@ -222,14 +230,14 @@ class ResearchLookup:
                     "HIGH-IMPACT, INFLUENTIAL research.\n\n"
                     "QUALITY PRIORITIZATION (CRITICAL):\n"
                     "- ALWAYS prefer highly-cited papers over obscure publications\n"
-                    "- ALWAYS prioritize Tier-1 venues: Nature, Science, Cell, NEJM, Lancet, JAMA, PNAS\n"
+                    "- ALWAYS prioritize Tier-1 venues: NeurIPS, ICML, ICLR, OSDI, SOSP, NSDI, VLDB, SIGMOD, PLDI\n"
                     "- ALWAYS prefer papers from established researchers\n"
                     "- Include citation counts when known (e.g., 'cited 500+ times')\n"
                     "- Quality matters more than quantity\n\n"
                     "VENUE HIERARCHY:\n"
-                    "1. Nature/Science/Cell family, NEJM, Lancet, JAMA (highest)\n"
-                    "2. High-impact specialized journals (IF>10), top conferences (NeurIPS, ICML, ICLR)\n"
-                    "3. Respected field-specific journals (IF 5-10)\n"
+                    "1. Premier conferences: NeurIPS, ICML, ICLR, OSDI, SOSP, NSDI, VLDB, SIGMOD, PLDI (highest)\n"
+                    "2. Strong subfield venues (ACL, EMNLP, CVPR, KDD, SIGCOMM, EuroSys, ASPLOS, ISCA) and top journals (JMLR, TOCS, TODS)\n"
+                    "3. Respected specialized conferences and journals\n"
                     "4. Other peer-reviewed sources (only if no better option)\n\n"
                     "Focus exclusively on scholarly sources. Prioritize recent literature (2020-2026) "
                     "and provide complete citations with DOIs."
@@ -311,7 +319,7 @@ IMPORTANT INSTRUCTIONS:
 
 PAPER QUALITY PRIORITIZATION (CRITICAL):
 8. ALWAYS prioritize HIGHLY-CITED papers over obscure publications
-9. ALWAYS prioritize papers from TOP-TIER VENUES (Nature, Science, Cell, NEJM, Lancet, JAMA, PNAS)
+9. ALWAYS prioritize papers from TOP-TIER VENUES (NeurIPS, ICML, ICLR, OSDI, SOSP, NSDI, VLDB, SIGMOD, PLDI)
 10. PREFER papers from ESTABLISHED, REPUTABLE AUTHORS
 11. For EACH citation include when available: citation count, venue tier, author credentials
 12. PRIORITIZE papers that DIRECTLY address the research question
@@ -386,8 +394,8 @@ Remember: Quality over quantity. Prioritize influential, highly-cited papers fro
                 })
 
         url_pattern = (
-            r'https?://[^\s\)\]\,\<\>\"\']+(?:arxiv\.org|pubmed|ncbi\.nlm\.nih\.gov|'
-            r'nature\.com|science\.org|wiley\.com|springer\.com|ieee\.org|acm\.org)'
+            r'https?://[^\s\)\]\,\<\>\"\']*(?:arxiv\.org|semanticscholar\.org|dblp\.org|'
+            r'openreview\.net|aclanthology\.org|ieee\.org|acm\.org|springer\.com)'
             r'[^\s\)\]\,\<\>\"\']*'
         )
         url_matches = re.findall(url_pattern, text, re.IGNORECASE)
@@ -448,7 +456,7 @@ Examples:
   python research_lookup.py "latest advances in quantum computing 2025"
 
   # Academic paper search (auto-routes to Perplexity)
-  python research_lookup.py "find papers on CRISPR gene editing clinical trials"
+  python research_lookup.py "find papers on Raft consensus in distributed systems"
 
   # Force a specific backend
   python research_lookup.py "topic" --force-backend parallel

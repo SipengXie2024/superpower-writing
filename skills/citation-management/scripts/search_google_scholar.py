@@ -237,8 +237,8 @@ def main():
     if not SCHOLARLY_AVAILABLE:
         print('\nError: scholarly library not installed', file=sys.stderr)
         print('Install with: pip install scholarly', file=sys.stderr)
-        print('\nAlternatively, use PubMed search for biomedical literature:', file=sys.stderr)
-        print('  python search_pubmed.py "your query"', file=sys.stderr)
+        print('\nAlternatively, extract metadata directly from a DOI or arXiv ID:', file=sys.stderr)
+        print('  python extract_metadata.py --doi 10.1145/3065386', file=sys.stderr)
         sys.exit(1)
     
     # Search

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # End-to-end smoke test for superpower-writing scaffold (LaTeX).
-# Exercises: dir init, dep check (permissive re: missing upstream), claim
-# enforcement allow/block paths, Zotero check, file-presence audit.
+# Exercises: dir init, dep check (permissive re: missing upstream), Zotero
+# check, file-presence audit.
 
 set -euo pipefail
 
@@ -36,214 +36,11 @@ echo "== 3. check-zotero.sh (no env) =="
   && fail "check-zotero should fail without creds" \
   || pass "check-zotero fails without creds as expected"
 
-echo "== 4. claim enforcement (LaTeX) =="
-mkdir -p .writing/manuscript .writing/claims
-cat >.writing/claims/section_03_methods.md <<'EOF'
-- id: meth-c1
-  CLAIM: test
-  EVIDENCE: []
-  STATUS: stub
-EOF
-
-payload_write() {
-  local file="$1" content="$2"
-  printf '%s' "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"$file\",\"content\":\"$content\"}}"
-}
-
-echo "   4a. stub claim -> expect block"
-out=$(payload_write "$WORK/.writing/manuscript/03_methods.tex" "% claim: meth-c1\\nprose" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh" || true)
-echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
-  && pass "stub blocks" || fail "stub did not block: $out"
-
-echo "   4b. evidence_ready -> allow"
-sed -i.bak 's/STATUS: stub/STATUS: evidence_ready/' .writing/claims/section_03_methods.md
-out=$(payload_write "$WORK/.writing/manuscript/03_methods.tex" "% claim: meth-c1\\nprose" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
-[[ -z "$out" ]] && pass "evidence_ready allows" || fail "evidence_ready emitted output: $out"
-
-echo "   4c. draft-only -> allow"
-out=$(payload_write "$WORK/.writing/manuscript/03_methods.tex" "% draft-only\\nrough" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
-[[ -z "$out" ]] && pass "draft-only allows" || fail "draft-only emitted output: $out"
-
-echo "   4d. untagged prose in protected stem -> block"
-out=$(payload_write "$WORK/.writing/manuscript/03_methods.tex" "unmarked prose" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh" || true)
-echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
-  && pass "untagged prose blocks" || fail "untagged did not block: $out"
-
-echo "   4e. non-manuscript path -> allow"
-out=$(payload_write "/tmp/other.tex" "anything" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
-[[ -z "$out" ]] && pass "non-manuscript allows" || fail "non-manuscript emitted: $out"
-
-echo "   4f. .md manuscript file -> allow (markdown no longer enforced)"
-out=$(payload_write "$WORK/.writing/manuscript/03_methods.md" "anything at all" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
-[[ -z "$out" ]] && pass "markdown bypass" || fail ".md file triggered hook: $out"
-
-echo "   4g. 00_abstract untagged -> allow (unprotected slug)"
-out=$(payload_write "$WORK/.writing/manuscript/00_abstract.tex" "Background sentence. Method sentence." \
-      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
-[[ -z "$out" ]] && pass "abstract unprotected" || fail "abstract blocked: $out"
-
-echo "   4h. 09_references untagged -> allow (unprotected slug via slug-ending match)"
-out=$(payload_write "$WORK/.writing/manuscript/09_references.tex" "\\\\bibliography{refs}" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
-[[ -z "$out" ]] && pass "references unprotected (slug-ending match)" || fail "references blocked: $out"
-
-echo "   4i. LaTeX structural line only -> allow"
-out=$(payload_write "$WORK/.writing/manuscript/03_methods.tex" "\\\\section{Methods}" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
-[[ -z "$out" ]] && pass "structural LaTeX line allows" || fail "structural line blocked: $out"
-
-echo "   4j. abstract + \\\\cite{} -> block"
-out=$(payload_write "$WORK/.writing/manuscript/00_abstract.tex" \
-      "Background sentence \\\\cite{smith2019}." \
-      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh" || true)
-echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
-  && pass "abstract \\cite{} blocks" || fail "abstract \\cite{} did not block: $out"
-
-echo "   4k. abstract + \\\\citep{} -> block"
-out=$(payload_write "$WORK/.writing/manuscript/00_abstract.tex" \
-      "Problem text \\\\citep{chen2020}." \
-      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh" || true)
-echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
-  && pass "abstract \\citep{} blocks" || fail "abstract \\citep{} did not block: $out"
-
-echo "   4l. abstract + \\\\parencite{} -> block"
-out=$(payload_write "$WORK/.writing/manuscript/00_abstract.tex" \
-      "Prior work \\\\parencite{zhang2021}." \
-      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh" || true)
-echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
-  && pass "abstract \\parencite{} blocks" || fail "abstract \\parencite{} did not block: $out"
-
-echo "   4m. abstract + % claim: -> block"
-out=$(payload_write "$WORK/.writing/manuscript/00_abstract.tex" \
-      "% claim: abs-c1\\nprose" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh" || true)
-echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
-  && pass "abstract claim-tag blocks" || fail "abstract claim-tag did not block: $out"
-
-echo "   4n. abstract with BPMRC tags but no citation -> allow"
-out=$(payload_write "$WORK/.writing/manuscript/00_abstract.tex" \
-      "% bpmrc: B\\nBackground prose. % bpmrc: P\\nProblem prose." \
-      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
-[[ -z "$out" ]] && pass "abstract BPMRC-only allows" || fail "abstract BPMRC-only blocked: $out"
-
-echo "   4o. symlinked manuscript dir, untagged prose -> block (realpath gating)"
-# A symlink whose NAME is not 'manuscript' but whose TARGET is the real
-# manuscript dir. The hook resolves symlinks (Path.resolve) before the
-# 'manuscript' parts match, so a write through the link to a protected stem is
-# still gated. Untagged prose blocks independent of any claim STATUS mutated by
-# earlier cases. The non-symlinked control in 4e (same untagged shape, /tmp
-# path, allowed) proves the block here is the symlink resolving into
-# manuscript/, not a blanket deny. Guards against a lexical-only path check.
-ln -s "$WORK/.writing/manuscript" "$WORK/.writing/linkdir"
-out=$(payload_write "$WORK/.writing/linkdir/03_methods.tex" "unmarked prose via symlink" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh" || true)
-echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
-  && pass "symlinked manuscript path still gated" || fail "symlink bypassed hook: $out"
-rm -f "$WORK/.writing/linkdir"
-
-echo "   4p. edit hooks/*.py in non-drafting context -> allow (self-lockout inert)"
-# Infra self-protection is OFF by default. With no opt-in env var and no active
-# drafting session, editing a hooks/ enforcement file must NOT be blocked, so a
-# plain plugin-development session never locks itself out. Unset both signals in
-# a subshell to assert the inert default regardless of the caller's environment.
-out=$(unset SUPERPOWER_WRITING_PROTECT_INFRA CLAUDE_PROJECT_DIR
-      payload_write "$PLUGIN_ROOT/hooks/enforce-claims.py" "# edited" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-claims.sh")
-[[ -z "$out" ]] && pass "hooks/ edit allowed by default (no self-lockout)" \
-  || fail "self-lockout guard fired in non-drafting context: $out"
-
-echo "== 4.5 term enforcement (LaTeX, opt-in via glossary.md) =="
-
-echo "   4.5a. no glossary -> allow arbitrary term tags"
-# Clean slate: no glossary present, sections carry % use: tags that would
-# otherwise fail. Enforce-terms must be a no-op.
-rm -f .writing/glossary.md
-cat >.writing/claims/section_02_background.md <<'EOF'
-- id: bg-c1
-  CLAIM: test
-  EVIDENCE: []
-  STATUS: evidence_ready
-EOF
-out=$(payload_write "$WORK/.writing/manuscript/02_background.tex" \
-      "% claim: bg-c1\\n% use: skeleton-family\\nprose" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-terms.sh")
-[[ -z "$out" ]] && pass "no-glossary allows" || fail "no-glossary emitted: $out"
-
-# Write a minimal glossary and rerun cases against it.
-cat >.writing/glossary.md <<'EOF'
-- id: skeleton-family
-  term: skeleton family
-  definition: Structurally identical contracts differing only in bounded constants.
-  defined_in: 02_background
-EOF
-
-echo "   4.5b. % use: unknown-id -> block"
-out=$(payload_write "$WORK/.writing/manuscript/02_background.tex" \
-      "% claim: bg-c1\\n% use: unknown-term\\nprose" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-terms.sh" || true)
-echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
-  && pass "unknown term id blocks" || fail "unknown term id did not block: $out"
-
-echo "   4.5c. % define: in wrong section -> block"
-cat >.writing/claims/section_03_methods.md <<'EOF'
-- id: meth-c1
-  CLAIM: test
-  EVIDENCE: []
-  STATUS: evidence_ready
-EOF
-out=$(payload_write "$WORK/.writing/manuscript/03_methods.tex" \
-      "% claim: meth-c1\\n% define: skeleton-family\\nprose" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-terms.sh" || true)
-echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
-  && pass "wrong-section define blocks" || fail "wrong-section define did not block: $out"
-
-echo "   4.5d. % define: in correct section -> allow"
-out=$(payload_write "$WORK/.writing/manuscript/02_background.tex" \
-      "% claim: bg-c1\\n% define: skeleton-family\\nprose" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-terms.sh")
-[[ -z "$out" ]] && pass "correct-section define allows" || fail "correct-section define emitted: $out"
-
-echo "   4.5e. % use: in later section than define -> allow"
-out=$(payload_write "$WORK/.writing/manuscript/03_methods.tex" \
-      "% claim: meth-c1\\n% use: skeleton-family\\nprose" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-terms.sh")
-[[ -z "$out" ]] && pass "later-section use allows" || fail "later-section use emitted: $out"
-
-echo "   4.5f. % use: in earlier section than define -> block"
-# Define term in 05_discussion; use it in 02_background (earlier).
-cat >.writing/glossary.md <<'EOF'
-- id: late-term
-  term: late term
-  definition: A term introduced late in the paper.
-  defined_in: 05_discussion
-EOF
-out=$(payload_write "$WORK/.writing/manuscript/02_background.tex" \
-      "% claim: bg-c1\\n% use: late-term\\nprose" \
-      | bash "$PLUGIN_ROOT/hooks/enforce-terms.sh" || true)
-echo "$out" | grep -q '"decision":[[:space:]]*"block"' \
-  && pass "use-before-define blocks" || fail "use-before-define did not block: $out"
-
-echo "   4.5g. % use: in abstract (exempt) -> allow"
-out=$(payload_write "$WORK/.writing/manuscript/00_abstract.tex" \
-      "% use: late-term\\nProse mentioning the term." \
-      | bash "$PLUGIN_ROOT/hooks/enforce-terms.sh")
-[[ -z "$out" ]] && pass "abstract exempt from term ordering" || fail "abstract was blocked: $out"
-
-# Cleanup glossary so subsequent tests are unaffected.
-rm -f .writing/glossary.md
-
-echo "== 5. plugin manifest sanity =="
+echo "== 4. plugin manifest sanity =="
 python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/plugin.json'))" && pass "plugin.json valid"
 python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/marketplace.json'))" && pass "marketplace.json valid"
-python3 -c "import json; json.load(open('$PLUGIN_ROOT/hooks/hooks.json'))" && pass "hooks.json valid"
 
-echo "== 6. skill + command + hook presence =="
+echo "== 5. skill + command + agent presence =="
 for name in main outlining writing-plans drafting claim-verification executing-plans scientific-visualization; do
   [[ -f "$PLUGIN_ROOT/skills/$name/SKILL.md" ]] \
     && pass "skills/$name/SKILL.md" \
@@ -254,37 +51,33 @@ for cmd in outline draft check-deps stash archive; do
     && pass "commands/$cmd.md" \
     || fail "missing commands/$cmd.md"
 done
-for h in enforce-claims.sh enforce-claims.py enforce-terms.sh enforce-terms.py check-deps.sh hooks.json; do
-  [[ -f "$PLUGIN_ROOT/hooks/$h" ]] \
-    && pass "hooks/$h" \
-    || fail "missing hooks/$h"
-done
 for a in section-drafter spec-reviewer manuscript-reviewer citation-auditor; do
   [[ -f "$PLUGIN_ROOT/agents/$a.md" ]] \
     && pass "agents/$a.md" \
     || fail "missing agents/$a.md"
 done
 
-echo "== 6b. output style + deletion audit =="
+echo "== 5b. output style + deletion audit =="
 [[ -f "$PLUGIN_ROOT/output-styles/academic-research-assistant.md" ]] \
   && pass "output-styles/academic-research-assistant.md" \
   || fail "missing output-styles/academic-research-assistant.md"
 for gone in skills/submission skills/revision skills/peer-review skills/verification \
             skills/finishing-branch skills/lightweight-execute skills/subagent-driven \
-            skills/team-driven commands/submit.md commands/revise.md agents/rebuttal-auditor.md; do
+            skills/team-driven commands/submit.md commands/revise.md agents/rebuttal-auditor.md \
+            hooks; do
   [[ ! -e "$PLUGIN_ROOT/$gone" ]] \
     && pass "removed: $gone" \
     || fail "deleted component still present: $gone"
 done
 
-echo "== 7. section-standards presence =="
+echo "== 6. section-standards presence =="
 for std in 00_abstract 01_introduction 02_background 03_methods 04_results 05_discussion 06_conclusion 07_related_work 08_motivation; do
   [[ -f "$PLUGIN_ROOT/skills/drafting/references/section-standards/$std.md" ]] \
     && pass "section-standards/$std.md" \
     || fail "missing section-standards/$std.md"
 done
 
-echo "== 8. skill linter (ratchet) =="
+echo "== 7. skill linter (ratchet) =="
 # lint_skills.py exits 0 when clean or every error is grandfathered in
 # scripts/lint_skills_baseline.txt; exits 1 on a NEW violation. Run from the
 # plugin root so it discovers skills/ and the baseline beside it.
@@ -292,7 +85,7 @@ echo "== 8. skill linter (ratchet) =="
   && pass "lint_skills.py clean (no new violations)" \
   || fail "lint_skills.py reported NEW violation(s); run: python3 scripts/lint_skills.py"
 
-echo "== 9. eval-harness fixture self-test =="
+echo "== 8. eval-harness fixture self-test =="
 # run.py --check-fixtures lints every scenario then asserts each good/bad
 # fixture grades to its expected status. No model call. Exits non-zero on any
 # mismatch, missing fixture, or orphan.

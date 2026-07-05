@@ -1,12 +1,12 @@
 # Metadata Extraction Guide
 
-Comprehensive guide to extracting accurate citation metadata from DOIs, PMIDs, arXiv IDs, and URLs using various APIs and services.
+Comprehensive guide to extracting accurate citation metadata from DOIs, arXiv IDs, and URLs using various APIs and services.
 
 ## Overview
 
 Accurate metadata is essential for proper citations. This guide covers:
-- Identifying paper identifiers (DOI, PMID, arXiv ID)
-- Querying metadata APIs (CrossRef, PubMed, arXiv, DataCite)
+- Identifying paper identifiers (DOI, arXiv ID)
+- Querying metadata APIs (CrossRef, arXiv, DataCite)
 - Required BibTeX fields by entry type
 - Handling edge cases and special situations
 - Validating extracted metadata
@@ -19,10 +19,10 @@ Accurate metadata is essential for proper citations. This guide covers:
 
 **Examples**:
 ```
-10.1038/s41586-021-03819-2    # Nature article
-10.1126/science.aam9317       # Science article
-10.1016/j.cell.2023.01.001    # Cell article
-10.1371/journal.pone.0123456  # PLOS ONE article
+10.1145/3065386               # ACM (CACM) article
+10.1109/CVPR.2016.90          # IEEE (CVPR) conference paper
+10.1145/1327452.1327492       # ACM (CACM) article
+10.1145/279227.279229         # ACM (TOCS) article
 ```
 
 **Properties**:
@@ -34,46 +34,8 @@ Accurate metadata is essential for proper citations. This guide covers:
 **Where to find**:
 - First page of article
 - Article webpage
-- CrossRef, Google Scholar, PubMed
+- CrossRef, Google Scholar, DBLP
 - Usually prominent on publisher site
-
-### PMID (PubMed ID)
-
-**Format**: 8-digit number (typically)
-
-**Examples**:
-```
-34265844
-28445112
-35476778
-```
-
-**Properties**:
-- Specific to PubMed database
-- Biomedical literature only
-- Assigned by NCBI
-- Permanent identifier
-
-**Where to find**:
-- PubMed search results
-- Article page on PubMed
-- Often in article PDF footer
-- PMC (PubMed Central) pages
-
-### PMCID (PubMed Central ID)
-
-**Format**: PMC followed by numbers
-
-**Examples**:
-```
-PMC8287551
-PMC7456789
-```
-
-**Properties**:
-- Free full-text articles in PMC
-- Subset of PubMed articles
-- Open access or author manuscripts
 
 ### arXiv ID
 
@@ -88,7 +50,7 @@ arXiv:hep-th/9901001  # Old format
 
 **Properties**:
 - Preprints (not peer-reviewed)
-- Physics, math, CS, q-bio, etc.
+- CS, math, physics, etc.
 - Version tracking (v1, v2, etc.)
 - Free, open access
 
@@ -108,7 +70,7 @@ arXiv:hep-th/9901001  # Old format
 **arXiv category**:
 ```
 cs.LG    # Computer Science - Machine Learning
-q-bio.QM # Quantitative Biology - Quantitative Methods
+cs.DC    # Computer Science - Distributed Computing
 math.ST  # Mathematics - Statistics
 ```
 
@@ -129,27 +91,27 @@ math.ST  # Mathematics - Statistics
 
 **Request**:
 ```
-GET https://api.crossref.org/works/10.1038/s41586-021-03819-2
+GET https://api.crossref.org/works/10.1145/3065386
 ```
 
 **Response** (simplified):
 ```json
 {
   "message": {
-    "DOI": "10.1038/s41586-021-03819-2",
+    "DOI": "10.1145/3065386",
     "title": ["Article title here"],
     "author": [
       {"given": "John", "family": "Smith"},
       {"given": "Jane", "family": "Doe"}
     ],
-    "container-title": ["Nature"],
-    "volume": "595",
-    "issue": "7865",
-    "page": "123-128",
-    "published-print": {"date-parts": [[2021, 7, 1]]},
-    "publisher": "Springer Nature",
+    "container-title": ["Communications of the ACM"],
+    "volume": "60",
+    "issue": "6",
+    "page": "84-90",
+    "published-print": {"date-parts": [[2017, 5, 1]]},
+    "publisher": "Association for Computing Machinery",
     "type": "journal-article",
-    "ISSN": ["0028-0836"]
+    "ISSN": ["0001-0782"]
   }
 }
 ```
@@ -188,96 +150,9 @@ CrossRef `type` field values:
 - `report`: Technical reports
 - `dissertation`: Theses/dissertations
 
-### PubMed E-utilities API
-
-**Specialized for biomedical literature** - Curated metadata with MeSH terms.
-
-**Base URL**: `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/`
-
-**API key recommended** (free):
-- Higher rate limits
-- Better performance
-
-#### PMID to Metadata
-
-**Step 1: EFetch for full record**
-
-```
-GET https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?
-  db=pubmed&
-  id=34265844&
-  retmode=xml&
-  api_key=YOUR_KEY
-```
-
-**Response**: XML with comprehensive metadata
-
-**Step 2: Parse XML**
-
-Key fields:
-```xml
-<PubmedArticle>
-  <MedlineCitation>
-    <PMID>34265844</PMID>
-    <Article>
-      <ArticleTitle>Title here</ArticleTitle>
-      <AuthorList>
-        <Author><LastName>Smith</LastName><ForeName>John</ForeName></Author>
-      </AuthorList>
-      <Journal>
-        <Title>Nature</Title>
-        <JournalIssue>
-          <Volume>595</Volume>
-          <Issue>7865</Issue>
-          <PubDate><Year>2021</Year></PubDate>
-        </JournalIssue>
-      </Journal>
-      <Pagination><MedlinePgn>123-128</MedlinePgn></Pagination>
-      <Abstract><AbstractText>Abstract text here</AbstractText></Abstract>
-    </Article>
-  </MedlineCitation>
-  <PubmedData>
-    <ArticleIdList>
-      <ArticleId IdType="doi">10.1038/s41586-021-03819-2</ArticleId>
-      <ArticleId IdType="pmc">PMC8287551</ArticleId>
-    </ArticleIdList>
-  </PubmedData>
-</PubmedArticle>
-```
-
-#### Unique PubMed Fields
-
-**MeSH Terms**: Controlled vocabulary
-```xml
-<MeshHeadingList>
-  <MeshHeading>
-    <DescriptorName UI="D003920">Diabetes Mellitus</DescriptorName>
-  </MeshHeading>
-</MeshHeadingList>
-```
-
-**Publication Types**:
-```xml
-<PublicationTypeList>
-  <PublicationType UI="D016428">Journal Article</PublicationType>
-  <PublicationType UI="D016449">Randomized Controlled Trial</PublicationType>
-</PublicationTypeList>
-```
-
-**Grant Information**:
-```xml
-<GrantList>
-  <Grant>
-    <GrantID>R01-123456</GrantID>
-    <Agency>NIAID NIH HHS</Agency>
-    <Country>United States</Country>
-  </Grant>
-</GrantList>
-```
-
 ### arXiv API
 
-**Preprints in physics, math, CS, q-bio** - Free, open access.
+**Preprints in CS, math, physics** - Free, open access.
 
 **Base URL**: `http://export.arxiv.org/api/query`
 
@@ -294,15 +169,14 @@ GET http://export.arxiv.org/api/query?id_list=2103.14030
 
 ```xml
 <entry>
-  <id>http://arxiv.org/abs/2103.14030v2</id>
-  <title>Highly accurate protein structure prediction with AlphaFold</title>
-  <author><name>John Jumper</name></author>
-  <author><name>Richard Evans</name></author>
-  <published>2021-03-26T17:47:17Z</published>
-  <updated>2021-07-01T16:51:46Z</updated>
+  <id>http://arxiv.org/abs/1706.03762v5</id>
+  <title>Attention Is All You Need</title>
+  <author><name>Ashish Vaswani</name></author>
+  <author><name>Noam Shazeer</name></author>
+  <published>2017-06-12T17:57:34Z</published>
+  <updated>2017-12-06T03:30:39Z</updated>
   <summary>Abstract text here...</summary>
-  <arxiv:doi>10.1038/s41586-021-03819-2</arxiv:doi>
-  <category term="q-bio.BM" scheme="http://arxiv.org/schemas/atom"/>
+  <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
   <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
 </entry>
 ```
@@ -364,13 +238,13 @@ GET https://api.datacite.org/dois/10.5281/zenodo.1234567
 ```bibtex
 @article{Smith2024,
   author  = {Smith, John and Doe, Jane},
-  title   = {Novel Approach to Protein Folding},
-  journal = {Nature},
+  title   = {Novel Approach to Query Optimization},
+  journal = {Communications of the ACM},
   year    = {2024},
-  volume  = {625},
-  number  = {8001},
+  volume  = {67},
+  number  = {8},
   pages   = {123--145},
-  doi     = {10.1038/nature12345}
+  doi     = {10.1145/journal.2024.123456}
 }
 ```
 
@@ -391,13 +265,13 @@ GET https://api.datacite.org/dois/10.5281/zenodo.1234567
 
 **Example**:
 ```bibtex
-@book{Kumar2021,
-  author    = {Kumar, Vinay and Abbas, Abul K. and Aster, Jon C.},
-  title     = {Robbins and Cotran Pathologic Basis of Disease},
-  publisher = {Elsevier},
-  year      = {2021},
-  edition   = {10},
-  isbn      = {978-0-323-53113-9}
+@book{Cormen2009,
+  author    = {Cormen, Thomas H. and Leiserson, Charles E. and Rivest, Ronald L. and Stein, Clifford},
+  title     = {Introduction to Algorithms},
+  publisher = {MIT Press},
+  year      = {2009},
+  edition   = {3},
+  isbn      = {978-0-262-03384-8}
 }
 ```
 
@@ -447,14 +321,14 @@ GET https://api.datacite.org/dois/10.5281/zenodo.1234567
 
 **Example**:
 ```bibtex
-@incollection{Brown2020,
-  author    = {Brown, Peter O. and Botstein, David},
-  title     = {Exploring the New World of the Genome with {DNA} Microarrays},
-  booktitle = {DNA Microarrays: A Molecular Cloning Manual},
-  editor    = {Eisen, Michael B. and Brown, Patrick O.},
-  publisher = {Cold Spring Harbor Laboratory Press},
-  year      = {2020},
-  pages     = {1--45}
+@incollection{Goodfellow2016,
+  author    = {Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron},
+  title     = {Convolutional Networks},
+  booktitle = {Deep Learning},
+  editor    = {Goodfellow, Ian and Bengio, Yoshua},
+  publisher = {MIT Press},
+  year      = {2016},
+  pages     = {326--366}
 }
 ```
 
@@ -474,11 +348,11 @@ GET https://api.datacite.org/dois/10.5281/zenodo.1234567
 
 **Example**:
 ```bibtex
-@phdthesis{Johnson2023,
-  author = {Johnson, Mary L.},
-  title  = {Novel Approaches to Cancer Immunotherapy},
-  school = {Stanford University},
-  year   = {2023},
+@phdthesis{Sutskever2013,
+  author = {Sutskever, Ilya},
+  title  = {Training Recurrent Neural Networks},
+  school = {University of Toronto},
+  year   = {2013},
   type   = {{PhD} dissertation}
 }
 ```
@@ -491,31 +365,29 @@ GET https://api.datacite.org/dois/10.5281/zenodo.1234567
 - `year`: Year
 
 **For preprints, add**:
-- `howpublished`: Repository (e.g., "bioRxiv")
+- `howpublished`: Repository (e.g., "arXiv")
 - `doi`: Preprint DOI
 - `note`: Preprint ID
 
 **Example (preprint)**:
 ```bibtex
-@misc{Zhang2024,
-  author       = {Zhang, Yi and Chen, Li and Wang, Hui},
-  title        = {Novel Therapeutic Targets in Alzheimer's Disease},
-  year         = {2024},
-  howpublished = {bioRxiv},
-  doi          = {10.1101/2024.01.001},
-  note         = {Preprint}
+@misc{Devlin2019,
+  author       = {Devlin, Jacob and Chang, Ming-Wei and Lee, Kenton and Toutanova, Kristina},
+  title        = {{BERT}: Pre-training of Deep Bidirectional Transformers for Language Understanding},
+  year         = {2019},
+  howpublished = {arXiv},
+  note         = {arXiv:1810.04805}
 }
 ```
 
 **Example (software)**:
 ```bibtex
-@misc{AlphaFold2021,
-  author       = {DeepMind},
-  title        = {{AlphaFold} Protein Structure Database},
-  year         = {2021},
+@misc{pandas2010,
+  author       = {McKinney, Wes},
+  title        = {pandas: A Foundational {Python} Library for Data Analysis},
+  year         = {2010},
   howpublished = {Software},
-  url          = {https://alphafold.ebi.ac.uk/},
-  doi          = {10.5281/zenodo.5123456}
+  url          = {https://pandas.pydata.org/}
 }
 ```
 
@@ -527,12 +399,12 @@ GET https://api.datacite.org/dois/10.5281/zenodo.1234567
 
 ```bash
 # Single DOI
-python scripts/extract_metadata.py --doi 10.1038/s41586-021-03819-2
+python scripts/extract_metadata.py --doi 10.1145/3065386
 
 # Multiple DOIs
 python scripts/extract_metadata.py \
-  --doi 10.1038/nature12345 \
-  --doi 10.1126/science.abc1234 \
+  --doi 10.1145/1327452.1327492 \
+  --doi 10.1109/CVPR.2016.90 \
   --output refs.bib
 ```
 
@@ -543,29 +415,6 @@ python scripts/extract_metadata.py \
 4. Determine entry type (@article, @book, etc.)
 5. Format as BibTeX
 6. Validate completeness
-
-### From PMID
-
-**For biomedical literature**:
-
-```bash
-# Single PMID
-python scripts/extract_metadata.py --pmid 34265844
-
-# Multiple PMIDs
-python scripts/extract_metadata.py \
-  --pmid 34265844 \
-  --pmid 28445112 \
-  --output refs.bib
-```
-
-**Process**:
-1. Query PubMed EFetch with PMID
-2. Parse XML response
-3. Extract metadata including MeSH terms
-4. Check for DOI in response
-5. If DOI exists, optionally query CrossRef for additional metadata
-6. Format as BibTeX
 
 ### From arXiv ID
 
@@ -591,12 +440,12 @@ python scripts/extract_metadata.py --arxiv 2103.14030
 
 ```bash
 python scripts/extract_metadata.py \
-  --url "https://www.nature.com/articles/s41586-021-03819-2"
+  --url "https://dl.acm.org/doi/10.1145/3065386"
 ```
 
 **Process**:
 1. Parse URL to extract identifier
-2. Identify type (DOI, PMID, arXiv)
+2. Identify type (DOI, arXiv)
 3. Extract identifier from URL
 4. Query appropriate API
 5. Format as BibTeX
@@ -604,17 +453,13 @@ python scripts/extract_metadata.py \
 **URL patterns**:
 ```
 # DOI URLs
-https://doi.org/10.1038/nature12345
-https://dx.doi.org/10.1126/science.abc123
-https://www.nature.com/articles/s41586-021-03819-2
-
-# PubMed URLs
-https://pubmed.ncbi.nlm.nih.gov/34265844/
-https://www.ncbi.nlm.nih.gov/pubmed/34265844
+https://doi.org/10.1145/3065386
+https://dx.doi.org/10.1109/CVPR.2016.90
+https://dl.acm.org/doi/10.1145/1327452.1327492
 
 # arXiv URLs
-https://arxiv.org/abs/2103.14030
-https://arxiv.org/pdf/2103.14030.pdf
+https://arxiv.org/abs/1706.03762
+https://arxiv.org/pdf/1706.03762.pdf
 ```
 
 ### Batch Processing
@@ -624,10 +469,9 @@ https://arxiv.org/pdf/2103.14030.pdf
 ```bash
 # Create file with one identifier per line
 # identifiers.txt:
-#   10.1038/nature12345
-#   34265844
-#   2103.14030
-#   https://doi.org/10.1126/science.abc123
+#   10.1145/3065386
+#   1706.03762
+#   https://doi.org/10.1109/CVPR.2016.90
 
 python scripts/extract_metadata.py \
   --input identifiers.txt \
@@ -654,16 +498,15 @@ python scripts/extract_metadata.py \
 
 **Example**:
 ```bibtex
-% Originally: arXiv:2103.14030
+% Originally: arXiv:1512.03385
 % Published as:
-@article{Jumper2021,
-  author  = {Jumper, John and Evans, Richard and others},
-  title   = {Highly Accurate Protein Structure Prediction with {AlphaFold}},
-  journal = {Nature},
-  year    = {2021},
-  volume  = {596},
-  pages   = {583--589},
-  doi     = {10.1038/s41586-021-03819-2}
+@inproceedings{He2016,
+  author    = {He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian},
+  title     = {Deep Residual Learning for Image Recognition},
+  booktitle = {IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  year      = {2016},
+  pages     = {770--778},
+  doi       = {10.1109/CVPR.2016.90}
 }
 ```
 
@@ -712,7 +555,7 @@ author = {Smith, John A.}
 **Issue**: Older papers or books without DOIs.
 
 **Solutions**:
-1. Use PMID if available (biomedical)
+1. Use arXiv ID if available (preprints)
 2. Use ISBN for books
 3. Use URL to stable source
 4. Include full publication details
@@ -727,7 +570,7 @@ author = {Smith, John A.}
   volume  = {123},
   pages   = {45--67},
   url     = {https://stable-url-here},
-  note    = {PMID: 12345678}
+  note    = {No DOI available for this era}
 }
 ```
 
@@ -821,24 +664,24 @@ Spot-check:
 ### 3. Handle Special Characters
 
 **LaTeX special characters**:
-- Protect capitalization: `{AlphaFold}`
+- Protect capitalization: `{BERT}`
 - Handle accents: `M{\"u}ller` or use Unicode
-- Chemical formulas: `H$_2$O` or `\ce{H2O}`
+- Math symbols: `$O(n \log n)$` or `$\lambda$-calculus`
 
 ### 4. Use Consistent Citation Keys
 
 **Convention**: `FirstAuthorYEARkeyword`
 ```
-Smith2024protein
+Smith2024optimizer
 Doe2023machine
-Johnson2024cancer
+Johnson2024cache
 ```
 
 ### 5. Include DOI for Modern Papers
 
 All papers published after ~2000 should have DOI:
 ```bibtex
-doi = {10.1038/nature12345}
+doi = {10.1145/3065386}
 ```
 
 ### 6. Document Source
@@ -854,8 +697,8 @@ note = {Dataset accompanying [citation]}
 
 Metadata extraction workflow:
 
-1. **Identify**: Determine identifier type (DOI, PMID, arXiv, URL)
-2. **Query**: Use appropriate API (CrossRef, PubMed, arXiv)
+1. **Identify**: Determine identifier type (DOI, arXiv, URL)
+2. **Query**: Use appropriate API (CrossRef, arXiv, DataCite)
 3. **Extract**: Parse response for required fields
 4. **Format**: Create properly formatted BibTeX entry
 5. **Validate**: Check completeness and accuracy

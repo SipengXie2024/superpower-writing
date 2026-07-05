@@ -100,7 +100,7 @@ def main():
     """Command-line interface."""
     parser = argparse.ArgumentParser(
         description='Convert DOIs to BibTeX format using CrossRef API',
-        epilog='Example: python doi_to_bibtex.py 10.1038/s41586-021-03819-2'
+        epilog='Example: python doi_to_bibtex.py 10.1145/3065386'
     )
     
     parser.add_argument(
