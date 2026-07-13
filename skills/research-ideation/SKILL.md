@@ -107,7 +107,7 @@ For each lens, generate several candidates before moving to the next. Tag each c
 
 Each candidate carries a one-sentence summary, a core hypothesis, the cheapest experiment that would test it, the contribution type (empirical finding, new method, theoretical result, or diagnostic), a rough effort estimate, and the lens of origin.
 
-**Optional cross-model generation seed.** A single Codex call can widen the pool with directions the executor would not reach. This is a generator, not a judge, so a same-family seed is fine. Write the landscape and gap summary to a bundle file, then delegate one brainstorm via `superpower-writing:collaborating-with-codex` (run the bridge in the background per that skill's contract). Merge Codex's directions into the pool. Do not let Codex critique here; its judging role comes in Phase 5.
+**Optional paired generation seed.** A paired Codex and Hermes call can widen the pool with directions the executor would not reach. Write the landscape and gap summary to a bundle file, then run `${CLAUDE_PLUGIN_ROOT}/scripts/paired_consult.py` in the background with `--handoff-kind ideation` and a timeout of at least `660000` ms. Keep each provider's candidates labeled by source. Do not silently merge them into the local pool. Present them as optional additions, and let the user decide which candidates enter the slate. Do not ask either provider to critique here; judging comes in Phase 5.
 
 Do not critique while generating. Capture even the candidates that feel weak. Dropping a candidate now defeats the breadth the lenses exist to create.
 
@@ -141,12 +141,16 @@ The FINER novelty score is a hypothesis to test against the literature, never a 
 
 "Would a reviewer care?" is the central taste call. The executor must not answer it alone. The executor is one model judging its own generated ideas, which voids any independence. Route the taste calls through a different model.
 
-Choose one of two routes:
+Write the full annotated candidate set plus FINER scores to a bundle file. Run the paired consultation in the background:
 
-- **Codex (preferred).** Write the full annotated candidate set plus FINER scores to a bundle file, then delegate the adversarial pass via `superpower-writing:collaborating-with-codex`. Run the bridge in the background per that skill's contract. Ask Codex, for each leading candidate: the strongest objection a reviewer would raise, the most likely failure mode, whether the prior-work note is a real novelty problem or a differentiable one, and which two or three it would actually pursue and why.
-- **Fresh-context Claude jury.** When Codex is unavailable, spawn a fresh-context Claude reviewer that has not seen the generation. Hand it only the candidate set and the same adversarial prompt. A reviewer that watched the ideas being born inherits the generator's blind spots, so the context must be fresh.
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/paired_consult.py" \
+  --cd "<absolute project root>" \
+  --handoff-kind ideation \
+  --PROMPT "Read the annotated candidate bundle. For every candidate, state the strongest reviewer objection, likely failure mode, novelty risk, and your own ranking. Do not modify files."
+```
 
-The cross-model ranking is the authoritative quality verdict. The executor does not narrow on its own taste before or instead of this pass. Its output is advisory to the user, not a silent filter.
+Use a Bash timeout of at least `660000` ms and do not poll. Keep Codex's objections and ranking separate from Hermes's objections and ranking. Do not create a combined ranking, vote, or winner. If one provider fails, preserve the successful opinion and identify the missing lane. The executor does not narrow on its own taste before this pass. Both rankings are advisory to the user, not silent filters.
 
 Verify the returned reasoning yourself before surfacing it. A delegated summary states intent, not proof.
 

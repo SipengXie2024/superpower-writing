@@ -76,18 +76,25 @@ EOF
   exit 1
 fi
 
-# ── Figure-generation backend (Codex CLI) — warning only ────────────────
-# scientific-schematics delegates diagram generation to Codex's native
-# image_gen via the collaborating-with-codex bridge. The bridge needs the
-# `codex` CLI on PATH; the rest of the writing lifecycle works without it.
+# External academic consultation backends are warning-only. Missing one lane
+# makes paired consultation partial; it must not block local writing workflows.
 if ! command -v codex >/dev/null 2>&1; then
   cat >&2 <<EOF
 [superpower-writing] Dependency check WARNING.
 
-The 'codex' CLI was not found on PATH. Figure generation
-(superpower-writing:scientific-schematics) delegates to Codex's built-in
-image_gen and will not work until Codex CLI is installed and authenticated.
-Everything else in the plugin works without it.
+The 'codex' CLI was not found on PATH. The Codex lane of paired academic
+consultation will fail, and scientific-schematics cannot generate figures with
+Codex image_gen. Local writing workflows and the Hermes lane remain available.
+EOF
+fi
+
+if ! command -v hermes >/dev/null 2>&1; then
+  cat >&2 <<EOF
+[superpower-writing] Dependency check WARNING.
+
+The 'hermes' CLI was not found on PATH. The Hermes lane of paired academic
+consultation will fail. Local writing workflows, Codex consultation, and the
+Codex-only scientific figure path remain available.
 EOF
 fi
 

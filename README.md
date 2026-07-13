@@ -19,9 +19,9 @@
 
 ## Status
 
-- **Version**: `v0.12.0`
+- **Version**: `v1.1.0`
 - **Scope**: single-author IMRAD research manuscripts (CS / systems / ML / HCI)
-- **Dependencies**: Zotero API (optional, gated by `zotero.enabled` in metadata); Codex CLI (used by `scientific-schematics` for figure generation via `collaborating-with-codex`)
+- **Dependencies**: Zotero API (optional, gated by `zotero.enabled`); Codex CLI and Hermes Agent CLI (optional academic consultation backends). Codex is also required for raster scientific-figure generation.
 - **Repo**: https://github.com/SipengXie2024/superpower-writing
 
 ## TL;DR — what this plugin does
@@ -31,7 +31,7 @@
 3. Follows **claim-first writing**: every load-bearing paragraph in `manuscript/NN_*.tex` must carry `% claim: id` bound to a claim with `STATUS: evidence_ready` (or `% draft-only` for exploration). Resolving a claim's evidence before writing its paragraph is a required drafting discipline.
 4. Resolves citations **Zotero first → network fallback** (when Zotero is enabled). Pushes new DOIs back to your library if configured.
 5. Checks reliability before handoff: `claim-verification` confirms every `\cite{}` resolves against `refs.bib` and that the cited abstract actually supports the claim (catching hallucinated or mismatched citations), flags any `draft-only` or `[NEEDS-EVIDENCE]` left in the skeleton, and runs an optional research-integrity gate on experiment-bearing papers.
-6. **Reviews and rebuts.** `adversarial-review` commits the single worst-case reviewer argument and adjudicates it; `external-review` routes a different-model critic over the work; `rebuttal` turns reviewer comments into a grounded, gated response letter. Every verdict is advisory: it surfaces to you and never auto-rejects or auto-mutates state.
+6. **Reviews and rebuts.** Read-only academic consultation runs Codex and Hermes concurrently and preserves both evidence-linked opinions separately. `adversarial-review` computes one verdict per provider; `external-review` keeps two venue reviews without voting or synthetic consensus; `rebuttal` turns reviewer comments into a grounded response letter. Every verdict is advisory.
 
 ## Agent install checklist
 
@@ -41,10 +41,12 @@ Run these in order. Each command prints what it did; compare to "Expected".
 
 ```bash
 which claude && claude --version      # needs Claude Code CLI
-which gh && gh auth status             # needed only if you want to push
+which codex && codex --version          # optional; paired review + raster figures
+which hermes && hermes --version        # optional; paired review
+which gh && gh auth status              # needed only if you want to push
 ```
 
-Expected: no command fails.
+Expected: `claude` succeeds. Missing `codex` or `hermes` makes paired consultation partial and produces a warning from `check-deps.sh`; it does not block local writing. Missing Codex also disables `scientific-schematics` raster generation. `gh` is optional.
 
 ### 1. Install this plugin
 
@@ -112,7 +114,7 @@ zotero:
 bash tests/smoke.sh
 ```
 
-Expected final line: `ALL SMOKE TESTS PASSED`. The test exercises `.writing/` init, dep-check and Zotero-creds failure messaging, manifest JSON sanity (plugin.json / marketplace.json), a file-presence audit of the shipped skills, commands, agents, output style, and section standards, and a deletion audit confirming removed components (including the former enforcement hooks) stay gone.
+Expected final line: `ALL SMOKE TESTS PASSED`. The test covers `.writing/` initialization, dependency and Zotero messaging, manifest JSON, shipped components, academic handoff validation, Codex and Hermes bridges, concurrent pairing, consumer routing, skill lint, and evaluation fixtures. It does not call the real external models.
 
 ## Agent usage — lifecycle by user intent
 
@@ -140,7 +142,26 @@ Each row is keyed to what the **user** says. The **agent** picks the slash comma
                           rebuttal (grounded response to reviewers)
 ```
 
-The idea phase runs in order when the contribution is undecided: `research-ideation` generates and ranks directions, then `novelty-gap-check` (查新, per-claim delta) and `idea-evaluator` (top-venue bar, fatal-flaw short-circuit) gate the survivor. Both gates are advisory; the user picks what to carry into outlining. Each gate updates `.writing/progress.md` Task Dashboard. Skipping requires explicit user override. The plugin produces an evidence-backed skeleton, then helps the human author stress-test it (`adversarial-review`, `external-review`) and respond to reviewers (`rebuttal`). Final prose refinement and the submission upload itself remain the human author's job.
+The idea phase runs in order when the contribution is undecided: `research-ideation` generates and ranks directions, then `novelty-gap-check` (查新, per-claim delta) and `idea-evaluator` (top-venue bar, fatal-flaw short-circuit) gate the survivor. The plugin then produces an evidence-backed skeleton and helps the author stress-test it. External review uses paired Codex and Hermes consultation; the two views remain separate and advisory. Final prose refinement and submission remain the human author's job.
+
+## Paired academic consultation
+
+Read-only academic analysis, literature synthesis, candidate prose, experiment planning, novelty opinions, and manuscript review use one neutral brief for both providers:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/paired_consult.py" \
+  --cd "/absolute/project" \
+  --handoff-kind venue-review \
+  --PROMPT "Read the named paper files and produce an evidence-linked review. Do not modify files."
+```
+
+Launch the command in the background with a timeout of at least `660000` ms. The result has `pair_status`, `codex`, and `hermes`. It never adds a consensus, winner, vote, or overall verdict. If one provider fails, the other result remains available.
+
+Codex consultation is forced into its `read-only` sandbox and never falls back to write access. Hermes oneshot has no equivalent filesystem sandbox, so the bridge ignores project rules, forbids writes in the prompt, and compares the worktree and current commit before and after the call. Any Hermes write makes that lane fail with `workspace_modified`.
+
+Public papers may be sent directly. Before sending an unpublished manuscript, confidential review, restricted dataset, personal information, or other sensitive content, identify the exact files or excerpts that both external services will receive and obtain user confirmation.
+
+Scientific image generation is the only Codex-only consultation exception because Hermes has no corresponding image tool. Authorized file-changing tasks also use one provider rather than two, avoiding concurrent edits.
 
 ## Output style
 
@@ -208,8 +229,8 @@ When `zotero.enabled: false` (default), the pipeline runs network-only.
     RESPONSE_DRAFT.md       # R-A-C response letter (rebuttal)
     REVISION_PLAN.md        # one checklist line per promised edit (rebuttal)
     REBUTTAL_STATE.md       # phase + three-gate status (rebuttal)
-    external-review-<date>.md  # cross-model critique + results-to-claims matrix (external-review)
-  adversarial-review.md     # committed kill-argument memo + adjudication (adversarial-review)
+    external-review-<date>.md  # separate Codex and Hermes reviews + provider status
+  adversarial-review.md     # independent Codex and Hermes attack/adjudication verdicts
   novelty-report.md         # optional, per-claim novelty delta (novelty-gap-check)
   archive/                  # frozen snapshots of completed work
   stash/<paper-name>/       # when you multiplex papers
@@ -226,6 +247,9 @@ When `zotero.enabled: false` (default), the pipeline runs network-only.
 | `check-zotero.sh` HTTP 403                      | key lacks required scope                                        | regenerate at zotero.org/settings/keys with read+write on the library                |
 | `check-zotero.sh` HTTP 404                      | wrong `ZOTERO_LIBRARY_ID` or `ZOTERO_LIBRARY_TYPE`              | `curl -sS https://api.zotero.org/keys/<YOUR_KEY>` → read `userID` field (use that as `ZOTERO_LIBRARY_ID` with `ZOTERO_LIBRARY_TYPE=user`) |
 | `smoke.sh` fails                                | read the specific `FAIL: ...` line                              | Each check is independent; fix what's listed                                         |
+| paired consultation is `partial`                | inspect the failed provider's stable `error_code`               | install or authenticate that CLI; keep the successful provider result                |
+| Hermes reports `workspace_modified`             | compare Git status and the current commit before and after      | report the external write and stop; do not describe the call as read-only            |
+| Codex consultation cannot start                 | confirm the installed Codex supports `--sandbox read-only`      | update Codex; never retry consultation with broader file access                      |
 
 ## Layout
 
@@ -243,6 +267,8 @@ scripts/
   check-deps.sh          # 7-root probe for upstream skills
   check-zotero.sh        # Zotero API auth probe (never echoes key)
   lint_skills.py         # CI-grade SKILL.md linter (name=slug, 40-80-word "Use when" description, no em-dash, LOC ceiling, single-level references); baseline-ratcheted
+  consult_handoff.py     # strict academic handoff profiles + private raw-artifact storage
+  paired_consult.py      # concurrent Codex/Hermes consultation with isolated provider context
 commands/                # /writing:outline /writing:draft /writing:check-deps /writing:stash /writing:archive
 output-styles/
   academic-research-assistant.md  # rigorous academic-research persona (see ## Output style)
@@ -256,7 +282,7 @@ skills/                  # writing-domain + planning skills
   drafting/              # claim-first drafting; orchestration via dynamic workflow or manual batch
   claim-verification/    # evidence-reliability check (claim completeness + citation/semantic match + optional research-integrity gate)
   adversarial-review/    # committed kill-argument memo + external adjudication + non-self-graded PASS/WARN/FAIL
-  external-review/       # cross-model critique via Codex bridge (mock venue review, results-to-claims matrix)
+  external-review/       # separate Codex/Hermes reviews, results-to-claims matrices, experiment plans
   rebuttal/              # reviewer comments → grounded R-A-C response with provenance/commitment/coverage gates
   executing-plans/       # manual-batch drafting fallback when dynamic workflows are unavailable
   literature-review/     # structured lit synthesis
@@ -269,7 +295,9 @@ skills/                  # writing-domain + planning skills
   polish-by-diff/        # diff-scoped polish for near-final prose
   writing-clearly-and-concisely/ # plain-language editing principles
   humanizer/             # reduce AI-trace patterns in prose
-  collaborating-with-codex/ # Codex CLI bridge (used by scientific-schematics)
+  collaborating-with-codex/ # Codex consultation/direct bridge; scientific figure exception
+  collaborating-with-hermes/ # stateless Hermes bridge with workspace-change detection
+  _shared/core/dual-consult-protocol.md # common privacy, isolation, evidence, and no-voting rules
   planning-foundation/   # persistent .writing/ state + delegated-role planning dirs
   brainstorming/         # design-doc exploration
   spec-interview/        # deep questioning to refine specs
@@ -288,7 +316,7 @@ README.md
 
 ## Scope (v1 YAGNI)
 
-**In scope**: single-author CS/systems/ML IMRAD paper skeletons across the full lifecycle. Idea generation and ranking (`research-ideation`), novelty adjudication (`novelty-gap-check`) and top-venue idea scoring (`idea-evaluator`) before structure; claim-first drafting; citation-reliability verification (`citation-management` / `research-lookup` + semantic match against the cited abstract) with an optional research-integrity gate on experiment-bearing papers; optional Zotero dual-source-of-truth; prose polish and AI-trace reduction; pre-submission stress-testing (`adversarial-review` kill-argument, `external-review` cross-model critique); and grounded reviewer-response/rebuttal drafting (`rebuttal`). All verdicts are advisory and never fabricate.
+**In scope**: single-author CS/systems/ML IMRAD paper skeletons across the full lifecycle. This includes ideation, novelty adjudication, claim-first drafting, citation verification, optional Zotero, figures, prose polish, grounded rebuttal, and paired Codex/Hermes academic consultation for review and research judgment. Provider opinions remain separate; all verdicts are advisory and all source claims require verification.
 
 **Out of scope** (the human author's job, or deferred): final prose refinement and the journal submission upload itself, reporting-guideline checklists (CONSORT/STROBE/PRISMA for clinical/biology venues), multi-author collaboration, non-IMRAD formats, LaTeX compile. Large parallel drafting and cross-checked audit are delegated to Claude Code dynamic workflows rather than bundled in the plugin.
 

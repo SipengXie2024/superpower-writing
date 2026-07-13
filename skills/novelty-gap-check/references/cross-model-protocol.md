@@ -1,76 +1,62 @@
-# Cross-model second-opinion protocol
+# Paired novelty second-opinion protocol
 
-How to get an independent novelty read from a second model during Phase C. This step is optional. Use it for a contentious or high-stakes idea where one model's judgment does not settle the question. Skip it for a clearly novel or clearly dominated idea.
-
-The cross-model channel in this plugin is `superpower-writing:collaborating-with-codex`. That skill drives Codex CLI through a bridge. Do not call any other model endpoint here.
+Use this optional step for a contentious or high-stakes idea. Once enabled, run Codex and Hermes together. Do not ask only one provider and do not turn two opinions into a vote.
 
 ## 1. When to run it
 
-Run the second opinion when:
+Run the paired opinion when:
 
-- The per-claim deltas are mixed and the overall verdict sits on a boundary (a MED that could be HIGH, a load-bearing LOW the user disputes).
-- The idea is high-stakes: a thesis direction, a months-long commitment, a funded milestone.
-- The user explicitly asks for a second model, or for a "brutal" or "adversarial" novelty read.
+- per-claim deltas sit near a HIGH, MED, or LOW boundary;
+- the idea is a thesis direction, funded milestone, or months-long commitment;
+- the user requests an adversarial or external novelty read.
 
-Skip the second opinion when one model already settles the question. A claim with an exact published precedent does not need a second vote to call LOW. A claim with no precedent after a thorough search does not need one to call HIGH.
+An exact published precedent does not need another vote. Keep the local retrieval verdict grounded in the paper itself.
 
-## 2. Write a dossier file, do not paste inline
+## 2. Build the dossier from verified search results
 
-The idea description, the core claims, and the candidate-paper list are usually too large to paste into a bridge prompt cleanly. Write a dossier file first, then send the bridge only the path. This keeps the prompt small and gives the second model a stable artifact to read.
+Write `.writing/novelty-dossier.md`, or a temporary file when `.writing/` is absent. Include:
 
-Recommended location: `.writing/novelty-dossier.md` when a project state directory exists, otherwise a temp path such as `/tmp/novelty-dossier-<slug>.md`. The dossier is a working artifact. It is not a manuscript file and carries no claim STATUS.
+- the proposed idea;
+- three to five atomic technical claims;
+- verified candidate prior work with DOI, arXiv ID, PMID, URL, or Zotero key;
+- exact source locators;
+- the local per-claim delta;
+- the questions: Is the claim novel? What is the closest work? What is the exact delta? Which recent paper might be missing?
 
-Dossier contents:
+Do not present the local verdict as the answer providers should confirm. Label it as a claim to challenge. Mark unresolved papers `[UNVERIFIED]` and include the needed verification action.
 
-```markdown
-# Novelty dossier (<idea slug>)
+## 3. Run the paired consultation
 
-## Proposed idea
-<1-2 sentence description>
+Launch this command in the background with a Bash timeout of at least `660000` ms:
 
-## Core technical claims
-1. <claim 1>
-2. <claim 2>
-...
-
-## Candidate prior work found in Phase B
-| # | Paper | Year | Venue | arXiv/DOI | one-line overlap |
-|---|-------|------|-------|-----------|------------------|
-| 1 | ... | ... | ... | ... | ... |
-
-## Our per-claim deltas (for the reviewer to challenge)
-1. <claim 1>. Delta <HIGH/MED/LOW>. Closest <paper>.
-...
-
-## Questions for the reviewer
-1. Is this idea novel? Judge per claim.
-2. What is the closest prior work for each claim? Name papers you can verify.
-3. What is the delta between each claim and its closest prior work?
-4. Did our search miss an obvious recent preprint? Name it if so.
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/paired_consult.py" \
+  --cd "<absolute project root>" \
+  --handoff-kind novelty \
+  --PROMPT "Read <absolute path>/.writing/novelty-dossier.md and the cited original sources. Independently assess each claim's novelty, closest prior work, and exact delta. Do not modify files. Never invent an identifier or locator."
 ```
 
-Include the three core questions verbatim: is this novel, what is the closest prior work, and what is the delta. Add the fourth question to catch a recent paper the first-pass search missed.
+Do not poll. A successful result keeps the providers independent. A partial result retains the successful lane. A failed lane is never reconstructed from the other lane.
 
-## 3. Brief the bridge
+## 4. Present three separate reads
 
-Invoke the bridge via `superpower-writing:collaborating-with-codex`. Read that skill for the exact bridge command, the `--cd` requirement, and the background-execution convention. Brief it like a senior peer, not a search box:
+Use this fixed structure:
 
-- Point it at the dossier path. Tell it to read the dossier and answer every question in it.
-- State the constraint plainly: name only papers it can verify, never fabricate an arXiv ID or DOI, and tag anything unverifiable `[UNVERIFIED]`. The same never-fabricate rule binds the second model.
-- Ask for a per-claim HIGH/MED/LOW verdict and a one-line delta for each, so its output merges directly into the report table.
+```markdown
+## Local retrieval verdict
+<per-claim assessment grounded in the verified search>
 
-Run the bridge in the background per the collaborating-with-codex convention. Do not poll. Continue when its result returns.
+## Codex novelty view
+<provider's claims, prior work, deltas, evidence, uncertainties, verification_needed>
 
-## 4. Reconcile the two reads
+## Hermes novelty view
+<provider's claims, prior work, deltas, evidence, uncertainties, verification_needed>
+```
 
-The second opinion is advisory input, not an override. Reconcile it against your own Phase C deltas:
+Do not add a consensus or winner. Provider agreement may be noted as an observation, but it does not replace source verification. Provider disagreement tells the executor which paper to reopen.
 
-- **Agreement** raises confidence. Record the verdict as is and note the second model concurred.
-- **Disagreement on a claim** is a signal to look again. Re-read the disputed paper's abstract before deciding. The model that read the paper more carefully wins, not the more recent one.
-- **A new paper from question 4** must clear the same pre-search verification gate before it enters the report. Resolve its identifier. If it does not resolve, tag it `[UNVERIFIED]`.
+Any new paper named by either provider enters `verification_needed` until its identifier resolves and the relevant original passage has been checked. Do not copy an unverified paper into the local prior-work table as fact.
 
-Surface both reads to the user when they diverge on a load-bearing claim. A disagreement the user can see is more useful than a single smoothed-over verdict. The user owns the final call.
+## 5. Trace the result
 
-## 5. Tracing
-
-Keep the dossier file and the bridge's returned answer for the record, the same way `claim-verification` keeps its report as an audit trail. When `.writing/` exists and the user wants the novelty report persisted, the dossier sits alongside it. When no project state exists, the dossier is a temp artifact and the reconciled verdict goes inline into the conversation.
+Keep the dossier and, when the user wants persistence, save the paired handoffs beside the novelty report. Preserve provider provenance for every suggested paper and delta. The overall PROCEED, PROCEED-WITH-CAUTION, or ABANDON call remains the local advisory judgment shown to the user, not the output of a provider vote.

@@ -113,7 +113,7 @@ Not every gate may be self-judged by the model that produced the work. Apply thi
 
 Could a script with no taste answer this gate? Yes, it is Type-A: the model may self-judge (a claim tag is present, a DOI resolves, an abstract is citation-free, prose numbers match a table). No, it needs taste, so it is Type-B: route to an independent or cross-model reviewer thread and never reply in place. A loop may DRIVE its own iteration but may not ACQUIT its own Type-B verdict.
 
-In this plugin, claim coverage, claim-tag presence, DOI resolution, abstract citation-freeness, and prose-versus-table number matches are Type-A. Prose readiness, argument strength, idea soundness, and post-rebuttal validity are Type-B. Type-B verdicts go to a fresh-context spec-reviewer or manuscript-reviewer, or to external-review for a different-family critic.
+In this plugin, claim coverage, claim-tag presence, DOI resolution, abstract citation-freeness, and prose-versus-table number matches are Type-A. Prose readiness, argument strength, idea soundness, and post-rebuttal validity are Type-B. Type-B verdicts go to a fresh-context spec-reviewer or manuscript-reviewer. When a Type-B gate uses external CLI consultation, route it through `skills/_shared/core/dual-consult-protocol.md` so Codex and Hermes remain independent and the user receives both views.
 
 Reviewer independence (allow and deny):
 

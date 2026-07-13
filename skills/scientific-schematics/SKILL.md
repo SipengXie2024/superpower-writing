@@ -102,8 +102,9 @@ Codex calls block 60–120s; a foreground call freezes the session. See
 `superpower-writing:collaborating-with-codex` for the full bridge contract.
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/collaborating-with-codex/scripts/codex_bridge.py \
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/collaborating-with-codex/scripts/codex_bridge.py" \
   --cd "<project_root>" \
+  --sandbox workspace-write \
   --PROMPT "Use your imagegen-scientific-schematics skill to generate <enriched diagram \
   description>. Save the final selected PNG to .writing/figures/<slug>.png and report the \
   absolute saved path."

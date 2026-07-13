@@ -1,12 +1,12 @@
 # Attack Briefs, Adjudication Briefs, and the Verdict Mapping
 
-This file holds the long detail for `adversarial-review`: the two thread briefs, the six attack axes, the rejection-dimension checklist, and the count-to-verdict table the helper implements. SKILL.md summarizes; this file is the literal text to paste into the threads and the table to read the helper's output against.
+This file holds the long detail for `adversarial-review`: the attack and adjudication briefs, the six attack axes, the rejection-dimension checklist, and the count-to-verdict table the helper implements. Use each brief once in the Codex lane and once in the Hermes lane. The adjudication in each lane receives only that provider's attack. Run the verdict helper separately for each provider.
 
 All venue references target CS, systems, and ML venues: NeurIPS, ICML, ICLR, OSDI, NSDI, SOSP, EuroSys, MLSys, USENIX Security, VLDB. Adapt the named venue to the paper's actual target.
 
-## Thread 1 brief: the attack memo
+## Attack-stage brief
 
-Paste this into a fresh thread, after filling the file list. Read only the current paper files.
+Use this as the common objective in a paired `adversarial-attack` call after filling the file list. Each provider reads only the current paper files and returns its own memo.
 
 ```
 You are simulating a hostile NeurIPS / ICML / ICLR / OSDI reviewer for a paper.
@@ -58,9 +58,9 @@ Pick the most damaging combination of the axes below. Do not list all of them.
 Output: just the rejection memo, nothing else.
 ```
 
-## Thread 2 brief: the adjudication
+## Adjudication-stage brief
 
-Paste this into a second fresh thread, independent of Thread 1. Fill in the file list and the attack memo verbatim.
+Use this as the common objective in a fresh paired `adversarial-adjudication` call. Put the Codex attack in `--CODEX_CONTEXT_FILE` and the Hermes attack in `--HERMES_CONTEXT_FILE`. Each provider sees only its own memo.
 
 ```
 You are an independent area-chair adjudicator examining whether the current

@@ -21,8 +21,6 @@ skills/citation-management/references/google_scholar_search.md::ref-toc::missing
 skills/citation-management/references/metadata_extraction.md::ref-toc::missing
 skills/claim-verification/SKILL.md::description::use-when
 skills/claim-verification/SKILL.md::em-dash::body
-skills/collaborating-with-codex/SKILL.md::description::em-dash
-skills/collaborating-with-codex/SKILL.md::em-dash::body
 skills/drafting/SKILL.md::description::use-when
 skills/drafting/SKILL.md::em-dash::body
 skills/drafting/references/figures-and-tables.md::ref-toc::missing

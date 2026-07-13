@@ -1,14 +1,14 @@
 {
   "name": "superpower-writing",
-  "description": "Local marketplace for superpower-writing IMRAD academic-writing plugin",
+  "description": "Local marketplace for the claim-first academic-writing plugin with paired Codex and Hermes consultation",
   "owner": {
     "name": "sipeng"
   },
   "plugins": [
     {
       "name": "superpower-writing",
-      "description": "Claim-first CS/systems/ML paper-skeleton drafting plugin (evidence-backed, for human refinement)",
-      "version": "1.0.0",
+      "description": "Claim-first CS/systems/ML paper drafting with evidence verification and separate Codex/Hermes academic consultation",
+      "version": "1.1.0",
       "source": "./"
     }
   ]

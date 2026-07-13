@@ -1,133 +1,118 @@
 ---
 name: collaborating-with-codex
-description: Use when delegating coding work — prototyping, debugging, bug analysis, code quality feedback, executing implementation tasks, or generating publication-quality scientific figures and diagrams — to Codex CLI instead of a Claude subagent. Supports multi-turn sessions via SESSION_ID. Required by `superpower-writing:scientific-schematics` for figure generation.
+description: This skill supports academic collaboration through Codex CLI. Use when the user asks to "ask Codex", "review my paper", "check the argument", "analyze results", "draft candidate prose", "design an experiment", or "generate a scientific figure". It handles evidence-linked consultation, authorized direct execution, multi-turn Codex sessions, and publication-quality scientific diagrams.
 ---
 
-> **MANDATORY: ALWAYS run codex_bridge.py in the background.**
-> When invoking `codex_bridge.py` via the Bash tool, you MUST set `run_in_background: true`.
-> Codex calls typically block for 60-120 seconds. Running them in the foreground freezes the
-> entire conversation. Never omit this flag. No exceptions.
->
-> **Sandbox policy:** `--sandbox read-only` is rejected at the argparse layer. When
-> `--sandbox workspace-write` is requested, the bridge first probes bubblewrap by calling
-> `bwrap --unshare-user --unshare-net --unshare-pid --ro-bind / / true` (result cached for
-> 5 minutes at `/tmp/codex_bridge_bwrap_probe.<uid>`). If the probe fails — typically
-> `bwrap: loopback: Failed RTM_NEWADDR: Operation not permitted` on Ubuntu 24.04+ with
-> restricted unprivileged user namespaces, or in containers without `CAP_NET_ADMIN` — the
-> bridge **auto-downgrades to `danger-full-access`** and writes a warning to stderr with the
-> fix command (`sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0`). Set
-> `CODEX_BRIDGE_SKIP_BWRAP_PROBE=1` to bypass the probe when you know the host is fine. The
-> default `danger-full-access` mode never runs the probe.
+# Collaborating with Codex
 
-## Workflow
+Route every Codex call through `codex_bridge.py`. Use academic evidence and manuscript review as the default context. Retain direct execution only for an explicitly authorized task.
 
-Every delegation follows the same four steps. The recipe blocks below are variations on this spine.
+For any read-only academic consultation other than scientific figure generation, call Codex and Hermes together through `scripts/paired_consult.py`. Follow `skills/_shared/core/dual-consult-protocol.md`. Do not run Codex alone for a review, analysis, synthesis, draft, experiment plan, or second opinion.
 
-1. **Brief.** Write a precise `--PROMPT`: state the goal, the relevant file paths, the constraints, and an explicit acceptance check (a test to pass, a diff to return, a path to save). Pick `--cd` (absolute workspace root). *In → task intent; out → a self-contained prompt string.*
-2. **Invoke in the background.** Call `codex_bridge.py` via the Bash tool with `run_in_background: true` (MANDATORY). Add flags as needed (`--skip-git-repo-check`, `--return-all-messages`, `--image`). *In → prompt + flags; out → a background task that returns on its own — do not poll.*
-3. **Capture `SESSION_ID`.** When the JSON returns, check `success`; if `false` or `error` is set, read the error and re-brief. Save `SESSION_ID` for any follow-up turn. *In → JSON response; out → session handle + agent_messages.*
-4. **Verify the deliverable yourself.** Read the returned diff, run the test, or inspect the saved file. Codex's summary states intent, not proof — never report success on its word alone. *In → claimed result; out → confirmed (or re-briefed) result.*
+Always launch the bridge or paired runner in the background. Use a Bash timeout of at least `660000` ms for paired consultation. Do not poll; wait for the completion notification.
 
-## Quick Start
+## Choose the mode
+
+### Paired consultation
+
+Use paired consultation for:
+
+- claim, evidence, method, statistics, novelty, or venue review;
+- literature-search result synthesis;
+- manuscript or rebuttal candidates;
+- experiment, ablation, metric, and result-analysis proposals;
+- adversarial review and independent second opinions.
+
+Send one neutral brief to both providers:
 
 ```bash
-python3 scripts/codex_bridge.py --cd "/path/to/project" --PROMPT "Your task"
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/paired_consult.py" \
+  --cd "/absolute/workspace" \
+  --handoff-kind venue-review \
+  --PROMPT "Read paper.tex. Produce an evidence-linked mock venue review. Do not modify files."
 ```
 
-**Inside any plugin that vendors this skill** (e.g. `superpower-planning`,
-`superpower-writing`), the bridge script lives at
-`${CLAUDE_PLUGIN_ROOT}/skills/collaborating-with-codex/scripts/codex_bridge.py`.
-`${CLAUDE_PLUGIN_ROOT}` resolves to the loading plugin's own root, so the same
-path works regardless of which plugin invokes it. Always use that absolute path
-when calling the bridge from another skill in the same plugin.
+Set `run_in_background: true` on the Bash call. Present `codex` and `hermes` separately. Do not vote, merge them into a consensus, or choose a winner for the user.
 
-**Output:** JSON with `success`, `SESSION_ID`, `agent_messages`, and optional `error`.
+Before sending unpublished, confidential, restricted, personal, or otherwise sensitive material, name the exact files or excerpts that both external services will receive and obtain user confirmation.
 
-## Parameters
+### Direct execution
 
-```
-usage: codex_bridge.py [-h] --PROMPT PROMPT --cd CD [--sandbox {workspace-write,danger-full-access}] [--SESSION_ID SESSION_ID] [--skip-git-repo-check]
-                       [--return-all-messages] [--image IMAGE] [--model MODEL] [--yolo] [--profile PROFILE]
-
-Codex Bridge
-
-options:
-  -h, --help            show this help message and exit
-  --PROMPT PROMPT       Instruction for the task to send to codex.
-  --cd CD               Set the workspace root for codex before executing the task.
-  --sandbox {workspace-write,danger-full-access}
-                        Sandbox policy for model-generated commands. Defaults to `danger-full-access`. `read-only` is intentionally removed — see the Sandbox policy note above. `workspace-write` runs a bwrap preflight and silently downgrades to `danger-full-access` when bubblewrap cannot initialize on this host.
-  --SESSION_ID SESSION_ID
-                        Resume the specified session of the codex. Defaults to `None`, start a new session.
-  --skip-git-repo-check
-                        Allow codex running outside a Git repository (useful for one-off directories).
-  --return-all-messages
-                        Return all messages (e.g. reasoning, tool calls, etc.) from the codex session. Set to `False` by default, only the agent's final reply message is
-                        returned.
-  --image IMAGE         Attach one or more image files to the initial prompt. Separate multiple paths with commas or repeat the flag.
-  --model MODEL         The model to use for the codex session. This parameter is strictly prohibited unless explicitly specified by the user.
-  --yolo                Run every command without approvals or sandboxing. Only use when `sandbox` couldn't be applied.
-  --profile PROFILE     Configuration profile name to load from `~/.codex/config.toml`. This parameter is strictly prohibited unless explicitly specified by the user.
-```
-
-## Multi-turn Sessions
-
-**Always capture `SESSION_ID`** from the first response for follow-up:
+Call the Codex bridge directly only when Codex must perform an authorized write or when scientific figure generation needs Codex's image tool.
 
 ```bash
-# Initial task
-python3 scripts/codex_bridge.py --cd "/project" --PROMPT "Analyze auth in login.py"
-
-# Continue with SESSION_ID
-python3 scripts/codex_bridge.py --cd "/project" --SESSION_ID "uuid-from-response" --PROMPT "Write unit tests for that"
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/collaborating-with-codex/scripts/codex_bridge.py" \
+  --cd "/absolute/workspace" \
+  --sandbox workspace-write \
+  --PROMPT "Perform the approved task and report changed files and verification output."
 ```
 
-## Common Patterns
+Before a write-capable call, state what Codex may change and where. Get user approval. Assign only one external provider. Read the resulting files or diff and run the checks yourself. Codex's summary is a claim, not proof.
 
-**Prototyping (request diffs, do not apply):**
+Direct mode defaults to `danger-full-access` for compatibility, so always pass the narrowest suitable `--sandbox` explicitly. Use `--yolo` only after explicit user authorization. The compatibility flag maps to Codex's current `--dangerously-bypass-approvals-and-sandbox` option.
+
+## Structured academic handoff
+
+The Codex bridge supports `--consult-handoff --handoff-kind KIND`, but normal academic consultation must enter through the paired runner. The available handoff kinds are:
+
+- `general`
+- `ideation`
+- `novelty`
+- `manuscript-draft`
+- `venue-review`
+- `results-claims-matrix`
+- `experiment-plan`
+- `adversarial-attack`
+- `adversarial-adjudication`
+
+Consultation forces `--sandbox read-only`. If that sandbox cannot start, let the Codex lane fail. Never retry with write access or bypass the sandbox.
+
+The bridge saves Codex's complete response in a private temporary file and returns only a validated handoff. Do not open `artifact.raw_path` automatically. Verify every citation, identifier, locator, sample size, number, method, hyperparameter, and statistical claim against the original source.
+
+## Codex sessions
+
+Capture `SESSION_ID` from a successful call. Reuse it only when continuity is intended, such as a second review of the same revised manuscript or another iteration of the same figure.
+
+For a paired follow-up, pass it only to Codex:
+
 ```bash
-python3 scripts/codex_bridge.py --cd "/project" --PROMPT "Generate unified diff to add logging. Do not write the changes to disk."
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/paired_consult.py" \
+  --cd "/absolute/workspace" \
+  --handoff-kind venue-review \
+  --CODEX_SESSION_ID "session-id" \
+  --CODEX_CONTEXT_FILE "/path/to/codex-handoff.json" \
+  --HERMES_CONTEXT_FILE "/path/to/hermes-handoff.json" \
+  --PROMPT "Reassess the revised manuscript against the same venue criteria."
 ```
-Note: the sandbox still defaults to `danger-full-access`. Enforce read-only behavior through the prompt ("do not modify files", "return a diff only") rather than through `--sandbox`, because `read-only` is blocked.
 
-**Debug with full trace:**
+Keep the two context files provider-specific. Never put Hermes's prior answer in Codex's context. Start a fresh Codex session when independence matters, including adversarial adjudication after an attack phase.
+
+## Scientific figure exception
+
+Scientific figure generation is the sole Codex-only consultation exception because Hermes has no equivalent image tool. Route it directly through this bridge and name Codex's `imagegen-scientific-schematics` skill.
+
 ```bash
-python3 scripts/codex_bridge.py --cd "/project" --PROMPT "Debug this error" --return-all-messages
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/collaborating-with-codex/scripts/codex_bridge.py" \
+  --cd "/absolute/workspace" \
+  --sandbox workspace-write \
+  --skip-git-repo-check \
+  --PROMPT "Use your imagegen-scientific-schematics skill to create the specified publication figure. Preserve every exact label and arrow meaning. Save the selected PNG to .writing/figures/architecture.png and report the path."
 ```
 
-## Image and Diagram Generation
+Specify exact labels, layout, arrow semantics, colors, and output path. Confirm the image exists and inspect it after return. Reuse `SESSION_ID` for targeted revisions to the same figure.
 
-Codex ships a built-in `image_gen` tool plus an `imagegen-scientific-schematics`
-skill that wraps it in a figure-design and figure-review protocol. This is the
-**preferred backend for publication-quality scientific figures** — architecture
-diagrams, data-flow pipelines, model diagrams, conceptual schematics. Claude has
-no native image tool, so this work must be delegated to Codex. (`superpower-writing`'s
-`scientific-schematics` skill is the writing-side entry point and routes here; it
-replaced the removed local `tools/image-generator` CLI.)
+## Supported direct options
 
-**Delegate a figure:**
-```bash
-python3 scripts/codex_bridge.py --cd "/path/to/project" --skip-git-repo-check \
-  --PROMPT "Use your imagegen-scientific-schematics skill to generate <figure description>. \
-  Spell every quoted label exactly. <arrow/zone/color semantics>. Clean white background, \
-  no figure number. Save the final selected PNG to .writing/figures/<slug>.png and report \
-  the absolute saved path."
-```
+| Option | Purpose |
+|---|---|
+| `--cd PATH` | Set the absolute workspace root |
+| `--sandbox read-only\|workspace-write\|danger-full-access` | Set Codex file access; consultation forces `read-only` |
+| `--SESSION_ID ID` | Resume a Codex conversation |
+| `--skip-git-repo-check` | Allow a non-Git workspace when explicitly needed |
+| `--return-all-messages` | Return event details in direct mode only |
+| `--image PATH` | Attach one or more input images |
+| `--model VALUE` | Pass a model only when the user explicitly specifies it |
+| `--profile VALUE` | Pass a profile only when the user explicitly specifies it |
+| `--yolo` | Bypass approvals and sandbox only with explicit authorization |
 
-Key points, all verified end-to-end through the bridge:
-
-- **Name the skill in the prompt** (`Use your imagegen-scientific-schematics skill`).
-  Codex loads it and follows its design/review protocol non-interactively.
-- **Tell Codex where to save.** `image_gen` writes to `~/.codex/generated_images/<session>/`
-  by default; Codex copies the selected image into the `--cd` workspace only when the
-  prompt asks. Always give an explicit in-project output path, or the asset is stranded
-  under `~/.codex/`.
-- **Spell out exact labels and arrow semantics.** Raster generation can misspell dense
-  or unusual labels. Quote literal labels and, for complex multi-view figures, include
-  the `CRITICAL TEXT LOCK` / `CRITICAL ARROW CONTINUITY` / `CRITICAL CONSISTENCY` locks
-  the skill documents.
-- **Verify the file yourself.** After the bridge returns, confirm the PNG exists at the
-  reported path and inspect it (Read the image) — Codex's summary states intent, not proof.
-- **Iterate in the same session.** Reuse the returned `SESSION_ID` for targeted fixes
-  ("the arrow from B to C is broken; regenerate with a single continuous polyline")
-  instead of re-describing the whole figure.
+Do not pass `--return-all-messages` during structured consultation. Do not silently add `--skip-git-repo-check`, `--model`, or `--profile`.

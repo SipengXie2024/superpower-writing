@@ -5,6 +5,29 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+## [1.1.0] — 2026-07-13
+
+### Added
+
+- **Paired academic consultation** through `scripts/paired_consult.py`. Read-only review, novelty judgment, ideation, candidate drafting, results analysis, and experiment planning now start Codex and Hermes concurrently from one neutral brief. Results remain under separate provider sections with `complete`, `partial`, or `failed` pair status. The runner never creates a consensus, winner, vote, preferred provider, or overall verdict.
+- **Hermes collaboration skill and bridge.** `collaborating-with-hermes` uses stateless `hermes --cli -z`, private raw-response storage, strict academic handoffs, stable failure codes, 600-second internal timeout, and before/after workspace fingerprints that detect both uncommitted edits and provider-created commits.
+- **Academic handoff schema version 2.** Nine task-specific profiles cover general evidence judgments, 15-20 idea candidates, novelty claims, manuscript candidates, venue reviews, results-to-claims matrices, experiment plans, adversarial attacks, and adversarial adjudication. Evidence records carry identifiers, precise locators, access scope, and verification status.
+- **Shared dual-consult protocol** covering unpublished-material confirmation, provider context isolation, Codex session continuity, Hermes stateless follow-ups, separate presentation, partial failure, evidence verification, and the Codex-only scientific figure exception.
+- Root MIT `LICENSE` for project-authored code. The vendored Codex skill keeps its original GudaStudio license.
+
+### Changed
+
+- **Codex consultation is fail-closed and read-only.** Academic handoff mode forces the current Codex CLI `read-only` sandbox and refuses write access or sandbox bypass. Direct execution retains session, image, model, profile, and full-event compatibility. The old `--yolo` bridge option now maps to Codex's current long-form bypass flag.
+- `external-review`, `research-ideation`, `novelty-gap-check`, and `adversarial-review` now use paired consultation. Adversarial review runs two complete independent attack-to-adjudication lanes and computes one deterministic verdict per provider without an overall verdict.
+- `check-deps.sh` warns separately about missing Codex and Hermes CLIs without blocking local writing. Missing Codex still disables raster scientific-figure generation.
+- README, plugin metadata, smoke tests, and skill lint baseline now describe the academic paired-consultation contract.
+
+### Fixed
+
+- Corrected the old Codex bridge's misleading safety contract. It no longer claims read-only consultation while defaulting the consultation to unrestricted access, no longer silently enables `--skip-git-repo-check`, and no longer uses the obsolete Codex `--yolo` CLI flag directly.
+
 ## [1.0.0] — 2026-07-05
 
 ### Added

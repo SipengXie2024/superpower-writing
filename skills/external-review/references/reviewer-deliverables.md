@@ -1,6 +1,6 @@
 # Reviewer Deliverable Prompts
 
-Copy these prompts verbatim into the Codex bridge follow-up rounds. Each is tuned to produce structured, gradeable output. Reuse the `SESSION_ID` from the initial review so the critic keeps the paper in context.
+Use these prompts as the common objective for paired follow-up rounds. Codex may reuse its `SESSION_ID`. Hermes remains stateless and receives only its own prior structured handoff. Keep the two returned deliverables separate rather than merging them into a consensus.
 
 Retarget the venue token to the user's actual target: NeurIPS, ICML, ICLR for ML; OSDI, NSDI, SOSP, EuroSys, ATC, FAST for systems; CCS, S&P, USENIX Security, NDSS for security; SIGMOD, VLDB for databases; SIGCOMM for networking; SIGGRAPH for graphics; STOC, FOCS, SODA for theory. The structure is identical across venues; only the bar and the section conventions shift.
 
