@@ -1,292 +1,77 @@
 ---
 name: outlining
-description: Converts a research idea into a complete IMRAD outline plus per-section claim list. Combines design-exploration and spec-writing into one chain. Output is .writing/outline.md (structure + key claims), populated claims/section_*.md files, and .writing/metadata.yaml filled. Use when starting a new paper or when outline is missing.
+description: Use when starting a new paper or when `.writing/outline.md` is missing or needs a major restructure. Converts a research idea into an IMRAD outline plus a per-section claim list, sharpened through an interleaved interview. Produces `.writing/outline.md` (structure + key claims), `.writing/claims/section_*.md` (claim stubs), and a filled `.writing/metadata.yaml`. No manuscript prose is written here, this is the spec phase before drafting.
 ---
 
-# Outlining — IMRAD Structure and Claim Stubs
+# Outlining : IMRAD structure, claims, and the interview
 
-This is the **spec phase** for a research paper. Output of outlining is the input to writing-plans and drafting. Nothing gets written as manuscript prose here. The deliverables are three files:
+This is the **spec phase**. Its output is the input to `drafting`. Nothing is written as manuscript prose here. Three deliverables:
 
-1. `.writing/outline.md` — IMRAD structure with 3-7 key claims per section.
-2. `.writing/claims/section_<NN>_<slug>.md` — one file per manuscript section, each containing a YAML list of claim stubs that prose will later bind to.
-3. `.writing/metadata.yaml` — author, preregistration, data/code availability, reporting-guideline fields filled out.
+1. `.writing/outline.md`, IMRAD structure with 3-7 key claims per section.
+2. `.writing/claims/section_<NN>_<slug>.md`, one file per section, a YAML list of claim stubs prose will later bind to.
+3. `.writing/metadata.yaml`, authors, availability, `writing_profile`, and reporting fields filled.
 
-**Filename-stem contract (load-bearing).** The claim-first discipline treats certain sections as unprotected by slug-ending: any manuscript file whose stem ends in `_<slug>` for slug ∈ (`abstract`, `references`, `acknowledgments`) is exempt from paragraph claim-tags. Concretely `00_abstract.tex`, `09_references.tex`, and `10_acknowledgments.tex` all pass through without paragraph tags. Every other section filename MUST contain real prose tagged with `% claim: id`. If you introduce a new unnumbered section (e.g. a data-availability block) whose content should be exempt, treat its slug as an unprotected section (exempt from paragraph claim-tags), like abstract/references/acknowledgments. The contract covers `.tex` files; `.md` files under `manuscript/` are not subject to it.
+The outline is a claim spine, not a table of contents. Every bullet is an **assertion the paper will make** ("We show X"), not a topic ("Overview of methods"). The claim-first discipline only works if outlining produces real claims.
 
-**Abstract is citation-free (load-bearing).** Any stem ending in `_abstract` is additionally citation-free: such files must contain no LaTeX citation command (`\cite{}`, `\citep{}`, `\citet{}`, `\nocite{}`, `\parencite{}`, or any `\*cite*` variant) and no `% claim: id` tag. The abstract summarizes the paper's own claims in prose; it cites nothing. BPMRC structural tags (`% bpmrc: B`, `% bpmrc: P`, etc.) are still required — they are not citations. Do NOT create a `claims/section_00_abstract.md` file; drafting would try to bind abstract paragraphs to it via `% claim:` tags the abstract may not carry.
+## Two load-bearing contracts
 
-**Optional: term-definition-before-use protocol.** The term-define-before-use discipline requires load-bearing terminology to be defined before it is used. This feature is **opt-in**: activate by copying `templates/glossary.md` to `.writing/glossary.md` and listing entries of the form `{id, term, definition, defined_in: <section_stem>}`. Once active, any `% define: <id>` comment in `manuscript/NN_<slug>.tex` must match `glossary[id].defined_in`, and any `% use: <id>` must appear in a section whose numeric prefix is ≥ the define section. Abstracts and references/acknowledgments sections are exempt (abstracts legitimately reference terms defined later in the body). When adding a new term during outlining, append its glossary entry at the same time you add the claim stub — it is cheaper than chasing `% use:` blocks later during drafting.
+- **Filename stems.** Sections whose stem ends in `_abstract`, `_references`, or `_acknowledgments` are exempt from paragraph claim-tags. Every other section's `.tex` file must carry `% claim: id`-tagged prose. If you add a new exempt section, treat its slug like abstract/references. The contract covers `.tex` files, not `.md`.
+- **Abstract is citation-free.** Any `_abstract` stem emits no `\cite`/`\citep`/`\citet`/`\nocite`/any `\*cite*` command and no `% claim:` tag, it summarizes the paper's own claims in prose. It still carries BPMRC structural tags. Do not create `claims/section_00_abstract.md`.
 
-All three must be complete before handing off to `superpower-writing:writing-plans`. Incomplete metadata blocks claim-verification later — fix it now while context is fresh.
+Optional term-definition-before-use: copy `templates/glossary.md` to `.writing/glossary.md` to activate `% define:`/`% use:` ordering checks; add a glossary entry when you add the term's claim stub.
 
-## When to Use
+## Process
 
-Trigger this skill when:
+### Step 1 : Capture the contribution
 
-- User starts a new paper and `.writing/outline.md` is empty (or missing).
-- User has a research idea but no IMRAD structure yet.
-- Existing outline needs significant restructuring (major scope shift, co-author request to pivot framing).
-- Any claim file under `.writing/claims/` is missing for a planned section.
+Lock down three things and write them to `.writing/findings.md`:
 
-Do NOT use this skill for:
+- **Core contribution** in one sentence. Everything downstream anchors to this.
+- **Target venue or venue class**, which sets the reporting guideline and structural norms.
+- **Unit of evidence** (dataset, trace, benchmark, proof), what counts as EVIDENCE later.
 
-- Copy-editing existing prose (use `polish` or `polish-by-diff`).
-- Post-review restructuring after journal feedback (the human author's job — out of scope for this plugin).
-- Filling in numeric details in an already-outlined paper (belongs to `drafting` with claim-first protocol).
+If the contribution is not yet decided, do not force a half-formed idea through IMRAD, that produces a fake outline masking missing thinking. Route to `superpower-writing:idea` first (it generates candidate directions, checks novelty against prior work, and evaluates the survivor against a top-venue bar, all advisory). The surviving direction becomes the contribution sentence. When the contribution is already decided (the common case), skip ahead.
 
-## Checklist (each must pass before handoff)
+### Step 2 : Ground in the literature
 
-- [ ] `.writing/` exists; if not, `main` skill must initialize it first.
-- [ ] `.writing/metadata.yaml` has no top-level key still set to `TODO` (authors, preregistration, data_availability, code_availability, reporting_guideline).
-- [ ] `.writing/outline.md` has IMRAD sections: Abstract, Introduction, Methods, Results, Discussion, Conclusion, with 3-7 bullets each.
-- [ ] Every bullet has a matching claim stub in the right `claims/section_<NN>_<slug>.md` file, `STATUS: stub`, `EVIDENCE` populated with type/ref placeholders.
-- [ ] Intro and Discussion are narrative-consistent: every Introduction gap/question has a Discussion bullet addressing it, and vice versa.
-- [ ] Upstream `literature-review` has been invoked at least once; key references are recorded in `.writing/findings.md` under Research Findings.
-- [ ] Scope check done: no bullet falls outside the paper's stated contribution.
-- [ ] User confirmed the outline skeleton before claim stubs were materialized (see Step 3 confirmation gate).
-- [ ] If `metadata.yaml` has `zotero.enabled: true` and a `collection_key` is set, EVIDENCE entries have been optionally seeded from that Zotero collection.
+Before proposing claims, synthesize the landscape with `superpower-writing:literature`: what is known, contested, missing. Record each finding in `.writing/findings.md` under Research Findings (citation + one-sentence takeaway + which IMRAD section it informs). Two or three passes is normal; a single sweep usually misses a baseline or a competing result.
 
-# Process
+### Step 3 : Draft a rough IMRAD skeleton
 
-## Step 1: Capture the research idea
+Pick the paper type first: **technique** (new method, the default) or **benchmark/dataset** (the artifact is data + an evaluation protocol). They use different skeletons; do not mix them. Ask via `AskUserQuestion` when unclear.
 
-Before any IMRAD structure, lock down:
+Write the skeleton into `.writing/outline.md` with 3-7 claim bullets per section, using the section frameworks below as **readable guidance**, they encode real rhetorical structure, not a checklist to satisfy mechanically. For the full template and examples of any framework, read the matching file under `../drafting/references/section-standards/` (resolve by slug: `<NN>_<slug>.md`, else the single `*_<slug>.md`).
 
-- The **core contribution** in one sentence. If the user can't state it, spend time here — everything downstream anchors to this.
-- The **target venue or venue class** (e.g., clinical journal, systems conference, ML workshop). This picks the reporting guideline (CONSORT / STROBE / PRISMA / none) which goes into `metadata.yaml`.
-- The **unit of evidence**: dataset, trace, simulation, benchmark, proof — whichever is the study's primary thing. This determines what counts as EVIDENCE later.
+| Section | Framework | Bullets | Include by default? |
+|---------|-----------|---------|---------------------|
+| Abstract | BPMRC (Background/Problem/Method/Result/Conclusion) | 5, labeled `[B][P][M][R][C]` | Always |
+| Introduction | CARS (Territory/Niche/Occupy) | 4-7, `[T][N][O]` in order | Always |
+| Background | DNPL (Domain/Notation/Prior/Limitation) | 4-6, `[D][N][P][L]` | CS/ML/systems; skip for IMRAD-strict medical |
+| Motivation | SFR (Scenario/Failure/Requirements) | 3-6, `[S][F][R]` | Opt-in (systems/architecture/hardware) |
+| Related Work | Thematic groups | 2-4, `[G]`, each states theme + how we differ | CS/ML/systems |
+| Methods | OFCA (Overview/Formalization/Core/Analysis, +Implementation) | 4-10, `[O][F][C][A][I]` in order | CS/ML/systems/theory |
+| Results | RSRT (Research questions/Setup/Results/Takeaways) | 7-15, one `[R]` per `[RQ]` | CS/ML/systems |
+| Discussion | ILFS (Interpretation/Limitations/Future/Significance) | 4-8, `[I][L][F][S]` in order | CS/ML/systems |
+| Conclusion | RSF (Restate/Summary/Forward) | 3 (2 if merged with Discussion) | CS/ML/systems |
 
-Write these three into `.writing/findings.md` under the Requirements section.
+Adapt to venue variations: combined Results and Discussion (interleave `[R]`/`[I]`), conclusion folded into Discussion, ML-conference format (Related Work in appendix). Medical/biology venues use IMRAD-strict (skip Background/Motivation/Related Work; follow CONSORT/STROBE/PRISMA). For a benchmark paper, §Methods and §Results become evaluation-framework / construction / findings sections, read `../drafting/references/section-standards/benchmark_README.md` first.
 
-Outlining assumes the contribution is already decided. If it is not, do not force a half-formed idea through IMRAD; that produces a fake outline that masks missing thinking. Route to the idea phase first and run the three idea-phase skills in order:
+### Step 4 : Interview to sharpen (interleaved loop)
 
-1. `Skill(skill="superpower-writing:research-ideation")`. It generates 15-20 candidate directions through named lenses, scores them with a FINER rubric, and surfaces a ranked slate. Use it when the research area is chosen but no single contribution is.
-2. `Skill(skill="superpower-writing:novelty-gap-check")`. It adjudicates the leading direction against prior work and emits an advisory PROCEED / PROCEED-WITH-CAUTION / ABANDON verdict with a per-claim delta table.
-3. `Skill(skill="superpower-writing:idea-evaluator")`. It evaluates the surviving idea against a top-venue bar (NeurIPS / ICML / ICLR / OSDI / NSDI / SOSP) and returns an advisory Strong-Accept / Accept-with-Revisions / Reject-and-Pivot verdict after a fatal-flaws audit.
+The skeleton is cheap and reviewable; sharpen it before it fans out into dozens of claim files. Interview the user with `AskUserQuestion`, one or two questions per round, refine the skeleton in place after each answer, and loop until it converges. Probe these dimensions, self-resolve any the draft, findings, or literature already answer; spend questions only on what genuinely needs the user:
 
-All three verdicts are advisory. Surface them and let the user pick the surviving idea; never auto-reject a direction or skip ahead on a CAUTION. The one idea that survives this chain becomes the **core contribution** sentence at the top of Step 1, and its target venue and unit of evidence feed the next two bullets. For open-ended design exploration of an already-chosen contribution (not idea selection), `superpower-writing:brainstorming` is the lighter alternative.
+- **Contribution boundary.** Is every bullet in service of the one-sentence contribution? What is deliberately out of scope?
+- **Claim → evidence.** For each key claim, what evidence backs it, a dataset, a run you have, a proof, a citation? Which claims have no data yet?
+- **Venue framing.** What does this venue expect structurally, and how should the contribution be framed for its reviewers?
+- **Novelty.** What is new relative to the closest prior work, stated concretely (not "we are the first")?
+- **Reviewer attacks.** What are the three most likely reviewer objections, and does the outline pre-empt each?
+- **Narrative spine.** Does every Introduction gap have a Discussion bullet answering it, and vice versa?
 
-When the contribution is already decided (the common case for a returning paper), skip the idea phase and proceed straight to the three-field capture above.
+Record non-obvious answers (rejected framings, known weaknesses, missing data) to `.writing/findings.md`. Only once the skeleton holds up does it earn claim stubs.
 
-## Step 2: Iterative literature retrieval
+### Step 5 : Materialize claim stubs
 
-Before proposing section-level claims, ground the paper in prior work. This is the only phase in the pipeline where broad literature reading happens; later phases only resolve specific cited items.
-
-```
-Skill(skill="superpower-writing:literature-review")
-```
-
-Use it to synthesize the landscape around the core contribution: what is known, what is contested, what is missing. Follow up with targeted lookups:
-
-```
-Skill(skill="superpower-writing:research-lookup")
-```
-
-For specific papers you or the user mention, for canonical datasets, or for recent preprints.
-
-Record findings in `.writing/findings.md` under Research Findings. Each finding entry should include: citation (with DOI where possible), one-sentence takeaway, and which IMRAD section it will inform (Intro / Methods / Results / Discussion).
-
-**Iterate:** after the first sweep, reflect on what gaps remain. Typical gaps:
-
-- No methodological precedent for a key choice → look up the method's canonical source.
-- Competing prior results → look up both and note the contested framing for Discussion.
-- Missing baseline → look up standard benchmarks in the subfield.
-
-Two or three retrieval passes is normal. A single sweep usually misses something.
-
-## Step 3: Draft the IMRAD outline
-
-### Paper-type switch (run before choosing the skeleton)
-
-Two paper types use two different section skeletons. Pick the type before writing any bullets, the same way the venue picks the IMRAD vs medical variant below.
-
-- **Technique paper.** The contribution is a new method, mechanism, or system that solves an existing problem. This is the default. It uses the standard skeleton: §Introduction (CARS), §Background (DNPL), §Methods (OFCA), §Results (RSRT), §Discussion (ILFS), §Conclusion (RSF), plus §Related Work and optional §Motivation. All per-section standards listed below apply.
-- **Benchmark / dataset paper.** The contribution is a benchmark, dataset, or evaluation framework, not a new method. Signals: the title names a benchmark; the core artifact is data plus an evaluation protocol; experiments map model capability boundaries rather than proving one method beats baselines. Typical venues: NeurIPS Datasets and Benchmarks Track, ICML, ICLR, SIGMOD, VLDB.
-
-When the paper is a benchmark/dataset paper, the skeleton changes. §Methods and §Results are replaced by benchmark-specific sections governed by their own standards under `skills/drafting/references/section-standards/`:
-
-| Benchmark section | Manuscript stem (example) | Standard file | Pillar |
-|-------------------|---------------------------|---------------|--------|
-| Task + Design Goals + Evaluation Framework | `02_evaluation_framework.tex` | `benchmark_evaluation_framework.md` | Evaluation Framework |
-| Construction Pipeline | `03_construction.tex` | `benchmark_construction.md` | Construction Pipeline |
-| Experiments / Empirical Findings | `05_findings.tex` | `benchmark_findings.md` | Empirical Findings |
-
-The benchmark paper reuses the shared standards for its other sections: §Introduction keeps `01_introduction.md` (CARS, with benchmark framing), an optional §Companion Method reuses `03_methods.md` (OFCA, compressed), and §Discussion / §Conclusion / §Related Work reuse `05_discussion.md`, `06_conclusion.md`, `07_related_work.md`. The routing map, the five-pillar scaffold, and the "problem definition IS the contribution" principle live in `skills/drafting/references/section-standards/benchmark_README.md`. Read it before outlining a benchmark paper. Do not mix the two skeletons in one paper.
-
-Ask the user via `AskUserQuestion` when the type is not obvious: "Is this a technique paper (new method) or a benchmark/dataset paper (new evaluation)?" The rest of Step 3 assumes a technique paper unless the benchmark variant was chosen.
-
-Open `.writing/outline.md` (created by `init-writing-dir.sh`; initially empty). Write the IMRAD skeleton with 3-7 bullets per section. Each bullet is a **claim** — an assertion the paper will make, not a topic heading. "We show X" is a claim; "Overview of methods" is not.
-
-Recommended bullet counts:
-
-| Section | Bullets | Included by default? | Purpose |
-|---------|---------|----------------------|---------|
-| Abstract | **5 (BPMRC, fixed)** | Always | Background / Problem / Method / Result / Conclusion — one bullet each, labeled `[B] [P] [M] [R] [C]`. See section-standard below. |
-| Introduction | **4–7 (CARS)** | Always | Territory / Niche / Occupy — at least one bullet per Move, labeled `[T] [N] [O]` in that strict order. |
-| Background / Preliminaries | **4–6 (DNPL)** | CS / ML / systems / DB / graphics / theoretical-CS papers; omit for IMRAD-strict medical / biology papers | Domain / Notation / Prior / Limitation — at least one bullet per element, labeled `[D] [N] [P] [L]` in order. |
-| Motivation | **3–6 (SFR)** | **OPT-IN** — only systems / architecture / hardware / some security venues that require a dedicated motivating example | Scenario / Failure / Requirements — labeled `[S] [F] [R]`. When included, compress Introduction's `[N]` to a single high-level gap bullet to avoid duplication. |
-| Related Work | **2–4 (ThematicGroup)** | CS / ML / systems / engineering papers; optional for strict IMRAD. May sit at §2 (systems/security convention) or near the end before §Conclusion (ML convention) | One thematic group per bullet, labeled `[G]`. Each bullet MUST state both the theme and how this paper differs. |
-| Methods (CS) | **4–10 (OFCA)** | CS / ML / systems / DB / graphics / theory papers | Overview / Formalization / Core / Analysis, optional Implementation — labeled `[O] [F] [C] [A] [I]`, strict O→F→C→A→I order. `[O]` and `[C]` required; `[F]` and `[A]` strongly recommended; `[I]` optional for systems/applied. |
-| Methods (medical / biology) | 3–6 | IMRAD-strict clinical / biology papers | Population/dataset, intervention/procedure, measurement, analysis, ethics/preregistration. Follows CONSORT / STROBE / PRISMA when applicable. No section standard file yet. |
-| Results (CS) | **7–15 (RSRT)** | CS / ML / systems / DB / graphics papers | Research Questions / Setup / Per-RQ Results / Takeaways — labeled `[RQ] [S] [R] [T]`, strict RQ→S→R→T order. `[RQ]` count MUST equal `[R]` count (1-to-1 correspondence). |
-| Results (medical / biology) | 3–7 | IMRAD-strict clinical / biology papers | One bullet per headline finding. No interpretation. Follows CONSORT / STROBE / PRISMA when applicable. No section standard file yet. |
-| Discussion (CS) | **4–8 (ILFS)** | CS / ML / systems / DB / graphics papers | Interpretation / Limitations / Future work / Significance — labeled `[I] [L] [F] [S]`, strict I→L→F→S order, each element at least 1 bullet. May merge with §Conclusion. |
-| Discussion (medical / biology) | 4–6 | IMRAD-strict clinical / biology papers | Interpretation, comparison to prior work, limitations, mechanism, implications. No section standard file yet. |
-| Conclusion (CS) | **3 exact (RSF)** | CS / ML / systems papers | Restate / Summary / Forward-look — labeled `[R] [S] [F]`, strict R→S→F. Exactly 3 bullets (2 when merged with §Discussion: RS only). Total ≤ 250 words. Optional section for short papers. |
-| Conclusion (medical / biology) | 2–3 | IMRAD-strict clinical / biology papers | One-sentence recap, one-sentence implication, one-sentence forward-look. No section standard file yet. |
-
-Use short imperative claims. Numeric values that belong in prose (e.g., sample size) can be placeholders (`N=[TODO]`) at this stage — they become EVIDENCE entries once resolved.
-
-**Section inclusion guidance:**
-
-- **IMRAD-strict venues** (NEJM / Lancet / JAMA / most biology): include only Abstract, Introduction, Methods, Results, Discussion, Conclusion. Skip Background, Motivation, Related Work — their content folds into Introduction and Discussion.
-- **Default CS / ML / systems**: add Background and Related Work. Motivation remains opt-in — only include it if the paper genuinely needs a dedicated motivating-example section (see `08_motivation.md` for the trigger conditions).
-- **Related Work placement:** decide §2 (early) vs. near-end based on the target venue's norm. The standards file applies identically regardless of position; only the manuscript stem number changes.
-
-**Section-specific standards.** For every section listed above, check whether a matching file exists under `skills/drafting/references/section-standards/`. Resolution is by **two-level match (slug-ending)**: first try `<NN>_<slug>.md` for exact stem; if miss, scan `section-standards/` for any file ending in `_<slug>.md` and use the single match. Canonical technique-paper filenames: `00_abstract.md`, `01_introduction.md`, `02_background.md`, `03_methods.md`, `04_results.md`, `05_discussion.md`, `06_conclusion.md`, `07_related_work.md`, `08_motivation.md`. When the benchmark variant was chosen in the paper-type switch, the benchmark-specific filenames also apply: `benchmark_evaluation_framework.md` (slug-ending `_evaluation_framework`), `benchmark_construction.md` (slug-ending `_construction`), `benchmark_findings.md` (slug-ending `_findings`), routed by `benchmark_README.md`. If one is found, it is binding. Read it now and shape the bullets to satisfy its outline requirements before moving to Step 4. The standards files codify conventions drafting will also enforce, so an outline that disagrees with its standard guarantees rework at drafting time.
-
-- `00_abstract.md` (canonical slot — §0/§1 fixed): requires the **5-bullet BPMRC structure** above. Prefix each Abstract bullet with `[B]`, `[P]`, `[M]`, `[R]`, or `[C]` in that order:
-
-  ```
-  ## Abstract
-
-  - [B] <one-sentence background>
-  - [P] <one-sentence problem / gap>
-  - [M] <one-sentence method>
-  - [R] <one-sentence headline result>
-  - [C] <one-sentence conclusion / implication>
-  ```
-
-- `01_introduction.md` (canonical slot — §0/§1 fixed): requires the **CARS (Create A Research Space) 3-Move structure**. Write 4–7 bullets total, with at least one per Move, in the strict order M1 → M2 → M3. Prefix each Introduction bullet with `[T]` (Territory / M1), `[N]` (Niche / M2), or `[O]` (Occupy / M3):
-
-  ```
-  ## Introduction
-
-  - [T] <centrality: why this topic matters>
-  - [T] <prior work: state of the field>
-  - [N] <gap / contradiction / open question>
-  - [O] <this paper's purpose + approach>
-  - [O] <principal contributions / key findings>
-  ```
-
-  All `[T]` bullets come before any `[N]`; all `[N]` come before any `[O]`. Typical distribution is 2–3 `[T]` + 1–2 `[N]` + 1–2 `[O]`. The CS/engineering contributions-list variant is a drafting-time choice (see `01_introduction.md` §Draft requirement) — at outline time, still write a single `[O]` bullet per principal contribution. **If the paper also includes §Motivation**, compress the `[N]` bullets to exactly 1 (a single high-level gap sentence).
-
-- `02_background.md` (governs any `NN_background.tex` manuscript stem): requires the **DNPL 4-part structure**. Write 4–6 bullets total, with at least one per element, in the strict order Domain → Notation → Prior → Limitation. Labels: `[D] [N] [P] [L]`. Manuscript stem is typically `02_background` (no Motivation) or `03_background` (with Motivation).
-
-  ```
-  ## Background
-
-  - [D] <domain recap: the problem space>
-  - [N] <formal notation and definitions the rest of the paper will reuse>
-  - [P] <dominant prior approach described in that notation>
-  - [L] <concrete limitation of the prior approach>
-  ```
-
-- `08_motivation.md` (slug-only, **OPT-IN**; governs any `NN_motivation.tex` manuscript stem): requires the **SFR 3-part structure**. Write 3–6 bullets total: exactly 1 `[S]` Scenario bullet, 1–2 `[F]` Failure bullets (quantitative), and 2–5 `[R]` Requirement bullets (one per requirement). Only include §Motivation when the paper targets a venue that expects one (systems / architecture / hardware / some security); otherwise skip the section entirely. Manuscript stem is typically `02_motivation` when opted in.
-
-  ```
-  ## Motivation
-
-  - [S] <one-sentence description of the concrete use case>
-  - [F] <one-sentence summary of how baseline fails, with a headline number>
-  - [R] <requirement 1: one-sentence actionable property>
-  - [R] <requirement 2: ...>
-  ```
-
-- `07_related_work.md` (governs any `NN_related_work.tex` manuscript stem, whether §2 early-placement or near-end late-placement): requires the **Thematic-Group structure**. Write 2–4 bullets total, one per thematic group, labeled `[G]`. Each bullet MUST state both the theme's shared approach and how this paper differs (differentiator in the bullet text, not deferred to drafting).
-
-  ```
-  ## Related Work
-
-  - [G] <theme 1: shared approach + how we differ>
-  - [G] <theme 2: shared approach + how we differ>
-  - [G] <theme 3: shared approach + how we differ>
-  ```
-
-- `03_methods.md` (governs any `NN_methods.tex` manuscript stem for CS / ML / systems / DB / graphics / theory papers): requires the **OFCA (+I) structure**. Write 4–10 bullets total: at least 1 `[O]` Overview and 2 `[C]` Core, with `[F]` Formalization and `[A]` Analysis strongly recommended; `[I]` Implementation is optional (0–2). Strict order O → F → C → A → I. Keep the manuscript filename as `<NN>_methods.tex` even if the paper renders the section as "§3 Design" / "§3 Approach" / "§3 Algorithm" — the slug is a plugin-internal convention, not a rendered heading.
-
-  ```
-  ## Methods
-
-  - [O] <one-sentence overview of the approach>
-  - [F] <formal problem statement>
-  - [C] <core component 1: name + one-line description>
-  - [C] <core component 2>
-  - [C] <core component 3>
-  - [A] <one-sentence correctness or complexity claim>
-  - [I] <implementation highlight: framework / hyperparameters / hardware>
-  ```
-
-- `04_results.md` (governs any `NN_results.tex` manuscript stem for CS / ML / systems / DB / graphics papers): requires the **RSRT four-part structure**. Write 7–15 bullets total: 3–5 `[RQ]` Research Questions, 1–3 `[S]` Setup, exactly as many `[R]` Results as `[RQ]` (1-to-1 in order), 0–2 `[T]` Takeaways. Strict order RQ → S → R → T. Keep filename as `<NN>_results.tex` even when the paper renders as "§5 Evaluation" / "§5 Experiments".
-
-  ```
-  ## Results
-
-  - [RQ] RQ1: <question 1>
-  - [RQ] RQ2: <question 2>
-  - [RQ] RQ3: <question 3>
-  - [S] Datasets / baselines / metrics / hardware (1–3 bullets)
-  - [R] RQ1 result: <headline number with comparator and uncertainty>
-  - [R] RQ2 result: <...>
-  - [R] RQ3 result: <...>
-  - [T] <one-sentence synthesis across RQs>
-  ```
-
-- `05_discussion.md` (governs any `NN_discussion.tex` manuscript stem for CS papers): requires the **ILFS four-part structure**. Write 4–8 bullets total: at least 1 `[I]` Interpretation, 1 `[L]` Limitations, 1 `[F]` Future work, 1 `[S]` Significance. Strict order I → L → F → S. §Discussion and §Conclusion may be merged as "Discussion and Conclusion"; when merged, append the RSF Conclusion template to the end of Discussion and drop RSF `[F]` to avoid duplicating ILFS `[F]`.
-
-  ```
-  ## Discussion
-
-  - [I] <why RQ1 result appeared as it did — mechanism or causation>
-  - [I] <why RQ2 scaling behavior appeared as it did>
-  - [L] <specific threat to validity or scope boundary>
-  - [F] <concrete future-work direction>
-  - [S] <practical or theoretical implication>
-  ```
-
-- `06_conclusion.md` (governs any `NN_conclusion.tex` manuscript stem for CS papers): requires the **RSF three-part structure**. Write **exactly 3 bullets** in the strict order R → S → F. Total section length ≤ 250 words. No new content, no verbatim Abstract copy. When §Conclusion is merged into §Discussion (common in NeurIPS / ICML), omit `[F]` and shrink to 2 bullets (RS only) — the forward-look lives in §Discussion's ILFS `[F]`.
-
-  ```
-  ## Conclusion
-
-  - [R] <one-sentence restatement of the contribution>
-  - [S] <one-sentence headline result>
-  - [F] <one-sentence forward-look>
-  ```
-
-- All IMRAD sections now have matching standards files. If the paper introduces a non-IMRAD section (e.g., §Glossary, §Ethics Statement, §Reproducibility Checklist), no standards file applies — generic bullet count from the table above governs, and `{SECTION_STANDARD}` falls through to the "no standard applies" text.
-
-### IMRAD Variations
-
-Not every venue uses canonical IMRAD (I-M-R-D-C as separate sections). When generating the skeleton, adapt to the venue's expected structure:
-
-- **Combined Results and Discussion.** Some venues (common in ML conferences, Nature/Science short articles) merge Results and Discussion into a single section where each finding is presented then immediately interpreted. When this applies, interleave `[R]`/`[T]` result bullets with `[I]` interpretation bullets under one heading, and drop the standalone Discussion ILFS block.
-- **IMRaD without separate Conclusion.** Many journals fold the conclusion into the final Discussion paragraph. When this applies, omit the `06_conclusion` stem and append the RSF conclusion template (minus `[F]` if Discussion already has ILFS `[F]`) to the end of the Discussion bullets.
-- **ILMRaD (Literature Review as explicit section).** Theses, dissertations, and some engineering journals require a standalone Literature Review section between Introduction and Methods. When this applies, add a `NN_literature_review.tex` stem and structure its bullets thematically (similar to Related Work `[G]` groups) but organized chronologically within each theme.
-- **ML conference format.** NeurIPS/ICML/ICLR papers typically use Introduction-Method-Experiments-Conclusion with Related Work in appendix. The Experiments section combines Results and Discussion (see "Combined Results and Discussion" above), and Related Work may be shortened or moved to supplementary material.
-
-When in doubt, check the target venue's author guidelines or recent publications from the same venue. The outline skeleton should match the venue's section structure before claim stubs are materialized.
-
-### Confirmation gate before materializing stubs
-
-The skeleton is the cheap, reviewable artifact; the claim files are the expensive, hard-to-undo one (a 6-section outline expands into 20–30+ YAML stubs across many files). Before proceeding to Step 4, **show the user the outline skeleton and stop for confirmation**. Present a compact summary, not the full file:
-
-- the section list with the standard applied and bullet count per section (e.g. `Methods (OFCA): 6 bullets`),
-- the venue variation chosen (combined R&D? merged Conclusion? Motivation opted in?),
-- the projected claim-stub total (sum of bullets, minus Abstract which gets no claim file).
-
-Then ask via `AskUserQuestion`: "Materialize this outline into claim stubs, or revise the skeleton first?" Only proceed to Step 4 once the user confirms. If the user wants changes, edit the skeleton in place and re-show the summary — do not generate stub files speculatively. This keeps a single decision point between the lightweight outline and the bulk file generation, so a wrong section set or scope is caught before it fans out into dozens of files.
-
-## Step 4: Materialize claim stubs
-
-For every bullet in the outline, create a YAML entry in the matching `.writing/claims/section_<NN>_<slug>.md` file. The filename stem must match the manuscript filename that will pair with it:
-
-```
-.writing/manuscript/03_methods.tex
-.writing/claims/section_03_methods.md
-```
-
-Claim YAML format (per design.md §6.1):
+For every bullet, add a YAML entry to the matching `.writing/claims/section_<NN>_<slug>.md` (stem matches the manuscript file that will pair with it):
 
 ```yaml
 - id: meth-c1
@@ -299,154 +84,41 @@ Claim YAML format (per design.md §6.1):
   STATUS: stub
 ```
 
-Rules:
+- **id**: short, section-prefixed, unique (`meth-c1`, `res-c2`). Prose binds via `% claim: meth-c1`.
+- **CLAIM**: one sentence restating the bullet, no hedging, no citations in this line.
+- **EVIDENCE**: what must be true to survive verification. `type` ∈ `citation` (needs `doi`/`arxiv`/`ref`), `dataset` (`ref`), `figure`/`table` (`id`), `analysis` (`description`; on systems papers use the structured source fields from `systems-evidence-contract.md`), `artifact` (first-party `ref` + `role`).
+- **STATUS**: always `stub` here. Drafting advances it to `evidence_ready`; claim-verification to `verified`. Leave placeholders like `doi: 10.xxxx/...` when the source is unknown, but never invent DOIs.
 
-- **id** is short, section-prefixed, and unique within the paper (`meth-c1`, `intro-c3`, `res-c2`, `disc-c4`). Prose binding uses these ids via `% claim: meth-c1` (LaTeX line comment at column 0).
-- **CLAIM** is a single sentence restating the bullet from the outline — no hedging, no citations in this line.
-- **EVIDENCE** lists what would have to be true for the claim to survive verification. Valid `type` values:
-  - `citation` — a paper or preprint; must have a `doi` (or `arxiv`, `ref`) field.
-  - `dataset` — a named dataset; `ref` required.
-  - `figure` — a figure in this paper; `id` field pointing to its planned figure id.
-  - `table` — a table in this paper; `id` field.
-  - `analysis` — a computed statistic to be produced during drafting; `description` field.
-- **STATUS** is always `stub` at outlining time. It advances to `evidence_ready` only after the drafting subagent resolves each EVIDENCE item (DOI resolves, dataset is accessible, figure is drawn), and to `verified` only after `claim-verification` passes.
-- Leave placeholders like `doi: 10.xxxx/...` when the exact source is not yet known — drafting will resolve them. But don't invent DOIs.
+Stubs are intentional: the claim-first discipline forbids prose against stubs, so claim files must mature before prose references them.
 
-> Claim-first protocol: see `superpower-writing:main` §Claim-First Protocol.
+### Step 6 : Fill `metadata.yaml`
 
-Outlining produces stubs on purpose: the claim-first discipline forbids prose against stubs, so claim files must mature before prose can reference them.
+Replace every `TODO`/empty key with a real value: authors (name/affil/orcid/coi), preregistration, data/code availability, and `reporting_guideline` (CS/ML/systems papers normally `none`). Verification checks presence, not truthfulness, the user owns that; use `null` for fields that truly do not apply. Ask via `AskUserQuestion` for anything you cannot infer; never fabricate names, ORCIDs, grants, or URLs.
 
-## Step 5: Optional Zotero seeding
+**`writing_profile` gate.** Set `writing_profile: systems` or `default`. Fill it from the user's explicit statement or a clear systems venue; when unsure, ask once, do not infer from `reporting_guideline: none` (ML and theory papers use `none` too) and do not scan the body to guess. For an older project missing the field, pause the first relevant flow, ask once, write it, then continue. Structured `analysis` evidence is required on all profiles; `writing_profile` only toggles the systems wording and figure references.
 
-Applicable only when `.writing/metadata.yaml` contains:
+Optional Zotero seeding: when `metadata.yaml` has `zotero.enabled: true` and a `collection_key`, seed `citation` EVIDENCE from that collection via `zotero_get_collection_items` (record `source: zotero` + `zotero_item_key`). Skip silently when disabled. Never push new items during outlining, that is a drafting concern.
 
-```yaml
-zotero:
-  enabled: true
-  collection_key: "ABCD1234"
-```
+### Step 7 : Self-review (readable checklist, not a linter)
 
-If both conditions hold, seed `EVIDENCE` `citation` entries from the pre-curated collection. The user has already vetted these references, so they are safe starting points.
+Before handing off, read the outline once and confirm:
 
-Call the `zotero_get_collection_items` MCP tool (from the `zotero` server
-in `.mcp.json`) with:
+- **Placeholders.** No stray `TODO`/`xxxx` beyond intentional evidence placeholders; unresolved items marked `[NEEDS-EVIDENCE]` with a one-line rationale in `findings.md`.
+- **Scope.** Every claim serves the one-sentence contribution; tangential bullets move to future-work notes.
+- **I↔D narrative.** Every Introduction gap has a Discussion answer, and every Discussion interpretation points back to a Results bullet.
+- **Framework fit.** Each section roughly matches its framework's shape and order (e.g. Introduction runs Territory → Niche → Occupy; Results has one `[R]` per `[RQ]`). This is a judgment read, not a grep, fix obvious breaks, do not police label counts.
+- **Challenge → module → contribution spine.** Each prior-work limitation maps to a challenge, each challenge to one Methods core module, each module to a contribution, each contribution to a section. A spine that does not close end to end reads as incoherent regardless of how strong any single piece is, reconcile before drafting.
 
-    collection_key = <metadata.yaml zotero.collection_key>
-    limit          = 100   # paginate with `start` if the collection is larger
+### Step 8 : Handoff
 
-For each returned item whose `data.DOI` is non-empty and whose
-`data.abstractNote` plausibly supports a draft claim, add a pre-filled
-EVIDENCE entry with `source: zotero` and `zotero_item_key: <data.key>`:
+Update `.writing/progress.md` (mark outlining complete with section and claim counts). Then hand off to `superpower-writing:drafting`, which resolves each claim's evidence and writes the LaTeX prose section by section.
 
-```yaml
-- id: intro-c2
-  CLAIM: Prior work found effect X in population Y
-  EVIDENCE:
-    - type: citation
-      doi: 10.1038/...
-      source: zotero
-      zotero_item_key: ABCD1234
-  STATUS: stub
-```
+## Key principles
 
-Skip this step silently when `zotero.enabled` is unset or false, or when `collection_key` is empty. Drafting will still query Zotero per-claim via `zotero_search_items`; outlining only seeds obvious matches to save work later.
+**Claims, not topics.** A bullet must have a truth value and bind to evidence.
 
-Never push new items to Zotero during outlining — that's a drafting concern (see `drafting` SKILL.md).
+**The interview is the point.** A well-structured outline of the wrong paper is the expensive mistake. The interleaved interview exists to catch a wrong contribution, a missing baseline, or an unanswerable reviewer attack while the outline is still cheap to change.
 
-## Step 6: Fill `metadata.yaml`
+**Metadata gate now, not later.** Unresolved authorship, availability, and `writing_profile` compound; resolving them while the paper's shape is malleable is cheap, at the submission deadline it is not.
 
-Open `.writing/metadata.yaml`. The template has every top-level key set to `TODO` or empty. Replace each with a real value:
-
-```yaml
-authors:
-  - name: <user-provided>
-    affil: <user-provided>
-    orcid: <user-provided or null>
-    coi: <declare: none | grant:... | equity:... | employment:...>
-preregistration:
-  registry: <OSF | ClinicalTrials.gov | null | ...>
-  url: <url or null>
-  deviations: []   # keep empty list; populated later if protocol deviates
-data_availability:
-  statement: <one-sentence statement>
-  access: <open | restricted | on-request | none>
-code_availability:
-  url: <repo url or null>
-  license: <SPDX id or null>
-reporting_guideline: <CONSORT | STROBE | PRISMA | none>
-```
-
-**Presence check, not correctness check:** verification only checks these fields are set. The user owns truthfulness. If a field truly does not apply (e.g., no preregistration for a computational paper), use `null` — not `TODO`.
-
-Ask the user for any field you cannot infer. Do not fabricate author names, ORCIDs, affiliations, grant numbers, or preregistration URLs. Use `AskUserQuestion` when information is missing.
-
-`reporting_guideline` records the target venue's reporting standard for the human author's reference; for CS / ML / systems papers it is normally `none`. Pick the right one now:
-
-- Randomized trial → `CONSORT`
-- Observational study → `STROBE`
-- Systematic review / meta-analysis → `PRISMA`
-- Computational / systems / ML method paper → `none` (or a venue-specific checklist if the user names one)
-
-## Step 7: Self-review
-
-Before handing off, spec-review the outline against five checks (mirrors `superpower-writing:writing-plans` self-review pattern):
-
-1. **Placeholder scan** — grep outline.md and claims/*.md for `TODO`, `xxxx`, `[NEEDS-EVIDENCE]`. Any hit that is not an intentional evidence placeholder (e.g., `doi: 10.xxxx/...`) must be resolved or explicitly annotated with `[NEEDS-EVIDENCE]` plus rationale.
-
-2. **I↔D narrative consistency** — every question/gap raised in Introduction has a matching answer/limitation/implication in Discussion. Every Discussion interpretation points back to a Results bullet that produced the finding being interpreted. Gaps here produce papers that feel hollow.
-
-3. **Scope check** — each claim bullet is directly in service of the one-sentence core contribution from Step 1. Tangential bullets must be moved to future-work notes or removed. Scope creep at outlining time compounds into wasted drafting effort.
-
-4. **Section-standard conformance** — for every section that has a matching file under `skills/drafting/references/section-standards/` (resolved via the two-level match rule: exact `<NN>_<slug>.md` first, slug-ending `*_<slug>.md` scan as fallback), verify the outline satisfies the "Outline bullet requirement" part of that standard. Concretely:
-
-   - Abstract (`00_abstract.md`, BPMRC): grep the Abstract block and confirm exactly 5 bullets appear in the order `^- \[B\]`, `^- \[P\]`, `^- \[M\]`, `^- \[R\]`, `^- \[C\]`. Any missing, duplicate, or out-of-order label fails the check.
-   - Introduction (`01_introduction.md`, CARS): grep the Introduction block and confirm (a) total bullet count is between 4 and 7 inclusive; (b) at least one `^- \[T\]`, one `^- \[N\]`, and one `^- \[O\]` line exists; (c) every `^- \[T\]` line appears before every `^- \[N\]`, and every `^- \[N\]` before every `^- \[O\]`. Any interleaving (e.g. `[T] ... [N] ... [T] ...`) fails the check. When §Motivation is present in the outline, additionally confirm §Introduction has exactly one `^- \[N\]` bullet (compressed form).
-   - Background (`02_background.md`, DNPL): when the outline has a §Background block, grep it and confirm (a) total bullet count is between 4 and 6 inclusive; (b) at least one `^- \[D\]`, one `^- \[N\]`, one `^- \[P\]`, and one `^- \[L\]` line exists; (c) strict D → N → P → L group ordering (all D before any N, all N before any P, all P before any L). Any interleaving fails.
-   - Motivation (`08_motivation.md`, SFR, opt-in): when the outline has a §Motivation block, grep it and confirm (a) exactly one `^- \[S\]` bullet; (b) between 1 and 2 `^- \[F\]` bullets; (c) between 2 and 5 `^- \[R\]` bullets; (d) strict S → F → R group ordering. If §Motivation is present, also verify Introduction's `^- \[N\]` count equals 1 (the compression rule above).
-   - Related Work (`07_related_work.md`, ThematicGroup): when the outline has a §Related Work block, grep it and confirm (a) total bullet count is between 2 and 4 inclusive; (b) every bullet starts with `^- \[G\]`; (c) every `[G]` bullet text contains a differentiator clause — grep each bullet for `unlike`, `in contrast`, `whereas`, `differs`, or `orthogonal` (case-insensitive). Bullets that only name a theme without stating differentiation fail the check.
-   - Methods (`03_methods.md`, OFCA, CS papers only): when the outline has a §Methods block and the paper is CS / ML / systems / theory (not IMRAD-strict medical), grep it and confirm (a) total bullet count is between 4 and 10 inclusive; (b) at least 1 `^- \[O\]` bullet and at least 2 `^- \[C\]` bullets exist; (c) strict O → F → C → A → I group ordering — all `[O]` before any `[F]`, all `[F]` before any `[C]`, all `[C]` before any `[A]`, all `[A]` before any `[I]`. Warn (do not fail) when `[F]` or `[A]` are missing: they are strongly recommended but skippable with deliberate justification; fail only when `[O]` or `[C]` is missing.
-   - Results (`04_results.md`, RSRT, CS papers only): when the outline has a §Results block and the paper is CS / ML / systems (not IMRAD-strict medical), grep it and confirm (a) total bullet count is between 7 and 15 inclusive; (b) between 3 and 5 `^- \[RQ\]` bullets; (c) between 1 and 3 `^- \[S\]` bullets; (d) `^- \[R\]` bullet count EXACTLY equals `^- \[RQ\]` bullet count (1-to-1 correspondence); (e) strict RQ → S → R → T group ordering. `[T]` is optional (0–2). Additionally, warn if any `^- \[R\]` bullet text does not contain at least one digit — every `[R]` result SHOULD carry a headline number at outline time (placeholders like `N=[TODO]` count as a digit for this check).
-   - Discussion (`05_discussion.md`, ILFS, CS papers only): when the outline has a §Discussion block and the paper is CS / ML / systems (not IMRAD-strict medical), grep it and confirm (a) total bullet count is between 4 and 8 inclusive; (b) at least one `^- \[I\]`, one `^- \[L\]`, one `^- \[F\]`, and one `^- \[S\]` line exists; (c) strict I → L → F → S group ordering — all `[I]` before any `[L]`, all `[L]` before any `[F]`, all `[F]` before any `[S]`. When §Conclusion is absent or merged into §Discussion, this rule still applies to the Discussion portion.
-   - Conclusion (`06_conclusion.md`, RSF, CS papers only): when the outline has a §Conclusion block and the paper is CS / ML / systems, grep it and confirm (a) standalone form: exactly 3 bullets in the strict order `^- \[R\]`, `^- \[S\]`, `^- \[F\]` — no more, no fewer; OR (b) merged form (when §Discussion's label mentions "Discussion and Conclusion" or the outline heading is "## Discussion and Conclusion"): exactly 2 bullets in the order `^- \[R\]`, `^- \[S\]`, with `[F]` omitted because §Discussion's `[F]` carries the forward-look. Any other bullet count or ordering fails the check.
-   - Additional sections: apply the same pattern — read the standards file's "Outline bullet requirement" section and verify its specific rule.
-
-   If a check fails, fix the outline and re-run; do not advance to writing-plans with a structural mismatch. Sections without a matching standards file are exempt.
-
-5. **Challenge → module → contribution consistency.** This is the same one-to-one invariant `01_introduction.md` enforces at drafting Step C, checked here at outline level so a broken spine is caught before stubs fan out. The introduction's logical spine must close end to end. Walk and grep-check each link (technique papers with §Introduction + §Methods; benchmark papers map §Methods to §Construction modules):
-
-   - **Limitation → challenge.** Each `^- \[N\]` niche bullet in §Introduction raises a prior-work limitation that maps to a technical challenge the paper addresses. A limitation with no challenge is noise; drop it or promote it.
-   - **Challenge → module (one-to-one).** Each challenge in the `^- \[O\]` bullets corresponds to exactly one §Methods core module (`^- \[C\]` bullet). The mapping is one-to-one, not one-to-many and not many-to-one. Count the distinct challenges and the `[C]` core modules; if the counts differ, one side is mis-stated. Reconcile before drafting.
-   - **Module → contribution (one-to-one).** Each `^- \[C\]` core module surfaces as a contribution in the `^- \[O\]` bullets (or a clearly grouped subset). A module with no contribution under-sells the work; a contribution with no module over-claims.
-   - **Contribution → section.** Each contribution maps to a planned section in the outline (the section that will carry its `\S\ref{...}` at drafting time). A contribution with no section is overreach; flag it.
-
-   Grep aid: count `grep -cE '^- \[C\]' .writing/outline.md` (core modules) against the distinct challenges enumerated in the `^- \[O\]` bullets, and confirm each `[C]` module has a matching `[O]` contribution. Treat any broken link as a blocking defect, not a stylistic note. A paper whose challenges, modules, and contributions do not line up one-to-one reads as incoherent regardless of how strong any single piece is. For a benchmark paper, substitute the §Construction pillar modules for `[C]` and the four benchmark contributions (the benchmark, the construction innovation, the evaluation, the headline findings) for the `[O]` contributions.
-
-If any check fails, fix and re-run. Record any unresolvable items as `[NEEDS-EVIDENCE]` in `.writing/findings.md` under Decisions — they must be resolved before submission but are not a blocker for advancing to writing-plans.
-
-## Step 8: Handoff
-
-Update `.writing/progress.md` — mark the outlining row complete with a one-line summary of sections and claim counts (e.g., "6 sections / 27 claims; zotero-seeded 8").
-
-Hand off:
-
-```
-Skill(skill="superpower-writing:writing-plans")
-```
-
-That skill decomposes the outline into executable per-section / per-figure / per-table tasks with a dependency graph, producing `.writing/plan.md`. Drafting comes after.
-
-# Key Principles
-
-**Claims, not topics.** An outline bullet must state an assertion. "Methods overview" is a heading, not a claim. "We sampled 1,247 jobs from the Google cluster trace 2019" is a claim — it has a truth value and binds to evidence. The claim-first protocol only works if outlining produces real claims.
-
-**Stubs are intentional.** Every claim starts `STATUS: stub`. The claim-first discipline forbids prose writes against stubs on purpose. That restraint is the feature, not a bug to work around. Drafting advances stubs to `evidence_ready` after resolving EVIDENCE — that is how the paper earns its prose.
-
-**Metadata gate now, not later.** Filling `metadata.yaml` at outlining feels bureaucratic; skipping it feels fast. But unresolved `TODO`s compound: authors keep changing, reporting-guideline choices shape verification, data-availability statements affect what can be published. Resolving this while the paper's shape is still malleable is cheap; resolving it at submission gate under deadline pressure is expensive.
-
-**Literature-review first, lookup-second.** `literature-review` synthesizes; `research-lookup` retrieves. Use synthesis to form the outline's narrative arc, then retrieval to ground individual claims. Reversing the order produces paper-shaped bibliographies instead of arguments.
-
-**Zotero is opt-in and non-blocking.** Zotero seeding saves work when the user has a curated collection. It never gates outlining. When disabled or unavailable, outlining proceeds network-only; drafting can still push newly discovered citations later (if `auto_push_new_citations: true`).
-
-**Don't fabricate.** No invented DOIs, fake ORCIDs, or guessed grant numbers. When information is missing, ask the user via `AskUserQuestion` or mark the item `[NEEDS-EVIDENCE]` with a one-line rationale. Fabrication in outlining contaminates every downstream stage.
-
-**One-session scope.** Outlining is usually one session. If it stretches across sessions, the paper's scope is probably still unclear — loop back to brainstorming rather than forcing more outline passes.
+**Don't fabricate.** No invented DOIs, ORCIDs, or grant numbers. When information is missing, ask or mark `[NEEDS-EVIDENCE]`, fabrication in outlining contaminates every downstream stage.

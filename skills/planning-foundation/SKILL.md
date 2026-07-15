@@ -1,227 +1,91 @@
 ---
 name: planning-foundation
-description: Use whenever a task will span more than 5 tool calls, multiple sessions, or risks hitting context-window limits — writing a paper, multi-file refactor, long research thread, anything where losing mid-task state would hurt. Creates a persistent .writing/ directory that acts as working memory on disk, so findings, decisions, and progress survive context resets. Every other superpower-writing skill assumes this directory exists; initialize it first. Trigger even when the user doesn't explicitly ask for "planning".
+description: Use whenever a writing task will span more than 5 tool calls, multiple sessions, or risks hitting context-window limits, writing a paper, a long literature thread, a multi-section revision, anything where losing mid-task state would hurt. Creates a persistent `.writing/` directory that acts as working memory on disk, so the outline, claims, findings, and progress survive context resets. Every other superpower-writing skill assumes this directory exists; initialize it first. Trigger even when the user does not explicitly ask for "planning".
 ---
 
 # Planning Foundation
 
-Work like Manus: Use persistent markdown files as your "working memory on disk."
+`.writing/` is working memory on disk, the persistent state for the current paper. Context windows are volatile and limited; the filesystem is not. Anything important gets written to `.writing/` so it survives a context reset or a new session.
 
-Every workflow skill in superpower-writing inherits this foundation. `.writing/` is the "RAM on disk" for the current work session.
-
-## Planning Directory Convention
+## Directory convention
 
 ```
 .writing/                     # gitignored, ephemeral working state
-├── design.md                  # design spec (created by brainstorming)
-├── plan.md                    # implementation plan (created by writing-plans)
-├── findings.md                # aggregated findings
-├── progress.md                # Task Status Dashboard + session log
-├── agents/                    # created on demand by subagents
-│   ├── implementer/           # one dir per role, reused across tasks
-│   │   ├── findings.md        # this agent's discoveries (appended across tasks)
-│   │   └── progress.md        # this agent's action log (appended across tasks)
-│   ├── spec-reviewer/
-│   └── ...
-├── stash/                     # paused projects (directory per entry)
-│   └── YYYY-MM-DD-<name>/
-│       ├── design.md, plan.md, findings.md, progress.md
-│       └── agents/
-└── archive/                   # completed projects (directory per entry)
-    └── YYYY-MM-DD-<name>/
-        ├── design.md, plan.md, findings.md, progress.md
-        └── summary.md
+├── metadata.yaml             # authors, venue, availability, writing_profile
+├── outline.md                # IMRAD structure + key claims (from outlining)
+├── ideation.md               # candidate directions + verdicts (from idea, optional)
+├── claims/                   # one file per section: section_<NN>_<slug>.md (claim stubs)
+├── manuscript/               # LaTeX prose: <NN>_<slug>.tex (from drafting)
+├── figures/                  # <fig_id>.tex/.pdf, data/, src/, briefs
+├── refs.bib                  # bibliography, fills as citations resolve
+├── findings.md               # discoveries, decisions, rejected alternatives
+├── progress.md               # Task Status Dashboard + session log
+├── agents/                   # created on demand by subagents (one dir per role)
+└── archive/                  # completed papers (dir per entry + summary.md)
 ```
 
-All project documents live in `.writing/`. The `agents/` directory is NOT created at init — each subagent creates its own subdirectory when dispatched.
+The outline is the paper's design spec; there is no separate design/plan document. `agents/` is not created at init, each subagent makes its own subdir when dispatched.
 
-Lifecycle directories:
-- `.writing/stash/` — paused projects (each entry is a subdirectory with all active files)
-- `.writing/archive/` — completed projects (each entry is a subdirectory with all active files + summary.md)
+## Quick start
 
-## Quick Start
+Before any complex writing task:
 
-Before ANY complex task:
+1. **Create `.writing/`**, run `bash "${CLAUDE_PLUGIN_ROOT}/scripts/init-writing-dir.sh"` (creates `.writing/` with `progress.md` + `findings.md` seeded from templates), or create the dir and seed the two files by hand.
+2. **Re-read the outline before decisions**, keeps the paper's goals in the attention window.
+3. **Update `progress.md` after each phase**, mark status, note files written, log errors.
 
-1. **Create `.writing/` directory** — run `bash "${CLAUDE_PLUGIN_ROOT}/scripts/init-writing-dir.sh"` (it creates `.writing/` with `progress.md` + `findings.md` seeded from the templates), or create the dir and seed the two files manually
-2. **Create `progress.md`** — copy [../../templates/progress.md](../../templates/progress.md) (includes Task Status Dashboard)
-3. **Create `findings.md`** — copy [../../templates/findings.md](../../templates/findings.md) as reference
-4. **Re-read plan before decisions** — Refreshes goals in attention window
-5. **Update after each phase** — Mark complete, log errors
+## File purposes
 
-## The Core Pattern
+| File | Holds | Update when |
+|------|-------|-------------|
+| `outline.md` | IMRAD structure + per-section key claims | After outlining or a restructure |
+| `claims/section_*.md` | Claim stubs (CLAIM / EVIDENCE / STATUS) prose binds to | As evidence resolves during drafting |
+| `findings.md` | Discoveries, decisions + rationale, rejected alternatives, constraints, debugging root causes | After any discovery or decision |
+| `progress.md` | Task Status Dashboard, phase status, files written, errors, verification results | After any status change, action, or error |
 
-```
-Context Window = RAM (volatile, limited)
-Filesystem = Disk (persistent, unlimited)
+## Core disciplines
 
--> Anything important gets written to disk.
-```
+### 1. Create `.writing/` first
+Never start a complex writing task without it. All paper documents live here; execution status lives in `progress.md`'s Task Status Dashboard.
 
-## File Purposes
+### 2. The 2-action dispatch rule
+After every ~2 read/search/explore operations, save to the right file by content type, discoveries and decisions to `findings.md`, status and actions and errors to `progress.md`. This keeps both knowledge and progress from being lost to a context reset.
 
-| File | Purpose | What Goes Here | When to Update |
-|------|---------|----------------|----------------|
-| `design.md` | Design spec: architecture and requirements | Created by brainstorming skill. Architecture, components, data flow, error handling, testing strategy | After design approval or spec review |
-| `plan.md` | Implementation plan: bite-sized tasks | Created by writing-plans skill. File structure, task steps, parallelism groups, verification commands | After plan approval or plan review |
-| `findings.md` | Knowledge base: discoveries, decisions, surprises | Code patterns, architecture insights, technical decisions + rationale, rejected alternatives, unexpected behavior, edge cases, dependency constraints, debugging root causes | After ANY discovery or decision |
-| `progress.md` | Operations log: status, actions, evidence | Task Status Dashboard rows, phase status changes, actions taken (files modified), error log + retries, test results, verification evidence, batch/phase summaries | After ANY status change, action, or error |
+### 3. Read before decide
+Before a major decision, read the outline and relevant findings. This re-orients you when context is stale.
 
-## Critical Rules
+### 4. Log every error
+Every error goes in `progress.md` (what failed, what you tried, what you observed). On repeated failure, escalate to the user rather than silently trying alternatives, the outline was designed deliberately, and self-directed workarounds bypass its intent.
 
-### 1. Create Planning Dir First
-Never start a complex task without `.writing/`. All project documents (design, plan, findings, progress) live in `.writing/`. Execution status is tracked via the Task Status Dashboard in `progress.md`.
+## Per-agent directories
 
-### 2. The 2-Action Dispatch Rule
-> "After every 2 read/search/explore operations, IMMEDIATELY save to the appropriate file by content type."
+When dispatching subagents, each gets `.writing/agents/{role}/` with its own `findings.md` (discoveries) and `progress.md` (action log), appended across tasks, one dir per role, not per task. The orchestrator aggregates agent findings into the top-level `findings.md` / `progress.md` after each task (see `scripts/aggregate-agent-findings.sh`).
 
-**Dispatch by content type:**
+## When to use
 
-| Content type | Target file | Examples |
-|---|---|---|
-| Discoveries, decisions, surprises | `findings.md` | Code patterns, constraints, approach chosen and why, edge cases |
-| Status, actions, errors, results | `progress.md` | Task marked complete, files modified, error + retry, test pass/fail |
+Use for multi-step writing, research threads, and anything spanning many tool calls or sessions. Skip for simple questions, single-file edits, and quick lookups.
 
-This prevents both knowledge AND progress from being lost.
+## The 5-question reboot test
 
-### 3. Read Before Decide
-Before major decisions, read the plan file. This keeps goals in your attention window.
-
-### 4. Update After Act
-After completing any phase:
-- Mark phase status: `in_progress` -> `complete`
-- Log any errors encountered
-- Note files created/modified
-
-### 5. Log ALL Errors
-Every error goes in the plan file. This builds knowledge and prevents repetition.
-
-```markdown
-## Errors Encountered
-| Error | Attempt | Resolution |
-|-------|---------|------------|
-| FileNotFoundError | 1 | Created default config |
-| API timeout | 2 | Added retry logic |
-```
-
-### 6. Never Repeat Failures
-```
-if action_failed:
-    log what you tried and observed
-    escalate to user for direction
-```
-Do NOT independently try alternative approaches. Log the failure and follow the Error Escalation Protocol.
-
-## Error Escalation Protocol
-
-```
-ATTEMPT 1: Diagnose & Fix
-  -> Read error carefully
-  -> Identify root cause
-  -> Apply targeted fix
-
-ATTEMPT 1 FAILED: Escalate to User
-  -> Show: what failed, what you tried, what you observed
-  -> Ask: is this a bug? a plan gap? an environment issue?
-  -> Align on direction BEFORE proceeding
-
-AFTER ALIGNMENT (based on user's judgment):
-  -> Bug           → reproduce, isolate, fix, verify (inline discipline)
-  -> Plan gap      → update plan with user
-  -> Environment   → fix environment
-  -> Architecture  → broader rethink with user
-```
-
-**Why escalate early:** The plan was carefully designed. Self-directed alternative approaches bypass plan intent and create workarounds. Always align with the user before changing direction.
-
-## Read vs Write Decision Matrix
-
-| Situation | Action | Reason |
-|-----------|--------|--------|
-| Just wrote a file | DON'T read | Content still in context |
-| Viewed image/PDF | Write findings NOW | Multimodal -> text before lost |
-| Browser returned data | Write to file | Screenshots don't persist |
-| Starting new phase | Read plan/findings | Re-orient if context stale |
-| Error occurred | Read relevant file | Need current state to fix |
-| Resuming after gap | Read all planning files | Recover state |
-
-## The 5-Question Reboot Test
-
-If you can answer these, your context management is solid:
-
-| Question | Answer Source |
-|----------|---------------|
-| Where am I? | Task Status Dashboard in progress.md |
-| Where am I going? | Remaining phases |
-| What's the goal? | Goal statement in plan |
-| What have I learned? | findings.md |
-| What have I done? | progress.md |
-
-## When to Use This Pattern
-
-**Use for:**
-- Multi-step tasks (3+ steps)
-- Research tasks
-- Building/creating projects
-- Tasks spanning many tool calls
-- Subagent orchestration
-
-**Skip for:**
-- Simple questions
-- Single-file edits
-- Quick lookups
-
-## Per-Agent Planning Directories
-
-When dispatching subagents, each gets its own planning dir:
-
-```
-.writing/agents/{role}/
-├── findings.md    # agent's discoveries (appended across tasks)
-└── progress.md    # agent's action log (appended across tasks)
-```
-
-**Do NOT create per-task directories** like `implementer-task-1/`. One directory per role, updated continuously.
-
-The orchestrator aggregates agent findings into top-level `.writing/findings.md` and `.writing/progress.md` after each task completes.
-
-## Templates
-
-- [../../templates/findings.md](../../templates/findings.md) — Research storage (shared plugin-root template)
-- [../../templates/progress.md](../../templates/progress.md) — Session logging (shared plugin-root template)
-- [templates/agent-context.md](templates/agent-context.md) — Planning rules to inject into subagent prompts (skill-local)
+If you can answer these from `.writing/`, your state management is solid: Where am I? (Task Dashboard) · Where am I going? (remaining phases) · What's the goal? (outline) · What have I learned? (findings.md) · What have I done? (progress.md).
 
 ## Scripts
 
-These live at the plugin root, not in the skill dir. Invoke each as `bash "${CLAUDE_PLUGIN_ROOT}/scripts/<name>"` (the variable resolves at runtime; the relative path is `../../scripts/<name>`).
+At the plugin root, invoked as `bash "${CLAUDE_PLUGIN_ROOT}/scripts/<name>"`:
 
-**Planning lifecycle:**
-- `init-writing-dir.sh` — Initialize `.writing/` with findings.md and progress.md
-- `writing-reset.sh` — Reset active state, preserve archive/ and stash/
-- `check-writing-state.sh` — Check state: missing | empty | active | complete
-- `snapshot-save.sh` — Copy active project files to a target directory (shared by stash/archive)
+- `init-writing-dir.sh`, initialize `.writing/` with findings.md + progress.md
+- `check-writing-state.sh`, report state: missing | empty | active | complete
+- `writing-reset.sh`, reset active state, preserve `archive/`
+- `snapshot-save.sh`, copy active files to a target dir (used by archiving)
+- `aggregate-agent-findings.sh`, merge subagent findings into the top-level files
+- `detect-base-branch.sh`, `detect-test-command.sh`, `unique-filename.sh`, project detection helpers
 
-**Stash/archive:**
-- `stash-list.sh` — List available stashes (directory + legacy format)
-- `stash-restore.sh` — Restore stash to active .writing/ state
-- `archive-search.sh` — Search archives by keyword
-- `unique-filename.sh` — Generate unique dated filename/dirname
+## Anti-patterns
 
-**Agent orchestration:**
-- `aggregate-agent-findings.sh` — Merge agent "Critical for Orchestrator" items into top-level files
-
-**Project detection:**
-- `detect-base-branch.sh` — Detect main/master/develop
-- `detect-test-command.sh` — Detect project test command
-
-## Anti-Patterns
-
-| Don't | Do Instead |
+| Don't | Do instead |
 |-------|------------|
-| Use TaskCreate/TaskUpdate as cross-session persistence | Use .writing/progress.md Task Status Dashboard for persistent status. Task API is for session-scoped orchestration only. |
-| State goals once and forget | Re-read plan before decisions |
-| Hide errors and retry silently | Log errors to plan file |
-| Stuff everything in context | Store large content in files |
-| Start executing immediately | Create plan file FIRST |
-| Repeat failed actions or independently try alternatives | Log failure, escalate to user for direction |
-| Let subagent findings disappear | Aggregate into top-level findings.md |
+| Use TaskCreate/TaskUpdate as cross-session memory | Use `progress.md`'s Task Status Dashboard; the Task API is session-scoped only |
+| State goals once and forget | Re-read the outline before decisions |
+| Hide errors and retry silently | Log to `progress.md`, escalate on repeat |
+| Stuff everything in context | Store large content in `.writing/` files |
+| Let subagent findings disappear | Aggregate into the top-level `findings.md` |
