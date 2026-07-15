@@ -12,7 +12,7 @@ Enforces the plugin's house conventions on every ``skills/*/SKILL.md`` and the
  - a long references file (over ~200 lines) must carry a table of contents
 
 The description parser tolerates YAML block scalars ("|" and ">") so multiline
-frontmatter descriptions (humanizer, polish) are read whole. It is a minimal
+frontmatter descriptions (polish) are read whole. It is a minimal
 stdlib parser; it does NOT depend on pyyaml.
 
 Ratchet model
@@ -118,7 +118,7 @@ def extract_description(fm: str) -> str | None:
       description: > / >-     (folded block scalar, joined with spaces)
       description: | / |-     (literal block scalar, newlines preserved)
     A block scalar's body is every following line more indented than the key,
-    which is exactly what the YAML spec mandates and what humanizer/polish use.
+    which is exactly what the YAML spec mandates and what polish use.
     """
     lines = fm.splitlines()
     for idx, line in enumerate(lines):

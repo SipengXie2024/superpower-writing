@@ -63,7 +63,7 @@ The abstract does **not** get a claims file. Unlike body sections, it carries on
 \end{abstract}
 ```
 
-**Tag rules.** The stem `00_abstract` is claim-exempt, so the claim-first discipline does NOT require `% claim: id` tags here. But the `% bpmrc: X` tags ARE required. The `section-drafter` Step C self-review runs `grep -cE '^\s*% bpmrc: [BPMRC]' .writing/manuscript/00_abstract.tex` against the draft and fails the section if the count is not exactly 5 or if any of B/P/M/R/C is missing.
+**Tag rules.** The stem `00_abstract` is claim-exempt, so the claim-first discipline does NOT require `% claim: id` tags here. But the `% bpmrc: X` tags ARE required. The Step C self-review confirms the draft carries all five `% bpmrc:` tags (B/P/M/R/C, exactly 5); a quick check is `grep -cE '^\s*% bpmrc: [BPMRC]' .writing/manuscript/00_abstract.tex`. If any of B/P/M/R/C is missing, the section is not ready.
 
 **Paragraph merging is forbidden.** A common anti-pattern is collapsing Background + Problem into one paragraph, or Method + Result into one. Do not do this. Each element owns its own paragraph even when its contribution is one sentence. Reviewers parse abstracts structurally; merged paragraphs force them to re-segment the text and increase triage-reject risk.
 

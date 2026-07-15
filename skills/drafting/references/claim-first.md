@@ -14,7 +14,7 @@ All load-bearing metadata (claim tags, structural tags, draft-only markers) live
 
 ## Claim-first (non-negotiable)
 
-Resolve every claim's EVIDENCE before writing any prose for it. Prose written against a `STATUS: stub` claim violates the discipline. See `superpower-writing:main` §Claim-First Protocol for the rules. `claim-verification` is the mechanical backstop that later confirms every tag resolves, but resolve evidence now, do not lean on the later check.
+Resolve every claim's EVIDENCE before writing any prose for it. Prose written against a `STATUS: stub` claim violates the discipline. See [`../../_shared/core/claim-first-protocol.md`](../../_shared/core/claim-first-protocol.md) for the rules. `claim-verification` is the mechanical backstop that later confirms every tag resolves, but resolve evidence now, do not lean on the later check.
 
 ### Step A : Evidence resolution (before prose)
 

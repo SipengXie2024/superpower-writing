@@ -13,6 +13,12 @@
 # Plugin-internal design history (kept locally, not published)
 .planning/
 
+# Local Claude Code session state, worktrees, and local settings — never shipped
+.claude/
+
+# Packaged exports / build artifacts
+*.zip
+
 # Python
 __pycache__/
 *.py[cod]

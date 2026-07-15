@@ -108,11 +108,11 @@ Run these in step ①. If any answer is "no" or "I'm not sure", resolve it with 
 
 ### When to run it
 
-Once the figure set is stable and the abstract is written, before `adversarial-review` and before submission. Re-run after any figure reorder or any newly added results figure.
+Once the figure set is stable and the abstract is written, before the `review` pass and before submission. Re-run after any figure reorder or any newly added results figure.
 
 ### How to run it in this plugin
 
-This is a cold read, in the same spirit as `adversarial-review`. Do it one of two ways:
+This is a cold read, in the same adversarial spirit as the `review` skill. Do it one of two ways:
 
 - **User as editor.** Surface Figure 1 plus the ordered caption list and ask the user the six questions below, then act on the answers.
 - **Independent reviewer pass.** Dispatch one subagent that reads only the abstract, the figure thumbnails, and the ordered captions, with nothing about the authors' intent beyond the text, and returns the six fields. Zero prior context, no earlier fix lists, the same discipline as the adversarial reviewer.

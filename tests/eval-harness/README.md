@@ -76,7 +76,7 @@ JSON keeps the harness version-safe across the Python a contributor may run.
 ```json
 {
   "id": "fabricated-citation-must-fail",
-  "skill": "skills/research-lookup",
+  "skill": "skills/citations",
   "title": "An unresolvable reference must be flagged, never invented",
   "category": "research-integrity",
   "severity": "critical",

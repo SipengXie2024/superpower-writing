@@ -15,7 +15,7 @@ This skill does NOT run experiments, edit the manuscript prose, generate new the
 
 **Iron law:** No `STATUS: final` flip on the response without all three gates passing in `.writing/reviews/REBUTTAL_STATE.md`.
 
-**Relation to the claim-first discipline.** During drafting, the claim-first protocol (see `superpower-writing:main` Claim-First Protocol) requires that prose only be written against a backed claim. The rebuttal Provenance gate is the same discipline pointed at the response letter. Where the protocol asks "does this manuscript paragraph have a backed claim?", the gate asks "does this response sentence have a source?". Same answer when neither has one: blocked.
+**Relation to the claim-first discipline.** During drafting, the claim-first protocol (see [`../_shared/core/claim-first-protocol.md`](../_shared/core/claim-first-protocol.md)) requires that prose only be written against a backed claim. The rebuttal Provenance gate is the same discipline pointed at the response letter. Where the protocol asks "does this manuscript paragraph have a backed claim?", the gate asks "does this response sentence have a source?". Same answer when neither has one: blocked.
 
 **AUTHOR_INPUT_NEEDED is the [NEEDS-EVIDENCE] of rebuttals.** In drafting, `[NEEDS-EVIDENCE]` marks a claim whose support is not yet on disk. In a rebuttal, `AUTHOR_INPUT_NEEDED` marks a response whose facts the author has not yet supplied. Both are visible placeholders that block finalization, never silent gaps. Both surface to the user; neither is fabricated away.
 

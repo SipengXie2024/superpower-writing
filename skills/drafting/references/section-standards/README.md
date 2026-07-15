@@ -1,6 +1,6 @@
 # Section Standards
 
-Section-specific writing conventions injected into `section-drafter` subagent prompts and referenced during outlining. One file per manuscript section; filenames follow a uniform `NN_slug.md` convention (numeric prefix + slug).
+Section-specific writing conventions the drafter reads inline while writing a section, and that outlining reads while shaping bullets. One file per manuscript section; filenames follow a uniform `NN_slug.md` convention (numeric prefix + slug).
 
 ## Filename contract
 
@@ -43,11 +43,11 @@ A benchmark paper reuses the shared files for its other sections: `01_introducti
 
 ### Match rule (two-level fallback, slug-ending match)
 
-The orchestrator takes the manuscript file's **stem** (e.g., `02_background` from `.writing/manuscript/02_background.tex`) and resolves it to a standards file in `section-standards/` (which contains `.md` instruction files that the drafter agent reads verbatim). The scan target is **always the `section-standards/` directory, not `manuscript/`** — the `.md` extension below refers to the standards file's extension, not the manuscript's.
+Take the manuscript file's **stem** (e.g., `02_background` from `.writing/manuscript/02_background.tex`) and resolve it to a standards file in `section-standards/` (which contains `.md` instruction files the drafter reads inline). The scan target is **always the `section-standards/` directory, not `manuscript/`**: the `.md` extension below refers to the standards file's extension, not the manuscript's.
 
 1. **Exact-stem match**: look for `section-standards/<NN>_<slug>.md` — used when the paper's stem number coincides with the canonical slot (e.g., a no-motivation CS paper with `manuscript/02_background.tex` matches `section-standards/02_background.md` directly).
 2. **Slug-ending scan**: if step 1 misses, scan `section-standards/` for any file whose name ends in `_<slug>.md`. Exactly one such file → use it. Zero matches → step 3. **Multiple matches** → abort with a configuration error (should never happen given the canonical-one-per-slug convention; indicates accidental duplicate).
-3. **No match**: substitute `No section-specific standard applies; use general IMRAD conventions from writing-principles.md.` as `{SECTION_STANDARD}`.
+3. **No match**: no section-specific standard applies; fall back to the general IMRAD conventions from `writing-principles.md`.
 
 Practical outcomes (manuscript `.tex` stem → matched standards `.md` file):
 
@@ -61,11 +61,11 @@ Renaming a file in this directory (e.g., creating a paper-specific `section-stan
 
 ## How the standards file is consumed
 
-1. **Outlining** — `superpower-writing:outlining` Step 3 applies the match rule above for each section and, if a file is found, reads it before drafting outline bullets for that section. The standards file dictates bullet structure, labels, and count. Bullets must pass the outline-level checks in the standards file before the outline is considered complete.
+1. **Outlining.** `superpower-writing:outlining` Step 3 applies the match rule above for each section and, if a file is found, reads it before drafting outline bullets for that section. The standards file dictates bullet structure, labels, and count. Bullets must pass the outline-level checks in the standards file before the outline is considered complete.
 
-2. **Drafting** — `superpower-writing:drafting` orchestrator applies the same match rule when assembling the per-section `section-drafter` subagent prompt. The file content is inlined into the `{SECTION_STANDARD}` placeholder in `section-drafter-prompt.md`. If neither the exact-stem nor slug-ending match finds a file, `{SECTION_STANDARD}` is replaced with `No section-specific standard applies; use general IMRAD conventions from writing-principles.md.`
+2. **Drafting.** `superpower-writing:drafting` applies the same match rule and reads the matched file inline before writing the section (see `claim-first.md` Step B). If neither the exact-stem nor slug-ending match finds a file, no section-specific standard applies and the general IMRAD conventions from `writing-principles.md` govern instead.
 
-3. **Self-review** — Step C of the drafter template re-reads the same resolved standards file and greps the draft for the required structural tags (e.g., `% bpmrc: B`, `% cars: T`, `% background: D`). A missing tag blocks the section from being marked `drafted`.
+3. **Self-review.** Step C of drafting re-reads the same resolved standards file and confirms the draft carries the required structural tags (e.g., `% bpmrc: B`, `% cars: T`, `% background: D`). A missing tag means the section is not ready to mark `drafted`; the exhaustive tag sweep is `claim-verification`'s job.
 
 ## Required content in every standards file
 
@@ -78,7 +78,7 @@ Each file MUST contain the following H2 sections, in this order:
 5. `## Style rules` — tense, voice, allowed citation forms, venue-specific caveats.
 6. `## Common failure modes` — 3–5 concrete patterns reviewers flag, with a short diagnosis.
 
-The `section-drafter` agent reads the file verbatim — do not use relative links that would break when the content is inlined into a subagent prompt.
+The drafter reads the file inline, so keep each standards file self-contained and readable on its own.
 
 ## Frontmatter
 

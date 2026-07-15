@@ -4,10 +4,8 @@ These patterns slip past outline compliance and prose-quality review because the
 
 Loaded by:
 
-- `skills/drafting/SKILL.md` §Style cautions for section intros and argumentative prose — one-line summary per rule.
-- `skills/drafting/references/section-drafter-prompt.md` §Step B — the drafter subagent reads this file at write time.
-- `agents/manuscript-reviewer.md` item 7 (Systems-paper argumentative structure) — canonical wording for flagged patterns.
-- `agents/spec-reviewer.md` item 5 (Argumentative-structure compliance) — canonical wording for compliance-level flags.
+- `skills/drafting/SKILL.md` §Writing standards, a one-line summary per rule.
+- `skills/drafting/references/claim-first.md` §Step B, read at write time before section intros.
 
 ## Overview paragraph discipline
 
@@ -111,7 +109,7 @@ Before writing any section intro, overview paragraph, thesis sentence, or contri
 
 ## How to apply at review time
 
-The reviewer agents (`manuscript-reviewer.md` item 7; `spec-reviewer.md` item 5) carry the patterns and severities inline, since agent files are loaded whole as system prompts. Use this reference as the canonical source when updating reviewer wording so the two agents stay in sync.
+This reference is the canonical source for these patterns and their severities. `drafting` reads it at write time and `polish` reuses it, so keep the wording here authoritative.
 
 ## Imported Patterns (from scientific-writing dissolution)
 

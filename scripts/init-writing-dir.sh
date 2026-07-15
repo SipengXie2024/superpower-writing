@@ -68,7 +68,7 @@ create_if_missing "$TEMPLATE_DIR/findings.md"   "$TARGET/findings.md"
 create_if_missing "$TEMPLATE_DIR/metadata.yaml" "$TARGET/metadata.yaml"
 [[ -f "$TARGET/outline.md" ]] || : > "$TARGET/outline.md"
 
-# refs.bib: empty file that drafting / claim-verification / citation-management
+# refs.bib: empty file that drafting / claim-verification / citations
 # populate from Zotero and network lookups as citations resolve.
 [[ -f "$TARGET/refs.bib" ]] || : > "$TARGET/refs.bib"
 

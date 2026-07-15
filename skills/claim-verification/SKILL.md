@@ -1,6 +1,6 @@
 ---
 name: claim-verification
-description: Evidence-reliability check. Walks every % claim tag in LaTeX manuscript/*.tex, confirms \cite{} citekeys resolve against .writing/refs.bib (exported from Zotero), runs semantic match against research-lookup abstracts to catch hallucinated or mismatched citations, optionally checks numeric/table consistency, flags any [NEEDS-EVIDENCE] or draft-only markers. Run on demand or when the skeleton is ready for the human author.
+description: Evidence-reliability check. Walks every % claim tag in LaTeX manuscript/*.tex, confirms \cite{} citekeys resolve against .writing/refs.bib (exported from Zotero), runs semantic match against network-fetched abstracts to catch hallucinated or mismatched citations, optionally checks numeric/table consistency, flags any [NEEDS-EVIDENCE] or draft-only markers. Run on demand or when the skeleton is ready for the human author.
 ---
 
 # Claim Verification
@@ -15,7 +15,7 @@ The most valuable check for an AI-drafted skeleton is Pass 2: it catches halluci
 
 **Iron law:** No `STATUS: verified` flip without fresh pass evidence recorded in the report.
 
-**Relation to the Claim-First Protocol:** during drafting, the claim-first discipline (see `superpower-writing:main` §Claim-First Protocol) requires resolving a claim's evidence before writing prose against it — do not draft against a stub-status claim. Drafting flips `STATUS` to `evidence_ready` when evidence is found. This skill is what flips `evidence_ready` → `verified` after the passes succeed. Never edit `STATUS` to `verified` manually: the audit trail lives in `.writing/verify-report.md`.
+**Relation to the Claim-First Protocol:** during drafting, the claim-first discipline (see [`../_shared/core/claim-first-protocol.md`](../_shared/core/claim-first-protocol.md)) requires resolving a claim's evidence before writing prose against it, do not draft against a stub-status claim. Drafting flips `STATUS` to `evidence_ready` when evidence is found. This skill is what flips `evidence_ready` → `verified` after the passes succeed. Never edit `STATUS` to `verified` manually: the audit trail lives in `.writing/verify-report.md`.
 
 **Optional term-ordering discipline.** If the project opted into `.writing/glossary.md`, drafting must keep every term defined before it is used: a `% define:` tag belongs in the right section, and no `% use:` tag may reference a term whose `defined_in` sits later in the paper. This verification skill does **not** re-run those checks; they are edit-time invariants, not verification-gate invariants. If you suspect a term ordering drifted after manual edits, sweep manually with `grep -n '% \(define\|use\):' .writing/manuscript/*.tex` and cross-reference `.writing/glossary.md`.
 
@@ -95,8 +95,8 @@ For each claim that passed Pass 1 with `type: citation` EVIDENCE entries:
 #### 2b. Network fallback
 
 1. Check `.writing/verify-cache.json` for the DOI. If present AND `source` field indicates successful prior resolution, use cached abstract_hash to confirm abstract still matches (re-fetch abstract only if hash mismatch or cache entry absent).
-2. On cache miss / mismatch, invoke `Skill(skill="superpower-writing:citation-management")` with the DOI. This resolves the DOI against Crossref and returns canonical metadata.
-3. On failure or ambiguity, invoke `Skill(skill="superpower-writing:research-lookup")` with the DOI and the CLAIM text. research-lookup queries Crossref (and optionally Semantic Scholar / arXiv / DBLP for CS) and returns abstract + metadata.
+2. On cache miss / mismatch, invoke `Skill(skill="superpower-writing:citations")` with the DOI. This resolves the DOI against Crossref and returns canonical metadata.
+3. On failure or ambiguity, invoke `Skill(skill="superpower-writing:literature")` with the DOI and the CLAIM text. literature queries Crossref (and optionally Semantic Scholar / arXiv / DBLP for CS) and returns abstract + metadata.
 4. **Network hit:** record `source: network` in the claim EVIDENCE entry.
 5. **`auto_push_new_citations: true` behavior:** if Zotero is enabled AND auto_push is true AND network (not Zotero) returned the hit, push the resolved item to `zotero.collection_key` by calling `zotero_add_by_doi(doi=<DOI>, collection_key=<key>)` from the `zotero` MCP server. The tool dedupes by DOI internally. Update EVIDENCE `source` to `both` and record the returned item key as `zotero_item_key`.
 6. **Network miss AND Zotero miss:** FAIL: `DOI <doi> for claim '<id>' unresolvable via Zotero or Crossref`.
@@ -235,12 +235,11 @@ This skill invokes these plugin-local skills via the Skill tool with the `superp
 | Skill | Invocation point | Expected I/O |
 |-------|------------------|--------------|
 | `zotero-mcp` (MCP) | Pass 2a, 2c body lookup, §5 push-back | `zotero_search_items` + `zotero_get_item_metadata` for query-by-DOI; `zotero_semantic_search` for claim-text similarity fallback (catches DOI-mismatched items and finds paragraph-level support when the abstract is ambiguous); `zotero_get_item_fulltext` for narrow passage reads when chunks alone are insufficient; `zotero_add_by_doi` for dedup-aware push. Registered in `.mcp.json`. |
-| `superpower-writing:citation-management` | Pass 2b primary | Resolve DOI → canonical Crossref record. |
-| `superpower-writing:research-lookup` | Pass 2b fallback / semantic match | DOI → abstract; optionally compare abstract ↔ claim text. |
+| `superpower-writing:citations` | Pass 2b primary | Resolve DOI → canonical Crossref record. |
+| `superpower-writing:literature` | Pass 2b fallback / semantic match | DOI → abstract; optionally compare abstract ↔ claim text. |
 
-If any of these skills is missing, `main` skill's dep gate will have already hard-failed the session. Inside this skill, a missing skill at invocation time is an unrecoverable error: halt verification and surface the install command.
+A missing skill at invocation time is an unrecoverable error: halt verification and surface the install command.
 
 ## Integration Points
 
-- **main skill:** routes here when user says "verify", "check claims", or when the skeleton is ready for the human author.
-- **drafting skill:** its section drafters flip `stub → evidence_ready`. This skill flips `evidence_ready → verified`.
+- **drafting skill:** it flips `stub → evidence_ready` as it resolves evidence. This skill flips `evidence_ready → verified`.

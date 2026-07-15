@@ -9,7 +9,7 @@
 
 ## Session: [YYYY-MM-DD]
 
-### Phase: outlining / writing-plans / drafting / claim-verification
+### Phase: outlining / drafting / claim-verification
 - **Status:** pending
 - **Started:** [timestamp]
 - Actions taken:

@@ -97,7 +97,7 @@ Polish must not create a novelty claim from a contribution claim. If prior-work 
 
 ## Final evidence-preservation pass
 
-After the humanizer and clarity passes, compare the result with the source and confirm:
+After the de-AI and clarity passes, compare the result with the source and confirm:
 
 - every number, unit, uncertainty statement, citation, figure/table reference, and `[NEEDS-EVIDENCE]` token survives verbatim;
 - every comparison still names its comparator, metric, condition, and evidence anchor;

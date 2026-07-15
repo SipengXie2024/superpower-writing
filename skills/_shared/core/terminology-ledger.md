@@ -81,7 +81,7 @@ one register where repeating the same word is correct. A reader who sees
 "throughput", "ingest rate", and "processing speed" in three sections cannot
 tell whether they are one metric or three. Pick one and repeat it. This rule
 overrides the usual prose advice against repetition. It also overrides the
-humanizer instinct to swap a fixed term for a synonym.
+de-AI instinct to swap a fixed term for a synonym.
 
 **Never coin new names.** Do not invent a name for the author's system, module,
 metric, or concept. A term may be missing, undefined, or used inconsistently in

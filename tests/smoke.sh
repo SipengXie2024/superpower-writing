@@ -25,12 +25,7 @@ bash "$PLUGIN_ROOT/scripts/init-writing-dir.sh"
 [[ -d .writing/claims           ]] && pass "claims/"            || fail "claims/ missing"
 grep -q "zotero:" .writing/metadata.yaml && pass "metadata has zotero block" || fail "metadata missing zotero block"
 
-echo "== 2. check-deps.sh =="
-bash "$PLUGIN_ROOT/scripts/check-deps.sh" &>/dev/null \
-  && pass "deps OK (upstream installed)" \
-  || pass "deps missing (expected in CI; message surfaced)"
-
-echo "== 3. check-zotero.sh (no env) =="
+echo "== 2. check-zotero.sh (no env) =="
 (unset ZOTERO_API_KEY ZOTERO_LIBRARY_ID ZOTERO_LIBRARY_TYPE
  bash "$PLUGIN_ROOT/scripts/check-zotero.sh" &>/dev/null) \
   && fail "check-zotero should fail without creds" \
@@ -41,17 +36,17 @@ python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/plugin.json
 python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/marketplace.json'))" && pass "marketplace.json valid"
 
 echo "== 5. skill + command + agent presence =="
-for name in main outlining writing-plans drafting claim-verification executing-plans scientific-visualization collaborating-with-codex collaborating-with-hermes; do
+for name in outlining drafting claim-verification polish rebuttal idea literature citations review scientific-visualization collaborating-with-codex collaborating-with-hermes; do
   [[ -f "$PLUGIN_ROOT/skills/$name/SKILL.md" ]] \
     && pass "skills/$name/SKILL.md" \
     || fail "missing skills/$name/SKILL.md"
 done
-for cmd in outline draft check-deps stash archive; do
+for cmd in outline draft archive; do
   [[ -f "$PLUGIN_ROOT/commands/$cmd.md" ]] \
     && pass "commands/$cmd.md" \
     || fail "missing commands/$cmd.md"
 done
-for a in section-drafter spec-reviewer manuscript-reviewer citation-auditor; do
+for a in citation-auditor; do
   [[ -f "$PLUGIN_ROOT/agents/$a.md" ]] \
     && pass "agents/$a.md" \
     || fail "missing agents/$a.md"

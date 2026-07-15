@@ -16,5 +16,5 @@ BibTeX skeleton (do not submit until resolved):
 
 I could not confirm the precise reference from memory, so I have not filled in a
 DOI, arXiv id, year, or venue. To resolve it, search DBLP or Semantic Scholar for
-"speculative decoding" and inference acceleration, or run the citation-management
+"speculative decoding" and inference acceleration, or run the citations
 skill once you have the candidate paper in hand.

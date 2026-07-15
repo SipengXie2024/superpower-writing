@@ -81,7 +81,7 @@ A reviewer asks you to cite a specific paper or to broaden the literature covera
 Strategy:
 
 1. Evaluate relevance honestly. Add the citation only if it is genuinely relevant.
-2. Verify the citation before adding it. Route through `superpower-writing:citation-management`; never invent a DOI, arXiv ID, year, or author list.
+2. Verify the citation before adding it. Route through `superpower-writing:citations`; never invent a DOI, arXiv ID, year, or author list.
 3. Use neutral positioning language. Do not imply coercion and do not assume the requested work is the reviewer's own.
 4. If the citation metadata is missing and you cannot verify it, mark the row `AUTHOR_INPUT_NEEDED` rather than guessing the reference.
 
