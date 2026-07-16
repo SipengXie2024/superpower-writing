@@ -7,6 +7,31 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.0] — 2026-07-16
+
+Breaking restructure. Model capability has outgrown much of the borrowed process ceremony, so this release cuts it and consolidates the rest: 35 skills become 20. The durable `.writing/` planning core (outline, findings, progress, claims, manuscript) is unchanged.
+
+### Removed
+
+- **BREAKING: 17 skills deleted.** Update any saved invocation, command, or note that named them; each maps to a surviving skill.
+  - Idea cluster: `research-ideation`, `idea-evaluator`, `novelty-gap-check` now live in `idea`.
+  - Literature cluster: `literature-review`, `research-lookup`, `academic-citation-workflow` now live in `literature`; `citation-management` now lives in `citations`.
+  - Review cluster: `adversarial-review`, `external-review` now live in `review`.
+  - Polish cluster: `polish-by-diff`, `writing-clearly-and-concisely`, `humanizer`, `evidence-led-wording` now live in `polish`.
+  - Dropped process ceremony: `writing-plans`, `executing-plans`, `git-worktrees`, `spec-interview`, `brainstorming`, and the central `main` router.
+- Orphaned agents, commands, and scripts: the `section-drafter`, `manuscript-reviewer`, and `spec-reviewer` agents; the `check-deps` and `stash` commands and their scripts. There is no central router or dependency-check gate anymore; every surviving skill self-routes by its own description.
+
+### Changed
+
+- **Five skill clusters merged one-to-one.** `idea` generates candidates, scores them with a FINER rubric, and runs novelty and fatal-flaw checks in one skill (the FINER hard gates are now readable guidance; the fatal-flaw short-circuit and the never-fabricate rule stay). `literature` searches Zotero first, falls back to the network, and synthesizes. `citations` slims citation-management to a Zotero-MCP-first core carrying its own validation scripts. `review` runs adversarial or venue mode, each keeping separate Codex and Hermes opinions with no synthetic consensus. `polish` runs the clarity, de-AI, and evidence-wording passes in one skill, in place or as a diff.
+- **Outlining now interleaves an interview.** A coarse outline, then a per-section interview (contribution boundary, claim to evidence, venue framing, novelty, likely reviewer attacks, narrative spine), then revision, converging with the author instead of guessing the paper's shape.
+- **Drafting is inline claim-first, not parallel subagents.** You draft each section yourself in outline order: resolve every claim's evidence first, then write LaTeX prose tagged with its claim ids. The old section-drafter subagent orchestration is gone.
+- **Enforcement is split by kind.** Evidence and fact-integrity checks stay mechanical: `claim-verification` still walks every `% claim` tag and confirms every `\cite` resolves. Rhetorical and structural rules are readable guidance again, not grep-enforced gates.
+
+### Added
+
+- **Shared `_shared/core/claim-first-protocol.md`.** The claim-first tags, the `stub → evidence_ready → verified` STATUS state machine, and the citation-free-abstract rule are extracted from the deleted `main` skill into one shared reference that `drafting`, `claim-verification`, and `rebuttal` all point at.
+
 ## [1.1.0] — 2026-07-13
 
 ### Added
