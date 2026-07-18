@@ -7,6 +7,17 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.1.0] — 2026-07-18
+
+Figure-prompt assets absorbed from [LigphiDonk/academic-figure-generator](https://github.com/LigphiDonk/academic-figure-generator) (MIT), all into `scientific-schematics`. Generation stays on the existing Codex `image_gen` (gpt-image-2) pipeline; no new skill and no new dependency.
+
+### Added
+
+- **Pastel modern-ML style preset** (`references/style-pastel-ml.md`). An opt-in second visual style matching 2024-2025 ICLR/NeurIPS figures: pure white canvas, shadow-lifted white panels, rounded fonts (Nunito/Poppins), pastel token squares, pill-shaped concept labels. Plugs into the existing 6-section prompt contract; the flat-minimal systems style stays the default.
+- **Anti-AI-look color rules.** Six avoid-to-use-instead substitutions against the machine-generated look: no colored background panels, no saturated banner bars, white fills with color only on borders, monochrome thumbnails, at most 3 colors plus greys, no gradients.
+- **Thumbnail vocabulary.** 18 data-type-to-prompt-phrase entries for embedding small monochrome visualizations inside module boxes when writing the LAYOUT section.
+- **Information-density checklist group** (opt-in, for dense ML-figure styles): no empty placeholder boxes, at least half the modules carry a thumbnail, dimensions annotated along main data-flow arrows.
+
 ## [2.0.0] — 2026-07-16
 
 Breaking restructure. Model capability has outgrown much of the borrowed process ceremony, so this release cuts it and consolidates the rest: 35 skills become 20. The durable `.writing/` planning core (outline, findings, progress, claims, manuscript) is unchanged.
@@ -787,6 +798,10 @@ Initial scaffold.
 - Auto-submission to journal portals.
 - LaTeX compile.
 
+[2.1.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v2.1.0
+[2.0.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v2.0.0
+[1.1.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v1.1.0
+[1.0.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v1.0.0
 [0.9.1]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.9.1
 [0.9.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.9.0
 [0.8.0]: https://github.com/SipengXie2024/superpower-writing/releases/tag/v0.8.0

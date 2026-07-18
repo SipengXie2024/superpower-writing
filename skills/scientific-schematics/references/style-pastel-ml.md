@@ -1,4 +1,4 @@
-# Pastel ML Style — Modern Airy Preset
+# Pastel ML Style: Modern Airy Preset
 
 Adapted from `academic-figure-prompt-pastel` in
 [LigphiDonk/academic-figure-generator](https://github.com/LigphiDonk/academic-figure-generator)
@@ -26,21 +26,21 @@ arrow-continuity and cross-view-consistency locks, no figure numbers.
 ## Five style rules
 
 1. **Pure white canvas + white panels + faint shadow.** Canvas is flat
-   `#FFFFFF` — no gradient, no tint, no grey. Panels are white `#FFFFFF`
+   `#FFFFFF`, with no gradient, no tint, no grey. Panels are white `#FFFFFF`
    rounded rectangles (radius ~20px) lifted only by a soft drop-shadow
    (3px blur, 1px y-offset, rgba(0,0,0,0.06)). Never distinguish panels with
    grey fills or borders; the shadow is the only separator.
-2. **Rounded friendly font.** Nunito / Poppins / Quicksand / Comfortaa —
-   rounded letter terminals, not angular Helvetica/Arial. Titles semi-bold to
+2. **Rounded friendly font.** Nunito / Poppins / Quicksand / Comfortaa,
+   with rounded letter terminals, not angular Helvetica/Arial. Titles semi-bold to
    bold (600-700) ~16-18pt; body regular (400) ~10-11pt; math in italic serif
    (Computer Modern / STIX). The font is the single strongest style marker.
-3. **Packed but uncluttered.** Every panel is filled with content — tokens,
-   curves, formulas, icons, arrows — at a consistent 8-12px micro-spacing.
+3. **Packed but uncluttered.** Every panel is filled with content (tokens,
+   curves, formulas, icons, arrows) at a consistent 8-12px micro-spacing.
    No dead space, no overlap, no text walls.
 4. **Floating elements, no nested boxes.** Elements sit directly on the white
    panel surface. No box-in-box nesting. Concept names go in faint pill-shaped
    badges.
-5. **Color rides on tokens, text, and curves — never on panels.** Small rounded
+5. **Color rides on tokens, text, and curves, never on panels.** Small rounded
    token squares (10-14px, pastel fill + 1px slightly darker border), colored
    keyword text in semantic colors, pastel curve strokes. Canvas and panels
    stay white.
@@ -74,7 +74,7 @@ when the content is genuinely symmetric.
 
 ## Prompt blocks
 
-Global block — goes at the top of the VISUAL STYLE section:
+Global block (goes at the top of the VISUAL STYLE section):
 
 ```text
 CANVAS: Pure flat white (#FFFFFF). No gradient, no tint, no grey.
@@ -85,14 +85,14 @@ shadow.
 FONT: Friendly rounded geometric sans-serif (Nunito / Poppins / Quicksand).
 Titles semi-bold to bold (600-700), ~16-18pt. Body regular (400), ~10-11pt.
 Math in italic serif (Computer Modern). Warm, approachable, modern feel.
-CONTENT DENSITY: Panels are FILLED with content — tokens, curves, formulas,
-icons, arrows — with consistent 8-12px micro-spacing. "Thoughtfully packed",
+CONTENT DENSITY: Panels are FILLED with content (tokens, curves, formulas,
+icons, arrows) with consistent 8-12px micro-spacing. "Thoughtfully packed",
 not "sparse".
 NO NESTED BOXES: Elements float directly on white panel surfaces. Only
 pill-shaped labels for concept names.
 ```
 
-Per-panel block — one per panel in the LAYOUT section:
+Per-panel block (one per panel in the LAYOUT section):
 
 ```text
 === PANEL: [name] ===
@@ -102,7 +102,7 @@ Content (packed, floating elements):
   [element descriptions...]
 ```
 
-Closing style block — end of prompt:
+Closing style block (end of prompt):
 
 ```text
 === STYLE SPECIFICATIONS ===
@@ -154,9 +154,9 @@ Inline illustrations:
 
 ## Quality checklist
 
-- [ ] Canvas is `#FFFFFF` — no gradient, no grey tint
-- [ ] Panels are `#FFFFFF`, lifted by soft shadow only — no grey fills
-- [ ] Font named as Nunito/Poppins/Quicksand — not Helvetica
+- [ ] Canvas is `#FFFFFF`, no gradient, no grey tint
+- [ ] Panels are `#FFFFFF`, lifted by soft shadow only, no grey fills
+- [ ] Font named as Nunito/Poppins/Quicksand, not Helvetica
 - [ ] Every panel filled (tokens + curves + formulas + icons), no dead space
 - [ ] 8-12px micro-spacing, no overlap
 - [ ] No box-in-box nesting; floating elements only
@@ -165,4 +165,4 @@ Inline illustrations:
 - [ ] Token squares have pastel fill + 1px darker border
 - [ ] Rich inline illustrations (curves, trees, networks), not just squares
 - [ ] Formulas in italic serif, floating on panels
-- [ ] Overall reads like a 2024-2025 ICLR oral figure — warm and approachable
+- [ ] Overall reads like a 2024-2025 ICLR oral figure, warm and approachable
