@@ -1,7 +1,7 @@
 {
   "name": "superpower-writing",
   "description": "Self-contained CS/systems/ML academic-writing plugin from research ideation to reviewer response. It drafts an evidence-backed IMRAD skeleton under claim-first discipline, verifies citations, creates figures, and supports rebuttals. Read-only academic consultation runs Codex and Hermes concurrently with separate evidence-linked handoffs, no voting or synthetic consensus, strict unpublished-material confirmation, Codex read-only isolation, and Hermes workspace-change detection. Scientific image generation remains a Codex-only exception. All model verdicts are advisory and require source verification.",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "author": {
     "name": "sipeng"
   },
