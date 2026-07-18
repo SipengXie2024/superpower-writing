@@ -1,6 +1,6 @@
 ---
 name: scientific-schematics
-description: Generate scientific figures as raster PNG via Codex's native image_gen (collaborating-with-codex bridge). Two roles — (1) design exploration, generating several diverse direction drafts in parallel for the user to pick from; the chosen draft is either used directly (manuscript, slides/PPT rework) or handed to tikz-figures as a replication reference, at the user's choice; (2) final raster output for pictorial figures (lighting/texture/3D/hand-drawn concept art, graphical abstracts) or whenever the user prefers a polished PNG. Codex runs its imagegen-scientific-schematics skill for design and visual review; this skill supplies the writing-side entry point, prompt guidance, and publication checklist.
+description: Generate scientific figures as raster PNG via Codex's native image_gen (collaborating-with-codex bridge). Two roles — (1) design exploration, generating several diverse direction drafts in parallel for the user to pick from; the chosen draft is either used directly (manuscript, slides/PPT rework) or handed to tikz-figures as a replication reference, at the user's choice; (2) final raster output for pictorial figures (lighting/texture/3D/hand-drawn concept art, graphical abstracts) or whenever the user prefers a polished PNG. Codex runs its imagegen-scientific-schematics skill for design and visual review; this skill supplies the writing-side entry point, prompt guidance, and publication checklist. Includes an opt-in pastel modern-ML style preset (ICLR/NeurIPS 2024-2025 airy look) for when the user asks for pastel / modern ML figure styling.
 allowed-tools: Read Write Edit Bash
 license: MIT license
 metadata:
@@ -191,7 +191,9 @@ structure forces you to fix the style and spell out every label before generatio
    rounded blue gradient boxes with drop shadows that scream "stock template". Pick one
    style and keep it identical across every figure in the paper. For systems / ML papers
    default to a flat, minimal, light-background style (no gradients, no 3D, thin dark-gray
-   arrows, sans-serif labels inside boxes).
+   arrows, sans-serif labels inside boxes). For modern ML venues (ICLR / NeurIPS / ICML) a
+   second preset is available — the pastel airy style of 2024-2025 papers: read
+   `references/style-pastel-ml.md` and use its blocks for VISUAL STYLE and COLOR PALETTE.
 3. **COLOR PALETTE (about 10 lines).** Exact hex codes for every color. Use a
    colorblind-safe set (Okabe-Ito) and assign one accent per logical group.
 4. **LAYOUT (50 to 150 lines).** Every component, box, and zone with its exact text and
@@ -211,6 +213,48 @@ Two rules govern the whole contract:
   select the best, rather than accepting the first. This pairs with the at-most-three
   targeted fix iterations in "Failure and Recovery": three fresh attempts up front, then
   bounded fixes on the chosen one.
+
+### Anti-AI-look color rules
+
+The fastest tell of a machine-generated figure is color overuse. Bake these
+substitutions into the VISUAL STYLE and COLOR PALETTE sections (this table and the
+thumbnail vocabulary below adapted from LigphiDonk/academic-figure-generator, MIT):
+
+| Avoid | Use instead |
+|-------|-------------|
+| 4-5 colored background panels | white-dominant + faint grey grouping |
+| Saturated header banner bars | small-caps text labels + thin grey divider |
+| A different fill color per module | white fills, color only on borders |
+| Full-color embedded thumbnails | monochrome or 2-color thumbnails |
+| 5+ colors in one figure | at most 3 colors + greys |
+| Rainbows / gradients | flat solid colors |
+
+### Thumbnail vocabulary
+
+Dense conference figures embed small monochrome visualizations inside module boxes.
+When writing the LAYOUT section, pull phrases from this table instead of leaving
+boxes as empty labeled rectangles:
+
+| Data type | Prompt phrase |
+|-----------|---------------|
+| Time series | `a small time-series waveform thumbnail` |
+| Frequency spectrum | `a small frequency spectrum bar chart thumbnail` |
+| Attention map | `a small monochrome attention heatmap grid thumbnail` |
+| Trajectory | `a small 3D orbital trajectory curve thumbnail` |
+| Probability distribution | `a small probability distribution bar chart thumbnail` |
+| Decision tree | `a small decision tree branching diagram thumbnail` |
+| Confusion matrix | `a small confusion matrix heatmap thumbnail` |
+| Network layer | `a small neural network layer diagram thumbnail` |
+| Feature vector | `a small horizontal feature vector bar visualization` |
+| Scatter | `a small scatter plot with cluster coloring thumbnail` |
+| Receptive field | `a progressively larger receptive field grid icon` |
+| Convolution kernel | `a small convolution filter kernel grid thumbnail` |
+| Gradient flow | `a small gradient flow direction arrow diagram` |
+| Loss curve | `a small training loss convergence curve thumbnail` |
+| ROC curve | `a small ROC curve with AUC shading thumbnail` |
+| Image sample | `a small example image/photo thumbnail` |
+| Point cloud | `a small 3D point cloud visualization thumbnail` |
+| Spatial heatmap | `a small spatial heatmap overlay thumbnail` |
 
 ## Prompt Locks for Complex Figures
 
@@ -284,6 +328,11 @@ Before submitting diagrams, verify:
 - [ ] No overlapping elements; adequate spacing; clean alignment
 - [ ] All arrows connect properly to their intended targets (no broken stubs)
 
+**Information density (opt-in — dense ML-figure styles, not the minimal systems default)**
+- [ ] Every module box has sub-content (sub-boxes, thumbnails, formulas) — no empty placeholder boxes
+- [ ] At least half the modules embed a small monochrome thumbnail
+- [ ] Dimensions annotated along main data-flow arrows (e.g. R^(N×D))
+
 **Accessibility**
 - [ ] Colorblind-safe palette (Okabe-Ito); works in grayscale; sufficient contrast
 - [ ] Redundant encoding where appropriate (shapes + colors)
@@ -311,6 +360,9 @@ Before submitting diagrams, verify:
 
 - **`references/best_practices.md`** — publication standards, file formats, accessibility,
   and typography guidelines (backend-agnostic).
+- **`references/style-pastel-ml.md`** — opt-in pastel modern-ML style preset
+  (ICLR/NeurIPS 2024-2025 airy look): style rules, palettes, prompt blocks, element
+  vocabulary, and its own quality checklist.
 
 **Publication standards**
 - Nature Figure Guidelines: https://www.nature.com/nature/for-authors/final-submission
