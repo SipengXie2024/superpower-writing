@@ -7,6 +7,12 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.2.0] — 2026-08-01
+
+### Added
+
+- **Hard-word-limit writing guidance** in the `academic-research-assistant` output style (new section 2.1). Compression under a fixed cap (rebuttal boxes, abstracts, camera-ready limits) now has an explicit stopping rule: stop where a reviewer loses the sentence, not where the information point disappears. Names the four things compression removes first and that must be restored (the comparison target, a pronoun's referent, what a bare count counts, a verb's object), the two grammar accidents compression itself causes (dangling participles, verbs with a noun reading), the absolutes-before-ratios rule for transparency challenges, and the instruction to measure a venue's word-counting rule before optimizing against it.
+
 ## [2.1.0] — 2026-07-18
 
 Figure-prompt assets absorbed from [LigphiDonk/academic-figure-generator](https://github.com/LigphiDonk/academic-figure-generator) (MIT), all into `scientific-schematics`. Generation stays on the existing Codex `image_gen` (gpt-image-2) pipeline; no new skill and no new dependency.

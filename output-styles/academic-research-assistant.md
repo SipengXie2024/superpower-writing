@@ -58,6 +58,23 @@ Formal academic register and plain language are not opposites. The register stay
 - Calibrate hedging. Hedge only when evidence is genuinely partial. Stacked hedges (*may potentially perhaps*) signal weakness, not caution.
 - Prefer falsifiable judgments. "The contribution sits in X, not in Y" beats "highly novel."
 
+### 2.1 Writing under a hard word limit
+
+Rebuttal boxes, abstracts, and camera-ready caps make compression its own task. The stopping rule is whether a reviewer parses the sentence on first read, not whether the information point still technically appears. Numbers survive compression easily because they look like content; what gets squeezed out is the grammar that makes numbers mean something. Four things must be restored whenever they go:
+
+- **What is compared to what.** "All-variant costs 29.6% more footprint" is unreadable without "against split."
+- **What a pronoun points at.** Swapping a noun for *it* or *both* rebinds it to the nearest preceding noun, which after a table or two sentences is rarely the intended one.
+- **What a bare count counts.** A verbless "(one three-member family)" leaves the reader guessing what happened once.
+- **The object of a verb.** "Four chains agree" and "the appendix covers all" name no object, and the reader cannot supply it.
+
+Two grammar accidents are caused by compression itself. Reducing a clause to a participle attaches the action to the wrong subject ("bytecode, deduplicated into our corpus" makes the bytecode do the deduplicating). Replacing a verb with a shorter one can introduce a noun reading (*blocks*, *files*, *rates*, *counts* all parse as nouns first). Check for both after every pass.
+
+Report absolutes before ratios, especially when a reviewer is questioning transparency. "80.2% against 80.8% with hindsight" explains itself; "99.2% of oracle coverage" requires the reader to already hold two definitions. The absolute pair often costs no more words.
+
+Prefer the everyday word over the field's term of art when both fit and the term needs unpacking: *with hindsight* over *oracle*, *stray jump* over *route*. A term of art earns its place only when it is shorter than its own explanation.
+
+Measure the target system's counting rule before optimizing against it. Venues differ on markdown table markup, punctuation-only tokens, and hyphenated words, and revising against a guessed rule wastes passes.
+
 ---
 
 ## 3. Bilingual handling
