@@ -67,6 +67,30 @@ A compact result chart placed in the Introduction as a preview of the headline g
 
 These are habits, not mechanical checks. Apply them before drawing and before delivering. They catch the failures that the syntax linter and overlap checker cannot see.
 
+### One figure, one job
+
+Write the one sentence the figure makes true before you draw it. If you cannot, the
+figure has no job yet, and no amount of layout work will give it one. Two corollaries,
+both learned the expensive way:
+
+**Two jobs fight over the layout.** A figure asked to show both *how the schedule came
+out* and *how one access resolves* needs a full-width time axis for the first and needs
+the transaction, the lookup table, and the store sitting next to each other for the
+second. Those are mutually exclusive. Every routing of the connecting line crosses
+something, and each fix relocates the collision. The tell is your third attempt at one
+connector: stop routing and re-split the jobs. Splitting them turned a figure that had
+lanes on top, tables below, and lines crossing both into three columns read left to
+right, where every connector became one short horizontal segment.
+
+**Bet on the claim, not on the mechanism.** When a motivation figure needs a failure to
+show, pick the one that survives the most hostile reading. A figure built on "the fee
+recipient is a hot key, so speculation rolls back" invites "that engine special-cases
+the fee recipient, your figure is a straw man." A figure built on "the access sets are
+already in the input and the engine does not use them" has to be answered at the level
+of the paper's actual claim. Same panel count, far harder to deflect. When you draw a
+competitor's behaviour, draw what it really does: a shared work queue does not park a
+core on one transaction and retry it in place, so do not draw it that way.
+
 ### The 30-second comprehension test
 
 Show the figure to someone unfamiliar with the paper. If they cannot describe the problem (for Figure 1) or the result (for a results figure) in 30 seconds, the figure is not doing its job. Inside this plugin the proxy is the user: surface the figure and ask "what do you take from this in 30 seconds?" rather than asking "is it done?". If their answer does not match the claim the figure is meant to support, the figure needs work, not the caption.
@@ -97,6 +121,7 @@ Run these in step ①. If any answer is "no" or "I'm not sure", resolve it with 
 - For Figure 1, which paradigm (A / B / C) and why not the other two? Are the gains large enough for a teaser, or would C show weakness?
 - Are all labels real entity names from the paper, with zero placeholders?
 - For Figure 1, is this the same running example that the Introduction sets up and that §Methods and §Evaluation will reuse?
+- Can you state in one sentence what this figure makes true? If it takes two sentences, it is two figures.
 - Would an unfamiliar reader get the message in 30 seconds?
 - Is the framing honest, with real data, untruncated axes unless flagged, and a representative example?
 

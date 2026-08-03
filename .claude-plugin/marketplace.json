@@ -8,7 +8,7 @@
     {
       "name": "superpower-writing",
       "description": "Claim-first CS/systems/ML paper drafting with evidence verification and separate Codex/Hermes academic consultation",
-      "version": "2.1.0",
+      "version": "2.3.0",
       "source": "./"
     }
   ]

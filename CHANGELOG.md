@@ -7,6 +7,21 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.3.0] — 2026-08-03
+
+Figure workflow hardening in `tikz-figures`, drawn from a full five-figure redraw of a systems paper. The redraw replaced raster figures whose labels had been scaled down to 4pt and whose data contradicted the paper's own correctness argument; every item below is a defect that survived visual review until a specific check caught it.
+
+### Added
+
+- **Typeset-size gate** (`references/preview-loop.md` + `references/preview-loop.py`). Compiles one figure at a time and reports the width it will actually occupy against the venue's column budget, so an oversized figure is caught in seconds instead of after a full manuscript build. Ships 1:1 screen renders alongside print renders, because a 4pt label is legible in a 300 dpi render and unreadable in the paper. Presets for USENIX, ACM, IEEE, and NeurIPS geometry, or pass the column width directly.
+- **High-resolution tiled overlap re-check** in the visual-feedback loop. The geometry checker does not report touching, riding on a frame line, or a label clipped by its own box; rendering at 900 dpi and reading 4 to 6 tiles does. Found five such defects in one six-panel figure that the checker passed.
+- **"One figure, one job"** ritual in `references/figure-rhetoric.md`. Write the sentence the figure makes true before drawing it. Two corollaries: two jobs fight over the layout and no routing fixes that (the tell is a third failed attempt at one connector), and a motivation figure should bet on the paper's claim rather than on a mechanism detail a reviewer can deflect.
+- **Seven verified TikZ pitfalls** in the lessons files: matrix rows are taller than `minimum height` so hand-computed coordinates drift, brace tips follow the path direction, diagonally adjacent cell highlights always collide at the corner, arrows shorter than their own tip render as a dot, multi-line notes need `text width` or they blow out the canvas, `anchor=east` labels push the bounding box negative, and lanes spanning the full frame make cross-lane connectors unroutable.
+
+### Changed
+
+- **`references/lessons.md` split by nature** into four files: `baselines.md` (verified parameters), `lessons.md` (cross-figure pitfalls), `lessons-by-type.md` (per-figure-type, load on demand), and `lessons-archive.md` (per-batch review history, not loaded by default). The mandatory step-2 load drops from 1039 lines to 403.
+
 ## [2.2.0] — 2026-08-01
 
 ### Added

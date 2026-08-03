@@ -41,12 +41,15 @@ skills/scientific-visualization/references/publication_guidelines.md::ref-toc::m
 skills/scientific-visualization/references/venue_requirements.md::em-dash::ref
 skills/scientific-visualization/references/venue_requirements.md::ref-toc::missing
 skills/tikz-figures/SKILL.md::em-dash::body
+skills/tikz-figures/references/baselines.md::em-dash::ref
 skills/tikz-figures/references/data-pipeline.md::em-dash::ref
 skills/tikz-figures/references/data-visualization.md::em-dash::ref
 skills/tikz-figures/references/data-visualization.md::ref-toc::missing
 skills/tikz-figures/references/figure-spec.schema.md::em-dash::ref
 skills/tikz-figures/references/geometry-math.md::em-dash::ref
 skills/tikz-figures/references/layered-architecture.md::em-dash::ref
+skills/tikz-figures/references/lessons-archive.md::em-dash::ref
+skills/tikz-figures/references/lessons-by-type.md::em-dash::ref
 skills/tikz-figures/references/lessons.md::em-dash::ref
 skills/tikz-figures/references/lessons.md::ref-toc::missing
 skills/tikz-figures/references/sequence-diagram.md::em-dash::ref

@@ -276,7 +276,7 @@ skill 现在支持 **4 种生成路径**——画图前必须先确定走哪条�
 - D 模式入库（不画新图）
 
 ### ② 加载专项规则
-确定图表类型后，**按需**加载对应文件（见下方"按需加载索引"）。同时加载 `references/lessons.md` 获取该类型已验证的基线参数和踩坑经验。
+确定图表类型后，**按需**加载对应文件（见下方"按需加载索引"）。同时加载 `references/baselines.md`（已验证参数）与 `references/lessons.md`（通用踩坑）；该图型专属的坑另见 `references/lessons-by-type.md`，按需读对应条目即可，不必整份加载。
 基线参数已经是 25 批次 157 张图的结晶——**直接用，不要从零试错**。要偏离基线必须有具体理由。
 
 ### ③ 生成代码（**Module-First 子流程 + 两层决策门**）
@@ -398,6 +398,7 @@ python3 references/pdf-overlap-checker.py file.pdf --json > "$(dirname file.pdf)
 #   candidate 2 类（需 triage）: line-through-node / node-overlap
 # ERROR 类大概率是真 bug 直接修；candidate 类是几何线索（heatmap 矩阵 / fan-in 收敛
 # / panel 边界等常误报），sub-agent 在 ④.5 自评时按坐标对照 PNG 决定 fix 还是 ignore。
+# 论文集成场景另跑排版尺寸闸门：references/preview-loop.py（详见 preview-loop.md）
 ```
 
 ### ④.5 **视觉反馈强制闭环（架构核心，不可跳过）**
@@ -448,14 +449,14 @@ python3 references/pdf-overlap-checker.py file.pdf --json > "$(dirname file.pdf)
 
 **优化规则**（Batch 9 实测：fig89 耗 32min / fig86 耗 55min，多数时间在重复 Read 和 triage）：
 
-1. **Reference 文档只首轮加载** — `SKILL.md` / `lessons.md` / `visual-patterns.md` / `step1-instructions.md` / `visual-review-checklist.md` 在 round 1 Read 一次后，**后续 round 不要重复 Read**（context 里已有）。只 Read 变化的：PNG + overlap.json + 你刚 Edit 的 figure.tex 片段
+1. **Reference 文档只首轮加载** — `SKILL.md` / `baselines.md` / `lessons.md` / `visual-patterns.md` / `step1-instructions.md` / `visual-review-checklist.md` 在 round 1 Read 一次后，**后续 round 不要重复 Read**（context 里已有）。只 Read 变化的：PNG + overlap.json + 你刚 Edit 的 figure.tex 片段
 2. **空检测跳过 triage** — `overlap.json` 中 `line-through-node` 数组为空 → E12 直接答 Y："overlap.json 中 0 处 candidate"。`node-overlap` 同理 → S8 直接 Y。**不要为空数组写 reasoning**
 3. **Triage 增量化** — round N 时只对 round N-1 之后**新出现**的 candidate 写 reasoning；之前 triage 过的复用结论（"同 round 1 第 3 处，仍 ignore"）
 4. **ERROR 优先于 candidate** — 先把 `text-overlap` / `text-overflow` / `text-line` / `off-center` 这 4 类 ERROR 修完（这些大概率是真 bug），再回头 triage candidate。避免一边修 ERROR 一边重新 triage 同一批 candidate
 
 **效率规则（避免 2-3x 时间膨胀）**：
 
-1. **Reference docs 只在 round 1 Read 一次** —— `SKILL.md` / `lessons.md` / `visual-patterns.md` / `step1-instructions.md` / `visual-review-checklist.md` 在 round 1 加载到 context 后，后续 round **不要再 Read**——已经在 context 里。**仅 PNG / overlap.json / figure.tex 每轮 Read（这些会变）**。
+1. **Reference docs 只在 round 1 Read 一次** —— `SKILL.md` / `baselines.md` / `lessons.md` / `visual-patterns.md` / `step1-instructions.md` / `visual-review-checklist.md` 在 round 1 加载到 context 后，后续 round **不要再 Read**——已经在 context 里。**仅 PNG / overlap.json / figure.tex 每轮 Read（这些会变）**。
 2. **Empty candidate 跳过 triage** —— 如 overlap.json 的 `line-through-node` 数组为空，S8 / E12 直接答 "Y, 0 候选无需 triage" 即过；非空才逐条分析。
 3. **Triage 缓存** —— round N 的 overlap.json triage 结论保留到 round N+1；只对**新出现**的 candidate（坐标或类型变了）写新 reasoning，已 triage 过的同坐标 candidate 直接复用 "round N 已判 ignore"。
 4. **Triage 延后** —— 优先修 text-overlap / text-overflow / off-center / text-line 这 4 类 ERROR（**真 bug**），全清后再开始 triage line-through-node / node-overlap candidates。避免每轮都重新分析 candidate。
@@ -525,8 +526,8 @@ python3 references/pdf-overlap-checker.py file.pdf --json > "$(dirname file.pdf)
 用户的目标重述："中间迭代多少轮无关紧要，只要图最后是完美的就行"。**绝不允许"凑合交付"**——"改了 3 轮差不多了吧"是认知疲劳的产物，不是质量信号。
 
 ### ⑦ 经验沉淀
-- 2 次以上才解决的问题 → 追加到 `references/lessons.md` 的 Part 2
-- 发现更优参数 → 更新 `lessons.md` 的 Part 1 基线表（**只升不降**）
+- 2 次以上才解决的问题 → 追加到 `references/lessons.md`（通用）或 `references/lessons-by-type.md`（图型专属）；逐批次复审归 `references/lessons-archive.md`，默认不加载
+- 发现更优参数 → 更新 `references/baselines.md`（**只升不降**）
 - 已被全局规则/Python checker 覆盖的内容**不要重复写入**
 
 ## Φ 沉淀通道（D 模式 — 用户已有 .tex 入库为新 skeleton）
@@ -628,7 +629,7 @@ python3 references/pdf-overlap-checker.py file.pdf --json > "$(dirname file.pdf)
 ```
 
 **Φ 与 ⑦ 经验沉淀 的区别**：
-- ⑦ 沉淀**抽象 lessons 与基线参数**（写入 `references/lessons.md`）
+- ⑦ 沉淀**抽象 lessons 与基线参数**（分别写入 `references/lessons.md` 与 `references/baselines.md`）
 - Φ 沉淀**完整可复用的 figure 模板**（写入 `tikz-snippets/example-skeleton-X-*.tex`）
 - 两者独立工作，可在同一会话各做各的
 
@@ -677,7 +678,7 @@ python3 references/pdf-overlap-checker.py file.pdf --json > "$(dirname file.pdf)
 | 一张 figure 内含多个子图，需规划面板并对拼合后的整图整体审查（compose 多面板图） | `references/figure-rhetoric.md` §6 |
 | 进入步骤① | `references/step1-instructions.md` |
 | AUDIT 模式（Ψ 审查通道） | `references/figure-audit.md` + `references/visual-review-checklist.md`（18 项） |
-| 步骤②（任何 TikZ 图，**必加载**） | `references/lessons.md` + `references/visual-patterns.md` |
+| 步骤②（任何 TikZ 图，**必加载**） | `references/baselines.md` + `references/lessons.md` + `references/visual-patterns.md` |
 | 步骤③ 决策门 | `references/figure-spec.schema.md`（B 路 spec） |
 | 步骤③ 走 B 路 → 跑 `dot-to-tikz.py` | （脚本，不需 Read） |
 | 步骤③ 走模板/从零 → 用 TikZ | `references/tikz-global-rules.md` + `references/tikz-template.tex` |
