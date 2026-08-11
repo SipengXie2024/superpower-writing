@@ -46,6 +46,13 @@ it is an abbreviation, and any variants already present in the source. Do not
 invent the canonical form. Read it off the source, off the user's stated
 preference, or off the field's standard nomenclature.
 
+Before extracting terms, read the repo-root `CONTEXT.md` if one exists. It is
+the project's concept vocabulary across papers, maintained by the
+domain-glossary skill, and its canonical names take precedence over
+re-deciding them per paper. In the other direction, when the ledger fixes a
+name for a new load-bearing concept and the user confirms it, offer to
+backfill that term into `CONTEXT.md` so the next paper inherits it.
+
 ## 2. Present the ledger to the user
 
 Show a compact table before or alongside the first output. The four columns are

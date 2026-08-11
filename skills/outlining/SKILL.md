@@ -30,6 +30,8 @@ Lock down three things and write them to `.writing/findings.md`:
 - **Target venue or venue class**, which sets the reporting guideline and structural norms.
 - **Unit of evidence** (dataset, trace, benchmark, proof), what counts as EVIDENCE later.
 
+The contribution sentence usually names the system or method. Those names are domain terms: record them in the repo-root `CONTEXT.md` as they are decided (`superpower-writing:domain-glossary`).
+
 If the contribution is not yet decided, do not force a half-formed idea through IMRAD, that produces a fake outline masking missing thinking. Route to `superpower-writing:idea` first (it generates candidate directions, checks novelty against prior work, and evaluates the survivor against a top-venue bar, all advisory). The surviving direction becomes the contribution sentence. When the contribution is already decided (the common case), skip ahead.
 
 ### Step 2 : Ground in the literature

@@ -70,8 +70,11 @@ rebuttal      grounded R-A-C response after reviews arrive
 `citations`, and `pdf-explore` resolve evidence throughout. Figures come from
 `tikz-figures` (vector), `scientific-visualization` (data plots), and
 `scientific-schematics` (raster concept art). Cryptographic proofs come from
-`game-based-security-proof` and `simulation-security-proofs`. Skills discover
-each other by description; there is no orchestrator to invoke first.
+`game-based-security-proof` and `simulation-security-proofs`. `domain-glossary`
+keeps the project's ubiquitous language in a repo-root `CONTEXT.md` that
+outlives any single paper, and `/wait-what` re-pitches the last message in
+controlled plain language when it did not land. Skills discover each other by
+description; there is no orchestrator to invoke first.
 
 ## Agent install checklist
 
@@ -331,6 +334,9 @@ scripts/
   consult_handoff.py     # strict academic handoff profiles + private raw-artifact storage
   lint_skills.py         # SKILL.md linter (name=slug, description length, no em-dash, LOC ceiling); baseline-ratcheted
   # plus archive-search / check-writing-state / snapshot-save / detect-* helpers
+hooks/
+  hooks.json             # SessionStart wiring
+  session-start.sh       # reminds to start CONTEXT.md in writing projects that lack one
 commands/                # /writing:outline  /writing:draft  /writing:archive
 output-styles/
   academic-research-assistant.md   # rigorous academic-research persona (see ## Output style)
@@ -355,6 +361,8 @@ skills/
   collaborating-with-codex/  # Codex CLI consultation bridge (read-only academic mode); scientific-figure exception
   collaborating-with-hermes/ # stateless Hermes Agent CLI bridge with workspace-change detection
   planning-foundation/   # persistent .writing/ working memory across context resets; initialize it first
+  domain-glossary/       # project ubiquitous language in repo-root CONTEXT.md; pairs with the terminology ledger
+  wait-what/             # user-invoked: re-pitch the last message in controlled plain language with CONTEXT.md terms
   archiving/             # freeze a completed .writing/ into archive/ and reset for the next paper
   releasing/             # version bump + tag + GitHub Release behind the smoke / lint / eval pre-release gate
 tests/
