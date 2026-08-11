@@ -7,6 +7,22 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.4.0] — 2026-08-11
+
+Ubiquitous-language support ported from superpower-planning and layered onto the existing terminology machinery instead of duplicating it.
+
+### Added
+
+- New skill `domain-glossary`: project-level shared vocabulary (ubiquitous language) in a repo-root `CONTEXT.md` that persists across papers. Terms keep their code- or field-native form; definitions are written in the conversation's working language; every concept gets one canonical name plus an `_Avoid_` list.
+- New skill `wait-what` (user-invoked): re-pitches the last message with the missing context in controlled plain language (ASD-STE100 for English, controlled Chinese otherwise), using `CONTEXT.md` terms.
+- Minimal SessionStart hook: reminds writing projects (`.writing/` present) that lack a repo-root `CONTEXT.md`; silent in every other directory.
+
+### Changed
+
+- The terminology ledger reads `CONTEXT.md` before extracting terms and offers to backfill confirmed new concept names, so per-paper surface forms and project-level vocabulary stay one system.
+- Outlining records contribution and system names as domain terms the moment the contribution is locked.
+- Smoke test covers the new skills and hook files; `hooks` removed from the deletion audit now that the directory is intentionally back.
+
 ## [2.3.0] — 2026-08-03
 
 Figure workflow hardening in `tikz-figures`, drawn from a full five-figure redraw of a systems paper. The redraw replaced raster figures whose labels had been scaled down to 4pt and whose data contradicted the paper's own correctness argument; every item below is a defect that survived visual review until a specific check caught it.
