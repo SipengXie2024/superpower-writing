@@ -41,6 +41,8 @@ These hold in `adversarial` and `venue` alike. They come from `skills/_shared/co
 
 **Verify evidence after return.** A structurally valid handoff is not factual proof. Before relying on any cited file, line, equation, number, or statistic, open the source and check it. Keep anything you cannot check in `verification_needed`.
 
+**Structured issue bundles, one per provider.** Each mode ends with every provider's findings extracted into that provider's own issues JSON at `.writing/reviews/issues-<provider>-<ISO-date>.json`, following the schema in `references/reviewer-deliverables.md`. Every issue carries a verbatim `quote` from the manuscript source and a stable `root_cause_key`. Run `scripts/verify_review_quotes.py` on each bundle; an unverified quote sends that finding back for re-anchoring against the source, never silently into the report. Bundles never merge across providers.
+
 **Do not schedule the verdict.** Both modes are verdict-bearing. Never wrap either inside `/loop`, `/schedule`, or `CronCreate`. Schedule the external wait that precedes a review, such as a job finishing or a PDF compiling, never the judgment itself. See `references/cadence-and-independence.md`.
 
 Always launch `paired_consult.py` in the background with a Bash timeout of at least `660000` ms. Do not poll. The runner starts both providers concurrently and returns when both settle.
@@ -101,7 +103,16 @@ Do not hand-derive either verdict. The helper validates the 3-to-7-point require
 
 ### Stage 4: verify and persist
 
-Check every cited file, line, equation, table, number, and experiment against the manuscript. Structural validation does not prove the adjudication is factually correct. Archive any prior `.writing/adversarial-review.md`, then write the report:
+Extract each provider's `partially` and `unresolved` points into that provider's issue bundle (schema and extraction rules in `references/reviewer-deliverables.md`), then verify the quotes:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/review/scripts/verify_review_quotes.py" \
+  .writing/reviews/issues-codex-<ISO-date>.json --source .writing/manuscript --write-back
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/review/scripts/verify_review_quotes.py" \
+  .writing/reviews/issues-hermes-<ISO-date>.json --source .writing/manuscript --write-back
+```
+
+Then check every cited file, line, equation, table, number, and experiment against the manuscript. The quote check proves the words exist; it does not prove the adjudication is factually correct. Archive any prior `.writing/adversarial-review.md`, then write the report:
 
 ```markdown
 # Adversarial Review (<ISO-8601 timestamp>)
@@ -153,7 +164,7 @@ Read the project to identify source files, not to tell the critics what to concl
 - relevant `.writing/claims/section_*.md` files;
 - target venue, page limit, and review objective.
 
-Write `.writing/reviews/review-request.md` with paths and structural facts only. Exclude your summary, interpretations, recommendations, extracted findings, and leading questions. The exact allow-and-deny rules are in `references/cadence-and-independence.md`.
+Write `.writing/reviews/review-request.md` with paths and structural facts only. Exclude your summary, interpretations, recommendations, extracted findings, and leading questions. The exact allow-and-deny rules are in `references/cadence-and-independence.md`. A review *standard* is part of the output shape and may be included: name `references/review-taxonomy.md` among the files each critic reads, so weaknesses come back classified by dimension and pre-filtered by its leniency rules.
 
 ### 3. Run both reviewers concurrently
 
@@ -190,7 +201,16 @@ Hermes stays stateless. Its context file must restate its own prior handoff. Nev
 
 ### 5. Verify and present
 
-Check each academic claim's identifier, locator, number, method, and statistical value against the source before reporting it. A structurally valid handoff is not factual verification. Present in this fixed order:
+Extract each provider's weaknesses into that provider's issue bundle (each critic is asked to append one as a JSON block; fall back to a faithful transcription if the block is missing, per `references/reviewer-deliverables.md`), then verify the quotes:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/review/scripts/verify_review_quotes.py" \
+  .writing/reviews/issues-codex-<ISO-date>.json --source .writing/manuscript --write-back
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/review/scripts/verify_review_quotes.py" \
+  .writing/reviews/issues-hermes-<ISO-date>.json --source .writing/manuscript --write-back
+```
+
+Then check each academic claim's identifier, locator, number, method, and statistical value against the source before reporting it. A structurally valid handoff is not factual verification, and a verified quote proves only that the words exist. Present in this fixed order:
 
 ```markdown
 ## Codex view
@@ -209,6 +229,26 @@ Do not add a combined verdict, consensus, winner, or preferred provider. State t
 ### 6. Persist without smoothing disagreement
 
 Save `.writing/reviews/external-review-<ISO-date>.md` with separate `Codex view` and `Hermes view` sections. Preserve each provider's evidence, uncertainty, verification queue, and failure status. Add any requested matrix or experiment plan under provider-specific headings. If `.writing/progress.md` exists, append one row with the report path and `pair_status`. Do not record a single merged verdict.
+
+---
+
+## Re-review after revision (both modes)
+
+After the user revises the manuscript, close the loop instead of reviewing from zero. This runs inside the multi-round exception in `references/cadence-and-independence.md`: each provider may see its own prior feedback, never the other's.
+
+1. Re-run the same mode on the revised source. Codex may resume its `SESSION_ID`; Hermes receives only its own prior structured handoff. Attach each provider's own previous issues JSON to its context and ask it to reuse the old `root_cause_key` for any concern that persists and to mint new keys only for new problems. Stable keys are what make the diff line up.
+2. Extract the fresh issue bundles and verify quotes as usual.
+3. Diff old against new, once per provider, never across providers:
+
+   ```bash
+   python3 "${CLAUDE_PLUGIN_ROOT}/skills/review/scripts/diff_review_issues.py" \
+     .writing/reviews/issues-codex-<old-date>.json .writing/reviews/issues-codex-<new-date>.json
+   python3 "${CLAUDE_PLUGIN_ROOT}/skills/review/scripts/diff_review_issues.py" \
+     .writing/reviews/issues-hermes-<old-date>.json .writing/reviews/issues-hermes-<new-date>.json
+   ```
+
+4. Present each provider's diff under its own heading with the four statuses as returned: `FULLY_ADDRESSED`, `PARTIALLY_ADDRESSED`, `NOT_ADDRESSED`, `NEW`. Do not reconcile the two diffs into one progress score.
+5. `FULLY_ADDRESSED` means the provider no longer raises that root cause, not that the fix is proven correct. Spot-check the revised passages before reporting an issue closed.
 
 ---
 

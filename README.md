@@ -353,6 +353,7 @@ skills/
   literature/            # find + review literature via Zotero semantic search, web search, arXiv / DBLP / Semantic Scholar / CrossRef
   citations/             # generate + verify BibTeX; add-by-DOI / arXiv through Zotero; audit .bib for missing fields and duplicates
   pdf-explore/           # navigate a long PDF (outline, per-page text, keyword search) without dropping it whole into context
+  pdf-visual-check/      # layout lint on the compiled PDF: margin overflow, block overlap, low-DPI images, blank pages
   tikz-figures/          # publication-quality LaTeX / TikZ vector figures, compile-verified, two-candidate preview
   scientific-visualization/  # publication-ready matplotlib / seaborn / plotly data plots with venue styling
   scientific-schematics/     # raster concept art / graphical abstracts via Codex image_gen

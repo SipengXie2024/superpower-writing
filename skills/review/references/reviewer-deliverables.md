@@ -13,7 +13,8 @@ Write a mock <venue> review of the paper as if you were on the program committee
 Use exactly these sections:
 - Summary: 3-5 sentences on what the paper does and claims.
 - Strengths: 3-5 items, each citing a specific section, table, or result.
-- Weaknesses: 3-5 items, each with the problem, why it matters, and a fix.
+- Weaknesses: 3-5 items, each with the problem, an exact quote copied verbatim
+  from the paper source, why it matters, and a fix.
 - Questions for Authors: 2-4 genuine questions whose answers could change the verdict.
 - Score: a single recommendation on the venue's scale (e.g. strong reject /
   reject / borderline / accept / strong accept) with one sentence of rationale.
@@ -22,6 +23,10 @@ Use exactly these sections:
 - What Would Move Toward Accept: the smallest set of changes that would flip a
   reject to a borderline, or a borderline to an accept.
 Be brutally honest. Cite the paper's own passages; do not be vague.
+After the review, append one fenced json code block: an array with one object
+per weakness, fields {id, title, quote, location, severity, root_cause_key}.
+quote must be copied verbatim from the source file, root_cause_key a short
+stable kebab-case name for the underlying defect.
 ```
 
 ### Mock-review rubric
@@ -70,7 +75,7 @@ When persisting the review to `.writing/reviews/`, store the critic's output und
 - S2 ...
 
 ## Weaknesses
-- W1 <title>: Problem / Why it matters / Suggested fix / Severity (critical|major|minor)
+- W1 <title>: Problem / Exact quote / Why it matters / Suggested fix / Severity (critical|major|minor)
 - W2 ...
 
 ## Questions for Authors
@@ -131,3 +136,32 @@ Expected shape of the returned plan:
 - One paragraph on why the top pick beats the runners-up on lift-per-compute.
 
 Never let the critic invent numbers for results not yet run. The plan describes what to measure, not what the measurement will show. If the brief lacks the compute budget, ask the user for it before sending this prompt rather than letting the critic assume one.
+
+## 4. Issue bundle schema
+
+Each provider's findings end up in that provider's own issues file, `.writing/reviews/issues-<provider>-<ISO-date>.json`, a JSON array of:
+
+```json
+{
+  "id": "W1",
+  "title": "short defect name",
+  "quote": "exact words copied verbatim from the paper source",
+  "location": "manuscript/eval.tex, Section 5.2 / eq. (7)",
+  "severity": "critical|major|minor",
+  "root_cause_key": "stable-kebab-case-key",
+  "quote_verified": true,
+  "quote_file": "filled by verify_review_quotes.py"
+}
+```
+
+How a bundle gets filled, per mode:
+
+- **venue**: the critic's own appended json block is the source of truth. If the block is missing or malformed, transcribe each weakness faithfully from the review text, copying its quoted passage verbatim; do not invent quotes the critic did not give. A weakness with no quotable anchor stays out of the bundle and goes into `verification_needed` instead.
+- **adversarial**: transcribe each `partially` and `unresolved` adjudication point into one issue; `answered_by_current_text` points are not issues. Derive `root_cause_key` from the point's label, take `quote` from the point's cited evidence, and map the point's severity straight across.
+
+Rules that keep the bundle honest:
+
+- One bundle per provider, never merged, never diffed across providers.
+- `root_cause_key` names the underlying defect, not the symptom, so a follow-up round can reuse it. On re-review, pass the provider its own previous bundle and ask it to keep old keys for surviving concerns.
+- Run `verify_review_quotes.py` before the bundle feeds any report or diff. An unverified quote means re-anchor the finding against the source or demote it to `verification_needed`.
+

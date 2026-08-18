@@ -7,6 +7,21 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.5.0] — 2026-08-18
+
+Review-loop hardening borrowed from an NTU classmate's paper-audit skill after a structured evaluation. The whole skill was not adopted: its committee self-review plus consensus scoring conflicts with the dual-lane independence rule, and most of its automated checks resolve scripts from sibling skills the archive does not include. Four self-contained pieces were.
+
+### Added
+
+- New skill `pdf-visual-check`: layout lint on the compiled PDF via pymupdf. Detects margin overflow, overlapping text or figure blocks, low-DPI embedded images, inconsistent body fonts, and blank pages, with page-anchored findings. Detect-only; two-column templates pass `--margin 54`.
+- `review`: per-provider structured issue bundles (`.writing/reviews/issues-<provider>-<date>.json`) in which every finding carries a verbatim manuscript quote and a stable `root_cause_key`. New `verify_review_quotes.py` confirms each quote exists in the source (whitespace-normalized, so LaTeX line wrapping does not false-negative); an unverified quote sends the finding back for re-anchoring instead of into the report.
+- `review`: post-revision re-review loop. Each provider re-examines its own prior bundle and reuses its root-cause keys; new `diff_review_issues.py` then labels every prior issue `FULLY_ADDRESSED`, `PARTIALLY_ADDRESSED`, `NOT_ADDRESSED`, or `NEW`. Diffs run once per provider and never across lanes.
+- `review`: `references/review-taxonomy.md`, a 16-dimension issue taxonomy with leniency rules (skip OCR noise, copy-editing trivia, content answered later) and calibration guidance, passed to both critics as a review standard under the existing output-shape allowance.
+
+### Changed
+
+- Venue-mode reviews now require an exact quote per weakness and an appended JSON issue block; adversarial adjudication points feed the same bundle schema from their `partially` and `unresolved` rulings.
+
 ## [2.4.0] — 2026-08-11
 
 Ubiquitous-language support ported from superpower-planning and layered onto the existing terminology machinery instead of duplicating it.
