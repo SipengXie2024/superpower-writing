@@ -72,20 +72,11 @@ Score every surviving candidate with the rubric in [FINER rubric](references/fin
 
 The FINER numbers rank and explain. They are reading aids for the user, not a gate this skill enforces. A candidate that reads as low may still be the user's pick after a restatement that lifts the weak criterion. The Novel score here is a hypothesis, not a settled fact; the authoritative check is Phase 2.
 
-### Step 5: Optional widening and cross-model read
-
-Two optional advisory passes widen the pool and check taste. Both are opt-in.
-
-- **Paired generation seed.** A paired Codex and Hermes call can surface directions the executor would not reach. Keep each provider's candidates labeled by source and present them as optional additions the user may admit; do not silently merge them.
-- **Cross-model taste read.** "Would a reviewer care?" is a taste call the executor should not answer alone about its own generated ideas. Route it through a paired consultation and keep each provider's ranking and objections separate.
-
-Both passes follow the shared dual academic consultation protocol in `_shared/core/dual-consult-protocol.md` and run `${CLAUDE_PLUGIN_ROOT}/scripts/paired_consult.py` with `--handoff-kind ideation` in the background. Keep the rankings advisory to the user; never turn two opinions into a vote or a winner. Verify any returned reasoning yourself before surfacing it.
-
-### Step 6: Wording advisory (non-blocking)
+### Step 5: Wording advisory (non-blocking)
 
 Scan the leading candidate questions for an AI-typical shell, most often the impact-or-effect frame ("the impact of X on Y"). This frame names no mechanism, metric, or comparison, which is why it reads as generic. When a candidate matches, raise a non-blocking note: it flags only the wording, not the idea, and asks what term a specialist would use instead. Let the user keep, rephrase, or ignore it. The advisory never edits the question on its own.
 
-### Step 7: Present, choose, and hand off
+### Step 6: Present, choose, and hand off
 
 Present the ranked candidates with their FINER scores, any cross-model objections, and the wording advisories. Use `AskUserQuestion` to ask which direction to carry forward. The user picks; the ranking is advice.
 
@@ -116,9 +107,6 @@ For each claim, delegate the search to `superpower-writing:literature`. Use at l
 For each claim, assign HIGH, MED, or LOW novelty against the closest prior work, using [novelty rubric](references/novelty-rubric.md). Two rules carry most of the weight. Applying X to Y is not novel unless the application reveals a surprising insight; naming a new pairing is not a contribution by itself. And if the method is not novel but the finding would be, say so explicitly and label which kind of contribution the idea is.
 
 Aggregate the per-claim deltas to one advisory call: PROCEED when at least one core claim is HIGH and no load-bearing claim is LOW; PROCEED-WITH-CAUTION when the strongest claim is MED or a HIGH claim sits next to a load-bearing LOW; ABANDON when every core claim is LOW against recent prior work. The aggregation table is a reading aid, not a switch. An `[UNVERIFIED]` paper must not force an ABANDON on its own.
-
-For a contentious or high-stakes idea, an optional paired Codex and Hermes second opinion can run before the call is surfaced, following the shared dual-consult protocol with `--handoff-kind novelty`. Keep the local verdict and each provider's view separate; no vote.
-
 ### Step 4: Emit the novelty report
 
 Surface the verdict in the fixed structure from [novelty report template](references/novelty-report-template.md): the restated idea, the per-claim delta table, the closest-prior-work table, the overall verdict with method-vs-finding and reviewer risk, and suggested positioning. Deliver it in chat, or save it to `.writing/novelty-report.md` on request per the Shared Rules.

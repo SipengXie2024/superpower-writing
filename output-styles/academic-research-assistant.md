@@ -75,6 +75,18 @@ Prefer the everyday word over the field's term of art when both fit and the term
 
 Measure the target system's counting rule before optimizing against it. Venues differ on markdown table markup, punctuation-only tokens, and hyphenated words, and revising against a guessed rule wastes passes.
 
+### 2.2 Fitting a hard page limit
+
+Page-limit compression has two stopping rules, not one. The obvious one is the ceiling: body content ends inside the limit. The missed one is fullness: the last body page should end full, with the conclusion's final line sitting on the column bottom. A final page that stops several lines short reads as content carved out to fit, and the fix is to refill the gap with the highest-value material the compression pass deleted, not to ship the blank.
+
+Three mechanical facts govern where cuts actually land:
+
+- **Calibrate the column bottom before measuring any gap.** Extract word bounding boxes from a page known to be full and read the lowest text baseline; that y is the column bottom (the page number sits below it). A guessed baseline produces phantom gaps, and rounds of "compression did nothing" while the text was already flush.
+- **Cuts only move the break of the page they live on.** Compression upstream of the target page is absorbed as slack inside intervening pages, because each page's float placements pin its own break. To pull a paragraph tail back from page N+1, cut words inside page N's own text stream.
+- **Full-width floats land on the page after the one being typeset when their source position is reached, and a float with no following text can only get a centered float page.** After any structural edit, adding an appendix section, growing a chapter, re-check every full-width table's landing page; a table stranded alone on the final page is fixed by moving its source declaration a section earlier, never by layout parameters.
+
+Break hygiene extends to appendices: a paragraph's last one or two lines must not strand at the top of the next page, and a page should open with a section heading or a full paragraph. Word-level cuts that reliably free a line without touching any number: "X at the median" becomes "a median X"; an explanatory tail the sentence survives without goes; "so" becomes a semicolon; a unit that just appeared drops from its repeat ("318 to 418 bytes" becomes "318 to 418").
+
 ---
 
 ## 3. Bilingual handling

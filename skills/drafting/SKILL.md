@@ -40,8 +40,6 @@ Figures are their own tasks, not inlined into a prose section. Dispatch per type
 
 - Structural (architecture / flowchart / pipeline / timeline) → `superpower-writing:tikz-figures`.
 - Data plots (bars / scaling / heatmap / cost curves) → `superpower-writing:scientific-visualization`.
-- Pictorial concept art or a graphical abstract (systems papers usually omit it) → `superpower-writing:scientific-schematics`.
-
 The prose paragraph that introduces a figure still carries a `% claim: id` tag for the claim it supports; figure files themselves carry no claim tags. See [`references/figures-and-tables.md`](references/figures-and-tables.md).
 
 ## After drafting

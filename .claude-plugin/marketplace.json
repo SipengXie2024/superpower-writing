@@ -1,14 +1,14 @@
 {
   "name": "superpower-writing",
-  "description": "Local marketplace for the claim-first academic-writing plugin with paired Codex and Hermes consultation",
+  "description": "Local marketplace for the claim-first academic-writing plugin",
   "owner": {
     "name": "sipeng"
   },
   "plugins": [
     {
       "name": "superpower-writing",
-      "description": "Claim-first CS/systems/ML paper drafting with evidence verification and separate Codex/Hermes academic consultation",
-      "version": "2.5.0",
+      "description": "Claim-first CS/systems/ML paper drafting with evidence verification",
+      "version": "3.0.0",
       "source": "./"
     }
   ]

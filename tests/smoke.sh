@@ -36,7 +36,7 @@ python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/plugin.json
 python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/marketplace.json'))" && pass "marketplace.json valid"
 
 echo "== 5. skill + command + agent presence =="
-for name in outlining drafting claim-verification polish rebuttal idea literature citations review scientific-visualization collaborating-with-codex collaborating-with-hermes domain-glossary wait-what; do
+for name in outlining drafting claim-verification polish rebuttal idea literature citations scientific-visualization domain-glossary wait-what; do
   [[ -f "$PLUGIN_ROOT/skills/$name/SKILL.md" ]] \
     && pass "skills/$name/SKILL.md" \
     || fail "missing skills/$name/SKILL.md"
@@ -58,33 +58,22 @@ echo "== 5b. output style + deletion audit =="
   || fail "missing output-styles/academic-research-assistant.md"
 for gone in skills/submission skills/revision skills/peer-review skills/verification \
             skills/finishing-branch skills/lightweight-execute skills/subagent-driven \
-            skills/team-driven commands/submit.md commands/revise.md agents/rebuttal-auditor.md; do
+            skills/team-driven commands/submit.md commands/revise.md agents/rebuttal-auditor.md \
+            skills/collaborating-with-codex skills/collaborating-with-hermes \
+            scripts/paired_consult.py scripts/consult_handoff.py \
+            skills/_shared/core/dual-consult-protocol.md \
+            skills/review skills/scientific-schematics; do
   [[ ! -e "$PLUGIN_ROOT/$gone" ]] \
     && pass "removed: $gone" \
     || fail "deleted component still present: $gone"
 done
 
 for file in \
-  scripts/consult_handoff.py \
-  scripts/paired_consult.py \
-  skills/collaborating-with-codex/scripts/codex_bridge.py \
-  skills/collaborating-with-hermes/scripts/hermes_bridge.py \
-  skills/_shared/core/dual-consult-protocol.md \
   hooks/hooks.json \
   hooks/session-start.sh \
   LICENSE; do
   [[ -f "$PLUGIN_ROOT/$file" ]] && pass "$file" || fail "missing $file"
 done
-
-echo "== 5c. academic consultation unit tests =="
-(cd "$PLUGIN_ROOT" && PYTHONDONTWRITEBYTECODE=1 python3 -m unittest \
-  tests.test_consult_handoff \
-  tests.test_codex_bridge \
-  tests.test_hermes_bridge \
-  tests.test_paired_consult \
-  tests.test_dual_consult_consumers) \
-  && pass "academic consultation unit tests" \
-  || fail "academic consultation unit tests failed"
 
 echo "== 6. section-standards presence =="
 for std in 00_abstract 01_introduction 02_background 03_methods 04_results 05_discussion 06_conclusion 07_related_work 08_motivation; do

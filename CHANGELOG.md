@@ -7,6 +7,22 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [3.0.0] — 2026-08-28
+
+Breaking removal of the external-consultation stack. The Codex and Hermes CLI bridges proved unreliable in operation (repeated runner failures and search timeouts), and the plugin now runs fully local.
+
+### Removed
+
+- Skills `collaborating-with-codex` and `collaborating-with-hermes`, the paired-consultation runner (`scripts/paired_consult.py`), the handoff layer (`scripts/consult_handoff.py`), the shared dual-consult protocol, and their unit tests and eval fixtures.
+- Skill `review` (cross-model adversarial / venue review): both modes executed through the removed provider lanes, and cross-model independence cannot be reproduced locally.
+- Skill `scientific-schematics` (raster concept art): generation ran on the removed Codex image backend.
+
+### Changed
+
+- `idea` drops the paired widening pass and the paired novelty second opinion; Phase 1 step numbering compacted.
+- Figure routing targets `tikz-figures` and `scientific-visualization` only, across drafting, literature, the tikz references, and the figure evidence contract.
+- README, both manifests, the smoke test (deletion audit extended), and the lint baseline updated to the local-only surface.
+
 ## [2.5.0] — 2026-08-18
 
 Review-loop hardening borrowed from an NTU classmate's paper-audit skill after a structured evaluation. The whole skill was not adopted: its committee self-review plus consensus scoring conflicts with the dual-lane independence rule, and most of its automated checks resolve scripts from sibling skills the archive does not include. Four self-contained pieces were.

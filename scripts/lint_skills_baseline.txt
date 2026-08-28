@@ -26,11 +26,6 @@ skills/drafting/references/section-standards/README.md::em-dash::ref
 skills/drafting/references/style-cautions.md::em-dash::ref
 skills/drafting/references/style-cautions.md::ref-toc::missing
 skills/drafting/references/writing-principles.md::ref-toc::missing
-skills/scientific-schematics/SKILL.md::description::em-dash
-skills/scientific-schematics/SKILL.md::description::use-when
-skills/scientific-schematics/SKILL.md::description::words-high
-skills/scientific-schematics/SKILL.md::em-dash::body
-skills/scientific-schematics/references/best_practices.md::ref-toc::missing
 skills/scientific-visualization/SKILL.md::em-dash::body
 skills/scientific-visualization/references/color_palettes.md::em-dash::ref
 skills/scientific-visualization/references/color_palettes.md::ref-toc::missing

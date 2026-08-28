@@ -9,8 +9,5 @@
   "missing-figure-data-must-refuse.bad": "fail-required",
 
   "unverified-numeric-manual-exempt.good": "needs-manual",
-  "unverified-numeric-manual-exempt.bad": "fail-required",
-
-  "paired-academic-consultation-keeps-views-separate.good": "needs-manual",
-  "paired-academic-consultation-keeps-views-separate.bad": "fail-required"
+  "unverified-numeric-manual-exempt.bad": "fail-required"
 }

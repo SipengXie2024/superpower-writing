@@ -5,11 +5,9 @@
 > IMRAD outline of claims, drafts an evidence-backed LaTeX skeleton under
 > claim-first discipline, verifies every citation, builds figures, polishes
 > prose, and drafts rebuttals. It is not a one-shot paper generator; a human
-> author refines the prose and submits. Twenty domain skills ship inside this
+> author refines the prose and submits. The domain skills ship inside this
 > plugin's `skills/` directory and self-route by their own descriptions. There
-> is no central router and no dependency gate. Read-only cross-model
-> consultation runs Codex and Hermes concurrently and keeps both opinions
-> separate and advisory.
+> is no central router and no dependency gate.
 
 <!-- This README is written to be agent-executable. Every install step, every
      check, and every troubleshooting recipe is a literal command you can run
@@ -19,7 +17,7 @@
 
 - **Version**: `v2.0.0`
 - **Scope**: single-author IMRAD research manuscripts (CS / systems / ML / HCI)
-- **Dependencies**: Zotero via the `zotero-mcp` MCP server (optional, gated by `zotero.enabled` in a paper's metadata); Codex CLI and Hermes Agent CLI (optional consultation backends). Codex is also required for raster scientific-figure generation.
+- **Dependencies**: Zotero via the `zotero-mcp` MCP server (optional, gated by `zotero.enabled` in a paper's metadata).
 - **Repo**: https://github.com/SipengXie2024/superpower-writing
 
 ## What changed in v2.0.0
@@ -43,7 +41,7 @@ itself in outline order, with no parallel subagents and no review pipeline.
 3. **Drafts claim-first.** `drafting` is a thin shell that routes to the writing references. Every load-bearing paragraph in `manuscript/NN_*.tex` carries a `% claim: id` comment bound to a claim whose `STATUS` is `evidence_ready` or `verified` (or a `% draft-only` marker for exploration). Resolving a claim's evidence before writing its paragraph is a required discipline.
 4. **Resolves citations Zotero first, then network fallback** (when Zotero is enabled), and can push new DOIs back to your library.
 5. **Checks reliability before handoff.** `claim-verification` confirms every `\cite{}` resolves against `refs.bib`, semantic-matches the cited abstract against the claim to catch hallucinated or mismatched references, and flags any `draft-only` or `[NEEDS-EVIDENCE]` left in the skeleton.
-6. **Polishes, reviews, and rebuts.** `polish` runs three passes (strip AI tells, apply Strunk clarity, hold each claim to its evidence). `review` runs cross-model on demand in two modes, adversarial (single strongest kill argument) or venue (calibrated mock peer review). `rebuttal` turns reviewer comments into a grounded response letter. Cross-model consultation keeps Codex and Hermes separate; no voting, no synthetic consensus.
+6. **Polishes and rebuts.** `polish` runs three passes (strip AI tells, apply Strunk clarity, hold each claim to its evidence). `rebuttal` turns reviewer comments into a grounded response letter.
 
 ## The writing spine
 
@@ -66,10 +64,10 @@ polish        de-AI pass, Strunk clarity, evidence wording (in place or diff-fir
 rebuttal      grounded R-A-C response after reviews arrive
 ```
 
-`review` (adversarial / venue) runs on demand at any stage. `literature`,
+`literature`,
 `citations`, and `pdf-explore` resolve evidence throughout. Figures come from
-`tikz-figures` (vector), `scientific-visualization` (data plots), and
-`scientific-schematics` (raster concept art). Cryptographic proofs come from
+`tikz-figures` (vector) and `scientific-visualization` (data plots).
+Cryptographic proofs come from
 `game-based-security-proof` and `simulation-security-proofs`. `domain-glossary`
 keeps the project's ubiquitous language in a repo-root `CONTEXT.md` that
 outlives any single paper, and `/wait-what` re-pitches the last message in
@@ -84,14 +82,10 @@ Run these in order. Each command prints what it did; compare to "Expected".
 
 ```bash
 which claude && claude --version      # needs Claude Code CLI
-which codex && codex --version          # optional; paired review + raster figures
-which hermes && hermes --version        # optional; paired review
 which gh && gh auth status              # needed only if you want to push a release
 ```
 
-Expected: `claude` succeeds. Missing `codex` or `hermes` makes cross-model
-consultation partial but does not block local writing. Missing Codex also
-disables `scientific-schematics` raster generation. `gh` is optional.
+Expected: `claude` succeeds. `gh` is optional.
 
 ### 1. Install this plugin
 
@@ -156,11 +150,10 @@ bash tests/smoke.sh
 ```
 
 Expected final line: `ALL SMOKE TESTS PASSED`. The test covers `.writing/`
-initialization, Zotero messaging, manifest JSON, shipped components, academic
-handoff validation, the Codex and Hermes bridges, concurrent pairing, skill
-lint, and evaluation fixtures. It does not call the real external models. This
-same smoke test, the skill linter, and the eval-harness fixture self-test form
-the pre-release gate that `releasing` runs before cutting a tag.
+initialization, Zotero messaging, manifest JSON, shipped components, skill
+lint, and evaluation fixtures. This same smoke test, the skill linter, and the
+eval-harness fixture self-test form the pre-release gate that `releasing` runs
+before cutting a tag.
 
 ## Commands
 
@@ -173,42 +166,9 @@ Each command is what the **agent** invokes on the user's behalf.
 | "Archive the current state"            | `/writing:archive`        | Runs `archiving`. Snapshots `.writing/` into `.writing/archive/<date>/` and consolidates findings before a reset.               |
 
 Other skills (`idea`, `literature`, `citations`, `pdf-explore`,
-`claim-verification`, `polish`, `review`, `rebuttal`, the figure and proof
-skills) self-route by description; ask for what you want ("review my paper",
-"check novelty", "polish this section", "find baselines") and the matching
-skill triggers.
-
-## Cross-model academic consultation
-
-Read-only analysis, literature synthesis, candidate prose, experiment planning,
-novelty opinions, and paper review use one neutral brief for both providers:
-
-```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/paired_consult.py" \
-  --cd "/absolute/project" \
-  --handoff-kind venue-review \
-  --PROMPT "Read the named paper files and produce an evidence-linked review. Do not modify files."
-```
-
-Launch the command in the background with a timeout of at least `660000` ms.
-The result has `pair_status`, `codex`, and `hermes`. It never adds a consensus,
-winner, vote, or overall verdict. If one provider fails, the other result
-remains available.
-
-Codex consultation is forced into its `read-only` sandbox and never falls back
-to write access. Hermes oneshot has no equivalent filesystem sandbox, so the
-bridge forbids writes in the prompt and compares the worktree and current
-commit before and after the call. Any Hermes write makes that lane fail with
-`workspace_modified`.
-
-Public papers may be sent directly. Before sending an unpublished manuscript,
-confidential review, restricted dataset, personal information, or other
-sensitive content, identify the exact files or excerpts that both external
-services will receive and obtain user confirmation.
-
-Scientific image generation is the only Codex-only consultation exception,
-because Hermes has no corresponding image tool. The shared rules live in
-`skills/_shared/core/dual-consult-protocol.md`.
+`claim-verification`, `polish`, `rebuttal`, the figure and proof
+skills) self-route by description; ask for what you want ("check novelty",
+"polish this section", "find baselines") and the matching skill triggers.
 
 ## Output style
 
@@ -295,7 +255,7 @@ scaffolds it; the rest fills in as skills run.
     06_conclusion.tex
     07_related_work.tex
   main.tex            # top-level LaTeX that \input{}s each manuscript section
-  figures/            # tikz-figures (vector) . scientific-visualization (plots) . scientific-schematics (raster)
+  figures/            # tikz-figures (vector) . scientific-visualization (plots)
   refs.bib            # bibliography; fills as citations resolve (Zotero export + network)
   findings.md         # discoveries, decisions + rationale, rejected alternatives
   progress.md         # Task Status Dashboard + session log
@@ -313,9 +273,6 @@ scaffolds it; the rest fills in as skills run.
 | `check-zotero.sh` HTTP 404                  | wrong `ZOTERO_LIBRARY_ID` or `ZOTERO_LIBRARY_TYPE`         | `curl -sS https://api.zotero.org/keys/<YOUR_KEY>`, read the `userID` field (use it as `ZOTERO_LIBRARY_ID` with `ZOTERO_LIBRARY_TYPE=user`) |
 | Zotero tools not available in session       | `.mcp.json` or vars changed after session start            | start a fresh Claude Code session; MCP servers load once at session start            |
 | `smoke.sh` fails                            | read the specific `FAIL: ...` line                         | each check is independent; fix what is listed                                        |
-| consultation is `partial`                   | inspect the failed provider's stable `error_code`          | install or authenticate that CLI; keep the successful provider result               |
-| Hermes reports `workspace_modified`         | compare Git status and the current commit before and after | report the external write and stop; do not describe the call as read-only            |
-| Codex consultation cannot start             | confirm the installed Codex supports `--sandbox read-only` | update Codex; never retry consultation with broader file access                     |
 
 ## Layout
 
@@ -330,8 +287,6 @@ scripts/
   writing-reset.sh       # reset active .writing/ state, preserve archive/
   check-zotero.sh        # Zotero API auth probe (never echoes key)
   aggregate-agent-findings.sh  # fold subagent findings into top-level findings.md / progress.md
-  paired_consult.py      # concurrent Codex / Hermes consultation with isolated provider context
-  consult_handoff.py     # strict academic handoff profiles + private raw-artifact storage
   lint_skills.py         # SKILL.md linter (name=slug, description length, no em-dash, LOC ceiling); baseline-ratcheted
   # plus archive-search / check-writing-state / snapshot-save / detect-* helpers
 hooks/
@@ -342,13 +297,12 @@ output-styles/
   academic-research-assistant.md   # rigorous academic-research persona (see ## Output style)
 templates/               # findings.md, glossary.md, metadata.yaml, progress.md (copied into .writing/ on init)
 skills/
-  _shared/core/          # claim-first-protocol.md, dual-consult-protocol.md, terminology-ledger.md (cross-skill contracts)
+  _shared/core/          # claim-first-protocol.md, terminology-ledger.md (cross-skill contracts)
   idea/                  # optional idea phase: lensed candidates + FINER, per-claim novelty, top-venue bar (advisory)
   outlining/             # IMRAD outline + per-section claim stubs + metadata.yaml, sharpened by an interleaved interview
   drafting/              # thin claim-first drafting shell -> writing references (section standards, style cautions, terminology)
   claim-verification/    # walks % claim tags, resolves \cite{} against refs.bib, semantic-matches abstracts, flags [NEEDS-EVIDENCE] / draft-only
   polish/                # three-pass prose polish (de-AI, Strunk clarity, evidence wording); edit-in-place or diff-first
-  review/                # cross-model review, two modes: adversarial kill-argument / calibrated venue mock review
   rebuttal/              # reviewer comments -> grounded R-A-C response with provenance / commitment / coverage gates
   literature/            # find + review literature via Zotero semantic search, web search, arXiv / DBLP / Semantic Scholar / CrossRef
   citations/             # generate + verify BibTeX; add-by-DOI / arXiv through Zotero; audit .bib for missing fields and duplicates
@@ -356,11 +310,8 @@ skills/
   pdf-visual-check/      # layout lint on the compiled PDF: margin overflow, block overlap, low-DPI images, blank pages
   tikz-figures/          # publication-quality LaTeX / TikZ vector figures, compile-verified, two-candidate preview
   scientific-visualization/  # publication-ready matplotlib / seaborn / plotly data plots with venue styling
-  scientific-schematics/     # raster concept art / graphical abstracts via Codex image_gen
   game-based-security-proof/ # game-hopping reduction proofs for cryptographic primitives
   simulation-security-proofs/ # simulation-based and UC proofs for MPC, ZK, OT, commitments
-  collaborating-with-codex/  # Codex CLI consultation bridge (read-only academic mode); scientific-figure exception
-  collaborating-with-hermes/ # stateless Hermes Agent CLI bridge with workspace-change detection
   planning-foundation/   # persistent .writing/ working memory across context resets; initialize it first
   domain-glossary/       # project ubiquitous language in repo-root CONTEXT.md; pairs with the terminology ledger
   wait-what/             # user-invoked: re-pitch the last message in controlled plain language with CONTEXT.md terms
@@ -369,7 +320,6 @@ skills/
 tests/
   smoke.sh               # end-to-end checks
   eval-harness/          # prose-output eval against machine-checkable rubrics (no-fabricated-DOI, [UNVERIFIED] discipline, refuse-missing-figure-data)
-  test_*_bridge.py / test_consult_handoff.py / test_paired_consult.py / test_dual_consult_consumers.py
 CHANGELOG.md
 .env.example
 .gitignore
@@ -381,9 +331,8 @@ README.md
 **In scope**: single-author CS / systems / ML IMRAD paper skeletons across the
 full lifecycle. This includes optional ideation, novelty adjudication,
 claim-first drafting, citation verification, optional Zotero, figures,
-cryptographic proof sections, prose polish, cross-model review, grounded
-rebuttal, and Codex plus Hermes consultation. Provider opinions remain separate;
-all verdicts are advisory and all source claims require verification.
+cryptographic proof sections, prose polish, and grounded rebuttal. All verdicts
+are advisory and all source claims require verification.
 
 **Out of scope** (the human author's job, or deferred): final prose refinement
 and the submission upload itself, reporting-guideline checklists

@@ -15,9 +15,9 @@ Require:
 - non-empty `conditions` stating scope, trust domain, protocol phase, or other boundaries needed to read the structure correctly
 - one `family`, `order`, `encoding`, and non-empty `caption_facts`
 - `interpretation_location: body`
-- `route: tikz-figures` for routine diagrams, or `route: scientific-schematics` only for design exploration or when the user explicitly chooses final PNG output
+- `route: tikz-figures` for routine diagrams
 
-Allow `family: other` only with `family_reason`. Require `route_reason` whenever a built-in family's default route changes, including either allowed `scientific-schematics` case. Keep routine diagrams with a clear direction in TikZ.
+Allow `family: other` only with `family_reason`. Require `route_reason` whenever a built-in family's default route changes. Keep routine diagrams with a clear direction in TikZ.
 
 Treat venue rules as higher priority than this reference. Record any width, font, or color departure under `venue_overrides` in the brief.
 

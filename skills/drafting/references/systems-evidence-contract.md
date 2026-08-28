@@ -146,7 +146,7 @@ Required fields are `figure_id`, `question`, `claim`, `sources`, `conditions`, `
 - `encoding` records the primary encoding and redundant grayscale encoding where methods are compared.
 - `caption_facts` lists the facts the caption must define.
 - `interpretation_location` is always `body`.
-- `route` is one of `tikz-figures`, `scientific-visualization`, or `scientific-schematics`.
+- `route` is one of `tikz-figures` or `scientific-visualization`.
 
 Built-in families and default routes:
 
@@ -159,7 +159,7 @@ Built-in families and default routes:
 | Which parameter region works? | `parameter-heatmap` | `scientific-visualization` |
 | How does cost grow across orders of magnitude? | `log-cost-curve` | `scientific-visualization` |
 
-`family: other` requires `family_reason`. A route that differs from the family default requires `route_reason`. `scientific-schematics` is allowed only when the design direction is unresolved and needs exploration, or when the user explicitly chooses final PNG output.
+`family: other` requires `family_reason`. A route that differs from the family default requires `route_reason`.
 
 Venue rules override reference widths, fonts, and colors. Record each override in an optional `venue_overrides` list.
 

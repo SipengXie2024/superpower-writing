@@ -18,16 +18,14 @@ metadata:
 
 输出格式**仅 TikZ**（`figure.tex`，`\input` 嵌入手稿）——HTML/CSS/SVG/matplotlib 均不可作为论文结构图输出。
 
-## 与 scientific-schematics 的分工（按图类型路由）
+## 与其他图技能的分工（按图类型路由）
 
 | 场景 | 走哪个 skill | 理由 |
 |---|---|---|
-| 设计方向已明确的结构化图：架构图 / 流程图 / pipeline / 时序 / 几何数学示意 / 含公式的图 | **本 skill（TikZ）** | 矢量、公式原生渲染、与正文字体统一 |
-| 设计方向不明 / 图型新颖 / 用户想先看几个方向 | `scientific-schematics` 探索模式（image_gen 并行出 3 张方向草图，用户选） | 发散探索快；选中的草图可直接交付，也可作为 `ref.png` 回到本 skill 走复刻 |
-| 插画感图：光影/材质/3D/手绘风 conceptual art、graphical abstract，或用户偏好精修 PNG | `scientific-schematics`（出 PNG） | 栅格生成器的视觉表现力强，PNG 本身就是合格交付物 |
+| 结构化图：架构图 / 流程图 / pipeline / 时序 / 几何数学示意 / 含公式的图 | **本 skill（TikZ）** | 矢量、公式原生渲染、与正文字体统一 |
 | 数据图表（实验结果曲线/柱状） | `scientific-visualization`（matplotlib） | 数据驱动，不是手画结构 |
 
-常规结构图默认本 skill（矢量是默认，不是规则）；经探索模式选定草图后回到本 skill 的，走复刻豁免（见 ①.7），用 `figure-diff.py` 对照 `ref.png` 验证还原度。最终用 PNG 还是矢量由用户定。
+常规结构图默认本 skill（矢量是默认，不是规则）。
 
 ## Philosophy（每次画图前必读，所有规则之上）
 

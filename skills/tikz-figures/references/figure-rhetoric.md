@@ -24,7 +24,7 @@ Most other figures are supporting. If a proposed figure is not one of these thre
 
 **Tool routing inside our plugin** (the three figures map to three skills):
 
-- Motivated example and solution overview are structural diagrams. Default to `tikz-figures` (vector, formula-native, font-matched). Use `scientific-schematics` when the direction is unclear (exploration mode) or the figure is pictorial.
+- Motivated example and solution overview are structural diagrams. Default to `tikz-figures` (vector, formula-native, font-matched).
 - Results figures are data-driven. Use `scientific-visualization` (matplotlib / pgfplots), never a hand-drawn diagram.
 
 ---
@@ -176,7 +176,7 @@ Start from the one sentence this figure makes true (every figure in `.writing/pl
 - **The rest are evidence,** ordered by how much each strengthens b, one sub-claim per row.
 - A main-text figure is usually 5 to 10 panels. Think of the width as a 12-column grid so panels can take flexible column spans (a full-width schematic above two half-width plots, for example).
 
-For each panel write down four things: its letter (a, b, c), its role (what it proves in the argument), which skill draws it (a schematic or overview goes to `tikz-figures` or `scientific-schematics`; a data result goes to `scientific-visualization`), and the evidence or data file it is bound to. This panel list is the multi-panel form of the tikz-figures step ① paper sketch: write it before drawing anything.
+For each panel write down four things: its letter (a, b, c), its role (what it proves in the argument), which skill draws it (a schematic or overview goes to `tikz-figures`; a data result goes to `scientific-visualization`), and the evidence or data file it is bound to. This panel list is the multi-panel form of the tikz-figures step ① paper sketch: write it before drawing anything.
 
 ### Draw each panel, then compose
 

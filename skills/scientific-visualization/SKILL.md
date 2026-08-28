@@ -1,6 +1,6 @@
 ---
 name: scientific-visualization
-description: Publication-ready data plots for CS papers (systems, ML, networking, security). Use when creating figures with multi-panel layouts, error bars, colorblind-safe palettes, log-scale axes, latency CDFs, throughput curves, training curves, ablation bars, or speedup comparisons for IEEE / ACM / USENIX / NeurIPS / ICML / ICLR submissions. Orchestrates matplotlib, seaborn, and plotly with venue-specific styling and PDF output that drops cleanly into LaTeX. For one-off exploration use seaborn or plotly directly; for system architecture diagrams use scientific-schematics instead.
+description: Publication-ready data plots for CS papers (systems, ML, networking, security). Use when creating figures with multi-panel layouts, error bars, colorblind-safe palettes, log-scale axes, latency CDFs, throughput curves, training curves, ablation bars, or speedup comparisons for IEEE / ACM / USENIX / NeurIPS / ICML / ICLR submissions. Orchestrates matplotlib, seaborn, and plotly with venue-specific styling and PDF output that drops cleanly into LaTeX. For one-off exploration use seaborn or plotly directly; for system architecture diagrams use tikz-figures instead.
 license: MIT license
 metadata:
     skill-author: K-Dense Inc. (upstream); CS adaptation by superpower-writing
@@ -26,7 +26,7 @@ Use this skill when:
 
 Do not use this skill for:
 
-- Architecture / data-flow / pipeline schematics — use `superpower-writing:scientific-schematics`
+- Architecture / data-flow / pipeline schematics — use `superpower-writing:tikz-figures`
 - Ad-hoc exploratory plots in a notebook — just import seaborn / plotly directly
 - Tables — use LaTeX `booktabs` directly; no Python needed
 
@@ -256,7 +256,7 @@ Don't fabricate error bars. If a measurement is from a single run, say so in the
 | matplotlib | Multi-panel, full control, anything that needs custom annotations | Default for camera-ready CS figures |
 | seaborn | Statistical plots with automatic CI / bootstrap | Built on matplotlib; styles compose; great for box / violin / regression |
 | plotly | Interactive HTML for project pages or supplementary | Use `kaleido` to export static PDF |
-| pgfplots / TikZ | When you want LaTeX to compile the figure | Best for diagrams that mix math and data; covered by `scientific-schematics` |
+| pgfplots / TikZ | When you want LaTeX to compile the figure | Best for diagrams that mix math and data; covered by `tikz-figures` |
 
 If a figure is reused across paper / poster / slides, render at multiple sizes from the same script — keep a single source-of-truth Python file under `.writing/figures/src/`.
 

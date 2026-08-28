@@ -298,9 +298,8 @@ closest-matching citation.
 
 A survey or systematic review reads better with one or two figures: a
 PRISMA-style flow of the screening counts, a thematic-synthesis diagram, or a
-research-gap map. Invoke `Skill(skill="superpower-writing:scientific-schematics")`
-for concept diagrams (it owns the image-generation backend and writes to
-`.writing/figures/`), or `Skill(skill="superpower-writing:scientific-visualization")`
+research-gap map. Invoke `Skill(skill="superpower-writing:tikz-figures")`
+for concept diagrams, or `Skill(skill="superpower-writing:scientific-visualization")`
 for data plots (CDFs, bars, Pareto fronts). This is a recommendation, not a
 gate.
 
