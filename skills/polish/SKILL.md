@@ -88,6 +88,11 @@ Byte-exact, never rewritten:
   the evidence is absent, keep the marker or return a neutral description that does
   not make the unsupported claim.
 
+Prose that polish writes into a `.tex` file must be valid LaTeX. Escape `%`, `&`,
+`_`, `$`, and `#` in any new or rewritten text (`\%`, `\&`, `\_`), and never strip
+an existing escape. A bare `%` starts a comment and silently eats the rest of the
+line.
+
 When clarity conflicts with evidential precision, keep the precision. A smoother
 sentence that converts an unknown fact into an asserted fact is a regression, not
 a polish. The third pass (`references/evidence-led-wording.md`) is the detailed
@@ -243,7 +248,8 @@ just do not make the rejected ones.
   the next attempt rather than letting Strunk compound the drift. Prefer one good
   polish over iterative grinding.
 - **Academic input is often near-identity.** A clean systems-paper paragraph may
-  come back unchanged, and that is the correct result. Hyphenated compounds
+  come back unchanged, and that is the correct result. Say so rather than echoing
+  the text (see Output philosophy). Hyphenated compounds
   (`cold-cache`, `per-contract`) and scholarly verbs (`shows`, `preserving`) are
   load-bearing; if a pass touched them, the preservation contract restores them.
 - **A polish that renames a `\subsection{...}` or section title.** That is a
@@ -257,6 +263,13 @@ In place, return the revised prose and nothing else, unless one short note earns
 its place (for example, "I kept the hedge in the third sentence because it carries
 the sample-size claim"). Meta-commentary about which tells you removed does not
 earn its place.
+
+Before returning, audit each change once: does it improve readability, or is it a
+swap for the sake of swapping (a synonym, a reordering, a rhythm tweak that reads
+no better)? Revert the second kind. Clean input should come back unchanged, and
+when it does, return one line instead of the text: `[No changes: the passage reads
+naturally as written.]` A silent echo is indistinguishable from a pass that never
+ran.
 
 In diff-first mode, keep user-facing text focused on the change under review: which
 one, what changed, accept / reject / partial, a one-sentence reason. Do not narrate

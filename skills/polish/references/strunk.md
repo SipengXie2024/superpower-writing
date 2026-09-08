@@ -26,6 +26,9 @@ Wrong (labeled): *Register: technical (rule 13 applied).* The service caches res
 Wrong (narrated): This is academic register, so I keep the hedges. The service caches responses.
 Right: The service caches responses.
 
+**Exception, unchanged input.** If the passes changed nothing, return the one-line
+unchanged note from SKILL.md's Output philosophy instead of echoing the input.
+
 **Exception, assumptions.** If you made a genuine editorial assumption the user
 should verify (say, you read a `not ... un-` as a literal double negative rather
 than emphasis), append one short bracketed line at the very end, for example

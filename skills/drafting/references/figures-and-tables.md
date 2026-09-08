@@ -362,6 +362,11 @@ Place below the figure. Structure:
    report sample size, name the statistical test.
 3. Define every abbreviation and symbol.
 
+Open with the content, never with a frame: "Tail-latency CDFs for the three
+scheduler variants", not "This figure shows the tail-latency CDFs". Default
+case is sentence case with a terminal period; use Title Case for a noun-phrase
+caption only when the venue template does.
+
 Example:
 
 ```
@@ -374,7 +379,10 @@ achieves sub-millisecond p99 latency up to 80 k requests/s, compared to
 
 ### Table Captions
 
-Place above the table. Title in sentence case, followed by a period. Footnotes
+Place above the table. Title in sentence case, followed by a period. Standard
+openers: "Comparison with ...", "Ablation study on ...", "Results on ...",
+"Effect of ... on ...". Content first, never "This table shows"; Title Case
+only when the venue template uses it. Footnotes
 below the table body define abbreviations, statistical tests, and conventions
 (e.g., "Bold values indicate the best result in each column").
 

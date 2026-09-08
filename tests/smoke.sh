@@ -36,7 +36,7 @@ python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/plugin.json
 python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/marketplace.json'))" && pass "marketplace.json valid"
 
 echo "== 5. skill + command + agent presence =="
-for name in outlining drafting claim-verification polish rebuttal idea literature citations scientific-visualization domain-glossary wait-what; do
+for name in outlining drafting claim-verification polish rebuttal idea literature citations scientific-visualization scientific-schematics domain-glossary wait-what; do
   [[ -f "$PLUGIN_ROOT/skills/$name/SKILL.md" ]] \
     && pass "skills/$name/SKILL.md" \
     || fail "missing skills/$name/SKILL.md"
@@ -52,6 +52,10 @@ for a in citation-auditor; do
     || fail "missing agents/$a.md"
 done
 
+python3 "$PLUGIN_ROOT/skills/scientific-schematics/scripts/imagegen.py" --help >/dev/null 2>&1 \
+  && pass "scientific-schematics/scripts/imagegen.py --help" \
+  || fail "scientific-schematics/scripts/imagegen.py missing or --help failed"
+
 echo "== 5b. output style + deletion audit =="
 [[ -f "$PLUGIN_ROOT/output-styles/academic-research-assistant.md" ]] \
   && pass "output-styles/academic-research-assistant.md" \
@@ -62,7 +66,7 @@ for gone in skills/submission skills/revision skills/peer-review skills/verifica
             skills/collaborating-with-codex skills/collaborating-with-hermes \
             scripts/paired_consult.py scripts/consult_handoff.py \
             skills/_shared/core/dual-consult-protocol.md \
-            skills/review skills/scientific-schematics; do
+            skills/review; do
   [[ ! -e "$PLUGIN_ROOT/$gone" ]] \
     && pass "removed: $gone" \
     || fail "deleted component still present: $gone"

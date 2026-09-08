@@ -7,6 +7,22 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [3.1.0] — 2026-09-08
+
+The image-generation skill returns on a local gateway, and three batches of rules borrowed from public writing prompts land in polish, scientific-visualization, and drafting.
+
+### Added
+
+- Skill `scientific-schematics` returns, rebuilt on the local sub2api gateway (Docker, `127.0.0.1:7234`) instead of the removed Codex CLI bridge. `scripts/imagegen.py` calls the OpenAI Images API shape directly (`/v1/images/generations`, `/v1/images/edits`) with gpt-image-2, runs parallel attempts (`--count`), and writes a provenance sidecar per PNG. Verified 2026-09-08: a seven-module architecture diagram with every label exact in 44 s; a single-label `edit` left the rest of the figure intact in 34 s. The subscription path ignores `size` and `quality`, so the prompt contract states the canvas shape in FRAMING.
+- `scientific-schematics/references/prompt-contract.md`: the six-section contract, anti-AI-look color rules, thumbnail vocabulary, and prompt locks moved out of SKILL.md, plus three rules borrowed from a public architecture-figure prompt: labels name modules and never explain them, the core novelty is the one visually distinct module, icons only where they aid recognition. The verified prompt is the worked example. `style-pastel-ml.md` restored unchanged.
+- `polish`: necessity self-check before output and an explicit one-line unchanged report instead of a silent echo; `leverage` / `utilize` / `facilitate` added to the AI-vocabulary list; LaTeX `\textbf` / `\emph` stress emphasis stripped while first-use `\emph` and list labels stay; `itemize` / `enumerate` never folded into prose; three academic filler openers; LaTeX escapes required in any prose polish writes into `.tex`.
+- `scientific-visualization/references/chart-chooser.md`: question-to-chart table merging the skill's systems patterns with the standard ML results charts, the scale rule for groups that differ by a lot (broken axis when raw magnitudes matter, log across orders of magnitude, normalized when the relative gain is the claim), orientation and series-count rules, and a list of charts reviewers object to (radar, pie, dual y-axis, bar plus line overlay, 3D) with replacements. Wired into the skill's workflow and resource table. Adapted from a public experiment-plot prompt; its radar / donut / dual-axis recommendations were downgraded to cautions.
+- Captions (`figures-and-tables.md`): open with the content, never "This figure shows"; standard table openers; Title Case only when the venue template uses it. Results (`04_results.md`): lead-in sentence per result paragraph, and a "bookkeeping narration" failure mode.
+
+### Changed
+
+- Figure routing in drafting, literature, tikz-figures, scientific-visualization, the figure evidence contract, README, and the smoke test includes `scientific-schematics` again.
+
 ## [3.0.0] — 2026-08-28
 
 Breaking removal of the external-consultation stack. The Codex and Hermes CLI bridges proved unreliable in operation (repeated runner failures and search timeouts), and the plugin now runs fully local.

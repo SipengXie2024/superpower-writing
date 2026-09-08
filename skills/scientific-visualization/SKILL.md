@@ -1,6 +1,6 @@
 ---
 name: scientific-visualization
-description: Publication-ready data plots for CS papers (systems, ML, networking, security). Use when creating figures with multi-panel layouts, error bars, colorblind-safe palettes, log-scale axes, latency CDFs, throughput curves, training curves, ablation bars, or speedup comparisons for IEEE / ACM / USENIX / NeurIPS / ICML / ICLR submissions. Orchestrates matplotlib, seaborn, and plotly with venue-specific styling and PDF output that drops cleanly into LaTeX. For one-off exploration use seaborn or plotly directly; for system architecture diagrams use tikz-figures instead.
+description: Publication-ready data plots for CS papers (systems, ML, networking, security). Use when creating figures with multi-panel layouts, error bars, colorblind-safe palettes, log-scale axes, latency CDFs, throughput curves, training curves, ablation bars, or speedup comparisons for IEEE / ACM / USENIX / NeurIPS / ICML / ICLR submissions. Orchestrates matplotlib, seaborn, and plotly with venue-specific styling and PDF output that drops cleanly into LaTeX. For one-off exploration use seaborn or plotly directly; for system architecture diagrams use tikz-figures or scientific-schematics instead.
 license: MIT license
 metadata:
     skill-author: K-Dense Inc. (upstream); CS adaptation by superpower-writing
@@ -26,7 +26,7 @@ Use this skill when:
 
 Do not use this skill for:
 
-- Architecture / data-flow / pipeline schematics — use `superpower-writing:tikz-figures`
+- Architecture / data-flow / pipeline schematics — use `superpower-writing:tikz-figures` (vector) or `superpower-writing:scientific-schematics` (image-model PNG)
 - Ad-hoc exploratory plots in a notebook — just import seaborn / plotly directly
 - Tables — use LaTeX `booktabs` directly; no Python needed
 
@@ -222,7 +222,7 @@ These transfer to almost any CS composite:
 
 ## Common CS Figure Patterns
 
-Reference implementations live in `references/matplotlib_examples.md`. The patterns covered:
+Reference implementations live in `references/matplotlib_examples.md`. To choose among these and the standard ML charts by the question the figure answers, with scale remedies and venue cautions, read `references/chart-chooser.md`. The patterns covered:
 
 | Pattern | Use case | Notes |
 |---------|----------|-------|
@@ -270,7 +270,7 @@ If a figure is reused across paper / poster / slides, render at multiple sizes f
 
 Then proceed:
 
-1. **Plan from the outline.** Each figure listed in `.writing/plan.md` should have a one-line claim it supports (`fig:cdf-latency` → "our system has a 2.4× lower p99 than the baseline at 32 clients"). For a figure that doubles as the paper's results-storytelling figure (the headline result a reviewer sees first), check `tikz-figures/references/figure-rhetoric.md`: it covers the three-figure storytelling model, the Figure-1 performance-teaser paradigm and its avoid-condition (do not teaser a marginal gain, it shows the weakness unkindly), and the 30-second comprehension test. That reference is venue-agnostic across our figure skills. When these plots form the full figure deck of a paper, run one **editor pass** over the whole deck before submission: the per-deck narrative review in `figure-rhetoric.md` §5 (hook verdict, figure arc, misplaced panels, missing panels, kill list), which is distinct from the per-figure defect hunt in the Final Checklist below. When one figure is itself multi-panel (an ablation grid, a schematic paired with its result), `figure-rhetoric.md` §6 covers outlining the panels from the claim, drawing each with the matching skill, and reviewing the composed image as one artifact with `verify_layout.py`.
+1. **Plan from the outline.** Each figure listed in `.writing/plan.md` should have a one-line claim it supports (`fig:cdf-latency` → "our system has a 2.4× lower p99 than the baseline at 32 clients"). For a figure that doubles as the paper's results-storytelling figure (the headline result a reviewer sees first), check `tikz-figures/references/figure-rhetoric.md`: it covers the three-figure storytelling model, the Figure-1 performance-teaser paradigm and its avoid-condition (do not teaser a marginal gain, it shows the weakness unkindly), and the 30-second comprehension test. That reference is venue-agnostic across our figure skills. When these plots form the full figure deck of a paper, run one **editor pass** over the whole deck before submission: the per-deck narrative review in `figure-rhetoric.md` §5 (hook verdict, figure arc, misplaced panels, missing panels, kill list), which is distinct from the per-figure defect hunt in the Final Checklist below. When one figure is itself multi-panel (an ablation grid, a schematic paired with its result), `figure-rhetoric.md` §6 covers outlining the panels from the claim, drawing each with the matching skill, and reviewing the composed image as one artifact with `verify_layout.py`. Then pick the chart from `references/chart-chooser.md` by the question the figure answers, apply its scale remedy and orientation rules, and record the chart as the brief's `family`.
 2. **Write a generator script** in `.writing/figures/src/<fig_id>.py`. The script reads from `.writing/figures/data/<fig_id>.{csv,jsonl}` and writes `.writing/figures/<fig_id>.pdf`. This separation lets reviewers (and you) regenerate figures from raw data.
 3. **Apply this skill's style** at the top of the script — copy the bundled `.mplstyle` file or use the inline rcParams snippet from Quick Start.
 4. **Verify before commit.** Open the PDF in a viewer at 100 % zoom and at the column width it will appear at in the paper. If text is cramped at column width, the font sizes are wrong. For a mechanical pre-check, call `verify(fig)` from `scripts/verify_layout.py` at the end of the generator script: it flags text that collides with other text or a foreign axes spine and text clipped off the canvas, and, with `crop_dir=`, writes one PNG per panel so you (or a review agent) run the perceptual pass the geometry check cannot. Open each crop with the Read tool and check contrast, leader crossings, color-identity confusion, and legend binding.
@@ -296,6 +296,7 @@ Then proceed:
 | `references/publication_guidelines.md` | Universal best practices: typography, layout, axes, accessibility, grayscale tests |
 | `references/venue_requirements.md` | Per-venue specs (IEEE, ACM, USENIX, NeurIPS, ICML, ICLR, arXiv) with exact widths, font sizes, and class-file gotchas |
 | `references/color_palettes.md` | Categorical (Okabe-Ito, Wong, Tol Bright/Muted), sequential (viridis family), diverging (RdBu, PuOr, BrBG); with grayscale and colorblind testing recipes |
+| `references/chart-chooser.md` | Question-to-chart table (systems patterns plus standard ML charts), scale remedies (broken axis / log / normalized), orientation and series-count rules, and the charts reviewers object to with their replacements |
 | `references/matplotlib_examples.md` | Twelve runnable patterns — CDF, throughput, training curve, Pareto, ablation, stacked-bar breakdown, heatmap, roofline, box+strip, multi-panel composition, `\columnwidth` IEEE template, `\textwidth` ACM template |
 | `scripts/style_presets.py` | `apply_publication_style(name)`, `set_color_palette(name)`, `configure_for_venue('ieee' / 'acm' / 'usenix' / 'neurips' / 'icml' / 'iclr' / 'arxiv')`. Copy into a project to pin the rcParams. |
 | `scripts/figure_export.py` | `save_publication_figure()` (multi-format), `save_for_venue()` (per-venue defaults), `check_figure_size()` (warns when figsize doesn't match the venue's column width). |

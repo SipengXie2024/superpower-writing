@@ -18,7 +18,7 @@ Read Voice Calibration and Register Awareness first, then work the patterns.
 - **Voice Calibration, Register Awareness, Personality**: calibrate before editing.
 - **Content patterns (rules 1-6)**: significance inflation, notability, -ing tails, promotional language, weasel words, outline-like sections.
 - **Language and grammar (rules 7-13)**: AI vocabulary, copula avoidance, negative parallelism, rule of three, elegant variation, false ranges, passive voice.
-- **Style patterns (rules 14-19+)**: em-dash overuse, boldface, inline-header lists, title case, emojis, curly quotes.
+- **Style patterns (rules 14-19+)**: em-dash overuse, boldface and italic emphasis, inline-header lists, title case, emojis, curly quotes.
 
 ## Voice Calibration (when the user gives a writing sample)
 
@@ -91,6 +91,9 @@ These remove pure formatting noise or chatbot artifacts. Apply everywhere:
 - **Rule 14 (em dashes), apply selectively.** Academic prose sometimes uses an
   em dash where a comma would create ambiguity. Check the alternative reads
   cleaner before swapping.
+- **Rule 16 (inline-header lists), do not fold `itemize` / `enumerate`.**
+  Contribution lists, research-question lists, and finding lists are venue
+  conventions. Folding them into prose is a structural edit, outside polish.
 - **Rule 10 (rule of three), check first.** The trio may be a real enumeration
   (three benchmarks, three contributions). Strip only rhetorical filler.
 - **Verb register, preserve scholarly verbs.** Do not informalize `shows /
@@ -193,11 +196,14 @@ Challenges and Legacy, Future Outlook.
 
 ### 7. Overused "AI vocabulary"
 **Watch:** actually, additionally, align with, crucial, delve, emphasizing,
-enduring, enhance, fostering, garner, highlight (verb), interplay,
-intricate/intricacies, key (adjective), landscape (abstract), pivotal, showcase,
-tapestry, testament, underscore (verb), valuable, vibrant.
+enduring, enhance, facilitate, fostering, garner, highlight (verb), interplay,
+intricate/intricacies, key (adjective), landscape (abstract), leverage (verb),
+pivotal, showcase, tapestry, testament, underscore (verb), utilize, valuable,
+vibrant.
 **Problem:** these appear far more often in post-2023 text and co-occur.
 **Fix:** delete or replace with a plain equivalent; recast the sentence around a concrete fact.
+`utilize` → `use`; `leverage` → `use` or `apply`; `facilitate` → the concrete verb
+(`build`, `run`, `let`).
 
 ### 8. Avoidance of "is" / "are" (copula avoidance)
 **Watch:** serves as / stands as / marks / represents [a], boasts / features /
@@ -240,13 +246,18 @@ writing. Most rewrite more cleanly with commas, periods, or parentheses.
 **Before:** promoted by Dutch institutions,not by the people themselves,even in official documents.
 **After:** promoted by Dutch institutions, not by the people themselves, even in official documents.
 
-### 15. Overuse of boldface
-**Problem:** phrases emphasized in boldface mechanically.
-**Fix:** remove the bold; let sentence structure carry the emphasis.
+### 15. Overuse of boldface and italic emphasis
+**Problem:** phrases emphasized in boldface or italics mechanically. In LaTeX this
+is `\textbf{...}` or `\emph{...}` wrapped around a phrase for stress rather than
+for definition.
+**Fix:** remove the emphasis; let sentence structure carry it. Keep `\emph{term}`
+at a term's first definition and `\textbf{...}` labels inside contribution,
+research-question, and finding lists; those are venue conventions, not emphasis.
 
 ### 16. Inline-header vertical lists
 **Problem:** list items that start with a bolded header followed by a colon, each restating the header.
 **Fix:** fold into prose. "The update improves the interface, speeds up load times, and adds end-to-end encryption."
+Academic `itemize` / `enumerate` lists stay (see Register Awareness).
 
 ### 17. Title case in headings
 **Problem:** every main word capitalized.
@@ -284,6 +295,11 @@ limited/scarce, based on available information.
 - "In the event that you need help" → "If you need help"
 - "has the ability to process" → "can process"
 - "It is important to note that the data shows" → "The data shows"
+- "It is worth noting that X" / "It should be noted that X" → "X"
+- "First and foremost, X" → "First, X" (or just "X")
+
+Logical connectives (however, therefore, moreover, in addition) are not filler.
+Keep the ones that mark a real step in the argument; cut only the announcements.
 
 ### 24. Excessive hedging
 **Problem:** over-qualifying ("could potentially possibly be argued that... might have some effect").
