@@ -57,11 +57,12 @@ Write the prompt file as six named sections in this order.
   contribution and give it the single visual distinction: a thicker border, the
   one accent color, or the central position. Every other module stays quiet.
   Say so in LAYOUT ("the hero module") and in COLOR PALETTE.
-- **State the canvas shape in FRAMING.** The subscription backend ignores the
-  `size` parameter and chooses its own canvas from the content; a left-to-right
-  pipeline came back as a 3:1 strip. Write "wide 3:1 strip", "3:2 landscape",
-  or "square" in FRAMING, and make the LAYOUT consistent with it (a single row
-  for a strip, stacked rows or panels for a landscape).
+- **State the canvas shape in FRAMING.** The image tool has no size parameter
+  and chooses the canvas from the prompt; a left-to-right pipeline with no
+  stated shape came back as a 3:1 strip, and "landscape 3:2" came back
+  1536x1024. Write "wide 3:1 strip", "3:2 landscape", or "square" in FRAMING,
+  and make the LAYOUT consistent with it (a single row for a strip, stacked
+  rows or panels for a landscape).
 - **Icons only where they aid recognition.** A small monochrome icon inside a
   module (document stack for a retriever, database cylinder for an index,
   shield for a verifier, network graph for a model) makes the module readable

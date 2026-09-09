@@ -1,43 +1,46 @@
 ---
 name: scientific-schematics
-description: Generate raster figure PNGs (architecture diagrams, pipelines, concept art, graphical abstracts) through the local sub2api gateway with gpt-image-2, under a six-section prompt contract with three-attempt selection and a targeted edit loop. Use when the user wants an image-model figure, says 生图 / 用 AI 出一张架构图 / 先出几个方向看看, prefers a polished PNG, or wants layout drafts to pick from before a TikZ rendition. Data plots go to scientific-visualization; routine vector diagrams default to tikz-figures.
+description: Generate raster figure PNGs (architecture diagrams, pipelines, concept art, graphical abstracts) through the local Codex CLI's built-in image tool (gpt-image-2), under a six-section prompt contract with three-attempt selection and a targeted edit loop. Use when the user wants an image-model figure, says 生图 / 用 AI 出一张架构图 / 先出几个方向看看, prefers a polished PNG, or wants layout drafts to pick from before a TikZ rendition. Data plots go to scientific-visualization; routine vector diagrams default to tikz-figures.
 license: MIT license
 allowed-tools: Read Write Edit Bash AskUserQuestion
 metadata:
     skill-author: superpower-writing (prompt contract adapted from K-Dense Inc. and LigphiDonk/academic-figure-generator, both MIT)
 ---
 
-# Scientific Schematics (raster figures through sub2api)
+# Scientific Schematics (raster figures through the Codex CLI)
 
 ## Overview
 
-This skill produces raster figures with an image model. Generation goes through
-the sub2api gateway that runs on this machine in Docker (container `sub2api`,
-host port `127.0.0.1:7234`). The gateway fronts a ChatGPT/Codex subscription and
-exposes the OpenAI Images API. `scripts/imagegen.py` wraps the two endpoints,
-`/v1/images/generations` and `/v1/images/edits`, and saves every PNG with a
-provenance sidecar (`<stem>.imagegen.json`: the request, the backend's
-`revised_prompt`, token usage, actual size). There is no CLI bridge and no
-session state; each call is one HTTP request.
+This skill produces raster figures with an image model. Generation runs through
+the Codex CLI installed on this machine: `scripts/imagegen.py` starts one
+non-interactive `codex exec` turn per image, Codex calls its built-in
+`image_gen` tool (gpt-image-2 on the ChatGPT subscription), copies the PNG to
+`--out`, and the script writes a provenance sidecar (`<stem>.imagegen.json`:
+the Codex thread id, the prompt Codex actually sent to the image model, actual
+size, wall time). `edit` resumes the thread recorded in the sidecar, so the
+model still sees the original image and changes only what the instruction
+names. No gateway, no API key, no token.
 
-Backend facts, measured 2026-09-08 with gpt-image-2 on a landscape architecture
-diagram:
+Backend facts, measured 2026-09-09 with codex-cli 0.153.4 on a four-module
+pipeline diagram:
 
-- About 45 seconds per image. Run every call with `run_in_background: true`.
-- The subscription path reports `model: gpt-image-2-codex`, ignores `size` and
-  `quality`, and picks its own canvas (a 3:1 strip for a left-to-right
-  pipeline). State the aspect ratio in the prompt text instead.
-- Billing is subscription quota in image tokens (about 700 output tokens per
-  figure), not per-image money.
-- Label fidelity is high: eight labels spelled exactly on the first attempt.
-  Keep the SPELL EXACTLY line anyway; it costs nothing.
-- `edit` with one instruction (rename one label) returned in 34 seconds,
-  changed only that label, and cost about 2200 tokens because the input image
-  is billed as well.
+- About 35 seconds per `generate` and about 45 seconds per `edit`; two
+  parallel attempts finished together in 36 seconds. Run every call with
+  `run_in_background: true`.
+- The image tool takes no size or quality parameter; the canvas follows the
+  prompt text. "Landscape 3:2" came back 1536x1024; a left-to-right pipeline
+  with no stated shape came back as a 3:1 strip. State the aspect ratio in
+  FRAMING.
+- Billing is ChatGPT subscription quota, not per-image money.
+- Label fidelity is high: labels spelled exactly on the first attempt. Keep
+  the SPELL EXACTLY line anyway; it costs nothing.
+- `edit` in the same thread (rename one label) changed only that label; every
+  other pixel stayed.
 
-Configuration: `SUB2API_TOKEN` (the script also accepts `CC_BBD_SH_TOKEN`) and
-optional `SUB2API_BASE_URL` (default `http://127.0.0.1:7234`;
-`https://cc.bbd.sh` reaches the same instance from other machines).
+Requirements: `codex` on PATH and logged in. `codex login` is interactive, so
+the user runs it in a terminal, never this skill. The `image_generation`
+feature is on by default; `codex features list | grep image_generation`
+confirms it.
 
 ## Two roles: decide which one applies before invoking
 
@@ -82,7 +85,7 @@ python3 "$IMG" generate --prompt-file .writing/figures/prompts/<slug>.txt \
 
 # one targeted fix on a chosen PNG
 python3 "$IMG" edit --image .writing/figures/<slug>-2.png \
-  --prompt 'Rename the label "Top-k Docs" to "Top-k Passages". Keep every other element, color, position, icon, arrow, and label exactly as in the input image.' \
+  --prompt 'Rename the label "Top-k Docs" to "Top-k Passages".' \
   --out .writing/figures/<slug>.png
 ```
 
@@ -90,9 +93,14 @@ Mandatory: `run_in_background: true` on every call. A foreground call freezes
 the session for a minute or more. Do not poll; the harness notifies on
 completion. Then Read the PNG to inspect it; the Read tool renders images.
 
-The script retries once on network errors and 5xx responses, exits non-zero
-with the gateway's message on 4xx, and prints one `OK <path> <WxH> <seconds>`
-line per image, with a note when the backend ignored the requested size.
+The script runs `codex exec` from the current directory with the
+`workspace-write` sandbox plus write access to the output directory, retries
+once when Codex exits non-zero or leaves no PNG behind, and prints one
+`OK <path> <WxH> <seconds> thread=<id>` line per image. `edit` resumes the
+thread named in the input image's sidecar; `--thread` overrides it, and an
+image without a sidecar is attached to a fresh thread instead. The edit
+instruction names only the change; the script adds the "keep everything else"
+clause.
 
 ## Workflow
 
@@ -137,11 +145,14 @@ only when the venue asks.
 
 ## Failure and recovery
 
-- **Script exits non-zero.** Read its message. A 4xx means the request is wrong
-  (unknown model, empty prompt, missing image file); fix and rerun. A network or
-  5xx failure that survived the built-in retry usually means the gateway is
-  down: check `docker ps` for the `sub2api` container, then stop and report the
-  error text. Never invent a saved path or claim an image exists.
+- **Script exits non-zero.** Read its message. `codex CLI not found` or an
+  authentication error in Codex's stderr needs the user to run `codex login`
+  in a terminal; stop and say so. "codex finished but <out> does not exist"
+  quotes Codex's last reply, which usually explains why nothing was saved (the
+  image tool refused the prompt, or Codex asked a question instead of acting);
+  fix the prompt and rerun. A timeout (600 s by default) that survived the
+  built-in retry means the turn hung; stop and report the error text. Never
+  invent a saved path or claim an image exists.
 - **Labels will not converge.** Allow at most three `edit` rounds on one image.
   If a label is still wrong after the third, hand the draft to
   `superpower-writing:tikz-figures` for a vector rendition, where text is exact,
@@ -164,7 +175,7 @@ decide most outcomes:
 - **Spell every label** in a list and add the literal line "SPELL ALL LABELS
   EXACTLY AS WRITTEN, do not rephrase or abbreviate".
 - **State the canvas shape** in FRAMING (wide 3:1 strip, 3:2 landscape,
-  square). The size parameter is ignored on the subscription path.
+  square). The image tool has no size parameter; the prompt decides.
 - **Icons only where they aid recognition:** a small monochrome icon inside a
   module (document stack, database cylinder, shield, network graph), never
   decoration.

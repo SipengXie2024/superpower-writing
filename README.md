@@ -67,7 +67,7 @@ rebuttal      grounded R-A-C response after reviews arrive
 `literature`,
 `citations`, and `pdf-explore` resolve evidence throughout. Figures come from
 `tikz-figures` (vector), `scientific-schematics` (image-model PNG through the
-local sub2api gateway), and `scientific-visualization` (data plots).
+local Codex CLI), and `scientific-visualization` (data plots).
 Cryptographic proofs come from
 `game-based-security-proof` and `simulation-security-proofs`. `domain-glossary`
 keeps the project's ubiquitous language in a repo-root `CONTEXT.md` that
@@ -310,7 +310,7 @@ skills/
   pdf-explore/           # navigate a long PDF (outline, per-page text, keyword search) without dropping it whole into context
   pdf-visual-check/      # layout lint on the compiled PDF: margin overflow, block overlap, low-DPI images, blank pages
   tikz-figures/          # publication-quality LaTeX / TikZ vector figures, compile-verified, two-candidate preview
-  scientific-schematics/ # raster figures with gpt-image-2 through the local sub2api gateway; six-section prompt contract, 3-attempt selection, targeted edit loop
+  scientific-schematics/ # raster figures with gpt-image-2 through the local Codex CLI's image tool; six-section prompt contract, 3-attempt selection, targeted edit loop
   scientific-visualization/  # publication-ready matplotlib / seaborn / plotly data plots with venue styling
   game-based-security-proof/ # game-hopping reduction proofs for cryptographic primitives
   simulation-security-proofs/ # simulation-based and UC proofs for MPC, ZK, OT, commitments

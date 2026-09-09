@@ -7,6 +7,14 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [3.2.0] — 2026-09-09
+
+The image-generation skill moves off the sub2api gateway onto the local Codex CLI.
+
+### Changed
+
+- `scientific-schematics` generates through the local Codex CLI instead of the sub2api gateway. `scripts/imagegen.py` now runs one non-interactive `codex exec` turn per image: Codex calls its built-in `image_gen` tool (gpt-image-2 on the ChatGPT subscription) and copies the PNG to `--out`; `edit` resumes the thread recorded in the sidecar, so the model still sees the original image. The sidecar records the thread id, the prompt Codex sent to the image model, size, and wall time. `--model`, `--size`, and `--quality` are gone (the tool has none); `edit` gains `--thread`, and an image without a sidecar is attached to a fresh thread. Verified 2026-09-09 with codex-cli 0.153.4: two parallel attempts at a four-module pipeline in 36 s with exact labels and the prompt handed to the image model verbatim; a same-thread single-label edit in 45 s with every other pixel unchanged. Needs `codex login`; no gateway, token, or container.
+
 ## [3.1.0] — 2026-09-08
 
 The image-generation skill returns on a local gateway, and three batches of rules borrowed from public writing prompts land in polish, scientific-visualization, and drafting.

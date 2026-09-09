@@ -1,107 +1,137 @@
 #!/usr/bin/env python3
-"""Generate or edit a figure PNG through a sub2api gateway (OpenAI Images API shape).
+"""Generate or edit a figure PNG with the Codex CLI's built-in image tool.
 
   imagegen.py generate --prompt-file brief.txt --out fig.png [--count 3]
-  imagegen.py edit --image fig.png --prompt "..." --out fig-v2.png
+  imagegen.py edit --image fig-2.png --prompt "..." --out fig.png
 
-Every saved PNG gets a sidecar <stem>.imagegen.json holding the request and the
-backend's response metadata (revised_prompt, usage, actual size) for provenance.
+Each call is one non-interactive `codex exec` turn: Codex calls its image_gen
+tool (gpt-image-2 on the ChatGPT subscription), copies the PNG to --out, and
+the script writes a sidecar <stem>.imagegen.json holding the Codex thread id
+(`edit` resumes that thread so the model still sees the original image), the
+prompt Codex actually sent to the image model, the size, and the wall time.
 """
 import argparse
-import base64
+import functools
+import glob
 import json
 import os
+import struct
+import subprocess
 import sys
 import time
-import urllib.error
-import urllib.request
-import uuid
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-DEFAULT_BASE = "http://127.0.0.1:7234"
-DEFAULT_MODEL = "gpt-image-2"
-USER_AGENT = "superpower-writing-imagegen/1.0"
+CODEX_HOME = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex"))
+
+GENERATE_TASK = """Generate exactly one image with the built-in image_gen tool. Pass the prompt \
+below to the tool verbatim: do not rewrite, shorten, or expand it, and do not read any skill \
+files first. Then copy the generated PNG to {out} (create parent directories as needed) and \
+reply with only that absolute path.
+
+PROMPT:
+{prompt}"""
+
+EDIT_TASK = """Edit the {which} with the built-in image_gen tool, applying exactly this change \
+and nothing else:
+
+{prompt}
+
+Keep every other element, label, color, position, arrow, and the canvas size exactly as in \
+that image. Copy the edited PNG to {out} (create parent directories as needed) and reply \
+with only that absolute path."""
 
 
-def token() -> str:
-    for name in ("SUB2API_TOKEN", "CC_BBD_SH_TOKEN"):
-        if os.environ.get(name):
-            return os.environ[name]
-    sys.exit("error: set SUB2API_TOKEN to a sub2api API key")
+@functools.lru_cache(maxsize=None)
+def codex_version() -> str:
+    try:
+        return subprocess.run(["codex", "--version"], capture_output=True, text=True).stdout.strip()
+    except FileNotFoundError:
+        sys.exit("error: codex CLI not found on PATH")
 
 
-def base_url() -> str:
-    return os.environ.get("SUB2API_BASE_URL", DEFAULT_BASE).rstrip("/")
+def png_size(path: Path) -> str:
+    head = path.read_bytes()[:24]
+    if head[:8] != b"\x89PNG\r\n\x1a\n":
+        sys.exit(f"error: {path} is not a PNG")
+    width, height = struct.unpack(">II", head[16:24])
+    return f"{width}x{height}"
 
 
-def post(path: str, body: bytes, content_type: str, timeout: int, retries: int) -> dict:
-    req = urllib.request.Request(
-        base_url() + path,
-        data=body,
-        method="POST",
-        headers={
-            "Authorization": "Bearer " + token(),
-            "Content-Type": content_type,
-            "User-Agent": USER_AGENT,
-        },
-    )
-    attempt = 0
-    while True:
+def sidecar_for(image: Path) -> Path:
+    return image.with_name(image.stem + ".imagegen.json")
+
+
+def image_gen_provenance(thread_id: str) -> dict:
+    """The last completed image_gen item in the thread's rollout file."""
+    pattern = str(CODEX_HOME / "sessions" / "*" / "*" / "*" / f"rollout-*-{thread_id}.jsonl")
+    last: dict = {}
+    for rollout in glob.glob(pattern):
+        with open(rollout, encoding="utf-8", errors="replace") as fh:
+            for line in fh:
+                if '"image_gen.generation"' not in line:
+                    continue
+                item = json.loads(line).get("payload", {}).get("item", {})
+                if item.get("kind") == "image_gen.generation" and item.get("status") == "completed":
+                    last = {"image_gen_id": item.get("id"), "revised_prompt": item.get("revisedPrompt")}
+    return last
+
+
+def run_codex(task: str, out: Path, timeout: int, resume: str | None, attach: Path | None) -> str:
+    cmd = ["codex", "exec"]
+    if attach:
+        # -i takes a list of files, so it must sit before a flag that ends the list
+        cmd += ["-i", str(attach)]
+    cmd += ["--json", "--color", "never", "--skip-git-repo-check",
+            "-C", os.getcwd(), "-s", "workspace-write", "--add-dir", str(out.parent),
+            "-c", 'model_reasoning_effort="low"']
+    if resume:
+        cmd += ["resume", resume]
+    cmd.append(task)
+    out.unlink(missing_ok=True)
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
+                              stdin=subprocess.DEVNULL)
+    except FileNotFoundError:
+        sys.exit("error: codex CLI not found on PATH")
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(f"codex exec timed out after {timeout}s")
+    thread_id, last_message = resume or "", ""
+    for line in proc.stdout.splitlines():
         try:
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
-                return json.loads(resp.read().decode())
-        except urllib.error.HTTPError as exc:
-            detail = exc.read().decode(errors="replace")[:500]
-            if exc.code < 500 or attempt >= retries:
-                sys.exit(f"error: HTTP {exc.code} from {path}: {detail}")
-        except (urllib.error.URLError, TimeoutError, OSError) as exc:
-            if attempt >= retries:
-                sys.exit(f"error: {path} failed after {attempt + 1} attempt(s): {exc}")
-        attempt += 1
-        time.sleep(5)
+            event = json.loads(line)
+        except ValueError:
+            continue
+        if event.get("type") == "thread.started":
+            thread_id = event.get("thread_id", thread_id)
+        item = event.get("item") or {}
+        if event.get("type") == "item.completed" and item.get("type") == "agent_message":
+            last_message = item.get("text", "")
+    if proc.returncode != 0:
+        raise RuntimeError(f"codex exec exited {proc.returncode}: {proc.stderr.strip()[-800:]}")
+    if not out.is_file():
+        raise RuntimeError(f"codex finished but {out} does not exist; its last message: {last_message[-800:]}")
+    return thread_id
 
 
-def multipart(fields: dict, files: dict) -> tuple[bytes, str]:
-    boundary = "----imagegen" + uuid.uuid4().hex
-    chunks = []
-    for name, value in fields.items():
-        chunks.append(
-            f"--{boundary}\r\nContent-Disposition: form-data; name=\"{name}\"\r\n\r\n{value}\r\n".encode()
-        )
-    for name, path in files.items():
-        chunks.append(
-            f"--{boundary}\r\nContent-Disposition: form-data; name=\"{name}\"; "
-            f"filename=\"{path.name}\"\r\nContent-Type: image/png\r\n\r\n".encode()
-        )
-        chunks.append(path.read_bytes())
-        chunks.append(b"\r\n")
-    chunks.append(f"--{boundary}--\r\n".encode())
-    return b"".join(chunks), f"multipart/form-data; boundary={boundary}"
+def attempt(task: str, out: Path, args, resume: str | None = None, attach: Path | None = None) -> str:
+    for n in range(args.retries + 1):
+        try:
+            return run_codex(task, out, args.timeout, resume, attach)
+        except RuntimeError as exc:
+            if n >= args.retries:
+                sys.exit(f"error: {exc}")
+            print(f"retrying after: {exc}", file=sys.stderr)
+    raise AssertionError("unreachable")
 
 
-def save(response: dict, out: Path, request: dict, started: float) -> None:
-    items = response.get("data") or []
-    if not items:
-        sys.exit(f"error: no image in response: {json.dumps(response)[:500]}")
-    item = items[0]
-    if item.get("b64_json"):
-        png = base64.b64decode(item["b64_json"])
-    elif item.get("url"):
-        png = urllib.request.urlopen(item["url"], timeout=120).read()
-    else:
-        sys.exit(f"error: image item has neither b64_json nor url: {list(item)}")
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_bytes(png)
-    meta = {k: v for k, v in response.items() if k != "data"}
-    meta["revised_prompt"] = item.get("revised_prompt")
-    sidecar = out.with_name(out.stem + ".imagegen.json")
-    sidecar.write_text(json.dumps({"request": request, "response": meta}, indent=2, ensure_ascii=False))
-    actual = meta.get("size", "?")
-    note = ""
-    if request.get("size") and actual != request["size"]:
-        note = f"  (backend ignored size={request['size']}; state the aspect ratio in the prompt)"
-    print(f"OK {out}  {actual}  {time.time() - started:.1f}s{note}")
+def save(out: Path, request: dict, thread_id: str, started: float) -> None:
+    size = png_size(out)
+    seconds = round(time.time() - started, 1)
+    record = {"backend": "codex-cli", "codex_version": codex_version(), "thread_id": thread_id,
+              "request": request, "size": size, "seconds": seconds, **image_gen_provenance(thread_id)}
+    sidecar_for(out).write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n")
+    print(f"OK {out}  {size}  {seconds}s  thread={thread_id}")
 
 
 def read_prompt(args) -> str:
@@ -114,20 +144,16 @@ def read_prompt(args) -> str:
 
 def cmd_generate(args) -> None:
     prompt = read_prompt(args)
-    body = {"model": args.model, "prompt": prompt, "n": 1}
-    for key in ("size", "quality"):
-        if getattr(args, key):
-            body[key] = getattr(args, key)
-    out = Path(args.out)
+    out = Path(args.out).resolve()
     outs = [out] if args.count == 1 else [
         out.with_name(f"{out.stem}-{i}{out.suffix}") for i in range(1, args.count + 1)
     ]
 
     def one(target: Path) -> None:
         started = time.time()
-        resp = post("/v1/images/generations", json.dumps(body).encode(), "application/json",
-                    args.timeout, args.retries)
-        save(resp, target, {"endpoint": "generations", **body}, started)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        thread_id = attempt(GENERATE_TASK.format(out=target, prompt=prompt), target, args)
+        save(target, {"mode": "generate", "prompt": prompt}, thread_id, started)
 
     with ThreadPoolExecutor(max_workers=len(outs)) as pool:
         list(pool.map(one, outs))
@@ -135,18 +161,25 @@ def cmd_generate(args) -> None:
 
 def cmd_edit(args) -> None:
     prompt = read_prompt(args)
-    image = Path(args.image)
+    image = Path(args.image).resolve()
     if not image.is_file():
         sys.exit(f"error: no such image: {image}")
-    fields = {"model": args.model, "prompt": prompt, "n": "1"}
-    if args.size:
-        fields["size"] = args.size
-    if args.quality:
-        fields["quality"] = args.quality
-    body, ctype = multipart(fields, {"image": image})
+    out = Path(args.out).resolve()
+    if out == image:
+        sys.exit("error: --out must differ from --image")
+    thread_id = args.thread
+    if not thread_id and sidecar_for(image).is_file():
+        thread_id = json.loads(sidecar_for(image).read_text()).get("thread_id")
+    if thread_id:
+        task = EDIT_TASK.format(which="most recent image in this thread", prompt=prompt, out=out)
+        attach = None
+    else:
+        task = EDIT_TASK.format(which="attached image", prompt=prompt, out=out)
+        attach = image
     started = time.time()
-    resp = post("/v1/images/edits", body, ctype, args.timeout, args.retries)
-    save(resp, Path(args.out), {"endpoint": "edits", "image": str(image), **fields}, started)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    thread_id = attempt(task, out, args, resume=thread_id, attach=attach)
+    save(out, {"mode": "edit", "image": str(image), "prompt": prompt}, thread_id, started)
 
 
 def main() -> None:
@@ -157,16 +190,14 @@ def main() -> None:
         p.add_argument("--prompt-file")
         p.add_argument("--prompt")
         p.add_argument("--out", required=True)
-        p.add_argument("--model", default=DEFAULT_MODEL)
-        p.add_argument("--size", help="e.g. 1536x1024; subscription backends may ignore it")
-        p.add_argument("--quality", choices=["low", "medium", "high", "auto"])
-        p.add_argument("--timeout", type=int, default=600)
+        p.add_argument("--timeout", type=int, default=600, help="seconds per codex exec turn")
         p.add_argument("--retries", type=int, default=1)
         p.set_defaults(fn=fn)
         if name == "generate":
             p.add_argument("--count", type=int, default=1, help="parallel attempts, saved as <stem>-1..N")
         else:
             p.add_argument("--image", required=True)
+            p.add_argument("--thread", help="Codex thread to resume; default: the image's sidecar")
     args = parser.parse_args()
     args.fn(args)
 
