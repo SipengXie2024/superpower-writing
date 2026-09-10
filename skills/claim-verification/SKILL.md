@@ -139,6 +139,21 @@ For papers that report their own experiments, run this OPTIONAL pass alongside P
 
 Run it only when the user opts in and has experiment artifacts on disk. Skip it for theory, position, and survey papers with no first-party experimental numbers. SUSPECTED is advisory: it surfaces to the user under the report's "Advisory: Research Integrity" block and never auto-rejects, never flips `STATUS`, never edits prose. See `references/research-integrity-gate.md` for the heuristics, the three-way verdict contract, and the Type-A/Type-B split.
 
+### Optional house-style wording sweep
+
+An advisory grep-level sweep of `manuscript/*.tex` against [`../_shared/core/house-style.md`](../_shared/core/house-style.md), run when the manuscript is heading for a reviewer. It reports wording, never evidence, so it can never turn a FAIL into a PASS and never gates a `STATUS` flip.
+
+What is mechanically checkable, per file and line:
+
+- An em-dash or a mid-sentence colon in prose (§1). The colon before a `\begin{itemize}` and a colon inside a `\section{...}` title are exempt.
+- A CamelCase or snake_case identifier, a file path, or a `0x` hex literal inside argumentative prose (§2).
+- The corpus or dataset name outside the evaluation-setup section, the external-validity block, and the abstract (§3.3, §8.19).
+- An inflated adjective from the §6.6 remove list.
+- `itself`, `it itself`, or `together with` (§8.11).
+- A red `\textcolor{red}{XXXX}` co-author TODO still present (§8.6).
+
+Report these under an "Advisory: House Style" block with file and line, exactly like the integrity gate's advisory block. Every hit is a judgment call for the user; a project `.claude/CLAUDE.md` may legitimately license any of them.
+
 ### Step 4: Emit Report
 
 Write `.writing/verify-report.md` with exact structure:

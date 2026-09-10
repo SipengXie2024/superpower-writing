@@ -11,6 +11,42 @@ This reference covers when to use tables versus figures, design principles
 adapted for computer-science and systems venues, statistical annotations,
 accessibility, technical specifications, and a pre-submission checklist.
 
+## The Paper's Figure Pattern
+
+Plan the figure set before drawing anything. Two figures carry structural duty and
+everything else supports them. This is house style §9; read it there for the full
+statement, and treat a project `.claude/CLAUDE.md` as the override.
+
+**The introduction carries one small single-column figure that shows only the
+problem.** A motivating instance, a gap map, or a "why X?" contrast. Cite it from
+the introduction's thesis or contributions paragraph. It contains no mechanism: no
+module box from the design, no named component of the proposed system, no pipeline
+stage. A reader who has seen only the abstract must understand it. Keeping
+mechanism out is what makes the design figure land later, and previewing mechanism
+here is the figure-level form of the overview-paragraph spoiler ban in
+`style-cautions.md`.
+
+**The design section opens with one full-width figure at the top of its first
+page.** Its named stages are the subsection spine: each stage has a subsection
+under it, in the same order and under the same name, so the figure doubles as the
+section's table of contents. Cite it from the section's first sentence, and let the
+caption point back at the subsections.
+
+**One running example, reused by every later method figure.** Same entities, same
+identifiers, same trace or schedule across figures, so a reader who follows the
+example in one figure does not reload context at the next. Three figures with three
+different examples cost a reviewer the same as three unrelated demos.
+
+**Float placement is a source-position decision.** A `[t]` float lands on the page
+after the one being typeset when its source position is reached, so the design
+figure's source line often has to sit in the *previous* section's file for the
+float to land on the design section's first page. When it does, leave a LaTeX
+comment at that line naming the section the float belongs to, or the next editor
+moves it back.
+
+**Everything else is supporting.** A figure that is neither of these two and backs
+no tagged claim does not earn its page.
+
 ## Decision Rule
 
 Before creating any display item, apply this three-way test:
@@ -352,6 +388,15 @@ architecture diagrams that need the horizontal space.
   figure below" or "the following table" (pagination may change).
 
 ## Captions
+
+**Length ceiling from the house style (§8.4, §8.18).** A caption is one identifying
+sentence in plain words, plus at most a clause per panel. First drafts run about
+twice too long. Methodology and interpretation live in the body; keep a number in
+the caption only when it appears nowhere else, and before cutting a caption confirm
+the dropped methodology and numbers survive in the body or on the figure. Table
+captions are title-only, with any explanation as a one-line note under the bottom
+rule, typeset-checked to fit one line. The structures below are the full menu; the
+ceiling decides how much of it a given caption gets.
 
 ### Figure Captions
 

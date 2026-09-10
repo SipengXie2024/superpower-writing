@@ -2,6 +2,8 @@
 
 Reference for drafting and revising systems/ML prose. Covers principles only; section-specific tense rules live in `section-standards/*.md` and style anti-patterns in `style-cautions.md`. Venue-specific figure and format conventions live in the `superpower-writing:scientific-visualization` skill (`references/venue_requirements.md`).
 
+**Precedence.** The house style in `_shared/core/house-style.md` is the canonical rulebook for reviewer-facing prose, and it wins wherever it speaks to the same point as this file. Two places where it is stricter than the general advice below: no em-dashes and no in-sentence colons anywhere in prose (§1), and dataset or corpus names stay out of thesis and claim sentences (§3.3). A project `.claude/CLAUDE.md` overrides both.
+
 ## Three Pillars
 
 ### Clarity

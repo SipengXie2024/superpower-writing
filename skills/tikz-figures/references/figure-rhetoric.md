@@ -6,6 +6,16 @@
 
 This file ports the figure-storytelling model and Figure-1 paradigms from two upstream skills and adapts them to our LaTeX / systems / ML house style. It is advisory. It never blocks a figure; it surfaces judgment calls so you and the user decide.
 
+## Contents
+
+- [1. The three-figure storytelling model](#1-the-three-figure-storytelling-model)
+- [2. The three Figure-1 paradigms](#2-the-three-figure-1-paradigms-and-when-to-avoid-each)
+- [3. Design-judgment rituals](#3-design-judgment-rituals)
+- [4. Quick self-questions before you draw](#4-quick-self-questions-before-you-draw)
+- [5. The editor pass](#5-the-editor-pass-judge-the-whole-figure-deck-as-one-story)
+- [6. Composing a multi-panel figure](#6-composing-a-multi-panel-figure)
+- [7. The house figure pattern](#7-the-house-figure-pattern-what-each-structural-figure-shows)
+
 ---
 
 ## 1. The three-figure storytelling model
@@ -195,3 +205,46 @@ Fix only the panels that fail and leave the clean ones alone, since regenerating
 ### Convergence
 
 Stop when the composite has no blocking defect, the panels read left to right and top to bottom as hook, then claim, then evidence, and a fresh look surfaces only carve-out nitpicks from the previous round (the signal that you are now over-labeling). As with every review here, the output is advisory: you and the user decide which panel to redraw, move, or cut.
+
+---
+
+## 7. The house figure pattern: what each structural figure shows
+
+Sections 1 through 6 decide whether a figure earns its place and how to judge it.
+This section fixes what the two structural figures are allowed to contain. It is
+the figure half of the plugin's house style, stated in full in
+`_shared/core/house-style.md` §9; a project `.claude/CLAUDE.md` overrides it.
+
+**The introduction figure shows only the problem.** One small single-column
+figure: a motivating instance, a gap map, or a "why X?" contrast. It is cited
+from the introduction's thesis or contributions paragraph. It contains no
+mechanism, meaning no module box from the design, no named component of the
+proposed system, and no pipeline stage. A reader who has seen only the abstract
+must understand it. This is Paradigm A or B from §2 with an extra constraint:
+even the "ours" panel stays at the level of the outcome, not the machinery.
+Previewing mechanism here is what makes the design figure land flat later.
+
+**The design figure is the section's spine.** One full-width figure at the top of
+the design section's first page. Its named stages are the subsection list: each
+stage in the figure has a subsection under it, in the same order and under the
+same name, so the figure doubles as the section's table of contents. It is cited
+from the section's first sentence, and its caption points back at the
+subsections. When the paper also carries a main algorithm float, the figure and
+the pseudocode agree on the stage names.
+
+**One running example across every later method figure.** Same entities, same
+identifiers, same trace or schedule. Build it from the paper's own semantics and
+keep it consistent, so a reader who follows the example in one figure does not
+reload context at the next. This is §3's "appears once, referenced throughout"
+tightened from the Figure-1 example to the whole method deck.
+
+**Float placement is a source-position decision, not a layout parameter.** A
+`[t]` float lands on the page after the one being typeset when its source
+position is reached. The design figure therefore often needs its source line in
+the *previous* section's file to land on the design section's first page. Leave a
+LaTeX comment at that line naming the section the float belongs to, so the next
+editor does not move it back.
+
+**Everything else is supporting.** A figure that is neither of these two and
+backs no tagged claim does not earn its page, which is §1's per-figure rule and
+§5's kill list applied at plan time instead of at audit time.

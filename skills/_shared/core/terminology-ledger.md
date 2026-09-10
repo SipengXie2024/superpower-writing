@@ -22,7 +22,7 @@ cross-file pass. The ledger feeds both. See the "Pairing" section at the end.
 
 This file is a reference fragment, not a standalone skill. Sibling skills load
 it to share one ledger format and one set of rules. Outlining loads it at
-structure time, drafting at write time, polish before its two passes. It does
+structure time, drafting at write time, polish before its passes. It does
 not enforce at write time and never mutates state on its own. Like every verdict
 in this plugin, a flagged collision is **advisory**. Surface it to the user and
 let the user choose the canonical form. Never auto-rename prose, never auto-edit

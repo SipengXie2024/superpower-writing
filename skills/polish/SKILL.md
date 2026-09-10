@@ -1,10 +1,10 @@
 ---
 name: polish
 description: |
-  Polish prose in three passes: strip AI-writing tells, apply Strunk's rules
-  for clarity, then hold every research claim to its evidence. Two modes: edit
-  in place, or diff-first where the original is untouched until the user
-  approves each change. Use when the user asks to 润色 / 改写 / 精修 / 打磨 a
+  Polish prose in four passes: strip AI-writing tells, apply Strunk's rules for
+  clarity, hold every claim to its evidence, then apply the house style. Two
+  modes: in place, or diff-first where the original stays untouched until the
+  user approves each change. Use when the user asks to 润色 / 改写 / 精修 / 打磨 a
   draft, or says "polish", "refine", "tighten", or "improve". Preserves meaning,
   numbers, citations, and [NEEDS-EVIDENCE] markers; never smooths an unsupported
   claim into a supported-sounding one.
@@ -22,7 +22,7 @@ allowed-tools:
 
 # Polish
 
-Polish runs three passes over a piece of prose, in this order:
+Polish runs four passes over a piece of prose, in this order:
 
 1. **De-AI**, strip the marks of machine-written text (inflated symbolism,
    em-dash overuse, rule-of-three, promotional language, vague attribution,
@@ -32,14 +32,26 @@ Polish runs three passes over a piece of prose, in this order:
 3. **Evidence-led wording**, for research and systems-paper prose, hold every
    comparison, magnitude word, and novelty claim to its evidence, and preserve
    unresolved-evidence markers. Read `references/evidence-led-wording.md`.
+4. **House style**, apply the standing conventions for reviewer-facing prose:
+   punctuation, reviewer self-containment, argument form, section
+   responsibility, term economy, and the senior co-author's editing
+   conventions. Read
+   [`../_shared/core/house-style.md`](../_shared/core/house-style.md).
 
 The order matters. De-AI works on texture: cadence, register, cliché, AI-brand
 punctuation. It does not shorten sentences; it makes them sound less like a
 chatbot. Run Strunk first and it will happily shorten AI-inflected prose into
 shorter AI-inflected prose, clipped but still hollow. Strunk second lands its
-cuts on real content instead of on decoration. Evidence-led wording runs last so
+cuts on real content instead of on decoration. Evidence-led wording runs third so
 that neither earlier pass has quietly turned an unknown fact into an asserted one
-while smoothing the prose.
+while smoothing the prose. House style runs last because it is the arbiter: it
+decides which of the first three passes' edits survive, and its §7 lists are the
+accept and reject defaults below.
+
+Pass 4 fully engages on reviewer-facing prose (a manuscript section, an abstract,
+a rebuttal, a review). For an email or a blog post, skip it. It never overrides
+pass 3: no house-style rule may turn an unsupported claim into a supported-sounding
+one, and `[NEEDS-EVIDENCE]` survives every pass.
 
 The output is a single revised version, not an explanation, not a checklist of
 tells you caught, unless the user asked for one or chose diff-first mode.
@@ -47,7 +59,7 @@ tells you caught, unless the user asked for one or chose diff-first mode.
 ## Two modes: pick one before you start
 
 **In place** is the default for a pasted paragraph, a single section, or any time
-the user just wants the better version back. Apply the three passes and return the
+the user just wants the better version back. Apply the passes and return the
 revised text. If the input was a file, Edit it directly.
 
 **Diff-first** (`--diff`, or when the user says "show me the diff first",
@@ -105,6 +117,22 @@ the user says the prose is a paper. For an email or a blog post it is a light
 touch, but the `[NEEDS-EVIDENCE]` rule above holds for any input that carries the
 marker.
 
+## The style hierarchy (both modes)
+
+Three layers, checked in this order before you change a word:
+
+1. **A project style file.** When the repo carries `.claude/CLAUDE.md`, `AGENTS.md`,
+   or an equivalent project rulebook with prose rules, those are hard constraints
+   that override every default below. Surface any rule the polish would have
+   violated instead of applying it silently.
+2. **The house style**, [`../_shared/core/house-style.md`](../_shared/core/house-style.md).
+   The plugin default for reviewer-facing prose, and pass 4 above. Inside it, §8
+   (the senior co-author's conventions) beats §1 through §7.
+3. **The de-AI and Strunk heuristics** in this skill's other references.
+
+The evidence rules are outside the hierarchy. No layer may relax the preservation
+contract above.
+
 ## Canonical-term table (consistency anchor)
 
 Before polishing anything longer than a paragraph, build a canonical-term table.
@@ -131,15 +159,14 @@ only when discovery is genuinely ambiguous.
 
 ### Step 2 : Polish a copy, never the original
 
-Work section by section. For each, copy the original, run the three passes on the
+Work section by section. For each, copy the original, run the passes on the
 copy, and generate a unified diff against the original. A convenient home for the
 copies and diffs is `.writing/polish-patches/` (create it if missing), but for a
 single pasted section you may hold the diff in memory and present it inline. The
 invariant is only that the original file stays byte-unchanged until Step 4.
 
-If a project style file (`.claude/CLAUDE.md`, `AGENTS.md`) sets prose rules, treat
-them as hard constraints that override default polish heuristics, and surface any
-rule the polish would have violated.
+Hold every change to the style hierarchy above: project file first, then the house
+style, then the de-AI and Strunk heuristics.
 
 ### Step 3 : Walk the diffs with the user, one change at a time
 
@@ -186,7 +213,8 @@ tally: sections processed, changes applied, rejected, partially accepted.
 ## Recurring over-edits: reject or accept by default
 
 These patterns recur across manuscripts. In diff-first mode, flag them; in-place,
-just do not make the rejected ones.
+just do not make the rejected ones. This list is the operational form of house
+style §7; when the two ever drift, §7 is canonical.
 
 **Reject by default:**
 
@@ -195,19 +223,27 @@ just do not make the rejected ones.
   term. `Naive (per-hash) AOT` becoming `Naive per-hash AOT` loses the scope.
 - **Modifier reordering that flips the argumentative subject.** When a modifier
   moves to a different head, check the head is still the same noun. If not, reject.
+  `compilability filter (...) identically to Naive AOT` becoming `compilability
+  filter used by Naive AOT` changes whose filter it is.
 - **Deletion of editorial qualifiers that bind downstream.** "and most consequential
   in production", "above all", "crucially", "the central case" are often
   load-bearing signals the next paragraph relies on. If it does, keep them.
 - **Semicolon-merge of two definition lines.** When two short sentences introduce a
-  defined term, the rhythm break is intentional. Keep them separate.
+  defined term, the rhythm break is intentional. `We call these positions
+  invariants.` stays standalone.
 - **Register downgrade.** Swapping an academic copula for a breezy phrasing (`is
   part of` becoming `falls out of`). Keep the original.
+- **Synonym swaps that blur a domain-precise term.** `has a different measurement`
+  becoming `is measured differently` loses the attestation meaning, a different
+  measurement value rather than a different measurement method. Keep the precise
+  term even when the swap reads smoother.
 
 **Accept by default:**
 
 - **Removal of self-deprecating qualifiers** around real design choices (`as an
   extension`, `albeit auxiliary`, `not a central experimental claim`), especially
-  when a later section states the trade-off confidently.
+  when a later section states the trade-off confidently. Optionally add a
+  forward-reference into Discussion to preserve scope visibility.
 - **Active-voice conversions that preserve meaning** (`is X by Y` to `Y X-es`).
 - **Defensive-negation removal** where the negation guards against a critique no
   reviewer would raise (`rather than by an arbitrary modeling compromise`).
@@ -227,7 +263,7 @@ just do not make the rejected ones.
   sections, change the argument, add or remove content). Those are different jobs.
   Polish preserves meaning.
 - LaTeX, code, tables, or bibliography fixes. Polish is for prose.
-- A single sentence the user wants nudged. The three-pass machinery is overkill;
+- A single sentence the user wants nudged. The four-pass machinery is overkill;
   edit inline and say you did.
 - The user already rejected a de-AI or Strunk change earlier in the conversation.
   Respect that; do not re-apply it silently.
@@ -240,7 +276,7 @@ just do not make the rejected ones.
   voice, prefer concrete nouns) rather than mechanically applying English
   punctuation rules. Never translate or romanize either language.
 - **Very long input.** Process one logical chunk at a time (paragraph or
-  subsection). Running all three passes over thousands of words in one shot
+  subsection). Running all four passes over thousands of words in one shot
   produces uneven quality, and chunking preserves headings, lists, and code blocks
   by touching only prose.
 - **Register mismatch after the de-AI pass.** If it sounds too casual for the

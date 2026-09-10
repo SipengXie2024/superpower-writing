@@ -88,6 +88,8 @@ Write a fact-complete caption that can be understood without searching the body 
 
 Allow exact comparisons that are directly visible in the figure. Keep causal explanations, mechanisms, and broader implications in the body near the first substantive reference. Keep `interpretation_location: body` in the brief.
 
+**Length ceiling.** The house style (`_shared/core/house-style.md` §8.4, §8.18) caps a caption at one identifying sentence in plain words, plus at most a clause per panel, and it wins over the fact-complete default above. Reconcile the two by moving each fact to the cheapest place that still carries it: put units, method order, and symbol keys on the figure itself as axis labels, a legend, or a panel annotation; put workload, hardware, sample size, aggregation, and uncertainty type in the body at the first substantive reference; and keep a number in the caption only when it appears nowhere else. A caption that has run to five sentences is usually a figure missing its labels. A project `.claude/CLAUDE.md` overrides both.
+
 ## Final checks
 
 - Regenerate the figure only from the recorded source data and script.

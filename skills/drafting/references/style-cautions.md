@@ -7,6 +7,10 @@ Loaded by:
 - `skills/drafting/SKILL.md` §Writing standards, a one-line summary per rule.
 - `skills/drafting/references/claim-first.md` §Step B, read at write time before section intros.
 
+Canonical rulebook: `_shared/core/house-style.md`. It states the rules; this file
+is the drafting-time scan and the worked before-and-after pairs. On any conflict,
+the house style wins, and a project `.claude/CLAUDE.md` wins over both.
+
 ## Overview paragraph discipline
 
 Opening paragraphs that preview their own subsections must obey three rules.
@@ -19,6 +23,8 @@ Opening paragraphs that preview their own subsections must obey three rules.
 
 ## Lesson 1 — Section responsibility discipline
 
+*Canonical rule: house style §4.*
+
 Each IMRAD section in a systems paper has a narrow job, and numbers must not drift across section boundaries.
 
 - **Ground / Workload section** (typically §3): dataset-independent observations the paper's system is *designed to exploit*. No system-definition premises.
@@ -30,6 +36,8 @@ Placement test: "could a third party independent of our system compute this from
 
 ## Lesson 2 — Do not pre-hedge scope in argumentative prose
 
+*Canonical rule: house style §3.3. The abstract may name the corpus scale (§8.19); argumentative prose still may not.*
+
 Argumentative sentences must not annotate claims with the dataset name. Phrases like "on X dataset", "in our workload", "on Base mainnet" inside thesis sentences pre-narrow the claim and invite the "does this generalize?" reviewer attack.
 
 Dataset naming is allowed at exactly two places:
@@ -40,6 +48,8 @@ Dataset naming is allowed at exactly two places:
 Elsewhere — intros, theses, claim sentences, contribution lists — prose is dataset-agnostic.
 
 ## Lesson 3 — Section intros foreground claims, not roadmaps
+
+*Canonical rule: house style §5, section openings synthesize rather than enumerate.*
 
 Section intros must not read as "The next subsections do X, Y, Z". That is reporting-style writing: it signals weak argumentation and wastes the intro's rhetorical real estate.
 
@@ -65,6 +75,8 @@ Practical check: scan the intro for any word that appears `\emph{...}` or is fir
 
 ## Lesson 5 — Results topic and closing sentences carry qualitative conclusions
 
+*Canonical rule: house style §6.4.*
+
 Results paragraphs run a strict three-zone discipline. The first sentence states the qualitative answer to the research question. The last sentence states the design or scientific implication. The middle carries supporting numbers, table references, and methodology.
 
 **Why it hurts.** Methodology-framing topic sentences ("a static scan of the filtered corpus answers RQ1", "this section reports compile-time savings", "we compute X over Y") tell the reader work was done but not what was found. Reviewers skim topic sentences; if they read process narration instead of conclusions, the paragraph reads as a process log rather than a result. Closing sentences that merely summarize the data ("the data shows Z") miss the chance to land the design implication, leaving the design choice un-anchored to its evidence.
@@ -80,6 +92,8 @@ Results paragraphs run a strict three-zone discipline. The first sentence states
 > Most bytes inside multi-member bytecode families are invariant across members, answering RQ1. The invariant PUSH-immediate byte share is 93.06% on Base, computed over 428 multi-member families. Treating these invariant bytes as compile-time constants therefore matches the common case in deployed contracts, not a corner case.
 
 ## Lesson 6 — Multi-corpus results read as parallel evidence, not anchor + extension
+
+*Canonical rule: house style §6.5.*
 
 When a finding is supported by data from multiple corpora, list the corpora as peers in canonical order rather than anchoring on one and treating the rest as a generalization check.
 
@@ -203,69 +217,22 @@ Several sentence-level faults recur across systems papers: passive-voice overuse
 
 > The system uses sparse data structures to reduce memory usage. Remapping bytecodes to compact encodings cuts working set size by 30% (Table 3). We evaluated on three benchmarks chosen to span real-world workload characteristics (§5.1).
 
-## Reviewer-facing hard rules (production systems-paper practice)
+## Reviewer-facing hard rules: see the house style
 
-Fixed conventions distilled from shipping CS/systems papers. They apply to all reviewer-facing prose (abstract, intro, related work, methods, results, discussion, threat model, limitations). They are additive to the lessons above: the lessons govern argument structure; these govern punctuation, claim form, and editing-pass decisions.
+The fixed conventions that govern punctuation, claim form, reviewer
+self-containment, inflated adjectives, and the accept/reject defaults of an
+aggressive editing pass now live in one place, `_shared/core/house-style.md`,
+so every skill that writes or edits reviewer-facing prose reads the same rules.
+Read it before drafting any section, and treat it as canonical wherever it
+overlaps this file. The short version of what moved there:
 
-### Punctuation: no em-dashes, no in-sentence colons
+- No em-dashes and no in-sentence colons, with the standard substitutions (§1).
+- No low-level identifiers in argumentative prose, observation before name (§2).
+- Goal-form, not precondition-form (§3.1); delete defensive negations (§3.2).
+- Direct positive contrasts over stacked `rather than` tails (§6.2).
+- Strip inflated adjectives and let the numbers carry the load (§6.6).
+- The default-REJECT and default-ACCEPT lists for an aggressive polish (§7).
 
-Both are grammatical in academic English; the preference here is fixed. Never use em-dashes (`---`, `--`, or a single em-dash) in prose, and never use a colon mid-sentence. Standard substitutions:
-
-- `X --- appositive list --- verb ...` becomes `X, including Y, Z, and W, verb ...`
-- `general claim: specific elaboration` becomes two sentences, or `general claim, so specific elaboration`
-- `... main clause --- trailing elaboration.` becomes `..., and/but/so trailing elaboration.` or a sentence break
-
-The one exception is the colon introducing a LaTeX `\begin{itemize}`. Inside `\item` bodies, em-dashes must still be replaced.
-
-### Goal-form, not precondition-form
-
-State design properties as commitments enforced by construction, not as runtime checks.
-
-- ✅ "The system's goal is X; the design enforces this by construction." Reads as a correctness commitment.
-- ❌ "The system does Y only when X holds." Reads as a runtime check, often unverifiable at the stated time, and misrepresents the causal arrow.
-
-Reuse boundaries, admission filters, and sharing rules are *designed to guarantee X by construction*, not to verify X at runtime.
-
-### Reviewer self-containment: no low-level identifiers in argumentative prose
-
-Argumentative prose must read standalone to a reviewer who has never seen the implementation. Keep function names, struct/enum/field identifiers, file paths, line numbers, raw byte-layout phrases, and hex literals out of claim text; they belong in an Implementation section or supporting material. Draft scan: if a claim sentence contains a CamelCase identifier, a snake_case identifier, a `0x...` hex literal, or an acronym not expanded in the same paragraph, rewrite it. Observation before name: describe what a thing does, then attach the term, so naming reads as earned rather than stipulated.
-
-### Delete defensive negations; keep substantive disambiguations
-
-Test: would a careful reviewer produce the negated reading on their own?
-
-- **No.** Defensive. The reader was never going to read it that way, and rebutting a misreading makes prose self-conscious. Delete it and state the positive form alone.
-- **Yes.** Two genuinely plausible readings, and the paper must actively reject one. Keep it; that is disambiguation, not defense.
-
-### Direct positive contrasts
-
-Avoid stacked `rather than` constructions in reviewer-facing prose. State the positive claim first; use a separate contrast sentence only when a real contrast must be drawn.
-
-### Strip inflated adjectives, let the numbers carry the load
-
-A 90-plus percent number already establishes the claim. Inflated adjectives wrap it in advocacy and read as compensation for weak evidence. Remove *overwhelmingly, dominant, captures, highly, extensively, robustly, comprehensively, settling RQ in the affirmative.*
-
-| ❌ Inflated | ✅ Direct |
-|---|---|
-| overwhelmingly invariant | most bytes are invariant, or the percent alone |
-| dominant case, not a sparse side channel | common case, not a corner case |
-| settling RQ in the affirmative | answering RQ |
-| captures the dominant structure | matches the structure |
-
-"Common case / corner case" is the systems-native contrast: it keeps the rebuttal-of-objection function without promotional language.
-
-### Editing-pass defaults
-
-When an aggressive polish pass on a long section returns many paragraph-pair replacements, 70-90% are typically correct. The recurring exceptions have stable defaults.
-
-**Default REJECT:**
-
-- Stripping a parenthetical limiter that establishes term scope at first use (`Naive (per-hash) AOT` to `Naive per-hash AOT` loses the scope marker).
-- Modifier reordering that flips the argumentative subject (`filter (...) identically to Naive AOT` to `filter used by Naive AOT` changes whose filter it is).
-- Deleting a mid-sentence editorial qualifier that binds to a downstream argument (`Third, and most consequential in production`).
-- Semicolon-merging two short sentences when one is a term definition (`We call these positions invariants.` stays standalone).
-- Register downgrades (neutral `is part of` to breezy `falls out of`).
-
-**Default ACCEPT:**
-
-- Removing a self-deprecating qualifier wrapped around a real design choice (`Admission as an extension` to `Admission`), when the Discussion already states the trade-off confidently. Optionally add a forward-reference into Discussion to preserve scope visibility.
+The lessons above stay here because they are the drafting-time application: what
+to scan for, in which paragraph position, with the before-and-after pairs. The
+canonical rule behind each is noted at its heading.

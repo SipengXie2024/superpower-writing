@@ -95,6 +95,21 @@ A well-balanced abstract gives Method and Result the most real estate; Backgroun
 - **Abstract is standalone.** A reader who reads only the abstract should understand what was done, what was found, and why it matters. Do not assume the reader will continue to the body.
 - **Word-limit compliance is hard.** Most venues enforce abstract word limits strictly (150--300 words). Count early and often. If the venue specifies a structured abstract, follow the required labels; otherwise use flowing paragraphs.
 
+## House-style abstract pattern (wins on conflict)
+
+`_shared/core/house-style.md` §8.17 and §8.19 record how one senior co-author actually writes an abstract, and where they speak to the same point as the rules above, they win. Read them before drafting; §8.19 carries the full before-and-after of an abstract he replaced wholesale, which is the fastest way to see the pattern.
+
+The wording rules, in short:
+
+- Open the problem paragraph on the named prior systems with venue tags, not on a grand claim. State the premise as a condition, then close on one challenge sentence. No `We argue that`, no `A recent measurement study shows ...` attribution narration.
+- Open the solution paragraph `We propose \sys, <noun-phrase characterization>` or `We present \sys, which ...`. The two are interchangeable; do not rewrite one into the other. Evidence sentences use announcement verbs (`We show that ...`, `We empirically demonstrate ...`).
+- Explain the mechanism causally, in words a non-specialist can follow. Compressed jargon like "removes write-after-read false serialization by construction" gets replaced by a sentence that says why.
+- Name the corpus scale and the fairness condition ("10,000 blocks containing 3.52M transactions", "a replay baseline supplied with the same precise access sets"). This is the one place the no-corpus-in-argumentative-prose rule is lifted; keep the harness name out and put the scale in.
+- Report the honest end-to-end number next to the headline, hedge precisely ("near the model's critical-path lower bound", not "reaches the optimum"), and end on the most bounded number. No slogan close.
+- Drop `itself` everywhere, including here (§8.11).
+
+**Where this collides with BPMRC, and how to resolve it.** His pattern runs three paragraphs: problem, solution, evidence. Background and Problem share the first, Method owns the second, Result owns the third, and Conclusion is deliberately absent because the abstract ends on the bounded number and the paper's Conclusion section carries the implication (§8.12). BPMRC's five elements still all appear, so keep all five `% bpmrc:` tags and let them mark element boundaries inside the three paragraphs rather than one tag per paragraph. The mechanical check (five tags, B through C, in order) still passes, and the "paragraph merging is forbidden" rule above is suspended for this pattern only. When no project rulebook or co-author convention applies, the five-paragraph default above stands.
+
 ## Common failure modes
 
 - **Missing problem statement.** Background flows directly into Method; reviewers flag "unclear motivation" or "the contribution is not justified". Fix: always write the P paragraph, even if it feels redundant with B.

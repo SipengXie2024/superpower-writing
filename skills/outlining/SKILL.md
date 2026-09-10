@@ -20,6 +20,16 @@ The outline is a claim spine, not a table of contents. Every bullet is an **asse
 
 Optional term-definition-before-use: copy `templates/glossary.md` to `.writing/glossary.md` to activate `% define:`/`% use:` ordering checks; add a glossary entry when you add the term's claim stub.
 
+## House style shapes the outline, not just the prose
+
+Read [`../_shared/core/house-style.md`](../_shared/core/house-style.md) before writing the skeleton. Three of its rules bind at outline time, when they are still cheap to satisfy:
+
+- **Section titles name their narrative role, in Title Case** (§8.1). `Background` becomes `Technical Warm-Ups`, a bare system name becomes `Our Solution: \sys`, `Adversary` becomes `Threat Model`. Name the sections this way in `outline.md` so drafting inherits them.
+- **Section responsibility decides where a claim bullet lives** (§4). A number that needs the proposed system's definitions to be measurable is a Results bullet even when it reads like a property of the data.
+- **The figure plan is part of the structure** (§9). Budget one small problem-only figure for the introduction and one full-width design figure whose named stages become the design section's subsections, then let the subsection list and the figure agree from the start.
+
+A project `.claude/CLAUDE.md` or `AGENTS.md` in the paper repo overrides the house style.
+
 ## Process
 
 ### Step 1 : Capture the contribution

@@ -41,7 +41,7 @@ itself in outline order, with no parallel subagents and no review pipeline.
 3. **Drafts claim-first.** `drafting` is a thin shell that routes to the writing references. Every load-bearing paragraph in `manuscript/NN_*.tex` carries a `% claim: id` comment bound to a claim whose `STATUS` is `evidence_ready` or `verified` (or a `% draft-only` marker for exploration). Resolving a claim's evidence before writing its paragraph is a required discipline.
 4. **Resolves citations Zotero first, then network fallback** (when Zotero is enabled), and can push new DOIs back to your library.
 5. **Checks reliability before handoff.** `claim-verification` confirms every `\cite{}` resolves against `refs.bib`, semantic-matches the cited abstract against the claim to catch hallucinated or mismatched references, and flags any `draft-only` or `[NEEDS-EVIDENCE]` left in the skeleton.
-6. **Polishes and rebuts.** `polish` runs three passes (strip AI tells, apply Strunk clarity, hold each claim to its evidence). `rebuttal` turns reviewer comments into a grounded response letter.
+6. **Polishes and rebuts.** `polish` runs four passes (strip AI tells, apply Strunk clarity, hold each claim to its evidence, apply the house style). `rebuttal` turns reviewer comments into a grounded response letter.
 
 ## The writing spine
 
@@ -58,7 +58,7 @@ drafting      inline, claim-first; a thin shell -> the writing references,
 claim-verification   mechanical citation + evidence check
   |
   v
-polish        de-AI pass, Strunk clarity, evidence wording (in place or diff-first)
+polish        de-AI, Strunk clarity, evidence wording, house style (in place or diff-first)
   |
   v
 rebuttal      grounded R-A-C response after reviews arrive
@@ -188,6 +188,31 @@ Research Assistant", or set `"outputStyle": "Academic Research Assistant"` in
 your project `.claude/settings.local.json`. It pairs with the claim-first
 contract in `skills/_shared/core/claim-first-protocol.md`.
 
+## The house style (default for reviewer-facing prose)
+
+`skills/_shared/core/house-style.md` is the plugin's standing style guide for
+anything a reviewer will read: abstract, introduction, related work, methods,
+results, discussion, threat model, limitations, conclusion, rebuttal, and peer
+review. It fixes punctuation (no em-dashes, no in-sentence colons), reviewer
+self-containment, goal-form argument, IMRAD section responsibility, term
+economy, the accept and reject defaults of an aggressive editing pass, one
+senior co-author's editing conventions (headings, floats, the related-work
+comparison table, capped triads, dangler repair, reference format, the abstract
+pattern with a full before-and-after), and the paper's figure pattern: one small
+problem-only figure in the introduction, one full-width design figure whose
+named stages are the subsection spine, one running example reused by every later
+method figure.
+
+It applies by default, unasked. `polish` runs it as a fourth pass, `drafting`
+reads it before the first section, and `outlining`, `rebuttal`,
+`claim-verification`, and the three figure skills point at the parts they need.
+
+**Precedence.** A project style file in the paper repo (`.claude/CLAUDE.md`,
+`AGENTS.md`) overrides the house style. Inside the house style, §8 beats §1
+through §7. Nothing in it may relax an evidence rule: the claim-first protocol,
+`[NEEDS-EVIDENCE]` preservation, and the no-fabrication rule outrank every
+stylistic preference.
+
 ## The claim-first protocol (core invariant)
 
 The single source of truth for the tag rules, the `STATUS` states, and citation
@@ -304,12 +329,12 @@ output-styles/
   academic-research-assistant.md   # rigorous academic-research persona (see ## Output style)
 templates/               # findings.md, glossary.md, metadata.yaml, progress.md (copied into .writing/ on init)
 skills/
-  _shared/core/          # claim-first-protocol.md, terminology-ledger.md (cross-skill contracts)
+  _shared/core/          # claim-first-protocol.md, terminology-ledger.md, house-style.md (cross-skill contracts)
   idea/                  # optional idea phase: lensed candidates + FINER, per-claim novelty, top-venue bar (advisory)
   outlining/             # IMRAD outline + per-section claim stubs + metadata.yaml, sharpened by an interleaved interview
   drafting/              # thin claim-first drafting shell -> writing references (section standards, style cautions, terminology)
   claim-verification/    # walks % claim tags, resolves \cite{} against refs.bib, semantic-matches abstracts, flags [NEEDS-EVIDENCE] / draft-only
-  polish/                # three-pass prose polish (de-AI, Strunk clarity, evidence wording); edit-in-place or diff-first
+  polish/                # four-pass prose polish (de-AI, Strunk clarity, evidence wording, house style); edit-in-place or diff-first
   rebuttal/              # reviewer comments -> grounded R-A-C response with provenance / commitment / coverage gates
   literature/            # find + review literature via Zotero semantic search, web search, arXiv / DBLP / Semantic Scholar / CrossRef
   citations/             # generate + verify BibTeX; add-by-DOI / arXiv through Zotero; audit .bib for missing fields and duplicates

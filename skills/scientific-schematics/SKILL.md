@@ -107,6 +107,13 @@ clause.
 1. Decide whether the paper needs this figure and which kind. Read
    `tikz-figures/references/figure-rhetoric.md` for Figure-1 and
    solution-overview candidates; it is venue-agnostic across the figure skills.
+   Its §7 and `_shared/core/house-style.md` §9 fix what each of the two
+   structural figures may contain: the introduction figure shows only the
+   problem and carries no mechanism, the design figure is full width at the top
+   of its section's first page with its named stages as the subsection spine,
+   and every later method figure reuses one running example. Decide which of the
+   two this image is before writing the brief, since it settles the canvas shape
+   and the label set. A project `.claude/CLAUDE.md` overrides the house style.
 2. Write the brief: every component with its exact label, the flow direction,
    the one hero module that carries the novelty, and the canvas shape.
 3. Write the prompt file `.writing/figures/prompts/<slug>.txt` following
@@ -217,6 +224,10 @@ Before shipping:
 
 - **Figure rhetoric (design judgment).** Whether the paper needs the figure and
   which kind: `tikz-figures/references/figure-rhetoric.md`.
+- **House style (what a structural figure may show).** The introduction's
+  problem-only figure, the design section's full-width spine figure, the shared
+  running example, float placement, and caption length:
+  `_shared/core/house-style.md` §9, §8.4, and §8.18.
 - **`superpower-writing:tikz-figures`**: vector diagrams compiled with LaTeX; the
   default route for routine paper figures and the vector-rendition path after
   exploration.

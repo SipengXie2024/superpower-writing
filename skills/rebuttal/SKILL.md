@@ -224,6 +224,7 @@ The gates are advisory in the plugin sense: they report blockers and stop the fi
 ### Phase 6: Tone and limit pass
 
 1. Apply `references/tone-and-stance.md`: calibrate claim verbs to the evidence tier, strip forbidden phrases, check that no reply is bare thanks.
+1a. Apply the house style, [`../_shared/core/house-style.md`](../_shared/core/house-style.md). The response letter is reviewer-facing prose, so §1 (no em-dashes, no in-sentence colons), §2 (no function names, file paths, or unexpanded acronyms in an answer), §6.6 (strip inflated adjectives, the numbers carry the load), and §8.13 (capped triads) all apply. One inversion is deliberate: §3.4 bans rebuttal register in the *manuscript*, and this is the one document where acknowledging the reasonable part of a critique belongs. Any promised manuscript edit is described in house-style terms, so the reviewer reads the same conventions in the letter and in the revision. A project `.claude/CLAUDE.md` overrides the house style.
 2. If the venue imposes a character or word limit, count it exactly. Compress in this order when over: redundancy, then replies to friendly reviewers, then the opener, then wording. Never drop a critical answer to fit.
 3. Optional adversarial scan: for each experimental claim, ask whether a hostile reviewer could find an undisclosed design choice (compute-matched vs epoch-matched, frozen parameter subset, seed protocol). If so, add a one-line caveat. Pre-registered-calibration phrasing defuses cherry-pick attacks, but only when true (see tone-and-stance).
 

@@ -180,7 +180,7 @@ skill 现在支持 **4 种生成路径**——画图前必须先确定走哪条�
 
 **加载 `references/step1-instructions.md`**——里面有完整的 10 项要素清单、参考图测量规则、ASCII 草图法、嵌入可视化决策表、**密度参考表（按论文复杂度选档位）**、节点形状/连线速查、Pre-flight P1-P7。**禁止"心里想好直接写代码"**——跳过这步返工率 100%。
 
-**同时加载 `references/figure-rhetoric.md`（设计判断，不是语法）**——决定**这张图该不该画 / 画哪一种**，而不是怎么写 TikZ。它给出：一篇论文真正需要的三张叙事图（motivated example / solution overview / results）、Figure-1 三范式及各自的回避条件（**gains 边际时 performance teaser 会反向暴露弱点**）、以及四条设计仪式（30 秒理解测试 / 只用真实实体禁止 `Entity1`/`X` 占位 / 同一例子贯穿全文 / 先在纸上画草图——本 skill step ① 的注释块就是"纸上草图"的落盘形式）。Figure-1 默认 Paradigm A（running example + failure case），mechanism 级贡献用 B，短论文且增益大且数值化才用 C。
+**同时加载 `references/figure-rhetoric.md`（设计判断，不是语法）**——决定**这张图该不该画 / 画哪一种**，而不是怎么写 TikZ。它给出：一篇论文真正需要的三张叙事图（motivated example / solution overview / results）、Figure-1 三范式及各自的回避条件（**gains 边际时 performance teaser 会反向暴露弱点**）、以及四条设计仪式（30 秒理解测试 / 只用真实实体禁止 `Entity1`/`X` 占位 / 同一例子贯穿全文 / 先在纸上画草图——本 skill step ① 的注释块就是"纸上草图"的落盘形式）。Figure-1 默认 Paradigm A（running example + failure case），mechanism 级贡献用 B，短论文且增益大且数值化才用 C。**同时读 `_shared/core/house-style.md` §9（论文图组默认布局）**：引言只放一张单栏「只讲问题」的小图（motivating instance / gap map / why-X 对比，**不含任何机制**），设计节首页顶部放一张通栏图、其命名 stage 就是各 subsection 的骨架且由该节第一句引用，后续所有方法图复用同一个 running example；`[t]` float 落在「读到它时正在排的那一页之后」，所以设计节首图的源码常需放进上一节的文件里并加注释说明。项目 `.claude/CLAUDE.md` 优先于 house style。
 
 **关键认识**：步骤① 的输出不是"最大复杂度版本"。先判断论文实际复杂度（极简/中等/复杂/超复杂），再选画图档位。**从复杂版起步然后修瑕疵**比**从合适档位起步**累计 token 高一个数量级——MMAlign 11 轮迭代就是反面教材。
 
@@ -673,7 +673,7 @@ python3 references/pdf-overlap-checker.py file.pdf --json > "$(dirname file.pdf)
 
 | 触发条件 | 文件 |
 |---------|------|
-| 进入步骤①（设计判断：该不该画 / 画哪种 / Figure-1 范式） | `references/figure-rhetoric.md` |
+| 进入步骤①（设计判断：该不该画 / 画哪种 / Figure-1 范式 / 论文图组默认布局） | `references/figure-rhetoric.md` + `_shared/core/house-style.md` §9 |
 | 整篇论文图组就绪、投稿前跑一次整组图叙事审查（editor pass） | `references/figure-rhetoric.md` §5 |
 | 一张 figure 内含多个子图，需规划面板并对拼合后的整图整体审查（compose 多面板图） | `references/figure-rhetoric.md` §6 |
 | 进入步骤① | `references/step1-instructions.md` |

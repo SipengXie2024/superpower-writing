@@ -29,6 +29,7 @@ Read [`references/claim-first.md`](references/claim-first.md) and follow it for 
 
 ## Writing standards (read as guidance, not gates)
 
+- **House style (read first, wins on conflict).** [`../_shared/core/house-style.md`](../_shared/core/house-style.md) is the standing rulebook for every sentence a reviewer will read: punctuation, reviewer self-containment, argument form, section responsibility, term economy, the abstract pattern, and the paper's figure pattern. Read it before the first section. Where it overlaps the references below, it is canonical and they defer. Where the paper repo carries its own `.claude/CLAUDE.md` or `AGENTS.md` prose rules, that project file overrides the house style.
 - **Per-section shape.** For each section read the matching `references/section-standards/<slug>.md` (resolve by slug-ending). It describes paragraph shape, required structural tags, tense and length. Treat it as guidance that refines `references/writing-principles.md`; if it genuinely conflicts with the outline, surface the conflict rather than silently picking one.
 - **Terminology ledger.** Before the first section, build the canonical-term table from [`../_shared/core/terminology-ledger.md`](../_shared/core/terminology-ledger.md): one name per thing across sections. Surface collisions and let the user pick; never coin a name to fill a gap.
 - **Style cautions.** Read [`references/style-cautions.md`](references/style-cautions.md) before writing any section intro, overview paragraph, or thesis sentence, and clear its scans.
@@ -41,7 +42,7 @@ Figures are their own tasks, not inlined into a prose section. Dispatch per type
 - Structural (architecture / flowchart / pipeline / timeline) → `superpower-writing:tikz-figures`.
 - Data plots (bars / scaling / heatmap / cost curves) → `superpower-writing:scientific-visualization`.
 - Image-model raster figures (design exploration with several layout drafts, pictorial concept art, a graphical abstract, or whenever the user prefers a polished PNG) → `superpower-writing:scientific-schematics`.
-The prose paragraph that introduces a figure still carries a `% claim: id` tag for the claim it supports; figure files themselves carry no claim tags. See [`references/figures-and-tables.md`](references/figures-and-tables.md).
+The prose paragraph that introduces a figure still carries a `% claim: id` tag for the claim it supports; figure files themselves carry no claim tags. See [`references/figures-and-tables.md`](references/figures-and-tables.md). Plan the paper's figure set from house style §9 before dispatching any of these: one small single-column problem-only figure in the introduction, one full-width design figure whose stages are the subsection spine, and one running example every later method figure reuses.
 
 ## After drafting
 
