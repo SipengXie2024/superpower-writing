@@ -7,6 +7,14 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [3.3.0] — 2026-09-10
+
+The shipped output style absorbs the plain-reporting rules, so one style covers manuscript prose and conversation with the user.
+
+### Changed
+
+- `academic-research-assistant` output style absorbs the plain-reporting rules of the user-level Plain style, so one style covers both registers: formal academic prose for the manuscript (§2, now explicitly scoped to submittable text) and plain reporting when talking to the user (§4, renamed "Response shape: plain reporting to the user"). §4 states that being understood beats brevity and that §2's word-level discipline applies to conversation too, then adds jargon glossed in one clause in parentheses at first use (§4.1), conclusion first with linear order and cause→effect chains (§4.2), length calibrated to the task (§4.3), a "step N of M, done, blocked on" line opening every turn of a multi-step task (§4.4), and errors reported as where / what / why-with-evidence / fix, with "cause undetermined" when there is no evidence (§4.5). The structured formats move to §4.6 unchanged. The intro names the two registers; §3 keeps identifiers verbatim and code comments in English. Frontmatter gains `keep-coding-instructions: true`, so Claude Code's scoping, verification, and git instructions stay active in paper repos.
+
 ## [3.2.0] — 2026-09-09
 
 The image-generation skill moves off the sub2api gateway onto the local Codex CLI.
