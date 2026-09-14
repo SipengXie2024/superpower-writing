@@ -44,7 +44,7 @@ figures.
 |---|---|---|
 | Which method wins on one metric across a few benchmarks? | Grouped vertical bars | Up to about 8 groups with short labels. Start at zero. Group by benchmark, color by method, method order fixed across the paper. |
 | Same, but method names are long or there are many items? | Horizontal bars | Long labels read left to right without rotation; sort by value unless the text introduces a fixed order. |
-| How much faster than the baseline, per benchmark? | Speedup bars | Baseline at `1.0x` as a reference line; log y when speedups span more than one order of magnitude. See `matplotlib_examples.md` pattern 3. |
+| How much faster than the baseline, per benchmark? | Speedup bars | Baseline at `1.0x` as a reference line; log y when speedups span more than one order of magnitude. Pattern 3 in `matplotlib_examples.md`. |
 | Which model is best on two competing metrics (accuracy vs cost)? | Pareto front | Scatter of all models, frontier drawn through the non-dominated points, your models highlighted. Annotate the frontier, not every point. Pattern 5. |
 | Where does the time, memory, or energy go? | Stacked bars (`breakdown-bars`) | Only when components add to a meaningful total; fixed segment order; hatch or outline for grayscale. Grouped bars when components do not sum. |
 | Which component contributes the gain (ablation)? | Grouped bars or a table | Bars when there are 3 to 6 variants and one metric; a table when several metrics or exact values matter. Pattern 12. |

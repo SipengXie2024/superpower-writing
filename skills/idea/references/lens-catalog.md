@@ -6,6 +6,23 @@ The lenses produce breadth. They do not judge quality. A candidate's worth is de
 
 Run all five lenses before critiquing any candidate. Add a domain-specific lens when the area warrants one. The five are a floor, not a ceiling.
 
+## Contents
+
+- **The Five Core Lenses**: the five mandatory angles, each with its own prompts
+  and CS and ML examples. Method-Transfer ports a technique into a domain that
+  has not tried it, Contradiction resolves two results that disagree,
+  Untested-Assumption names what the subfield takes for granted and designs the
+  test that could break it, Scaling-Regime pushes a known finding to an
+  unexplored edge, and Diagnostic asks why something works rather than building
+  something new.
+- **Adding A Domain-Specific Lens**: when an area's own recurring structure earns
+  a sixth lens and what it takes to write one, with identification,
+  hardware-bottleneck, and threat-model examples.
+- **How To Run The Lenses**: how many candidates each lens should yield toward
+  the pool of 15 to 20, tagging each candidate with its lens of origin, grounding
+  generation in real prior work instead of memory, and why critique stays out of
+  the generation pass.
+
 ## The Five Core Lenses
 
 ### 1. Method-Transfer

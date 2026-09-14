@@ -3,6 +3,26 @@
 This document provides detailed guidelines for formatting citations in various
 academic styles commonly used in literature reviews.
 
+## Contents
+
+- **APA Style (7th Edition)** - format templates and worked examples for journal
+  articles, books, book chapters, preprints, and conference papers.
+- **ACM Style (ACM Reference Format)** - templates and examples for journal
+  articles and conference proceedings, plus how to handle very long author lists.
+- **Chicago Style (Author-Date)** - templates and examples for journal articles
+  and books in the author-date variant.
+- **IEEE Style** - the numbered-bracket format for journal articles and books,
+  with abbreviated journal names.
+- **Common Abbreviations for Journal Names / DOI Best Practices** - a lookup list
+  of short forms for frequently cited computing and machine learning venues, then
+  how to verify a DOI (Zotero MCP or CrossRef) and write it as a URL with no
+  trailing punctuation.
+- **In-Text Citation Guidelines** - what a citation looks like inside a sentence
+  in APA, in ACM and IEEE numbering, and in Chicago.
+- **Reference List Organization** - alphabetical versus order-of-appearance
+  sorting per style, hanging indents, and the fields to keep consistent across
+  entries.
+
 ## APA Style (7th Edition)
 
 ### Journal Articles

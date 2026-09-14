@@ -40,7 +40,7 @@ python3 references/preview-loop.py --col-pt 240.1 --text-pt 504 fig3   # 手填�
 
 这样图继承正文字体、零缩放、文字在 PDF 里可选可搜。`preview-loop.py` 的 wrapper 复刻同一套 preamble，所以预览和成品逐像素一致。
 
-**给每张图设尺寸预算再动手**。单栏图高度超过 250pt 就该问是不是同时在讲两件事（见 `figure-rhetoric.md` 的 "One figure, one job"）；跨栏图和单栏图的面积往往差不多，跨栏换来的是形状不是空间，代价是必须浮到页顶。
+**给每张图设尺寸预算再动手**。单栏图高度超过 250pt 就该问是不是同时在讲两件事（`figure-rhetoric.md` 的 "One figure, one job" 讲的正是这条判断）；跨栏图和单栏图的面积往往差不多，跨栏换来的是形状不是空间，代价是必须浮到页顶。
 
 ## 宽度超标时先查左边
 

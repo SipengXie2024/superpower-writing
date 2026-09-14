@@ -10,11 +10,11 @@ All load-bearing metadata (claim tags, structural tags, draft-only markers) live
 - `.writing/outline.md`, `.writing/metadata.yaml`
 - `.writing/refs.bib` (may be empty at first; fills as citations resolve)
 - Any upstream sections already in `.writing/manuscript/*.tex`
-- The matching section standard (below) and `references/style-cautions.md`
+- The matching section standard (below); the prose scans live in `references/style-cautions.md`, which SKILL.md links directly
 
 ## Claim-first (non-negotiable)
 
-Resolve every claim's EVIDENCE before writing any prose for it. Prose written against a `STATUS: stub` claim violates the discipline. See [`../../_shared/core/claim-first-protocol.md`](../../_shared/core/claim-first-protocol.md) for the rules. `claim-verification` is the mechanical backstop that later confirms every tag resolves, but resolve evidence now, do not lean on the later check.
+Resolve every claim's EVIDENCE before writing any prose for it. Prose written against a `STATUS: stub` claim violates the discipline. The tag syntax, exempt sections, and citation placement are fixed by `_shared/core/claim-first-protocol.md`, which SKILL.md links directly. `claim-verification` is the mechanical backstop that later confirms every tag resolves, but resolve evidence now, do not lean on the later check.
 
 ### Step A : Evidence resolution (before prose)
 
@@ -33,7 +33,7 @@ Abstracts are citation-free and have no claims file. Skip Step A. Emit no `\cite
 
 ## Step B : Prose (LaTeX)
 
-Write `.writing/manuscript/{NN}_{slug}.tex`. Before writing the section intro, overview paragraph, thesis sentence, or contribution bullets, read `references/style-cautions.md` and clear its scans against your intended prose.
+Write `.writing/manuscript/{NN}_{slug}.tex`. Section intros, overview paragraphs, thesis sentences, and contribution bullets must clear the scans in `references/style-cautions.md`, which SKILL.md links directly.
 
 Tagging:
 - Every load-bearing paragraph carries a tag line at column 0 immediately above it: `% claim: id` for a paragraph asserting an evidence-backed claim, or `% draft-only` for scaffolding (remove before `claim-verification`).
@@ -54,7 +54,7 @@ LaTeX syntax essentials: `\section{}`/`\subsection{}` (not `#`); `\textbf{}`/`\e
 
 For each section, read the matching file under `references/section-standards/` (resolve by slug: try `{NN}_{slug}.md`, else the single `*_{slug}.md`). It describes the section's shape, paragraph count, required structural tags, tense and length. Treat it as guidance that refines `references/writing-principles.md`, not a mechanical checkpoint. If the standard genuinely conflicts with the outline or the claim set (e.g. it wants 5 abstract bullets but the outline gives 3), stop and surface the conflict to the user rather than silently picking one.
 
-When `.writing/metadata.yaml` has `writing_profile: systems`, also read `references/systems-evidence-contract.md` for structured `analysis`/`artifact` evidence and the Results/Discussion boundary.
+When `.writing/metadata.yaml` has `writing_profile: systems`, `references/systems-evidence-contract.md` governs structured `analysis`/`artifact` evidence and the Results/Discussion boundary; SKILL.md links it directly.
 
 ## Step C : Bookkeeping
 

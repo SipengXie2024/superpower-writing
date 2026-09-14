@@ -63,7 +63,7 @@ Renaming a file in this directory (e.g., creating a paper-specific `section-stan
 
 1. **Outlining.** `superpower-writing:outlining` Step 3 applies the match rule above for each section and, if a file is found, reads it before drafting outline bullets for that section. The standards file dictates bullet structure, labels, and count. Bullets must pass the outline-level checks in the standards file before the outline is considered complete.
 
-2. **Drafting.** `superpower-writing:drafting` applies the same match rule and reads the matched file inline before writing the section (see `claim-first.md` Step B). If neither the exact-stem nor slug-ending match finds a file, no section-specific standard applies and the general IMRAD conventions from `writing-principles.md` govern instead.
+2. **Drafting.** `superpower-writing:drafting` applies the same match rule and reads the matched file inline before writing the section (`claim-first.md` Step B). If neither the exact-stem nor slug-ending match finds a file, no section-specific standard applies and the general IMRAD conventions from `writing-principles.md` govern instead.
 
 3. **Self-review.** Step C of drafting re-reads the same resolved standards file and confirms the draft carries the required structural tags (e.g., `% bpmrc: B`, `% cars: T`, `% background: D`). A missing tag means the section is not ready to mark `drafted`; the exhaustive tag sweep is `claim-verification`'s job.
 

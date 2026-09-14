@@ -20,6 +20,16 @@ The §Conclusion is the shortest load-bearing section of the paper. Its only job
 - **No verbatim Abstract copy.** The Conclusion and the Abstract cover similar ground but serve different purposes; copying the Abstract text wholesale is lazy and reviewers notice. Paraphrase with a different sentence structure and emphasis.
 - **Length ceiling: 250 words.** Conclusions exceeding this word count are almost always doing §Discussion's job. Trim.
 
+## Contents
+
+- [Framework](#framework): what RSF stands for, what each of the three sentences has to accomplish, and how the Conclusion's forward-look sits above §Discussion's future work.
+- [Role of each element](#role-of-each-element): table giving the purpose and typical content of R, S, and F, plus the choice between three short paragraphs and one three-sentence paragraph.
+- [Outline bullet requirement](#outline-bullet-requirement): the exactly-3-bullet budget for `.writing/outline.md`, the `[R]`/`[S]`/`[F]` prefixes and their strict order, the 2-bullet merged-section variant, and how bullets seed `conc-c*` claim IDs.
+- [Draft requirement](#draft-requirement): both accepted `.tex` layouts as annotated LaTeX skeletons, where the `% conclusion: X` and `% claim: id` tags go in each, the 100-250 word budget, and the bans on figure references and new citations.
+- [Style rules](#style-rules): tense per element, active voice and first-person plural, confident-but-bounded tone, paraphrasing the Abstract, no stacked hedges, and what makes a forward-look concrete.
+- [Common failure modes](#common-failure-modes): seven recurring defects (over-length, verbatim Abstract copy, new content, generic forward-look, missing `[F]`, overclaiming, stacked hedges), each with its reviewer symptom and its fix.
+- Closing subsections: [Purpose and placement](#purpose-and-placement) carries a full worked Conclusion example, [Conclusion vs. Abstract](#conclusion-vs-abstract) explains why the two serve different readers, and [When to omit the Conclusion](#when-to-omit-the-conclusion) covers short and merged-section papers.
+
 ## Framework
 
 **RSF = Restate, Summary, Forward-look.** Three elements in strict order that cleanly close the paper:

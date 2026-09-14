@@ -10,6 +10,15 @@ The §Background (sometimes titled §Preliminaries or §Technical Background) se
 
 **Stem is not fixed.** This file governs any `.writing/manuscript/NN_background.tex` regardless of its numeric prefix: `02_background.tex` when Background is §2 directly after Introduction, or `03_background.tex` when a §Motivation section takes the §2 slot. Match resolves via slug-ending fallback (see `README.md`).
 
+## Contents
+
+- [Framework](#framework): what DNPL stands for, why each of the four parts exists, and the test for deciding whether material belongs in §Background or §Related Work.
+- [Role of each element](#role-of-each-element): table giving the purpose of D, N, P, and L and the reader question each one answers, plus the optional closing summary paragraph.
+- [Outline bullet requirement](#outline-bullet-requirement): the 4–6 bullet budget for `.writing/outline.md`, the `[D]`/`[N]`/`[P]`/`[L]` prefixes, the strict group ordering, and how bullets seed `bg-c*` claim IDs.
+- [Draft requirement](#draft-requirement): the 4–6 paragraph `.tex` layout with a worked LaTeX skeleton, the required `% background: X` and `% claim: id` tags, per-paragraph sentence counts, word budget, and equation labelling.
+- [Style rules](#style-rules): tense for each element, active voice, citation density, the ban on forward references by section number, notation hygiene, paragraph transitions, and length discipline.
+- [Common failure modes](#common-failure-modes): eleven recurring defects (domain dump, missing L, notation first introduced in §Methods, informally described baseline, vague limitation, Related Work bleed, and others), each with its reviewer symptom and fix.
+
 ## Framework
 
 **DNPL = Domain recap, Notation/definitions, Prior approach, Limitation of prior.** Four paragraphs that together walk the reader from "here is the problem space" to "here is precisely what fails about the current state of the art, which is what this paper will fix". The skeleton is pedagogical in intent: a reader who has just read the Introduction should be able to follow §Methods only after absorbing these four elements in this order.

@@ -14,7 +14,7 @@ This is a routing and overview document, not a section standard the drafter read
 
 Use it when the paper's primary contribution is a benchmark, dataset, or evaluation framework, not a new method. Signals: the title names a benchmark; the core artifact is data plus an evaluation protocol; the experiments reveal where model capability boundaries sit rather than proving one method beats baselines. Typical venues: NeurIPS Datasets and Benchmarks Track, ICML, ICLR, SIGMOD, VLDB.
 
-For technique papers (a new method or mechanism solving an existing problem), use the default standards: `01_introduction.md` (CARS), `03_methods.md` (OFCA), `04_results.md` (RSRT), and the rest. Do not mix the two skeletons in one paper.
+For technique papers (a new method or mechanism solving an existing problem), the default standards apply instead: `01_introduction.md` (CARS), `03_methods.md` (OFCA), `04_results.md` (RSRT), and the rest. Do not mix the two skeletons in one paper.
 
 ## The five-pillar scaffold
 

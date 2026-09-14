@@ -2,6 +2,20 @@
 
 Twelve runnable patterns covering the figure types that appear in systems, ML, networking, and security papers. Each example assumes the publication style from `../scripts/style_presets.py` is applied:
 
+## Contents
+
+- **Examples 1-3, headline performance results.** Latency CDF with p50/p99 markers on a log-x axis; throughput vs concurrency with a linear-scaling reference line; per-benchmark speedup bars anchored at the 1.0x baseline.
+- **Example 4, training curves over several seeds.** Mean line plus a shaded one-standard-deviation band, log-scaled loss axis.
+- **Example 5, Pareto front.** Accuracy against parameter count, prior work vs ours, with the frontier drawn through the winning points.
+- **Example 6, stacked bar breakdown.** Latency split into network, compute, I/O, and other, with a segment order that stays stable across bars.
+- **Example 7, roofline plot.** Log-log compute roof against memory bandwidth, ridge point marked, application kernels placed as labeled dots.
+- **Example 8, heatmap.** Cache miss rate on a viridis grid with a labeled colorbar and per-cell value annotations.
+- **Example 9, box plus strip plot.** Per-seed variability, showing both the distribution shape and every individual run.
+- **Examples 10-11, multi-panel layouts.** Three panels stacked for an IEEE single column (3.5 in wide), and a 2x3 grid spanning an ACM two-column page (7.0 in), both with (a)/(b)/(c) panel labels.
+- **Example 12, grouped bar for ablations.** Variants against benchmarks, the bar-chart equivalent of an ablation table.
+- **Common Adjustments.** Embedding fonts so reviewers do not hit Type 3 warnings, matching LaTeX's `\columnwidth`, using `constrained_layout` when `tight_layout` clips labels, and shrinking multi-megabyte PDFs via rasterization.
+- **Tips.** Regenerating figures in a clean environment, keeping the raw data file beside the script, drawing baseline reference lines beneath bars, pinning log-scale limits, and sharing axes across panels.
+
 ```python
 import matplotlib.pyplot as plt
 import numpy as np

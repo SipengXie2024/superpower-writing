@@ -8,6 +8,15 @@ framework: CARS
 
 The introduction MUST follow John Swales' **CARS** (Create A Research Space) model — three Moves, in order, that together persuade the reader the paper deserves its page count. CARS has been the textbook default across STEM and social-science venues since 1990; use it even when the introduction reads narratively, because the underlying 3-Move skeleton is what reviewers track whether they realize it or not.
 
+## Contents
+
+- **Framework** and **Role of each element**: the three CARS Moves (Territory, Niche, Occupy), why omitting one is the most common structural defect, and a table of each Move's purpose and canonical sub-steps.
+- **Interaction with §Motivation (when opted in)**: how to compress M2 when the paper carries a dedicated §Motivation section, and what stays unchanged.
+- **Outline bullet requirement**: the 4–7 `[T]`/`[N]`/`[O]` bullet contract for `.writing/outline.md`, the typical distribution, and the ordering checks outlining self-review greps for.
+- **Draft requirement**: paragraph count and ordering, the paired `% cars:` / `% claim:` tags, the T → N transition rule, the length budget, and the CS / engineering variant with an explicit contributions list.
+- **Style rules**: tense per Move, voice, citation density, the three-layer numeric discipline, first-use term glosses, opening-hook and length limits.
+- **Common failure modes**: the recurring defects reviewers flag, the challenge-to-module-to-contribution chain that must close end to end, and the six questions every introduction must let the reader answer.
+
 ## Framework
 
 **CARS = Create A Research Space.** Three Moves:
@@ -30,7 +39,7 @@ In practice, every introduction picks one or two sub-steps per Move — not all 
 
 ## Interaction with §Motivation (when opted in)
 
-When the paper includes a dedicated §Motivation section (see `motivation.md` — typical in systems / architecture / hardware / security venues), Introduction's M2 must be **compressed** to avoid duplicating content that now lives in §Motivation:
+When the paper includes a dedicated §Motivation section (its standard lives in `motivation.md` — typical in systems / architecture / hardware / security venues), Introduction's M2 must be **compressed** to avoid duplicating content that now lives in §Motivation:
 
 - **Outline:** reduce `[N]` bullets to **exactly 1**, stating the gap at the highest level ("No prior system supports X at production scale"). The detailed problem scenario and quantitative failure belong in §Motivation, not here.
 - **Draft:** the single `% cars: N` paragraph should be 2–4 sentences that flag the gap and defer to §Motivation ("We elaborate on this gap in §Motivation."). Do not pre-announce the motivating scenario's numbers or requirements in Introduction — §Motivation owns those.
@@ -160,7 +169,7 @@ An optional trailing `% cars: O` paragraph may be added to describe paper organi
 - **Abstract echo in §Introduction first paragraph.** The first paragraph of §Introduction repeats Abstract-B's opening sentence structure and enumerates the same related systems with the same connectors. Symptom: a reader who has already read the abstract gets no new signal from the first 100 words of the body, and reviewers score the paper "context-light". Fix: assume the reader has already absorbed the abstract. §Introduction T1 starts one level deeper — technical stakes, mechanism detail, or methodology exposition — and treats the abstract's context as given, not restated. Opening the first T paragraph with a verbatim or near-verbatim copy of Abstract-B's first sentence is a hard fail; rewrite from a different angle (e.g., abstract frames "what", introduction frames "how" or "why-now").
 - **Naive-solution-then-improvement framing (novelty under-positioning).** The `[N]`→`[O]` transition first sketches an obvious baseline solution, then presents the paper's method as a delta over it ("A simple approach is X; we improve X by adding Y"). Symptom: the method reads as a low-score incremental patch, and reviewers anchor on "this is a small tweak" even when the real idea is substantial. The hand-holding walks the reader to the answer and erases the curiosity that makes the contribution land. Fix: lead the `[O]` paragraph with the insight and the mechanism, not the strawman. State the technical challenge and why a naive extension fails (that belongs in `[N]`), then open `[O]` with what the paper actually does. Even when the work is genuinely incremental, do not stage it as "naive baseline, then our patch".
 - **Retrofit contributions.** The contributions list is written after the experiments finished, cherry-picking only the runs that worked. Symptom: contributions track the favorable results rather than the paper's claims, and an honest ablation later contradicts a bullet. Fix: write the contributions list before running experiments, from the challenges and the design. Experiments then confirm or refute each bullet; a refuted bullet gets cut or rewritten, not quietly dropped.
-- **Promise-and-forget.** A contribution bullet promises a specific result ("10x speedup", "halves memory") that §Results does not support with a matching number. Symptom: reviewers quote the bullet against the evaluation table in the rebuttal. Fix: every quantitative promise in a contribution must resolve to a §Results number; if §Results shows a 3x speedup, the bullet says 3x, not 10x. Cross-check the contributions list against §Results before submission. See `01_introduction_examples.md` for annotated skeletons that lead with insight, plus a NOT-recommended abstract-only-novelty anti-example.
+- **Promise-and-forget.** A contribution bullet promises a specific result ("10x speedup", "halves memory") that §Results does not support with a matching number. Symptom: reviewers quote the bullet against the evaluation table in the rebuttal. Fix: every quantitative promise in a contribution must resolve to a §Results number; if §Results shows a 3x speedup, the bullet says 3x, not 10x. Cross-check the contributions list against §Results before submission. `01_introduction_examples.md` holds annotated skeletons that lead with insight, plus a NOT-recommended abstract-only-novelty anti-example.
 
 ### Challenge-to-module-to-contribution consistency (CRITICAL invariant)
 

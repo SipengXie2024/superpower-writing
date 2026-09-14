@@ -3,6 +3,15 @@
 > **何时读**：复杂档准备拼装 ≥ 3 个 snippet 时必读。
 > **核心**：snippet 解决"局部质量"，组合规则解决"全局组合"。Batch 17 fig153 v3 教训：sub-agent 把 snippets 都塞进去了，但 snippets 之间的留白、对齐、Z-order 没规划 = 整图仍乱。
 
+## Contents
+
+- **1. 三种推荐整图骨架**：双栏对称、5 Stage 横向、中央 hero + 4 panels 三套版式的 ASCII 示意图，动手拼装前先选定一个
+- **2. snippet 间留白铁律**：stage 容器、公式 box、panel、Color Legend、标题各自的最小间距数值表
+- **3-4. 对齐与 Z-order 铁律**：同 row 同 height、同列同 width 的对齐要求；背景填充 → 箭头 → box 文字 → 标题注释的四层叠放顺序
+- **5. 整图配色策略**：≤ 6 色的名额分配（1 个 accent + 2-3 主色 + 1-2 辅色 + 灰），附三种常见配色翻车写法
+- **6. 必备元素（复杂档）**：标题、嵌入 viz、信息 panel、公式 box、Color Legend、Summary Bar 分别该用哪个 snippet、摆在哪
+- **7. 检查清单**：拼装完成后逐条过一遍的 9 项自查
+
 ## 1. 三种推荐整图骨架（选一个）
 
 ### A. 双栏对称（Encoder/Decoder 类）

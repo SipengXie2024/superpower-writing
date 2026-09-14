@@ -2,6 +2,15 @@
 
 This document provides formal templates for writing simulation-based security proofs in academic papers, following established conventions in cryptographic literature.
 
+## Contents
+
+- **1. Semi-honest security**: the standard real/ideal indistinguishability template, with the simulator construction and the hybrid argument skeleton.
+- **2. Malicious security**: the template that additionally handles an adversary deviating from the protocol, including extraction and abort handling.
+- **3. Zero-knowledge**: completeness, soundness, and zero-knowledge stated as separate theorems with their own proof skeletons.
+- **4. Hybrid model**: proofs written against idealized functionalities, and how to compose them back down to the real model.
+- **5. UC security**: the environment-based formulation and what changes relative to the stand-alone templates above.
+- **6. Usage guidelines**: which template to pick, what to adapt per paper, and the notation conventions the templates assume.
+
 ## 1. Semi-Honest Security Proof Template
 
 ```latex

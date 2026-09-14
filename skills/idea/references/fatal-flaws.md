@@ -2,6 +2,23 @@
 
 Reference for the top-venue bar evaluation. Ten canonical fatal flaws, each with a question-style detection rule and a concrete defense, plus the time-based severity rule that drives the short-circuit.
 
+## Contents
+
+- **What counts as fatal**: the three signatures that separate a fatal flaw from
+  an ordinary weakness, and the two-flaw cap that forces a Reject and Pivot
+  verdict.
+- **The ten flaws**: F1 novelty versus the closest prior work, F2 venue fit, F3
+  stale baseline, F4 missing motivation, F5 resource mismatch, F6 unverifiable
+  claim, F7 ethical or data-access blocker, F8 overly ambitious scope, F9
+  solution hunting for a problem, F10 no failure case considered, each with the
+  detection question to ask and the red flag that fires.
+- **Defenses**: a table pairing every flaw F1 to F10 with the concrete fix that
+  clears it, under the rule that a defense which cannot run inside the idea's
+  lifecycle leaves the flaw fatal.
+- **Severity rule**: how defense time sorts flaws into CRITICAL, MAJOR, and
+  MINOR, which combinations force Reject and Pivot or Accept with Revisions, and
+  why the lifecycle the user stated, not a fixed calendar, sets the threshold.
+
 ## What counts as fatal
 
 A fatal flaw causes rejection from a top venue regardless of how well the rest of the paper is executed. The bar is deliberately high. Not every weakness is fatal. Calling an idea fatally flawed stops the user from pursuing it, so this list stays conservative.

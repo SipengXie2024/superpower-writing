@@ -4,6 +4,16 @@ Use this reference only when `.writing/metadata.yaml` contains `writing_profile:
 
 Polish preserves the paper's evidential strength. It may make a supported claim clearer. It must not make an unsupported claim sound supported.
 
+## Contents
+
+- **Preserve unresolved evidence**: how to handle the `[NEEDS-EVIDENCE]` marker, and why a nearby number does not by itself support the claim around it.
+- **Comparison contract**: the four parts (comparator, metric, condition, evidence anchor) that `faster`, `reduces`, and similar words require, with an unsupported and a supported example.
+- **Magnitude words**: when `substantial` and its relatives may stay, and the three fallbacks when they may not.
+- **Statistical significance**: `significant` reserved for a named test result, and what to write instead when no test exists.
+- **Efficiency claims, Scalability claims**: what `efficient` and `scalable` must each name (resource or scaling dimension, comparator, tested range and condition, measurement), and why asymptotic complexity or one measured range does not substitute.
+- **Novelty claims**: the word set (`novel`, `new`, `first`, `unprecedented`) that needs a stated contrast with prior work, with a preferred and an avoid example.
+- **Final evidence-preservation pass**: the end-of-polish checklist for comparing the rewritten text against the source before returning it.
+
 ## Preserve unresolved evidence
 
 `[NEEDS-EVIDENCE]` is an unresolved claim marker, not awkward prose.

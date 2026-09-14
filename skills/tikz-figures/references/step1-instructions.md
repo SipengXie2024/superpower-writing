@@ -4,6 +4,15 @@
 > **加载后必须以文字形式输出完整的画图指令**——禁止"心里想好了直接写代码"。
 > 跳过这步直接写代码，就像不画图纸直接盖房子。返工率 100%。
 
+
+## Contents
+
+- 画图指令必须包含的 10 项要素（含 ASCII 布局草图、可视化嵌入决策）
+- 密度参考表（按论文复杂度选档位）
+- 节点形状与连线类型速查
+- 步骤③ Pre-flight Checklist
+- 创造空间 — 复杂档可调用的词汇
+
 ## 画图指令必须包含的 10 项要素
 
 ### 0. 参考图测量（如有参考图/复刻目标）
@@ -156,3 +165,16 @@
 | P7 | 易犯错误已对照 `lessons.md` 排查 | 读取该图表类型的经验条目 |
 
 任一项不通过就**停下来补完**，不要"先写代码再说"。代码阶段的 bug 修复成本是指令阶段的 5 倍。
+
+## 创造空间 — 复杂档可调用的词汇（不强制，但**应该考虑**）
+
+| 维度 | 选项 |
+|---|---|
+| **嵌入可视化** | attention heatmap / loss curve / 真实图像色块 / signal waveform / 数学曲线 / N×N matrix / mel spectrogram / 散点分类 |
+| **信息 panel** | hyperparameters 框 / metrics 表 (FID/BLEU/Acc) / color legend / glossary 注释 / 数学符号速查 |
+| **数学公式嵌入** | `FFN(x) = max(0, xW₁+b₁)W₂+b₂` 直接写进 box 内部，**不是只贴标签** |
+| **配色** | ≥5 种 zone tone + accent color；浅色 zone 背景 + 中饱和度 box + dark accent |
+| **层级** | hero ≥ 2× 辅助 box；"N=6 layers" 灰色透明栈背景 |
+| **Cross-zone** | dashed rail + 跨段标签 (如 "K, V") |
+| **学术 polish** | dataset 标注 ("CIFAR-10") / 性能数字 ("FID=3.17") / 引用作者年份 |
+

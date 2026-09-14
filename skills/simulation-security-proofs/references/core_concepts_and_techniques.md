@@ -122,7 +122,7 @@ Real World =^c Hybrid_1 =^c Hybrid_2 =^c ... =^c Ideal World
 2. Show adjacent hybrids are indistinguishable
 3. Reduce distinguishing advantage to breaking cryptographic assumption
 
-See `references/hybrid_arguments.md` for detailed treatment.
+`references/hybrid_arguments.md` gives the detailed treatment: the hybrid lemma, types of hybrid arguments, and systematic construction of hybrid sequences.
 
 ### Technique 2: Rewinding
 

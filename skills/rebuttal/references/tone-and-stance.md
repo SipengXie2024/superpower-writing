@@ -2,6 +2,18 @@
 
 Use this file when drafting response prose, rewriting a defensive author note, or deciding how to disagree. All examples target CS / systems / ML venues.
 
+## Contents
+
+- **Core posture**: the stance every reply holds, and who actually reads the response (reviewers, the meta-reviewer, and at OpenReview venues the public).
+- **Evidence-tiered verb ladder**: a table matching claim verbs to evidence strength, from `demonstrate` on a controlled result down to `are consistent with` on a correlation, plus how to downgrade a causal claim the experiment never isolated.
+- **Recommended sentence patterns** and **Forbidden-phrase blocklist**: the openings worth reusing because each carries an answer, an action, or a manuscript location, and the phrases that must never ship because they accuse the reviewer, plead limited time or compute, or say nothing verifiable.
+- **Disagreement pattern**: the five-step order for disagreeing with one narrow reading rather than with the reviewer, with a fill-in template.
+- **Reviewer-misunderstanding pattern**: treating a misread as a presentation defect to fix instead of telling the reviewer they misread.
+- **The structural_distinction move**: the reply to "your method reduces to X" or "this is just generic Y", conceding the local reduction and naming the structural feature that survives it, backed by a theorem, a derivation step, or a measured consequence.
+- **Concede without surrendering**: pairing a concession with the regime, mechanism, or result it preserves so the contribution stays intact.
+- **Pre-registered-calibration phrasing**: one-line wording for thresholds and splits fixed before any test result was inspected, and why claiming this when untrue is the most damaging fabrication.
+- **Surface non-obvious design choices upfront**: naming a weaponizable evaluation caveat first with its number, such as compute-matched rather than epoch-matched training, frozen parameters, or an atypical seed protocol.
+
 ## Core posture
 
 - Cooperative but not submissive.

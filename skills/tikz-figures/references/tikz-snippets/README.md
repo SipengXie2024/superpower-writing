@@ -4,6 +4,15 @@
 > **核心理念**：snippets 是手工精雕的乐高积木——sub-agent 拼装 N×M 组合，保证基线质量同时不千图一面。
 > **PNG 预览在 `previews/` 目录**——sub-agent 选 snippet 前**先看 PNG 决定视觉效果**，再读 .tex 改参数。
 
+## Contents
+
+- **为什么有这个目录**：Batch 13-17 的演化教训，说明视觉质量为什么要靠手工精雕的片段而不是文字 checklist。
+- **📚 Snippet Gallery**：21 个 snippet 的索引表，每行带 PNG 预览，分 5 类（嵌入数据可视化、信息 panel / 图表、数学 / 几何、结构 / 流程、整图骨架元素）；第 6 组另有 6 个 GOLD STANDARD 完整 figure 骨架（B 横向 pipeline、C 中央 hero + 4 panels、D 竖向 + 右侧 side panel、E 多模态融合、F 多 phase 多子元素、G 联邦式竖向），附骨架的关键设计原则和「复制整文件后只改 content」的使用流程。
+- **使用规则**：选片段与拼装的 5 条操作规则（先看 PNG 再选、只复制 `%% COPY-START / END` 段、只替换 placeholder、多片段共用同一套颜色 token）。
+- **不要做的事**：4 个已知误用（照抄 examples 主题、自创简化版、复杂图只拼一个 snippet、跳过 PNG 直接读 .tex）。
+- **编译验证**：每个 snippet 本身是 standalone .tex，用 `xelatex` 单独编译看 demo 效果的做法。
+- **已知避坑（PGF gotchas）**：写新 snippet 时必避的 7 个 pgfmath / `\foreach` 陷阱及其修复对照表（计数器累加、plot coordinates 不展开、括号内表达式不求值、macro 命名、数据含逗号、amssymb、ellipse 参数粘连）。
+
 ## 为什么有这个目录
 
 Batch 13-17 演化教训：纯文本 Philosophy + 18 项 checklist 让 sub-agent 知道"要嵌入 viz / panel / 公式"，但**写出来的视觉重量、留白、配色协调仍然失败**——因为这些是 visual perception 而非 textual 任务。

@@ -2,6 +2,20 @@
 
 Universal best practices for plots that go into a CS paper, independent of the specific venue. Per-venue specs (IEEE / ACM / USENIX / NeurIPS / ICML / ICLR / arXiv) live in `venue_requirements.md`.
 
+## Contents
+
+- **Core Principles**: the four rules (clarity, truthfulness, reproducibility, accessibility) every figure is judged against.
+- **File Format, Resolution Requirements**: PDF as the default, the narrow cases where PNG is acceptable, why JPEG never is, and the minimum DPI per content type.
+- **Typography**: sans-serif family choice, minimum and recommended point sizes at final print size, and rules for units, SI prefixes, and math text.
+- **Color Usage**: the safe categorical, sequential, and diverging defaults, the forbidden colormaps, and the shared `_palette.py` pattern that pins one color per method across the paper.
+- **Layout and Composition**: multi-panel labelling, axis and tick settings, line, marker, and bar sizing, and legend placement.
+- **Statistical Conventions for CS**: what CS reviewers check first, how many seeds or runs each experiment type needs, and a caption template that states n and error type.
+- **Data Fidelity and Self-Consistency**: six correctness rules covering excluded runs, non-comparable conditions plotted as peers, labels and titles the data must support, and one canonical number per claim.
+- **Accessibility**: colorblind prevalence and simulators, the grayscale conversion check, and small-screen legibility.
+- **Common Mistakes (CS-specific)**: ten recurring failures in submitted CS figures, each with its fix.
+- **Pre-submission Figure Checklist**: fourteen boxes to tick before a figure goes into the paper.
+- **See Also**: the sibling reference files and the two helper scripts, with what each covers.
+
 ## Core Principles
 
 1. **Clarity first.** A reviewer skimming should understand the figure in five seconds without reading the caption. The headline finding must be visually obvious.
@@ -72,7 +86,7 @@ Set `font.size: 8` as a default; matplotlib uses it for everything that doesn't 
 
 ## Color Usage
 
-See `color_palettes.md` for the full reference. Summary:
+`color_palettes.md` holds the full reference (hex codes, colormap recipes, grayscale checks). Summary:
 
 - Default categorical: Okabe-Ito (8 colors, colorblind-safe).
 - Sequential: viridis or cividis (perceptually uniform, grayscale-safe).

@@ -11,6 +11,29 @@ the default; use this preset when the target venue is a modern ML conference
 (ICLR / NeurIPS / ICML, 2024-2025 look) or the user asks for a pastel / airy /
 "modern ML" figure.
 
+## Contents
+
+- **How it plugs into the 6-section contract**: which of the six prompt sections
+  this preset rewrites (framing, visual style, palette), which stay unchanged,
+  and the standing rules that still apply either way.
+- **Five style rules**: the defining constraints, namely a pure white canvas with
+  white panels separated only by a faint shadow, a rounded friendly font,
+  thoughtfully packed density, floating elements instead of nested boxes, and
+  color carried by tokens and text rather than by panels.
+- **Five color carriers** and **Preset palettes**: the five places color is
+  allowed to appear, each with a description pattern, then three ready-made
+  palettes (warm ML, cool research, earthy warm) with exact hex values for token
+  fills and text emphasis.
+- **Layout flexibility**: how many panels to use, sizing them by content weight,
+  and when an asymmetric arrangement beats a symmetric 2×2 grid.
+- **Prompt blocks**: copy-ready text for the global style header, for each panel
+  description, and for the closing style specification at the end of the prompt.
+- **Element vocabulary**: description patterns for token squares, for curves and
+  mini-charts, and for inline illustrations such as decision trees, networks,
+  trajectory fans, and compression funnels.
+- **Quality checklist**: twelve checks to run against a generated figure before
+  accepting it.
+
 ## How it plugs into the 6-section contract
 
 | Section | What changes |

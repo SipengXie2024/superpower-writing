@@ -2,6 +2,18 @@
 
 Per-venue specifications for figure dimensions, fonts, formats, and quirks. Always cross-check the venue's current Author Guide — these requirements drift between editions.
 
+## Contents
+
+- **Quick Reference Table**: column widths, minimum DPI, preferred format, and LaTeX class for every venue covered below, in one table.
+- **IEEE (Transactions and Conferences)**: 3.5 in / 7.16 in widths, 300-600 DPI rules, 8 pt sans-serif minimum, `Fig. N` numbering, PDF eXpress font checks, and `figure` / `figure*` snippets.
+- **ACM (`acmart`)**: how `sigconf`, `acmsmall`, and `acmlarge` differ in width, the tighter 7 pt / 6 pt type floors, and inclusion snippets.
+- **USENIX**: two-column 3.33 in / 7.0 in geometry, its permissive conventions, and the missing `figure*` shortcut in `usenix2019_v3`.
+- **NeurIPS / ICML / ICLR**: per-venue single-column widths (5.5 in, 6.75 in), vector-only expectations, panel-label variants, and figures counting against the page limit.
+- **arXiv Preprints**: inherit the target venue's width, and watch for EPS rasterization plus stripped font info during arXiv's compile.
+- **Figure Width vs. `\includegraphics` Scaling**: why a 7 in figure squeezed into a 3.5 in column halves every label, and the ways to avoid it.
+- **Per-venue Style Files**: which `assets/*.mplstyle` matches which venue, how to load it by absolute path, and the `configure_for_venue()` helper.
+- **Validating Compliance**: `check_figure_size()` for dimensions, `pdffonts` for font embedding, and the Type 3 grep that catches the common submission-portal rejection.
+
 ## Quick Reference Table
 
 | Venue | Single column | Double / full | Min DPI (raster) | Preferred format | Class file |

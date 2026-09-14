@@ -12,6 +12,14 @@ The §Methods section is the paper's technical core. In CS papers it goes by man
 
 **Scope.** This standard targets CS papers broadly: ML / NLP / CV / systems / databases / graphics / theoretical CS / applied CS. Clinical, biology, and IMRAD-strict medical papers should not use this file — their §Methods follows CONSORT / STROBE / PRISMA checklist conventions, which are out of scope for this plugin.
 
+## Contents
+
+- **Framework** and **Role of each element**: what question each of O/F/C/A/I answers for a reviewer, a purpose-and-content table per element, and which elements a paper may legitimately drop.
+- **Outline bullet requirement**: how many `[O]` / `[F]` / `[C]` / `[A]` / `[I]` bullets `outline.md` needs, the strict O → F → C → A → I ordering, and how those bullets seed `meth-cN` claim stubs.
+- **Draft requirement**: annotated LaTeX skeleton with paragraph-level `% methods: X` tags, plus rules for the pipeline figure, pseudocode blocks, equations, proof rigor, and the word budget.
+- **Style rules**: tense and voice, pseudocode and equation conventions, how sparse citations should be, concrete reproducibility wording, first-use term glosses, and subsection granularity.
+- **Common failure modes**: 22 reviewer complaints with symptom and fix, from a missing overview figure through prose-only complexity claims, vague hyperparameters, and core components no ablation ever tests.
+
 ## Framework
 
 **OFCA = Overview, Formalization, Core, Analysis.** Four elements, sequenced, that together answer the four questions a reviewer asks of any CS §Methods:

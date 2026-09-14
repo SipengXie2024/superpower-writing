@@ -8,9 +8,18 @@ framework: RSFF
 
 The §Empirical Findings section reports what evaluating models on the benchmark reveals. Unlike a technique paper's §Results, its purpose is not to prove one method beats baselines. Its purpose is to reveal where and why model capability boundaries sit, and what that implies for future work. It MUST organize analysis around research questions and condense each major analysis into a bolded "Finding X:" sentence that reads like a lemma. The section often renders as "§5 Experiments" or "§5 Evaluation".
 
-**Slug convention.** Keep the manuscript slug as `findings` regardless of the rendered title. Author it as `.writing/manuscript/NN_findings.tex` so the slug-ending match resolves here. See `benchmark_README.md` for the full benchmark-variant resolution table.
+**Slug convention.** Keep the manuscript slug as `findings` regardless of the rendered title. Author it as `.writing/manuscript/NN_findings.tex` so the slug-ending match resolves here. `benchmark_README.md` holds the full benchmark-variant resolution table.
 
 **Scope.** Benchmark and dataset papers for CS / ML / NLP / CV / systems / databases. Technique papers use `04_results.md` (RSRT); the structures overlap on RQs and Setup but diverge on the Finding-X convention and the capability-boundary purpose.
+
+## Contents
+
+- **Framework** and **Role of each element**: RSFF (research questions, setup, per-RQ Findings, forward opportunities), the two ways this variant departs from a technique paper's §Results, and a table giving each element's purpose and typical content, including the non-optional overall-performance table and the human baseline.
+- **The "Finding X:" convention**: the four tests a bolded Finding must pass (surprising, specific, actionable, data-backed) and the lead-evidence-scope-forward-pointer micro-structure of a Finding paragraph.
+- **Outline bullet requirement**: the 7–14 bullet budget for `.writing/outline.md` §Findings, the strict RQ → S → F → FO label ordering with a worked example, the rule that `[F]` count equals `[RQ]` count, and how bullets seed `find-c*` claim stubs.
+- **Draft requirement**: an annotated LaTeX skeleton with one subsection per RQ, where the `% findings: X` and `% claim: id` tags go, the required overall-performance table and its formatting, the comparator-and-uncertainty rule for headline numbers, and the length budget.
+- **Style rules**: tense per kind of statement, voice, number presentation, baseline fairness across the model panel, what to cite, negative-result transparency, and the ban on fabricated scores.
+- **Common failure modes**: six reviewer-triggering defects (leaderboard without Findings, obvious Findings, Findings with no forward pointer, too few models, no human baseline, mechanism creep), each with its symptom and fix.
 
 ## Framework
 

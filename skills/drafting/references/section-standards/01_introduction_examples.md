@@ -10,7 +10,7 @@ Companion to `01_introduction.md`. The CARS standard fixes the Move skeleton (M1
 
 The strategies differ only in M1 framing and the M2→M3 hand-off. The `% cars:` and `% claim:` tags still apply exactly as in `01_introduction.md`: every load-bearing paragraph carries both. The contributions list still obeys the 3–5-item, noun-phrase-heading, section-pointer rules.
 
-**One rule cuts across all four strategies.** Lead the `[O]` paragraph with the insight and the mechanism. Do NOT open it by sketching a naive baseline and framing the paper as a delta over it. The naive-solution-then-improvement move makes the work read as a low-score incremental patch (see `01_introduction.md` failure modes). The technical challenge and why a naive extension fails belong in `[N]`; `[O]` opens with what the paper actually does.
+**One rule cuts across all four strategies.** Lead the `[O]` paragraph with the insight and the mechanism. Do NOT open it by sketching a naive baseline and framing the paper as a delta over it. The naive-solution-then-improvement move makes the work read as a low-score incremental patch (`01_introduction.md` lists it among its failure modes). The technical challenge and why a naive extension fails belong in `[N]`; `[O]` opens with what the paper actually does.
 
 ## Contents
 
@@ -19,6 +19,7 @@ The strategies differ only in M1 framing and the M2→M3 hand-off. The `% cars:`
 - [Strategy 3: Novel task](#strategy-3-novel-task-challenging-for-three-reasons)
 - [Strategy 4: Observation-driven](#strategy-4-observation-driven)
 - [NOT recommended: abstract-only novelty illusion](#not-recommended-abstract-only-novelty-illusion)
+- [Note on "to the best of our knowledge, this is the first ..."](#note-on-to-the-best-of-our-knowledge-this-is-the-first-): why the unverifiable first-ever construction invites an easy reviewer attack, with weak and strong phrasings
 
 ## Strategy 1: Task-then-application
 

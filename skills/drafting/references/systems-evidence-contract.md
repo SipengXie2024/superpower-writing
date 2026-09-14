@@ -7,6 +7,15 @@ Use this reference in two layers:
 
 Before using any profile-specific rule, read `.writing/metadata.yaml`. If `writing_profile` is missing or `TODO`, stop, ask the user to choose `systems` or `default`, write the answer back, and then continue. Do not infer the profile from `reporting_guideline: none` or from manuscript wording.
 
+## Contents
+
+- **Structured analysis evidence**: the six fields every `type: analysis` entry must carry, what counts as a real `calculation` rather than a phrase like `analyzed data`, when `uncertainty` may be `not_applicable`, and how long a `[NEEDS-EVIDENCE]` placeholder may stand before a claim reaches `evidence_ready`.
+- **Artifact evidence**: when `type: artifact` is the right source for first-party implementation, specification, configuration, protocol, proof, or pseudocode material, the `ref`, `role`, and `locator` rules including path resolution inside the paper project root, and why a passing structural check still leaves substantive support to manual review.
+- **Systems Results paragraphs** and **Systems Discussion interpretation paragraphs**: the four-move order for each, with worked sentences showing which implications a measurement licenses in Results, and how the Discussion verb (`shows`, `suggests`, `we hypothesize`) has to track the strength of the mechanism evidence.
+- **Systems figure brief**: the `.writing/figures/<fig_id>.brief.yaml` schema with a full example and its required fields, the table mapping analytical questions to built-in families and default routes, when `family_reason` or `route_reason` becomes mandatory, and how venue overrides and correctness tables sit outside the brief.
+- **Visual and caption rules**: grayscale-first method encoding, shared axes, order, and legend across small multiples, layout direction and structural cues for architecture and timeline figures, and everything a caption must define before interpretation moves to the body.
+- **Failure behavior and compatibility**: the exact conditions that keep a claim at `stub`, fail structural verification, stop figure dispatch, or block routing, plus the rules that keep legacy claims and existing figures from being rewritten in bulk.
+
 ## Structured analysis evidence
 
 Use `type: analysis` only for a computed statistic or a deterministic transformation of identified inputs.

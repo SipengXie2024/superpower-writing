@@ -2,6 +2,15 @@
 
 Use this file when a comment cannot be handled by straightforward acceptance and a text edit. Each case names a strategy and gives a template. All templates are CS / systems / ML targeted. Adapt the bracketed slots to the paper.
 
+## Contents
+
+- **Impossible or out-of-scope experiment**: declining a requested experiment on study-design grounds instead of pleading time, budget, or hardware, with a template and retargets for method, systems, and theory papers.
+- **Reviewer factual error**: pointing at the manuscript location where the data already are rather than telling the reviewer they erred, and why a small clarifying edit is still worth making when the reviewer is strictly wrong.
+- **Conflicting reviewers**: finding the one calibrated sentence that answers two incompatible requests, avoiding promises that contradict each other across replies, and deferring to the editor when an instruction exists.
+- **Reviewer-requested citation**: when to add a suggested reference and when to decline it, the verification requirement before any citation goes in, and templates for both directions.
+- **Major statistical or empirical-rigor critique** and **Reproducibility or artifact critique**: what to obtain from the author before drafting (metric definition, seed count and variance protocol, comparison protocol, repository link, commit, license) and why a missing value becomes `AUTHOR_INPUT_NEEDED` instead of an invented number or URL.
+- **Appeal-like case: route it out**: the signals that a task is an appeal rather than a revision response, why the stance and audience differ, and the default message that hands the choice back to the user.
+
 ## Impossible or out-of-scope experiment
 
 The reviewer asks for work that needs a new system, a new dataset, a cluster you do not have, a longitudinal study, or a different evaluation design.

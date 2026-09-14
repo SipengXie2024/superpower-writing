@@ -8,6 +8,17 @@ framework: BPMRC
 
 The abstract MUST follow the **BPMRC** structure: Background → Problem → Method → Result → Conclusion. This is the structured-abstract skeleton adopted by JAMA, BMJ, NEJM, Lancet, and most IMRAD venues. Use it even for narrative (unstructured) abstracts — the labels disappear but the five elements remain, in this order.
 
+## Contents
+
+- **Framework**: what the five BPMRC letters stand for, and the triage questions a reviewer uses them to answer.
+- **Role of each element**: table giving each element its sentence budget and the one question it must answer.
+- **Outline bullet requirement**: the exactly-5 labelled bullets `.writing/outline.md` §Abstract must carry, the grep check that enforces their order, and why the abstract gets no claims file.
+- **Draft requirement**: the 5-paragraph `% bpmrc:` tagged skeleton for `00_abstract.tex`, why the stem is claim-exempt but still tag-required, and the ban on merging elements into shared paragraphs.
+- **Length budget**: ~250 words by default (or the venue limit from `metadata.yaml`), split element by element.
+- **Style rules**: tense and voice, the bans on citations, undefined abbreviations and figure references, registration IDs, and the three-layer numeric discipline that keeps percent changes in the abstract and absolute counts in §Results.
+- **House-style abstract pattern (wins on conflict)**: the senior co-author's three-paragraph problem/solution/evidence wording, and how it overrides the five-paragraph default while still passing the five-tag check.
+- **Common failure modes** and **Title guidance**: the six defects that draw triage rejects, then title length, specificity, and worked good/bad title examples.
+
 ## Framework
 
 **BPMRC = Background, Problem, Method, Result, Conclusion.** The skeleton forces a reviewer to answer, in sequence: *why does this field matter → what is missing → what did you do → what did you find → so what?* Reviewers who cannot answer any one of those questions after reading the abstract will reject the paper at the triage desk, regardless of what the body delivers. Enforcing the skeleton at outline and draft time eliminates the single most common structural defect in submitted abstracts.

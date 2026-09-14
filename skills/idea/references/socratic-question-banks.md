@@ -6,6 +6,14 @@ Use these banks as a toolkit, not a script. Pick the questions that fit the natu
 
 The mode follows a convergence limit. Aim to converge within about 15 rounds. If the user cannot converge after several rounds in problem framing, offer to switch to the default generate-and-evaluate path rather than looping forever.
 
+## Contents
+
+- **Six question types** - the general-purpose Socratic probes (clarification, hidden assumptions, evidence, other perspectives, implications, and questioning the question itself), each with five ready-to-ask phrasings.
+- **Topic question-banks (CS and ML)** - field-specific questions grouped by direction clarification, method probing, literature positioning, analytical reasoning, and contribution significance.
+- **Five questioning strategies** - funnel, mirror, counterfactual, analogy, and strategic silence, each with a short worked dialogue showing how the move plays out.
+- **Dialogue management rules** - how short each reply should be, when to extract an insight note, the roughly 15-round convergence limit, and how to respond when the user asks to be handed a direct answer.
+- **What the coaching mode produces** - the markdown template for the unscored direction summary the user compiles with you, and how it hands off to the default scored path.
+
 ## Six Question Types
 
 ### Type 1: Clarification

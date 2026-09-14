@@ -4,6 +4,14 @@ This rubric scores research-direction candidates so the surviving idea can hand 
 
 FINER stands for Feasible, Interesting, Novel, Ethical, Relevant. Score every candidate on all five criteria on a 1-to-5 scale. Use the behavioral anchors below so two passes on the same candidate land near the same number.
 
+## Contents
+
+- **Pre-Score Read: Methodology Implication**: the check that runs before any number gets assigned. A candidate implying no experiment, dataset, proof technique, or measurement is marked `too-vague` and returned for restatement, with worked examples of what passes and what does not.
+- **The Five Criteria With Behavioral Anchors**: one 1-to-5 table per criterion describing what each score looks like, plus the caveats that matter. Novelty scored here is a hypothesis for Phase 2 to test against the literature, ethics lands at 4 or 5 for most CS work, and relevance is anchored to named venue communities.
+- **Ranking Guidance (advisory, not a gate)**: how to read the averages without turning them into a filter. Roughly 3 or higher with no criterion at 1 is workable territory, a lone 1 is worth naming out loud, and the user still picks the survivor.
+- **Output: Brief Plus Rejected List**: copy-ready templates for the two artifacts. The Research-Direction Brief carries the direction, implied method, FINER table, scope boundaries, and lens of origin; the Candidates Considered table records every rejection with an objective reason such as a cited paper or a named missing resource.
+- **Quality Criteria For The Selected Direction**: the short final check the surviving direction must pass before handoff to outlining.
+
 ## Pre-Score Read: Methodology Implication
 
 Before scoring, read each candidate for one thing.

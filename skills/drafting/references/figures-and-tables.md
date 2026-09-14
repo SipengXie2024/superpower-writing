@@ -1,5 +1,36 @@
 # Figures and Tables for Systems Papers
 
+## Contents
+
+- **Overview** and **The Paper's Figure Pattern**: why display items carry the
+  evidence, and the two figures that do structural work, a mechanism-free problem
+  figure in the introduction and a full-width design figure whose stages name the
+  subsections, plus the single running example rule and where a float's source
+  line has to sit.
+- **Decision Rule**: the three questions that settle text vs. table vs. figure, a
+  content-to-display-type mapping for systems work, and how many display items a
+  paper should carry.
+- **Design Principles**: the five rules that make an item stand alone, keep it
+  from duplicating the prose, hold terminology and error bars consistent across
+  the paper, and keep the data-ink ratio high.
+- **Figure Types**: when to reach for a bar, line, scatter, box, heatmap, or flow
+  diagram, each with drawing guidelines and the mistakes reviewers flag.
+- **Table Design**: required parts, decimal alignment and precision, bolding the
+  best result, footnote conventions, with a worked latency table.
+- **Statistical Annotations**: what every quantitative comparison must report,
+  which error bar to choose (SD, SE, 95 % CI), and significance-marker
+  conventions.
+- **Accessibility**: colour-blind-safe palettes, contrast and minimum font and
+  line sizes, and keeping a figure readable in greyscale.
+- **Technical Specs** and **Numbering**: vector vs. raster formats, resolution,
+  single- and double-column widths, a format comparison table, and how to number
+  and cite items in the text.
+- **Captions**: the house-style length ceiling, the structure of figure and table
+  captions, and a worked example of each.
+- **Venue-Specific**: display-item limits and format notes for systems
+  conferences, journals, and workshops; ML-venue expectations live in the
+  scientific-visualization skill.
+
 ## Overview
 
 Figures and tables carry the evidence in a systems paper. Readers scan them before
@@ -9,7 +40,7 @@ poorly designed one obscures it.
 
 This reference covers when to use tables versus figures, design principles
 adapted for computer-science and systems venues, statistical annotations,
-accessibility, technical specifications, and a pre-submission checklist.
+accessibility, technical specifications, and venue conventions.
 
 ## The Paper's Figure Pattern
 
@@ -236,11 +267,20 @@ diagram to repeat text that already appears in the surrounding prose.
 ### Formatting
 
 - Align decimal points within each column.
-- Keep precision consistent (e.g., two decimal places throughout a column).
+- Keep precision consistent (e.g., two decimal places throughout a column) and
+  no finer than the measurement warrants; five decimals on a microsecond value
+  is noise.
 - Use an en-dash for "not applicable" or "not measured."
 - Bold the best result in each column when comparing systems; state this
   convention in a footnote.
 - Use superscript symbols or letters for footnotes (*, superscript a, b, c).
+- Split an over-wide table into two, or move the extra columns to an appendix.
+- Do not table data a figure already shows. Pick whichever form answers the
+  question better and cut the other; showing both reads as padding.
+- Keep formatting consistent across every table in the paper. Column order,
+  precision, bolding convention, and header capitalization that drift between
+  tables make a reviewer check whether the numbers are comparable.
+- Typeset tables as markup (LaTeX `tabular`), never as a pasted raster image.
 
 ### Example
 
@@ -255,16 +295,6 @@ Baseline          12.3    45.1    89.7
 
 * p < 0.01 vs. Baseline (paired t-test, n = 5 runs).
 ```
-
-### Common Mistakes
-
-1. Too many columns; split into two tables or move detail to an appendix.
-2. Missing units or inconsistent precision.
-3. Over-reporting decimal places (five decimals for a microsecond value is
-   noise).
-4. No sample size or run count.
-5. Duplicate data already shown in a figure.
-6. Inconsistent formatting across tables within the same paper.
 
 ## Statistical Annotations
 
@@ -463,40 +493,3 @@ conventions and page-budget guidance, are covered in the
 
 General advice: consult the target venue's author guide before finalising any
 figure. Column widths, margin allowances, and colour policies vary.
-
-## Final Checklist
-
-Review every figure and table before submission.
-
-**For every figure:**
-
-- [ ] Vector format (PDF/EPS) for plots and diagrams?
-- [ ] At least 300 dpi if raster?
-- [ ] Fits column width without overflow?
-- [ ] Caption below the figure, self-explanatory?
-- [ ] All abbreviations and symbols defined?
-- [ ] Error bars included and labelled (SD, SEM, or CI)?
-- [ ] Sample size or run count stated?
-- [ ] Axes labelled with units?
-- [ ] Text legible at final print size (>= 8 pt)?
-- [ ] Readable in greyscale / colour-blind safe?
-- [ ] Referenced in text in order of appearance?
-- [ ] Consistent style with other figures in the paper?
-
-**For every table:**
-
-- [ ] Descriptive title above the table?
-- [ ] Column headers include units?
-- [ ] Decimal-aligned and consistent precision?
-- [ ] Abbreviations defined in footnotes?
-- [ ] Sample sizes or run counts included?
-- [ ] Best results highlighted (bold) with footnote?
-- [ ] Editable format (LaTeX tabular), not a raster image?
-- [ ] Referenced in text in order of appearance?
-
-**Overall:**
-
-- [ ] Display-item count reasonable (~1 per 1 000 words)?
-- [ ] No duplication between text, tables, and figures?
-- [ ] Consistent formatting across all items?
-- [ ] Every item earns its place (no filler)?

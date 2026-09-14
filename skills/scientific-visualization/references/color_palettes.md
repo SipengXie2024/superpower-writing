@@ -2,6 +2,17 @@
 
 CS-tailored guidance: colorblind-safe categorical palettes, perceptually uniform colormaps for heatmaps, conventions for method-to-color consistency, and grayscale verification. Drops biology-specific guidance (fluorophores, DNA bases, microscopy channels) — those live in the upstream skill if you need them.
 
+## Contents
+
+- **Categorical Palettes (Discrete Series)**: hex codes for Okabe-Ito, Wong, and three Paul Tol sets, plus the trimmed 2, 3, and 4 color subsets for plots with few series.
+- **Sequential Colormaps (Continuous Single-Variable Data)**: which perceptually uniform map to use for heatmaps (viridis, cividis, plasma, inferno, magma), and why jet, rainbow, and hsv are rejected.
+- **Diverging Colormaps (Centered Data)**: maps for data with a meaningful center such as speedup or correlation, and how to pin the norm to that center.
+- **Method-to-Color Consistency**: the shared `_palette.py` pattern that fixes one color, marker, and line style per method across every figure in the paper.
+- **Grayscale Verification**: convert a figure to B/W, and fix series that collapse to the same shade with line styles, markers, or bar hatching.
+- **Colorblind Simulation**: simulator tools (Coblis, Color Oracle, Sim Daltonism) and a `colorspacious` snippet for checking deuteranopia, protanopia, and tritanopia.
+- **Domain-Specific Palettes for CS**: the few color conventions CS does have, covering roofline plots, latency CDFs, cache hierarchy heatmaps, and confusion matrices.
+- **Avoid, Resources**: seven recurring color mistakes to check a finished figure against, then links to ColorBrewer, Paul Tol, matplotlib, and seaborn palette references.
+
 ## Categorical Palettes (Discrete Series)
 
 ### Okabe-Ito (default — 8 colors)

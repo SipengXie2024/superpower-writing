@@ -2,9 +2,21 @@
 
 > **何时加载**：步骤②，任何 TikZ 图必加载。
 > **写入规则**：只追加经过验证的事实，不写未确认猜测。按经验操作失败就更新或删除该条。
-> 参数基线见 `baselines.md`，图型专属教训见 `lessons-by-type.md`，历史批次复审见 `lessons-archive.md`。
+> 分工：本文件只放通用教训，参数基线在 `baselines.md`，图型专属教训在 `lessons-by-type.md`，历史批次复审在 `lessons-archive.md`。
 
 > （原 `evolution.md` + `experience-log.md` 已于 2026-03 合并，2026-08 按性质拆分为本组四个文件。）
+
+## Contents
+
+- **开篇两条散条目（不属于任何小节）**：背景层的环境名是 `\begin{pgfonlayer}{background}`；⟦⟧ 双方括号要 `stmaryrd` 宏包。
+- **视觉层次/绘制顺序**：同色同型同方向的线可以共用出发点，只有实线 vs 虚线这类不同类型才必须分开锚点。
+- **连线路径**：七条最常踩的路径规则。对齐就走直线、弯折点离箭头尖 ≥0.8cm、旁边有空白就别让标签压线、箭头终点必须落在目标边框上、树状分叉点用 `coordinate` 不用 `\node`、同一通道最多 3 条线、旋转文字要查四角是否侵入邻居。
+- **信息密度**：小标注堆太多会导致全图重叠（干净 > 塞满），同类功能的箭头必须统一粗细和 scale。
+- **美感守恒**：每轮迭代后回头检查，修一个问题不能破坏原有的对称、平行和间距均匀。
+- **连线/箭头精度（Round 11 用户实测发现）**：fan-out 要用 tree pattern 而不是扫帚式散射；junction dot 周围所有线都不带 tip（fan-in 汇合和 fan-out 起点同理）；容器标题不要 fill 嵌在边框上；双向语义的箭头两端都要 tip。这节还留了一张按端点类型分挡的 shorten 历史表，已被 `tikz-template.tex` 的 canonical `arrow/.style` 取代，只作背景不作执行依据。
+- **并行 100 张测试发现（R3-100 批次）**：画数学/几何/密码学示意图之前，先核查文案给的坐标是否真的满足声明的方程，不一致就先纠正再画。
+- **R3-100 Pilot 主 agent 三遍复审发现**：sub-agent 自审系统性漏掉的八类盲区。浮动 annotation 要有 leader line 引到具体元素、hero 展开别选各 instance 都一样的通用结构、压缩多步骤必须显式标注、箭头方向自评要逐条写 "tip 在哪一端"、窄框标签要按字符数量宽度、多个 legend 框要么合并要么拉开 ≥1cm、箭头改用 canonical pattern（调 line width 不调 tip scale，附 5 个根因与代码块）、重叠自评必须逐处枚举。
+- **上一节标题下后续追加的条目（2026-05-22 与 2026-08-03，紧接正文末尾）**：`\foreach` 里用 xcolor 颜色名变量必定报错；`matrix` 实际行高大于 `minimum height`，依赖行位置的元素一律用锚点；`brace` 尖端在路径行进方向的左手边；节点净间距小于 tip 长度时箭头被压成一个点；多行说明必须配 `text width` 否则撑爆图宽；`anchor=east` 的标签会把 bounding box 往负方向扩。
 
 ---
 
@@ -86,7 +98,7 @@
 #### [通用] - Fan-out 多线必须用 tree pattern，禁止"扫帚式"散射
 - **问题/发现**：MLP 节点扇出 3 条线到 3 个 task heads，3 条线从 `(fanout)` 同一点用 `(fanout) -- ++(0.55, 0) -- (target_y) -- (target.west)` 写，结果在 junction 附近 3 条线以不同角度散开，视觉上像"扫帚"——线段相互交叉、近距离干扰，读者要费力分辨。
 - **禁止模式**：`(fanout) -- ++(0.55, 0) -- (target_y) -- (target.west)` 这种单 `\draw` 隐式斜线，3 条会撞角。
-- **解决方案**：tree pattern (trunk + spine + stubs)。**完整代码模板和细则见** `tikz-global-rules.md` §"一对多分叉连线（树状扇出）" 和 §"多源汇聚→多目标扇出（沙漏树）"。
+- **解决方案**：tree pattern (trunk + spine + stubs)。完整代码模板和细则在 `tikz-global-rules.md` 的 §"一对多分叉连线（树状扇出）" 与 §"多源汇聚→多目标扇出（沙漏树）" 两节。
 - **发现日期**：2026-05-16（MMAlign Round 11 用户视觉反馈）
 
 #### [通用] - Junction dot 不被箭头 tip 戳——所有 dot-as-connector 场景

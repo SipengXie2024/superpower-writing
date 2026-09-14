@@ -8,9 +8,18 @@ framework: GSTM
 
 The §Evaluation Framework section defines what the benchmark measures and how. In a benchmark paper this section carries the contribution: the problem definition, the task scope, and the measurement taxonomy ARE the contribution, the way a method is the contribution in a technique paper. It MUST state design goals, fix the task scope, lay out a fine-grained taxonomy, and specify how each dimension is scored. It usually renders as "§2 Task and Design Goals" or "§2 Benchmark Overview", appearing before §Construction.
 
-**Slug convention.** Keep the manuscript slug as `evaluation_framework` regardless of the rendered title. Author it as `.writing/manuscript/NN_evaluation_framework.tex` so the slug-ending match resolves here. See `benchmark_README.md` for the full benchmark-variant resolution table.
+**Slug convention.** Keep the manuscript slug as `evaluation_framework` regardless of the rendered title. Author it as `.writing/manuscript/NN_evaluation_framework.tex` so the slug-ending match resolves here. `benchmark_README.md` holds the full benchmark-variant resolution table.
 
 **Scope.** Benchmark and dataset papers for CS / ML / NLP / CV / systems / databases. Technique papers do not have this section; their problem statement is one element of §Methods (OFCA Formalization).
+
+## Contents
+
+- [The problem definition IS the contribution](#the-problem-definition-is-the-contribution) and [Framework](#framework): why the evaluation dimension carries the paper the way a method carries a technique paper, and what GSTM (Goals, Scope, Taxonomy, Measurement) demands of each element, including the G1–G4 goal standard and the three proven taxonomy patterns.
+- [Role of each element](#role-of-each-element): table giving each letter's purpose and typical content, plus the optional difficulty-calibration note on whether the hardest subset still leaves headroom for future models.
+- [Outline bullet requirement](#outline-bullet-requirement): the 5–8 `[G]` / `[S]` / `[T]` / `[M]` bullets `.writing/outline.md` must carry, their strict non-interleaved order, a worked example block, and how the bullets seed `eval-c*` claim stubs.
+- [Draft requirement](#draft-requirement): the annotated LaTeX skeleton for the four subsections, the paragraph-level `% eval: X` plus `% claim: id` tagging rule, the hard rules on stating exclusions, giving a concrete cell count and validating a model-as-judge, and the 800–2,000 word budget.
+- [Style rules](#style-rules): tense and voice, coupling each goal to a concrete strategy and the taxonomy back to the §Introduction gap, what to cite, and the ban on invented cell counts or validation numbers.
+- [Common failure modes](#common-failure-modes): five recurring defects (vague evaluation dimension, no out-of-scope statement, single overall score, unvalidated model-as-judge, taxonomy unmoored from the gap), each with its reviewer symptom and fix.
 
 ## The problem definition IS the contribution
 

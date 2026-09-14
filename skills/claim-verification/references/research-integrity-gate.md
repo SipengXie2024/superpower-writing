@@ -8,6 +8,15 @@ Loaded by:
 
 - `skills/claim-verification/SKILL.md` §Optional research-integrity gate: one-line pointer plus the verdict contract.
 
+## Contents
+
+- **When this gate applies**: the three conditions that must all hold before running it, and the paper types (theory, position, survey) to skip.
+- **The three-way verdict per heuristic**, plus **NEVER-FABRICATE**: what CLEAR / SUSPECTED / INSUFFICIENT each mean, how they aggregate into one headline verdict, and the rule that a missing artifact yields INSUFFICIENT instead of an invented number.
+- **Pipeline-integrity heuristics** (H1 suspiciously round effect size, H2 unexplained surprise, H3 seed-count mismatch, H4 bug reframed as insight): detection steps and verdict criteria for results a broken pipeline can produce while still matching the tables.
+- **Number-tracing failure modes** (N1 best-seed cherry-pick, N2 delta-arithmetic error, N3 caption-table mismatch, N4 scope overclaim): how to trace each reported number back to the raw result files rather than the authors' summary.
+- **Independence note (Type-B routing)**: which heuristics are taste judgments that need an independent reviewer thread (H2, H4, N4) and which are mechanical enough for the gate to self-judge (H3, N1, N3).
+- **Reporting**: where findings are written, what each entry must record, and why the gate never flips a claim `STATUS` or blocks the pipeline.
+
 ## When this gate applies
 
 Run it only when all three hold:
@@ -137,7 +146,7 @@ Verdict: CLEAR when the scope language matches the evaluated breadth. SUSPECTED 
 
 ## Independence note (Type-B routing)
 
-Several heuristics here ask for taste, not a lookup. Judging whether a surprise is genuine (H2), whether an insight is real or a reframed bug (H4), or whether scope language is fair (N4) is a Type-B judgment under the gate in `SKILL.md`. A drafting loop that produced the prose must not acquit its own Type-B verdict on these. Route them to an independent or cross-model reviewer thread, following the two-stage review pattern in `planning-foundation/references/review-loop-protocol.md`, rather than self-clearing. The mechanical traces (N1 arithmetic, N3 caption-vs-content, H3 directory count) are Type-A: a script with no taste could answer them, so the gate may self-judge those.
+Several heuristics here ask for taste, not a lookup. Judging whether a surprise is genuine (H2), whether an insight is real or a reframed bug (H4), or whether scope language is fair (N4) is a Type-B judgment under the gate in `SKILL.md`. A drafting loop that produced the prose must not acquit its own Type-B verdict on these. Route them to an independent or cross-model reviewer thread per the Type-A vs Type-B section of `SKILL.md`, which also states what the reviewer may and may not be given, rather than self-clearing. The mechanical traces (N1 arithmetic, N3 caption-vs-content, H3 directory count) are Type-A: a script with no taste could answer them, so the gate may self-judge those.
 
 ## Reporting
 

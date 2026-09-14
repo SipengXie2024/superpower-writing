@@ -5,6 +5,18 @@
 > **核心理解**：本清单是 catching last-mile bugs，**不是设计指南**。设计指南在 SKILL.md 顶部 Philosophy 段。
 > 18 项全部 Y 仅说明"没有明显 bug"，**不说明"审美达标"**——审美由 Philosophy 段的 UNFORGETTABLE Question 主导。
 
+## Contents
+
+- **强制流程**：一轮审查的执行顺序，从 Philosophy 前置三问到 overlap.json、18 项 Y/N、blocker 回环
+- **维度 1 编译保障（T1 / T3 / T4）**：数学字符是否渲染正常、编译日志有无 Missing character、窄标签是否被截断
+- **维度 2 空间布局（S1 / S6 / S8 / S9）**：文字标签重叠、大块空白带的扫描口径、节点几何相交检测、相邻元素最小间距数值
+- **维度 3 语义正确（M1 / M2 / M3 / M8）**：模块和连线有没有漏画、箭头方向是否与指令一致、hero 展开该不该绑定具体 instance
+- **维度 4 连线精度（E1 / E2 / E3 / E9 / E12）**：tip 落点与 shorten、fan-out / fan-in 的 trunk + spine + stubs 写法与同色铁律、canonical 箭头 style、线穿节点的 triage 规则
+- **维度 5 审美底线（A1 / V1）**：整图左右视觉平衡；复杂档必须有嵌入数据可视化或信息 panel
+- **审查输出格式**：每轮汇报的模板，含 Philosophy 三问、18 项逐条证据、blockers 与 patch plan
+- **升级机制**：第 3 轮仍有 ≥5 blocker 或同一 blocker 连续两轮没修好时改走重设计；自评 0 blocker 也仍要给用户看
+- **历次用户终审教训**：47 项为何精简到 18 项，被移走的老细则现在放在哪里
+
 ## 强制流程
 
 ```

@@ -8,9 +8,17 @@ framework: SSEQ-Split
 
 The §Construction Pipeline section is the technical core of a benchmark paper, equivalent to §Methods in a technique paper. It describes how the benchmark's data is built so that another team can reproduce it, scale it, and trust its quality. Reviewers scrutinize this section hardest; a vague pipeline is a top rejection reason for benchmark submissions. It MUST document a paradigm choice and every pipeline stage with explicit inputs, operations, outputs, and quality gates.
 
-**Slug convention.** Keep the manuscript filename's slug as `construction` regardless of the rendered title. The paper may render it as "§3 Benchmark Construction", "§3 Data Construction", or "§3 Dataset Pipeline"; still author it as `.writing/manuscript/NN_construction.tex` so the slug-ending match resolves to this file. See `benchmark_README.md` for the full benchmark-variant resolution table.
+**Slug convention.** Keep the manuscript filename's slug as `construction` regardless of the rendered title. The paper may render it as "§3 Benchmark Construction", "§3 Data Construction", or "§3 Dataset Pipeline"; still author it as `.writing/manuscript/NN_construction.tex` so the slug-ending match resolves to this file. `benchmark_README.md` holds the full benchmark-variant resolution table.
 
 **Scope.** Benchmark and dataset papers for CS / ML / NLP / CV / systems / databases. This is the heaviest chapter of such a paper. Technique papers use `03_methods.md` (OFCA) instead.
+
+## Contents
+
+- **Framework** and **Role of each element**: the five pipeline stages (source selection, seed generation, enrichment, quality control, split), the three construction paradigms and when each one fits, and a table giving every element's purpose, typical content, and quality gate, including the non-optional statistical profile.
+- **Outline bullet requirement**: the 5–9 bullet budget for `.writing/outline.md` §Construction, the strict PD → SS → SG → EN → QC → SP → ST label ordering with a worked example, how bullets seed `con-c*` claim stubs, and the ban on inventing dataset sizes at outlining time.
+- **Draft requirement**: an annotated LaTeX skeleton with one subsection per stage, where the `% construction: X` and `% claim: id` tags go, the mandatory pipeline figure, the input/operation/output/quality-gate rule every stage must satisfy, and the length budget.
+- **Style rules**: tense and voice, the reproducibility discipline each stage owes the reader, what to cite versus what to record as a `type: dataset` artifact, the ban on fabricated provenance, and the required contamination-resistance statement.
+- **Common failure modes**: five reviewer-triggering defects (vague pipeline, no quality gate, missing contamination mitigation, unnamed paradigm, statistics that disagree with the table), each with its symptom and fix.
 
 ## Framework
 

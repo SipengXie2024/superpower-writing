@@ -2,6 +2,15 @@
 
 Reference for the top-venue bar evaluation. The Higher / Faster / Stronger / Cheaper / Broader idea-framing axes, the generative inversion that produced them, the anti-inflation scoring rule, and tiered anchors keyed to venue papers. The scores are reading aids that surface where an idea's ceiling sits. They are advisory, not a gate.
 
+## Contents
+
+- **Origin: the generative inversion** - why the framework starts from a strong baseline and asks where it can be pushed, instead of hunting for a problem that fits a technique in hand.
+- **The five axes** - what Higher, Faster, Stronger, Cheaper, and Broader each cover, each with two or three concrete entry strategies for generating or locating an idea's contribution.
+- **Scoring tiers** - the 1-to-10 anchors per axis, spelling out what separates a 9-10 from a 6-8 or a 3-5.
+- **Anti-inflation rule** - default every axis to 5 and earn each point with a sentence from the idea, plus the five recurring scoring failures (inflation, deflation, uncited evidence, generic lift suggestions, score and verdict mismatch).
+- **Reading the scores (advisory)** - how to read a finished score profile: which pair of axes becomes the paper's thesis, and when the spread says the idea is too thin to proceed.
+- **Tiered anchors keyed to venue papers** - a table of illustrative top-venue patterns and their scores for each axis, with the caveat to verify attributions before quoting them.
+
 ## Origin: the generative inversion
 
 This framework comes from a discipline for generating incremental ideas given a strong baseline. The inversion is the whole point:

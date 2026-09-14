@@ -22,6 +22,14 @@ opt_in: true
 
 **Interaction with Introduction and Background.** §Motivation overlaps topically with both. Compress Introduction's CARS M2 (`[N]` bullets) to one high-level gap sentence when §Motivation is present — the detailed problem statement now lives in §Motivation, not Introduction. Similarly, keep §Background's L element brief when §Motivation already demonstrated the failure; §Background's L can reference §Motivation's findings rather than re-proving them ("as shown in §Motivation, baseline X incurs O(n²) memory overhead...").
 
+## Contents
+
+- **Framework / Role of each element**: what S (Scenario), F (Failure), R (Requirements) each contribute, the question each answers, and why R is rendered as a numbered list instead of prose.
+- **Outline bullet requirement**: the `[S]` / `[F]` / `[R]` bullet labels for `.writing/outline.md`, how many bullets of each kind are allowed, their strict order, and how they seed claim stubs.
+- **Draft requirement**: the LaTeX skeleton for `NN_motivation.tex` (three tagged paragraphs plus an R1/R2/R3 itemize list), the `% motivation:` / `% claim:` tag pairs, the word budget per element, and when a figure or table is expected.
+- **Style rules**: tense for each element, active voice, where citations or measurement provenance are mandatory, and the cap on figures and tables.
+- **Common failure modes**: six recurring problems (failure stated without numbers, scenario too abstract, aspirational requirements, overlap with Introduction, more than one scenario, requirements §Methods never addresses), each with its reviewer symptom and fix.
+
 ## Framework
 
 **SFR = Scenario, Failure, Requirements.** Three paragraphs (plus an optional requirements list) that together build an irrefutable case for why the paper's contribution is needed. The skeleton answers three questions in sequence: *what concrete situation are we talking about → how do existing solutions fail in this situation → what properties must a correct solution have*.

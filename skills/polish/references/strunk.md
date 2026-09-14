@@ -4,6 +4,19 @@ William Strunk Jr.'s *The Elements of Style* (1918) teaches you to write plainly
 and cut ruthlessly. This is the clarity-and-concision pass of polish: cut
 needless words, prefer active voice, prefer the concrete over the abstract.
 
+## Contents
+
+- **Output discipline** : return only the revised text, with no register labels,
+  rule citations, or narration of the classification; includes the two permitted
+  exceptions (unchanged input, one bracketed assumption line).
+- **Register awareness** : the five input types (academic, technical, quoted
+  material, code, default) and how hard to push Strunk on each.
+- **Process** : the five-step order of work, from classifying the register to
+  verifying that load-bearing content survived the cuts.
+- **The rules** : the eight high-leverage Strunk rules, each with the restraint
+  that applies in academic and technical prose.
+- **Common cuts** : a lookup list of stock padding phrases and their replacements.
+
 ## Output discipline (the iron rule : read first)
 
 Return **only the revised text**. Nothing before it, nothing after it, unless the

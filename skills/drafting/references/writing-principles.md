@@ -4,6 +4,16 @@ Reference for drafting and revising systems/ML prose. Covers principles only; se
 
 **Precedence.** The house style in `_shared/core/house-style.md` is the canonical rulebook for reviewer-facing prose, and it wins wherever it speaks to the same point as this file. Two places where it is stricter than the general advice below: no em-dashes and no in-sentence colons anywhere in prose (§1), and dataset or corpus names stay out of thesis and claim sentences (§3.3). A project `.claude/CLAUDE.md` overrides both.
 
+## Contents
+
+- **Three Pillars** -- the bulk of the file, one part each on clarity (precise language, sentence length, active voice), conciseness (wordy-to-concise substitution tables), and accuracy (reporting values, uncertainty, and statistical claims without overreaching).
+- **Objectivity** and **Consistency** -- keeping evaluative and emotional language out of results, acknowledging conflicting evidence, and holding terminology, notation, tense, and citation style steady across the manuscript.
+- **Logical Organization** -- paragraph and section flow, signposting phrases, and parallel phrasing in lists of aims.
+- **Tense** -- which tense goes with established facts, completed findings, methods you performed, and background on the research area.
+- **Word Choice** -- commonly confused pairs (affect/effect, fewer/less, that/which), the overloaded adjectives "significant," "novel," "important," "efficient," and "scalable" with quantified replacements, and vague words to drop.
+- **Numbers and Units** -- numerals versus spelled-out words, spacing and SI prefixes, range formatting, and a table of the conventional unit for each systems metric.
+- **Paragraphs** -- target paragraph length and the four devices that hold a paragraph together.
+
 ## Three Pillars
 
 ### Clarity
