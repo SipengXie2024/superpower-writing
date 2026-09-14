@@ -17,7 +17,9 @@ Every load-bearing paragraph in `.writing/manuscript/*.tex` carries a LaTeX line
 
 ## Claim-first discipline
 
-Never write prose (Edit / Write / MultiEdit) into `**/manuscript/*.tex` when a `% claim: id` tag references a claim with `STATUS: stub`, when the claim file is missing, or when untagged load-bearing prose lands in a tagged section. In each case resolve evidence first: look the source up via `superpower-writing:literature` or `superpower-writing:citations` (Zotero-first when `zotero.enabled`), bump `STATUS` to `evidence_ready`, then write.
+Never produce manuscript prose for a claim whose `STATUS` is `stub`, and the same when the claim file is missing or when untagged load-bearing prose lands in a tagged section. The ban is on the prose, not on the tool that emits it: handing the paragraph over in the reply because no write tool is available is the same violation as editing the `.tex` file. In each case resolve evidence first: look the source up via `superpower-writing:literature` or `superpower-writing:citations` (Zotero-first when `zotero.enabled`), bump `STATUS` to `evidence_ready`, then write.
+
+A citekey, DOI, or half-remembered number the user offers does not resolve anything, and neither does his permission to use it. A `\cite{...}` key he supplies is the stub's own EVIDENCE placeholder restated, not a source anyone looked up. Name the claim that is still unresolved and what you need for it, write the paragraphs whose claims did resolve, and leave the rest unwritten.
 
 ## Exempt sections
 
