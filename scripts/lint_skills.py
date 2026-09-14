@@ -6,8 +6,8 @@ Enforces the plugin's house conventions on every ``skills/*/SKILL.md`` and the
 
  - frontmatter ``name`` equals the directory slug
  - ``description`` is 40..80 words, third person, contains a "Use when" clause
- - no em-dash (U+2014): an error under templates/, which reaches the manuscript,
-   and a warning elsewhere, since a skill's operating instructions are not the
+ - no em-dash (U+2014) under templates/, the only tree that reaches the manuscript;
+   not checked elsewhere, since a skill's operating instructions are not the
    reviewer-facing prose the house style governs
  - SKILL.md body LOC: warn above 500, error above 700 (push detail into references)
  - references/ is single level: a references file must not link to another
@@ -19,11 +19,11 @@ stdlib parser; it does NOT depend on pyyaml.
 
 Ratchet model
 -------------
-The current tree already violates several of these rules (notably two oversize
-SKILL.md files and many pre-existing em-dashes). Those known violations are
-grandfathered in ``lint_skills_baseline.txt`` so the linter exits 0 on the
-current tree, yet exits 1 the moment a NEW violation appears in a new or edited
-file. Grandfathered findings are reprinted as TODO lines, not as gating errors.
+Known violations can be grandfathered in ``lint_skills_baseline.txt`` so the
+linter exits 0 on the current tree, yet exits 1 the moment a NEW violation
+appears in a new or edited file. Grandfathered findings are reprinted as TODO
+lines, not as gating errors. The baseline is currently empty: every rule here
+passes on the tree as committed.
 
 Each error carries a stable key (``path::check::detail``) that omits line
 numbers, so ordinary edits to a grandfathered file do not churn the baseline.
@@ -52,14 +52,17 @@ from pathlib import Path
 
 EM_DASH = "—"
 # The em-dash ban comes from skills/_shared/core/house-style.md, whose own scope line
-# binds it to "every piece of prose a reviewer will read": abstract, introduction,
-# related work, background, methods, results, discussion, rebuttal, response letter,
-# peer review. A skill's own operating instructions are not reviewer-facing prose, so
-# flagging them as release-blocking errors applies the rule outside the scope it
-# claims. It stays as a warning: worth a look when the hit is inside an example
-# sentence a drafter might imitate, not a gate. Anything under templates/ does reach
-# the manuscript and is still checked as an error below.
-EM_DASH_SEVERITY = "warn"
+# binds it to "every piece of prose a reviewer will read". Only templates/ reaches the
+# manuscript, so only templates/ is checked, as an error.
+#
+# The warning that used to fire everywhere else is gone. It was kept on the theory that
+# a hit might land inside an example sentence a drafter would imitate, but all 607
+# occurrences across the skills tree were classified once: every one is a heading
+# ("# Abstract — BPMRC Standard"), a bold label ("**B — Background**"), a table cell, or
+# instructional prose. Zero were imitable example sentences. A check with no true
+# positives and 38 standing warnings teaches readers to skip the linter's output, which
+# costs more than the rule it was enforcing.
+EM_DASH_SEVERITY = None
 
 DESC_MIN_WORDS = 40
 DESC_MAX_WORDS = 80
@@ -280,7 +283,7 @@ def check_description(path: str, fm: str) -> list[Finding]:
                 "error",
             )
         )
-    if EM_DASH in desc:
+    if EM_DASH_SEVERITY and EM_DASH in desc:
         out.append(
             Finding(path, "description", "em-dash", "description contains an em-dash", EM_DASH_SEVERITY)
         )
@@ -310,7 +313,7 @@ def check_body(path: str, body: str) -> list[Finding]:
                 "warn",
             )
         )
-    if EM_DASH in body:
+    if EM_DASH_SEVERITY and EM_DASH in body:
         out.append(
             Finding(
                 path,
@@ -353,9 +356,10 @@ def check_reference_file(ref_path: Path, path: str, skill_md: str = "") -> list[
 
     if EM_DASH in text:
         severity = "error" if path.startswith("templates/") else EM_DASH_SEVERITY
-        out.append(
-            Finding(path, "em-dash", "ref", f"{path}: references file contains an em-dash", severity)
-        )
+        if severity:
+            out.append(
+                Finding(path, "em-dash", "ref", f"{path}: references file contains an em-dash", severity)
+            )
 
     # single-level references: this file must not link/point into references/
     nested: set[str] = set()
