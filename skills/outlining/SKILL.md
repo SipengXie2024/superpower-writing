@@ -1,6 +1,6 @@
 ---
 name: outlining
-description: Use when starting a new paper or when `.writing/outline.md` is missing or needs a major restructure. Converts a research idea into an IMRAD outline plus a per-section claim list, sharpened through an interleaved interview. Produces `.writing/outline.md` (structure + key claims), `.writing/claims/section_*.md` (claim stubs), and a filled `.writing/metadata.yaml`. No manuscript prose is written here, this is the spec phase before drafting.
+description: Use when starting a new paper, when `.writing/outline.md` is missing or needs a major restructure, or when someone asks for a section's prose while the structure is still unsettled ("论文一个字都没有", "大纲还没定", "先从 Evaluation 动笔"). That last request routes here, not to drafting. Converts a research idea into an IMRAD outline plus a per-section claim list through an interleaved interview, producing `.writing/outline.md`, `.writing/claims/section_*.md`, and a filled `.writing/metadata.yaml`. No manuscript prose is written here, this is the spec phase before drafting.
 ---
 
 # Outlining : IMRAD structure, claims, and the interview

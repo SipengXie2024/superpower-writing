@@ -9,13 +9,13 @@ Turn claims into sentences. You draft each section yourself, in outline order, n
 
 **Say what you are doing, in the user's terms, not the skill's name:** "Writing the manuscript prose, section by section, resolving each claim's evidence first."
 
-## Preconditions
+## Stop here if there is no outline yet
 
-Draft only once outlining has produced:
+Drafting consumes what outlining produced: `.writing/outline.md` (approved), `.writing/claims/section_*.md` (stub entries per section), a filled `.writing/metadata.yaml` (note `writing_profile`, `zotero.enabled`, `zotero.auto_push_new_citations`), and an existing `.writing/manuscript/`.
 
-- `.writing/outline.md` (approved) and `.writing/claims/section_*.md` (stub entries per section).
-- `.writing/metadata.yaml` filled (note `writing_profile`, `zotero.enabled`, `zotero.auto_push_new_citations`).
-- `.writing/manuscript/` exists (from `init-writing-dir.sh`).
+If any of those is missing, or if the user says in passing that the structure is not settled ("论文一个字都没有", "大纲还没定", "章节怎么排还没想好"), stop and hand off to `superpower-writing:outlining` before writing any prose. Say in one sentence what is missing and what outlining will produce. Do not draft the section anyway, and do not invent the claim spine inline as you write.
+
+Being asked for one specific section, "先把 Evaluation 写出来", is the usual shape of this rather than an exception to it. A section drafted against no claim spine gives `claim-verification` nothing to check, so the gap resurfaces later as a rewrite.
 
 Skip this skill to copy-edit existing prose (use `polish`) or to verify a finished draft (use `claim-verification`).
 
