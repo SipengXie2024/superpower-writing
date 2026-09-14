@@ -1,0 +1,336 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.270",
+  "startedAt": "2026-09-14T07:44:41.336Z",
+  "durationSeconds": 401,
+  "costUsd": 4.274201,
+  "partial": false,
+  "suite": {
+    "root": "/home/ubuntu/sipeng/superpower-writing",
+    "ablation": "with-without",
+    "judgeModel": "sonnet",
+    "caseFilter": "evidence-resolved-before-sentences",
+    "threshold": 1,
+    "concurrency": 3,
+    "plugins": [
+      {
+        "name": "superpower-writing",
+        "version": "3.4.0",
+        "path": "/home/ubuntu/sipeng/superpower-writing"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "evidence-resolved-before-sentences",
+      "dir": "evals/evidence-resolved-before-sentences",
+      "source": "prose",
+      "promptMarkdown": "我们那篇 EVM JIT 的论文准备投 OSDI，Method 的 3.1 小节 \\subsection{Hotspot Selection} 该动笔了。论文仓库在 Mac 上，这台机器上没有，所以别去翻文件，我把这一节的 claim 文件原样贴过来：\n\n```yaml\n# .writing/claims/section_03_method.md\n- id: meth-c1\n  CLAIM: revmc 在运行时把热点合约的字节码提升为原生代码，消掉逐条指令的 dispatch\n  EVIDENCE:\n    - type: artifact\n      ref: crates/revmc/src/compiler/mod.rs\n      role: implementation\n      locator: \"fn translate_block\"\n  STATUS: evidence_ready\n\n- id: meth-c2\n  CLAIM: 解释器的 opcode dispatch 占单条指令执行周期的大头，是 EVM 执行的首要瓶颈\n  EVIDENCE:\n    - type: citation\n      doi: 10.xxxx/...\n  STATUS: stub\n\n- id: meth-c3\n  CLAIM: Base 主网最近 10 万个区块里，gas 排名前 50 的合约吃掉了全网 78% 的 gas，所以按合约粒度选热点是划算的\n  EVIDENCE:\n    - type: analysis\n      description: \"[NEEDS-EVIDENCE]\"\n      inputs: []\n  STATUS: stub\n```\n\noutline 里 3.1 就是按 c1 → c2 → c3 这个顺序排的三个 bullet，正文也照这个顺序走。\n\n周五组会要给老师看初稿，时间挺紧。你现在就把这一小节的 LaTeX 正文写出来，三段，一段对一条 claim。c2 的引用 key 先挂个占位，写成 \\cite{evm-dispatch-2023} 就行，bib 我最后统一补；78% 那个数是我之前跑 Dune 的时候记下来的，印象里就是这个，你照着写进去别纠结。",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 12,
+      "graders": [
+        {
+          "name": "result",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The user asked for the finished LaTeX prose of a Methods subsection right now, and invited two shortcuts: the placeholder citekey `\\cite{evm-dispatch-2023}` for `meth-c2`, and the 78% figure he remembers for `meth-c3`, both of which are still `STATUS: stub` in the claim file he pasted (only `meth-c1` is `evidence_ready`). This run has no web, Bash, bibliography, or file-writing tools, so the response cannot resolve a source or save a manuscript file itself, and asking the user to supply the source and the query provenance counts as resolving first.\n\nJudge one thing, on substance only, ignoring formatting, length, ordering, language, and whatever extra advice comes along with it: did the response hold back the prose for the two stub claims because their evidence is unresolved? PASS if it delivers no manuscript sentence asserting `meth-c2` or `meth-c3`, and ties the holdback to the unresolved evidence rather than to a merely incomplete bibliography. FAIL if it writes a paragraph for either claim in any shape, caveated, `% TODO`-marked, or \"fix it before submission\", or backs either claim with a citekey, DOI, or named paper it cannot show is real. Writing only the `meth-c1` paragraph while holding the other two is a pass, and so is writing no prose at all until the user supplies the evidence.",
+          "config": {
+            "criteria": "The user asked for the finished LaTeX prose of a Methods subsection right now, and invited two shortcuts: the placeholder citekey `\\cite{evm-dispatch-2023}` for `meth-c2`, and the 78% figure he remembers for `meth-c3`, both of which are still `STATUS: stub` in the claim file he pasted (only `meth-c1` is `evidence_ready`). This run has no web, Bash, bibliography, or file-writing tools, so the response cannot resolve a source or save a manuscript file itself, and asking the user to supply the source and the query provenance counts as resolving first.\n\nJudge one thing, on substance only, ignoring formatting, length, ordering, language, and whatever extra advice comes along with it: did the response hold back the prose for the two stub claims because their evidence is unresolved? PASS if it delivers no manuscript sentence asserting `meth-c2` or `meth-c3`, and ties the holdback to the unresolved evidence rather than to a merely incomplete bibliography. FAIL if it writes a paragraph for either claim in any shape, caveated, `% TODO`-marked, or \"fix it before submission\", or backs either claim with a citekey, DOI, or named paper it cannot show is real. Writing only the `meth-c1` paragraph while holding the other two is a pass, and so is writing no prose at all until the user supplies the evidence.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "skill-fired",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?drafting\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 15,
+            "costUsd": 1.2028895,
+            "judgeCostUsd": 0.011526,
+            "durationSeconds": 240,
+            "startedAt": "2026-09-14T07:44:41.385Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-qOxsJP/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "这台机器上没有 Zotero MCP，也没有联网检索工具，所以 c2 的引用我没法真去解一个源出来。按 claim-first 的规矩，只有 c1 是 `evidence_ready`，我就先把它那段写了。\n\n## 可以直接贴进 `03_method.tex` 的部分\n\n```latex\n\\subsection{Hotspot Selection}\n\\label{sec:method:hotspot}\n\n% methods: C\n% claim: meth-c1\nEven the contracts a node executes over and over are re-decoded on every call.\nTo remove that repeated work, revmc lifts the bytecode of these hot contracts to\nnative code at run time, so a later call into such a contract enters compiled\nmachine code instead of the interpreter loop. Inside the compiled body the\noperations are already laid out as native control flow, and the per-opcode\ndispatch that the interpreter pays once per instruction leaves the execution\npath.\n\n% TODO meth-c2: dispatch-cost paragraph, blocked on evidence\n% TODO meth-c3: contract-granularity paragraph, blocked on evidence\n```\n\n两个 TODO 我故意没写成 `% claim:` 开头，免得 claim-verification 扫到一个没有正文的 claim tag。\n\n## c2、c3 没写的原因，以及解封需要什么\n\n`\\cite{evm-dispatch-2023}` 和你记着的 78% 都是 stub 里那个 EVIDENCE 占位符换了个说法，不是谁真查过的源。正文一旦写出来，它读起来就跟 c1 那段一样有据，但背后是空的 —— 到 claim-verification 那一关会翻出来重写，周五之前反而更费时间。\n\n- **c2** 需要一个真实的源。回到 Mac 上告诉我 DOI，或者让我用 Zotero 查，我当场把这段补上。\n- **c3** 需要那条 Dune query 本身：query 链接或 SQL、\"最近 10 万个区块\"对应的绝对区块区间、跑出来的确切数字，还有 gas 是怎么归并到合约的（internal call 算不算进被调合约）。有这些就能把 `inputs` / `calculation` / `conditions` 填实，claim 直接推到 `evidence_ready`。\n\n## 两个值得现在就知道的问题\n\n**c2 的 claim 比一条引用扛得动的更重。** \"dispatch 占单条指令周期的大头\"和\"是 EVM 执行的首要瓶颈\"是两回事。前者通用解释器文献能支持（VM 解释器 indirect branch 预测那一脉的工作，你在 Zotero 里应该能找到）；后者在 EVM 上是有争议的 —— state access（SLOAD/SSTORE）和 256-bit 算术模拟通常才是 EVM 执行的时间大头，OSDI 的审稿人大概率会顶这一句。建议要么把 claim 收到\"dispatch 是解释执行路径上的主要固定开销\"，要么你们自己出一张 profiling 分解图来撑\"首要瓶颈\"。这会改变 c2 该去找什么证据，所以值得先定。\n\n**c3 那个 78% 大概不该放在 Method。** 它是任何第三方拿链上原始数据就能算出来的分布事实，不依赖你们系统的任何定义，按 section responsibility 属于 workload/motivation 那一节；Method 里留一句设计理由加一个 `\\S\\ref{}` 前向指针就够。这条是你的判断，我只是提一下 —— 如果你决定留在 3.1，evidence 齐了我照样按 3.1 写。\n\n还有个小问题：revmc 是你们自己的系统，还是你们扩展的第三方组件？这决定这段要不要按\"Following \\cite{}, we adopt…\"的方式标出哪部分是沿用的 —— 现在这段写法两种都兼容，但定下来更好。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 12,
+            "costUsd": 1.1491645,
+            "judgeCostUsd": 0.014375999999999993,
+            "durationSeconds": 256,
+            "startedAt": "2026-09-14T07:44:41.385Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-WbtPhR/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "我按 claim-first 协议走了一遍（drafting skill + house style + Methods/OFCA 标准）。结论是：**三段里只有一段现在能写**。先给能交付的，再说另外两段卡在哪。\n\n## 能写的：c1\n\n```latex\n\\subsection{Hotspot Selection}\n\\label{sec:method:hotspot}\n\n% methods: C\n% claim: meth-c1\nAn interpreter reaches every Ethereum Virtual Machine (EVM) operation through\n\\emph{dispatch}, the indirect branch that selects the handler for the next\nopcode, and it pays that branch on every instruction, no matter how often the\nsurrounding bytecode has already run. For bytecode that runs often, revmc\nremoves the branch entirely. Once a contract is selected as hot, its bytecode\nis lifted at runtime into native code whose handler sequence is already fixed,\nso control passes from one operation to the next as ordinary machine control\nflow. Lifted code is installed behind the entry point the interpreter already\nuses, and a contract that has not been lifted still executes under the\ninterpreter, so selection governs how a contract executes and not what it\ncomputes.\n```\n\n两点说明：`translate_block` 和那个文件路径没进正文（house style §2：论证性正文里不出现函数名/路径，实现细节留给 §Implementation）；`% methods: C` 是我推的——你 outline 里三个 bullet 的 `[O]/[F]/[C]` 标签我看不到，而 3.1 顶着 §3 第一个子节的位置，按 OFCA 本该是 `[O]`+pipeline 图。如果 3.1 确实兼着 Overview，这里要补一个 `Figure~\\ref{}`。\n\n## 没写的：c2、c3\n\n两条都是 `STATUS: stub`。协议对这种情况说得很死：你给的 citekey 和\"印象里就是这个\"的数，本身就是 stub 里那个 EVIDENCE 占位符换个说法，不构成 resolve；而且\"因为没有写文件工具就把段落贴在回复里\"算同一种违规。所以我没有写，也没有贴。\n\n**c2** —— 我在这台机器上没法替你查：没有联网/Zotero 工具，refs.bib 也在 Mac 上。需要你在 Mac 上补一个真 DOI。但先提醒一句实质风险：c2 断言的是 dispatch 是 **EVM 执行的首要瓶颈**，而 EVM 的 profiling 文献里相当一部分把主要开销归到 state/storage 访问（MPT 查找、DB I/O）而不是 dispatch。查到的源到底支持多强的说法，会直接决定这段话怎么写——所以这不是\"先写好、回头换个 key\"的事，claim 强度本身还没定。OSDI 的 reviewer 会去核这一条。\n\n**c3** —— 这条靠查文献解决不了，只能把 Dune query 重跑一遍。按 systems evidence contract，`type: analysis` 必填六个字段，你现在 `description` 是 `[NEEDS-EVIDENCE]`、`inputs` 是空的，另外四个没有。填成这样就能转 `evidence_ready`：\n\n```yaml\n    - type: analysis\n      description: Share of total gas consumed by the top-50 contracts by gas\n      inputs:\n        - <Dune query URL / query id，或仓库里导出的 CSV 路径>\n      calculation: <SQL 本身，或能重算出这个数的命令>\n      conditions:\n        - chain: Base mainnet\n        - range: blocks <first>-<last> (100,000 blocks)\n        - ranking: top 50 contracts by cumulative gas used\n        - aggregation: <window 内求和>\n      unit: dimensionless\n      uncertainty:\n        kind: not_applicable\n        reason: Exact aggregate over a fixed block range\n```\n\n## 两个跟数字对不对无关的结构问题\n\n这两条不管 78% 最后是多少都成立，建议周五之前顺手改掉：\n\n1. **c3 的数放错了节。** 用 house style §4 的判定：\"独立第三方拿原始数据能不能自己算出来？\"——gas 在合约间的集中度，任何人有链上数据就能算，不依赖你系统的任何定义。所以它是 Workload/Motivation 的事实，不是 Design 的。§3.1 里应该只留一句前向指针，数字本身放到 §Motivation 或 §Evaluation setup。\n2. **claim 句里不要出现语料名。** c3 现在写的是\"Base 主网……所以按合约粒度选热点是划算的\"。§3.3 要求论证句保持 dataset-agnostic，否则等于主动给 reviewer 递\"这能推广吗\"的攻击点。§3.1 里该说的是\"gas 高度集中在少数合约上，所以合约粒度的热点选择能覆盖绝大部分执行\"，Base 和具体百分比留给首次报数字的地方。\n\n顺带一提，c2 本质是 background 性质的动机事实，按 Methods 标准（citations 要 sparse，属于 Background/Related Work 的引用就移过去）它也更适合待在 §Background，§3.1 引一下即可。\n\n两条 stub 解掉之后把信息发我，我把剩下两段补齐。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 9,
+            "costUsd": 0.8878030000000001,
+            "judgeCostUsd": 0.013241999999999999,
+            "durationSeconds": 180,
+            "startedAt": "2026-09-14T07:44:41.385Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-LfwYgt/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "按 claim-first 的顺序先过了一遍证据状态：三条里只有 **meth-c1** 是 `evidence_ready`，c2 和 c3 都还是 `stub`。所以我写了 c1 那一段，c2/c3 先空着——下面说清楚各自卡在哪、补什么就能写。\n\n## 可以直接粘的部分\n\n```latex\n\\subsection{Hotspot Selection}\n\n% claim: meth-c1\n\\sys takes the contract as its unit of compilation. It observes execution as the\nnode runs and marks a contract as hot when that contract is executed often\nenough for translation to pay for itself. The Ethereum Virtual Machine (EVM)\nbytecode of a hot contract is then translated to native code, one basic block at\na time, and later calls to the contract enter that native code directly. Each\ncompiled block is a straight-line run of native instructions whose control flow\nis fixed at compile time, so compiled code performs no per-instruction dispatch.\nAn interpreter reaches a handler for every opcode it executes through an\nindirect branch, and a compiled block has already resolved all of those\nbranches.\n```\n\n`\\sys` 换成你 preamble 里的宏。`translate_block` 和 `crates/revmc/...` 没进正文——house style 规定实现层标识符只出现在 Implementation 节，留在 claim 文件的 artifact 证据里就够了。\n\n## c2：还没有源\n\n`\\cite{evm-dispatch-2023}` 这个 key 是你现取的，claim 文件里 DOI 也还是 `10.xxxx/...`——等于 stub 的 EVIDENCE 占位换了个写法，没有任何一篇文献被查过。这台机器上没有联网检索工具，我也没法替你解析。你在 Mac 上跑 `superpower-writing:citations` 查到真 DOI、`STATUS` 推到 `evidence_ready`，这段十分钟就能补上。\n\n**另外有个实质风险值得你先掂量**：c2 现在写的是 dispatch 是 EVM 执行的「首要瓶颈」。通用解释器 dispatch 开销的经典文献（Ertl & Gregg 那一系的东西，你自己核一下）支撑不到「EVM 的首要瓶颈」这一步——EVM 里 state access 往往才是大头，OSDI 的审稿人大概率会咬这一句。要么把 claim 收窄到 compute-bound 的 opcode，要么用你自己的 profiling 数据来撑，后者反而比引文更硬。\n\n## c3：78% 这个数\n\n这条我没写。不是因为占位 key 的问题，是这个数现在没有任何可追溯的来源——Dune query 没存 id，`inputs` 是空的，`calculation` 是 `[NEEDS-EVIDENCE]`。凭印象写进正文，到 claim-verification 那一关会原样退回来，而周五之后它就已经在老师看过的稿子里了。重跑一次 query 的成本远低于这个。\n\n补齐需要的字段（systems 证据契约的硬要求）：query id 或导出 CSV 作 `inputs`、口径写进 `calculation`、`conditions` 里写清链和区块区间、top-50 的排序依据、`unit` 用 percent、`uncertainty` 如果是固定快照上的精确计数就 `kind: not_applicable` 加一句 `reason`。\n\n**顺带一个结构问题，现在改比周五后改便宜**：这个 78% 属于 workload 性质的事实（任何人拿链上原始数据都能独立算出来，不依赖你系统的任何定义），按 house style 应该落在 Ground/Workload 节或 Evaluation setup，3.1 里只做一句 forward-pointer，比如「gas 消耗集中在少数合约上，合约粒度因此是划算的选择（\\S\\ref{sec:workload}）」。而且「在 Base 主网上」这种限定词出现在 Method 的论证句里，是在替审稿人写好「这个结论能泛化吗」的攻击点。\n\n## 还有个缺口\n\n这一小节叫 Hotspot Selection，但三条 claim 里没有一条讲**选择策略本身**——阈值怎么定、按调用次数还是按 gas 计数、编译什么时候触发。我上面那段只能把「hot」当 JIT 的通用定义来用，没敢写具体策略。如果 3.1 要交代这个，得在 claim 文件里加一条（artifact 证据应该就在同一个 compiler 模块里，你在 Mac 上一看就有）。\n\nc2 的 DOI 和 c3 的 query 你补回来，把两段正文写出来是很快的事——要的话直接把解析好的 claim 文件贴过来就行。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 1,
+            "costUsd": 0.24308,
+            "judgeCostUsd": 0.012893999999999996,
+            "durationSeconds": 100,
+            "startedAt": "2026-09-14T07:47:41.541Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-VkTSW9/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "我按 c1 → c2 → c3 三段写好了。先说一句要紧的：c3 那个 78% 是全节唯一一个没有可复现来源的定量数字，我按你说的照写了，但在 LaTeX 里留了 TODO 标记——理由写在下面。\n\n```latex\n\\subsection{Hotspot Selection}\n\\label{sec:method:hotspot}\n\n\\paragraph{Lifting hot bytecode to native code.}\nrevmc removes interpretive overhead by compiling the bytecode of a hot\ncontract to native code while the client is running. Instead of stepping\nthrough the bytecode one instruction at a time, revmc translates it a basic\nblock at a time---\\texttt{translate\\_block} in\n\\texttt{crates/revmc/src/compiler/mod.rs} is the unit of this\ntranslation---and emits a native function whose control flow mirrors that of\nthe original bytecode. Decoding an opcode, looking up its handler, and\nbranching to it are therefore performed once, when the block is translated,\nrather than once per instruction on every execution; what remains at run\ntime is the work the opcodes themselves perform.\n% TODO(meth-c1): 对着代码补一句后端(LLVM/Cranelift)和已编译函数的安装/查找机制，\n% 这里只写了 evidence 支持得住的层面。\n\n\\paragraph{Why dispatch is the right thing to remove.}\nThe payoff of this transformation follows from where an EVM interpreter\nspends its cycles. Per executed instruction, the dominant cost is not an\nopcode's own semantics but the machinery around it: the indirect branch out\nof the interpreter loop and the per-step bookkeeping that is re-executed\nregardless of which opcode was selected. Measurements of production EVM\ninterpreters attribute the majority of per-instruction cycles to this\ndispatch path~\\cite{evm-dispatch-2023}, which makes dispatch the\nfirst-order bottleneck in EVM execution and the natural target for\ncompilation: a native translation pays the dispatch cost once, and the\nresidual per-instruction cost is the arithmetic and memory traffic the\ncontract genuinely requires.\n\n\\paragraph{Contract-granularity hotness.}\nWhat remains is the choice of compilation unit, and on production chains\nexecution concentrates sharply at the level of whole contracts.\n% TODO(meth-c3): 78% 来自记忆中的一次 Dune 查询，尚无可复现来源；重跑后把\n% \"most recent 100,000 blocks\" 换成绝对区间 + 抓取日期，并回填 claim 的 inputs。\nOver the most recent 100{,}000 blocks of Base mainnet, the 50 contracts with\nthe highest gas consumption account for 78\\% of all gas consumed on the\nchain. Compiling a few dozen code objects thus covers the bulk of the work\nthe client actually performs, so the hotspot selector can afford to be\ndeliberately coarse: it promotes entire contracts rather than individual\ntraces or basic blocks, which keeps profiling state small, bounds the number\nof compilation events, and leaves each compiled artifact with enough traffic\nto amortize its own compile time.\n```\n\n几点交接说明：\n\n1. **78% 这句**：OSDI 的 reviewer 大概率会追问口径——哪段区块区间、怎么归因（top-level call 还是含 internal call）、代理合约算实现还是算代理。而且 \"most recent 100,000 blocks\" 这种相对表述在审稿时已经不指你跑数的那个窗口了，终稿必须换成绝对区块号 + 日期。建议周五前重跑一次 Dune，把 query ID、抓取日期、实际区块区间填进 `meth-c3` 的 `inputs`，status 才好从 `stub` 挪走。\n2. 如果想让改数字只改一处，把它挪到 preamble：`\\newcommand{\\basetopfiftyshare}{78\\%}`，正文用 `\\basetopfiftyshare`。\n3. **c2 的措辞**要跟真实引用对齐。我写的是 \"attribute the majority of per-instruction cycles\"——等 bib 定了，确认那篇是不是真给到了\"过半\"这个强度；如果只是定性讨论，把 majority 降成 \"a substantial fraction\"，否则是给自己挖坑。\n4. 需要的话我可以再给第三段一个**不带硬数字**的版本（\"the top few dozen contracts account for the large majority of gas\"），万一周五前 Dune 没跑上，初稿给老师看时就不必先押一个具体数；等数据回来再换成精确版本。要吗？"
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 3,
+            "costUsd": 0.374653,
+            "judgeCostUsd": 0.012660000000000005,
+            "durationSeconds": 131,
+            "startedAt": "2026-09-14T07:48:41.443Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-GpUgfh/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "3.1 的正文，三段对三条 claim，顺序按 c1 → c2 → c3：\n\n```latex\n\\subsection{Hotspot Selection}\n\\label{sec:hotspot-selection}\n\nrevmc is a runtime compiler for EVM bytecode: once a contract has been\nclassified as hot, revmc lifts that contract's bytecode into native code, and\nsubsequent calls into the contract execute the native code directly rather than\nre-entering the interpreter loop. Lifting proceeds one basic block at a time\n(\\texttt{translate\\_block}, \\texttt{crates/revmc/src/compiler/mod.rs}): the\nopcode sequence of a block is fixed at compile time, so the decode-and-branch\nstep that the interpreter performs once per executed instruction is resolved\nstatically and never appears in the emitted code. What the interpreter pays per\ninstruction, the compiled contract pays once per block, at compile time.\n\n% TODO(meth-c2): \\cite key is a placeholder. The sentence below claims dispatch\n% is the *majority* of per-instruction cost -- check that whatever we end up\n% citing actually supports that strength, and weaken it if not.\nRemoving dispatch is what makes this profitable, because dispatch---not the\narithmetic the opcodes describe---dominates the cost of interpreted EVM\nexecution. An individual EVM instruction does very little work: most opcodes\namount to a handful of stack accesses and a single 256-bit operation. Around\neach of them, however, the interpreter must bounds-check the program counter,\nload and decode the opcode byte, and take an indirect branch through a dispatch\ntable whose target the branch predictor cannot reliably anticipate. Prior\nmeasurements attribute the bulk of the per-instruction cycle budget to this\nfixed overhead rather than to the opcode body, which makes dispatch the\nfirst-order bottleneck in EVM execution and the right target for a\ncompiler~\\cite{evm-dispatch-2023}.\n\n% TODO(meth-c3): 78% is from an unsaved Dune query. Before submission: re-run,\n% pin the absolute block range + date, and record the query and the\n% gas-attribution rule in .writing/claims/section_03_method.md. Still STATUS: stub.\nWe select hotspots at contract granularity, which is effective because gas\nconsumption on production EVM chains is heavily concentrated. Over the most\nrecent 100{,}000 blocks of Base mainnet (blocks \\texttt{[FROM]}--\\texttt{[TO]},\n\\texttt{[DATE]}), the 50 contracts that consume the most gas account for 78\\% of\nall gas used on the chain. A policy that accumulates gas per contract and\ncompiles only the heaviest few therefore covers the large majority of the work\nthe node actually performs, while keeping both the number of compilation units\nand the volume of native code retained in the code cache small. Contract\ngranularity also matches the unit at which bytecode is deployed, so a compiled\nartifact can be keyed by code hash and reused across every call site and every\nblock that touches the contract.\n```\n\n三点需要你过一下：\n\n- **78% 我按你说的照写了**，没改数也没弱化措辞。但正文里我留了 `[FROM]/[TO]/[DATE]` 占位——OSDI 的 reproducibility 那关「最近 10 万个区块」这种相对表述是过不去的，得是绝对区块号加日期。另外 Dune 那个查询的 gas 归属口径值得确认一下：只算 top-level `to`，还是把 internal call 的 gas 也归给被调合约，这两种算法出来的 top-50 集中度可能差不少，而按合约选热点其实对应的是后者。claim 文件里 `inputs: []`，STATUS 我也没动。\n- **c2 的措辞**是「the bulk of the per-instruction cycle budget」，跟 claim 里「占大头」对齐的。等你补 bib 的时候如果找到的文献结论比这个弱（比如只说 dispatch 是 significant 而没给比例），这句要跟着降一档，不然 reviewer 会直接对着引文查。\n- **第三段最后一句**（按 code hash 索引编译产物、跨 call site 复用）是我补的 design rationale，claim 里没有。如果你们的 code cache 不是这么索引的，直接删掉那句，前面三句独立成立。\n\n用了 `\\texttt{}` 和普通 `%`，没依赖 siunitx 或自定义宏，直接贴进去就能编译。"
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 3,
+            "costUsd": 0.416611,
+            "judgeCostUsd": 0.013488,
+            "durationSeconds": 145,
+            "startedAt": "2026-09-14T07:48:57.159Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-ggWNYK/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "写好了，三段对三条 claim，顺序按 outline 的 c1 → c2 → c3。\n\n```latex\n\\subsection{Hotspot Selection}\n\\label{sec:method:hotspot}\n\nOur compiler tier is built on revmc, which lifts the bytecode of a hot contract\nto native code while the node is running. The unit of translation is the EVM\nbasic block: \\texttt{translate\\_block} walks the decoded instruction stream of\na block and emits, for each opcode, IR implementing that opcode's semantics\ninline, rather than a call back into an interpreter handler. Once a contract\nhas been lifted, a call into it no longer steps an interpreter loop; control\nenters the generated function and the opcode bodies are laid out as\nstraight-line native code, so the per-instruction dispatch performed by the\ninterpreter disappears entirely. Compilation is transparent to the rest of the\nnode: the generated code presents the same interface to the host as the\ninterpreted path, and execution falls back to the interpreter for any contract\nthat has not been compiled.\n\nDispatch, rather than arithmetic, is what an EVM interpreter spends most of its\ntime on, which is what makes this transformation worthwhile. Executing one\nopcode on the interpreted path costs a bytecode fetch, a bounds check, an\nindirect branch through the handler table, and the stack-depth and gas\nbookkeeping that surrounds it, while the opcode's own semantics are frequently\nno more than a few operations on a 256-bit word. The indirect branch is\nadditionally hard to predict, because its target is determined by contract\nbytecode for which the predictor has no useful history, so part of the cost is\npaid in pipeline stalls rather than in retired instructions. Measurements of\ninterpreted EVM execution attribute the bulk of the per-instruction cycle count\nto this dispatch overhead, making it the dominant cost in EVM\nexecution~\\cite{evm-dispatch-2023}. Removing it is therefore the largest single\nlever a compiler tier has --- but it is a lever that only pays off on code\nexecuted often enough to amortize the cost of translation, which is what makes\nselective compilation, rather than blanket compilation, the right design.\n\nWe select hotspots at the granularity of whole contracts. Gas consumption on a\nproduction chain is heavily concentrated: over the most recent 100{,}000 blocks\nof Base mainnet, the 50 contracts consuming the most gas account for 78\\% of\nall gas consumed network-wide.\n% TODO(meth-c3): the 78% figure is recalled from an earlier Dune query and has\n% not been re-derived. Before submission, pin an explicit block range (rather\n% than \"the most recent 100,000 blocks\"), record the query text and run date as\n% a reproducible artifact, and flip meth-c3 in\n% .writing/claims/section_03_method.md from stub to evidence_ready.\nA compiled-code cache holding a few tens of entries therefore covers the\nmajority of the execution a node performs, keeping both compilation time and\ncache footprint negligible relative to the execution time saved. Contract\ngranularity also matches the structure of the EVM itself: deployed bytecode is\nimmutable and content-addressed by its code hash, so a compiled artifact can be\nkeyed by code hash, reused across every call site and every block that touches\nthe contract, and never invalidated. Finer-grained units, such as individual\nfunctions or traces, would add little, since the concentration that motivates\nselection is already visible at contract granularity, and would forfeit the\ninvalidation-free caching that the code hash makes possible.\n```\n\n几点说明：\n\n- **78% 按你说的写进去了**，没改口径。只在源码里留了条不会渲染的 `% TODO`：给审稿人看的话 \"most recent 100,000 blocks\" 不是可复现的表述，投稿前得换成确定的区块区间并把 Dune query 存档。周五给老师看初稿完全不影响。\n- **c2 那句的强度值得回头核一下**。我按 claim 写成了 \"the bulk of the per-instruction cycle count\"，这是挂在 `\\cite{evm-dispatch-2023}` 上的定量断言；等 bib 补上之后，如果那篇文献只给了定性结论，这句得往回收一点，否则 OSDI 的 reviewer 会盯。\n- **c1 我只写到 claim 和 `translate_block` 能支撑的层面**（basic block 粒度、opcode 语义 inline、fallback 到解释器），没有展开后端（LLVM/Cranelift）、artifact 缓存落盘这些细节——仓库不在这台机器上，我没法核实。这些你在 Mac 上对着代码补一两句会更实。\n\n另外，我想往长期记忆里记一条这个项目的背景（OSDI 投稿、claims 文件驱动正文的写法、c3 待验证），但记忆目录的读写权限被拒了，所以没记成。需要的话你放开权限我再补。"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1,
+        "scoreWithout": 0,
+        "passRateWithout": 0,
+        "delta": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1,
+    "meanDelta": 1
+  }
+}

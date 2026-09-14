@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — superpower-writing v3.4.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>superpower-writing v3.4.0</h1>
+<p class="verdict">Plugin effect: <span class="delta delta-zero">· 0.0 pts</span> vs baseline — improved 0 · flat 1 · regressed 0 of 1 case.</p>
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.270</span>
+<span class="num">2026-09-14 07:30 UTC</span>
+<span class="num">6m 59s</span>
+<span class="num">$3.25</span>
+<span class="num">6 runs</span>
+<span class="num">3 in flight</span>
+
+
+<span>judge sonnet</span>
+<span class="num">threshold 100%</span>
+<span>filtered: --case reference-cuts-under-page-budget</span>
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score · with plugin</span><span class="value">0%</span><span class="sub">mean of per-case scores</span></div>
+<div class="tile"><span class="label">Ablation Δ</span><span class="value num delta-zero">0.0</span><span class="sub">score points vs baseline, 1 of 1 case</span></div>
+<div class="tile"><span class="label">Baseline score</span><span class="value num">0%</span><span class="sub">without the plugin</span></div>
+<div class="tile"><span class="label">Cases</span><span class="value num">1</span><span class="sub">0 of 1 ≥ 100% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">0%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 100% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li>"With plugin" and "Baseline" runs are identical except for the plugin being loaded; Δ is the with-plugin score minus the baseline score.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>reference-cuts-under-page-budget</h2>
+<span class="muted mono">evals/reference-cuts-under-page-budget</span>
+<span class="spacer"></span>
+
+<span class="delta delta-zero">· 0.0 pts</span>
+<span class="muted">with plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">0%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">With plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">4 turns · $0.65 · 07:30:23 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">我只用了你贴的内容（没有 manuscript 或 .bib 文件），所以下面每条都对得上你给的句子和表格。
+
+## 你挑的三条，全部不能砍
+
+三条都踩在&quot;绝对不能砍&quot;的类别上——而且巧的是，它们恰好是全篇 22 条里承重最狠的三条。问题出在筛选标准：你按 venue 和引用数排序，但决定一条引用能不能删的是**它在文里干什么活**，跟它发在哪、多少引用是两回事。
+
+| 你的理由 | 实际情况 |
+|---|---|
+| **[19]** arXiv 预印本，没正式发表 | 最危险的一条。正文写着&quot;the closest point to our design&quot;，而且它是 Table 2 的一行，2.8x 就压在你 4.6x 上面。砍它要删表格行——本身就违反你&quot;正文不动&quot;的前提——而且删掉最近的竞争者，懂行的审稿人会直接读成你在藏对比。并发工作引预印本完全正常。 |
+| **[7]** 2018 形式语义，跟实现不沾边 | Theorem 1 是**相对于 [7] 的 small-step 语义**定义的。砍掉之后&quot;observationally equivalent&quot;就没有了参照物，定理不成立。它不是实现参考，是正确性命题量化的那个形式对象。另外 CSF + ~390 引用也不算软 venue。 |
+| **[12]** workshop，才 11 引用 | 62% 这个数的唯一出处，而且是全文的动机。砍掉就剩一个无出处的具体统计量，这是最容易被挑的一类问题。低引用恰恰常见于&quot;某个数的唯一来源&quot;这种小众测量论文。 |
+
+关于 [12] 补一句实话：它真正的弱点不是 venue，是**2019 年的测量用在 2026 年的 camera-ready 上**——主网合约构成这七年变化极大（DeFi、L2、proxy 模式）。但这是&quot;该加固&quot;的理由，不是&quot;该删&quot;的理由，删了只会更糟。camera-ready 阶段能做的最多是脚注注明测量时间窗口。
+
+## 建议砍的六条
+
+全部是 bracket 内部删 key，一个词都不动，Table 2 完全不受影响：
+
+| 砍 | 是什么 | 理由 | 改动 |
+|---|---|---|---|
+| **[9]** | Signer，ETH 硕士论文 | 全书目最弱的文献类型，未经同行评议，工作被 [4] GASTAP 和 [14] 完全覆盖 | `[2,4,9,14,18,21]` → 删 9 |
+| **[14]** | GasChecker，Chen et al. | 与 [2] 同组同问题；[2] 下一句被单独点名，Chen 系的代表性已经保住了 | 同上，删 14 |
+| **[21]** | Marescotti，ISoLA | 精确最坏情况 gas，是这个 bundle 里离&quot;analyzes or reduces gas cost&quot;最远的一条 | 同上，删 21 |
+| **[15]** | Hölzle PICs，ECOOP 1991 | 契合度问题：PIC 讲的是 inline caching 和 type feedback，不是热代码升级到优化层。&quot;standard practice in production language VMs&quot;靠 [17] HotSpot 独力支撑足够，[17] 还是你 promotion policy 的直接来源。**这条恰好说明为什么引用数不是标准——~1300 引用的经典，但在这句话里干的活最少。** | `[15, 17]` → `[17]` |
+| **[10]** | Wang，IEEE Access | 与 [20] 共引；[20]《A Survey on Blockchain Virtual Machines》CSUR 2023 覆盖 Wasm 运行时，留它撑住这句 | `[10, 20]` → `[20]` |
+| **[8]** | Zheng，FGCS 综述 | 两篇通用综述干同一件事，重复。对一篇讲 VM 执行的论文，[20]（区块链虚拟机综述）比 [8]（智能合约总览）更对题 | `[8, 20]` → `[20]` |
+
+砍完 bundle A 剩 `[2, 4, 18]`——一篇奠基性的、一篇分析工具、一篇重写工作，撑&quot;a large body of work&quot;够用。[20] 一条同时服务 Wasm 句和综述句。每个句子都还留着至少一条引用，零处改词。（&quot;surveys [20]&quot;复数配单引用——你这句里&quot;script-level analyses of other chains [22]&quot;本来就是这么写的，风格一致，没人会看。）
+
+22 → 16 条。
+
+## 两个提醒
+
+**页数算术**：6 × 5–6 行 = 30–36 行。你说 0.8 页，那得是单栏模板每页 ~45 行才刚好压住，余量很薄。重新编译后实测，别信估算——参考文献列表的回流和孤行效应经常吃掉一两行的收益。
+
+**不够的话往这里要**（按性价比排序，都要动正文）：
+
+1. 删掉整句 &quot;Surveys and adjacent chains&quot; 那句。它的全部内容是&quot;这些东西跟我们的问题无关&quot;——不承担任何论证。删了释放 [22]，加约 3 行正文，共 ~8 行。更干净的变体：删这句之后把 [10] 换回来（它是 Wasm 那句真正对题的引用），改砍 [20] + [22]，条数一样但引用更精确。
+2. &quot;the same staging now appears in JavaScript engines...&quot; 整句删掉，释放 [16]（V8 博客，非存档来源），~7 行。
+3. 从 bundle A 再拿 [18] 或 [4]，但会让&quot;a large body of work&quot;只剩两条，偏薄。
+
+砍掉的六条**留在 .bib 里别删**——未被引用的条目不占版面，以后要换回来是零成本的。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">4 turns · $0.71 · 07:30:23 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">没有可用的检索后端（这个会话里没有 Bash/parallel-cli，也没有 Zotero MCP），所以下面是纯基于你贴的引用上下文做的筛查，未经外部核验——不过这件事的判断依据本来就在上下文里，不在文献元数据里。
+
+## 先说结论：你挑的三条，是全文最不能砍的三条
+
+砍引用的判据不是 venue 有多硬，是**它扛着什么**。一条引用如果是某个数字、某条定理、某个表格行、或某句&quot;最接近的工作&quot;的唯一支撑，它就不能动，跟它发在哪、被引多少次无关。你那三条正好全是承重的。
+
+## 我给的 6 条（全部只删方括号里的编号，不改任何一句话）
+
+| 砍 | 条目 | 理由 | 具体改动 |
+|---|---|---|---|
+| [9] | Signer, MSc thesis | 全表最弱载体：未正式发表的硕士论文，~40 引；内容被 [4]/[21] 完全覆盖 | 见下 |
+| [14] | GasChecker (Chen et al.) | 跟 [2] 同一组作者，而 [2] 下一句已被点名，块内冗余 | 见下 |
+| [21] | Marescotti, ISoLA&apos;18 | 精确最坏情况 gas，块里最窄的题目；静态 gas 分析已由 [4] (TACAS) 代表 | 见下 |
+| [8] | Zheng et al., FGCS survey | 同一句里的 [20] 更新、更对题（区块链 VM，不是泛智能合约） | `[8, 20]` → `[20]` |
+| [15] | Hölzle et al., PIC | 见下，这条还有额外问题 | `[15, 17]` → `[17]` |
+| [10] | Wang et al., IEEE Access | 该句几条里 venue 最弱、引用最少（~30）；[20] 的 VM survey 覆盖 Wasm 运行时 | `[10, 20]` → `[20]` |
+
+前三条是同一处改动：`[2, 4, 9, 14, 18, 21]` → `[2, 4, 18]`。一句话挂 6 个 key 本来就是典型过引，而这段自己就写了&quot;orthogonal to execution-side tiering&quot;——留一个分析代表 [4]、一个改写代表 [18]，正好对上 &quot;analyzes or reduces&quot; 的两半，句子一字不动。
+
+**[15] 值得单说**：那句是&quot;promoting hot code to an optimizing tier ... [15, 17]&quot;，但 PIC 讲的是动态派发的 inline caching，不是分层提升。真正支撑这句的是 [17]，而且三句之后你又把 [17] 当作 promotion policy 的直接来源引了一次。砍掉它不只是省行，是把一处挂错的引用去掉。
+
+注意砍完 [8] 和 [10] 之后，[20] 单独扛两句话了——所以 [20] 不能再动。
+
+**另外**：这 6 条一条都没碰 Table 2（表里是 [13][5][3][11][19]，全留）。表格行是全文最承重的引用，这不是巧合。
+
+### 一个更值得砍的替换
+
+如果你愿意删五个词，把 [10] 换成 **[22] (Miller et al., Bitcoin Script)**：Bitcoin Script 的使用统计跟 EVM 执行策略毫无关系，你那句自己都承认 &quot;do not address execution strategy&quot;。改动是删掉 &quot;and script-level analyses of other chains [22]&quot; 这个从句——[22] 本身是比 [10] 好的论文，但对**这篇**论文是更差的引用，而且还能多省一两行正文。
+
+## 你那三条的问题
+
+**[12]** —— Intro 里 62% 那个数的唯一出处。砍掉之后，全文动机所依赖的那个数字变成无出处断言，这是 camera-ready 阶段 shepherd 能打回来的那类问题。Workshop、11 引，这些对一条**测量数据引用**不是判据：你引它是因为数据出自它，不是因为它有名。
+
+不过有个你该知道的独立风险：WTSC@FC 2019 意味着那是 2018 年前后的主网数据，早于 EIP-1559、早于 Merge、早于流量大规模迁往 L2。2026 年发表时这个数确实容易被质疑。但解法是给它加个时间限定（&quot;in 2019 measurements, the top 100 contracts...&quot;），不是删引用——删了只会把一个&quot;可以标注年份的弱点&quot;变成&quot;没有出处的主张&quot;。
+
+**[19]** —— 这是最危险的一刀。你自己的句子写着 &quot;the closest point to our design&quot;，它还占着 Table 2 里 2.8x 那一行，是全表第二好的数。砍掉最接近的竞争工作，读起来就是在藏最近的 baseline，而 Sphinx 的作者完全可能是你 camera-ready 的读者。何况它违反你自己的前提：要改 Related Work 一整句 + 删一行表格。&quot;arXiv 预印本、才 8 引&quot;恰恰是留它的理由——2024 年的预印本能成为最接近的先验工作，正说明这个方向新，也正说明必须引。
+
+**[7]** —— Theorem 1 写的是 &quot;observationally equivalent ... with respect to the small-step EVM semantics of [7]&quot;。删了 [7]，这条定理就是&quot;相对于无&quot;的等价。你给的理由（跟实现不沾边）正好是留它的理由：形式语义**就应该**独立于你的实现，这种独立性才让等价性陈述有意义而不是循环论证。而且 Appendix B 大概率通篇在 KEVM 里做推理，这根本不是一处方括号改动。语义引用也不看年份——EVM 语义是个稳定对象，KEVM 至今仍是标准参考。
+
+## 为什么按 venue 排序会系统性地挑错
+
+被引上万的经典（[1] 7000、[6] 11000、[15] 1300）往往是装饰性的——大家都引所以你也引。而具体、新近、低引的条目（[12] 11 引、[19] 8 引）往往承重，因为一篇论文最具体的主张——一个实测数字、一个最近竞争者、一个语义基线——只能靠窄而新的来源撑。按引用数从低往高砍，等于优先砍承重墙。
+
+## 收尾
+
+- **预备队**（6 条不够时按序动用）：再从 gas 块砍 [4] 或 [18] 一条（剩 `[2, 18]` 仍成立）→ [22] + 从句 → 整段 &quot;Surveys and adjacent chains&quot;（它自己写了 &quot;give background but do not address execution strategy&quot;），这段能一次换来 [8][20][22] 三条加两行正文。
+- **算术留个心**：6 × 5.5 ≈ 33 行，按你的模板约 0.73 页，略低于 0.8。也就是说这一刀刚好打平、没有余量，重编译前别当已经解决，预备队备着。
+- 砍掉的条目留在 `.bib` 里别删，未被引用的条目不占版面，万一要加回来是现成的。
+- 重编译后查三项：undefined citations 为 0、没有新的 overfull box、Table 2 没有跨页重排。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">6 turns · $0.68 · 07:30:23 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">没有 Bash / 联网检索 / Zotero 可用，所以我没法独立核对你给的引用数和 venue（都按你贴的数据算）。不过这不影响结论——砍哪条取决于这条引用在正文里**承重多少**，而不是它发在哪。
+
+## 先说你挑的三条：三条都不能砍
+
+而且更直接的问题是，**这三条都违反了你自己定的&quot;正文一个字都不用动&quot;**：
+
+**[12]（Zhou &amp; Li, 62% gas skew）** —— 这是 Intro 里 &quot;62%&quot; 这个数字的唯一出处，而这个数字是整篇论文的动机。砍掉它，要么删掉那句话，要么留一个裸数字在 camera-ready 里。你对它质量的判断没错（workshop、11 引用、而且是 2019 年的 mainnet 数据拿来支撑 2026 年的论文，确实偏旧），但质量弱的结论是&quot;以后换个更强的来源或自己测一遍&quot;，不是现在删掉。
+
+**[19]（Sphinx）** —— 风险最高的一条。正文自己写了它是 &quot;the closest point to our design&quot;，Table 2 里它还是 2.8x 那行、你 4.6x 之外的次优系统。camera-ready 阶段把最接近的前作从参考文献里拿掉，读起来就是在埋竞品；而且表格会多出一个悬空行，又得改表。预印本不是理由——minor revision 都过了，审稿人大概率知道这篇。
+
+**[7]（KEVM）** —— Theorem 1 说的是 &quot;observationally equivalent ... with respect to the small-step EVM semantics of [7]&quot;。砍了它，定理就没有了它所参照的语义，命题本身失去定义。&quot;跟实现不沾边&quot;恰恰是它的作用：它不是实现参考，是你定理的语义基准。
+
+## 建议砍这 6 条
+
+选择标准：只砍**成组引用里的冗余成员**——组里还有别的 key 留着，所以删掉只改方括号内容，正文一个字不动。
+
+| 砍 | 理由 | 正文变化 |
+|---|---|---|
+| [9] Signer, MSc thesis | 6 条 gas 组里学术地位最低的一条（未经评审的硕士论文） | `[2,4,9,14,18,21]` → `[2,4,18]` |
+| [14] GasChecker | 与保留的 [2] 同一作者团队、同一主题，组内最冗余 | 同上 |
+| [21] Marescotti, ISoLA | 组内成员，worst-case gas，与主线最远 | 同上 |
+| [8] Zheng survey, FGCS | 两篇 survey 取一；[20]（CSUR 2023）更新更权威，且它在 Wasm 那句里也用到 | `[8, 20]` → `[20]` |
+| [10] Wang, Wasm runtimes | 与 [20] 成对，[20] 留着，句子仍有引用 | `[10, 20]` → `[20]` |
+| [15] Hölzle, PICs | 与 [17] 成对，而 [17] 在同段被二次点名（&quot;follows the invocation-counter design of [17]&quot;），实际承重的是 [17] | `[15, 17]` → `[17]` |
+
+删完后 gas 那句还剩 [2]（奠基）、[4]（静态分析）、[18]（重写优化），&quot;analyzes or reduces&quot; 两侧都有代表，说 &quot;a large body of work&quot; 也还撑得住。Table 2、Intro、4.2、Theorem 1 全部不动。
+
+**唯一需要你拍板的是第 6 条。** [15] 引用量高（~1300），砍它有轻微&quot;少了个经典&quot;的观感；但那段的设计传承明确记在 [17] 名下，PICs 本来就更偏 inline cache 而非 tiering，算不上贴切引用。想更保守就用 **[4]（GASTAP）换掉 [15]**——代价是 gas 组只剩 [2, 18] 两条去撑&quot;a large body of work&quot;。我倾向砍 [15]，因为保住 3 条的组读起来更自然。
+
+## 三个执行提醒
+
+1. **先翻一遍审稿意见**。如果哪位审稿人在上一轮明确要求补某条引用，那条就不能动——minor revision 的 camera-ready 里删掉审稿人点名要的文献，是会被 AE 注意到的。
+2. **被砍的条目留在 .bib 里别删**，只是不 cite。未引用的条目不占任何版面，等于留了一个备用池，将来需要换回来随时可用。
+3. **重编译后过三道闸**：undefined citation 为 0、页数达标、没有新的 overfull box。22 → 16 条会让全文编号整体前移，BibTeX 自动处理，但如果 Table 2 里的编号是手写的记得同步。我挑的这 6 条都是多作者、长标题的条目，基本都吃满 5–6 行，比砍 [3]/[5]/[11]/[13] 那类只有一行 URL 的省得多——不过实际省了多少还是以渲染出来的 PDF 为准。
+
+如果砍完还差一点，下一个动的地方是 &quot;Surveys and adjacent chains&quot; 那整段：它自己就承认这些工作 &quot;do not address execution strategy&quot;，删掉整句能再腾出 [22]（以及那几行正文）。但那就要动正文了，所以放在备选。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+</section><section class="arm">
+<div class="arm-head">
+<span class="arm-label">Baseline (no plugin)</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">1 turns · $0.40 · 07:33:57 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">先说结论：你挑的三条，**一条都不能砍**——而且是同一个毛病。你的排序键是&quot;venue 软不软、引用多不多&quot;，但决定能不能砍的其实是另一件事：**这条引用在正文里承多少重**。承重的引用，砍了必然要动正文（或者留下一句没有出处的话），跟它发在哪儿无关。按这个标准重排，你那三条恰好是全文最不能动的几条之一。
+
+## 你挑的三条
+
+**[12] Zhou &amp; Li（workshop，11 引用）** — 它是 intro 里 &quot;top 100 contracts account for 62% of all gas&quot; 这个**具体数字的唯一出处**。砍掉之后，你整篇论文的动机段落里躺着一个没有来源的实测百分比。11 引用和 workshop 都不重要，重要的是这句话没它就不成立。这是三条里最直接的硬伤。
+
+**[19] Sphinx（arXiv 预印本）** — 正文写着 &quot;Sphinx [19] is the closest point to our design&quot;，Table 2 里还有一整行，2.8x，正好是 MHOT 4.6x 之下的第二名。砍它要删一句话**加一行表格**，而且是把自己最近的对手从对比里拿掉。预印本不是理由，related work 认 priority 不认 venue。另外：minor revision 之后砍掉&quot;最接近的相关工作&quot;，是审稿人最容易注意到的一类改动——尤其如果 Sphinx 是当初哪位审稿人要求你加的。
+
+**[7] KEVM** — &quot;Theorem 1 ... observationally equivalent ... with respect to the small-step EVM semantics of [7]&quot;。这是你定理**所相对的那个语义**。&quot;跟我们的实现不沾边&quot;恰恰是它该在的原因：形式化定理不相对于某个已发表的语义来陈述，就没有内容。2018 年对形式语义来说也不算旧。
+
+## 我给的六条
+
+三条都保不住，所以下面六条是完整的方案。六条**全部只出现在多引用的方括号里**，没有一条被点名、没有一条进 Table 2，删完只需要改 `\cite{}` 里的 key，一个词都不动。
+
+| 砍 | 唯一出现位置 | 删后那句 | 为什么安全 |
+|---|---|---|---|
+| [9] Signer 硕士论文 | gas 分析那串 | — | 全表最弱条目，且被同串里任意一条覆盖 |
+| [14] GasChecker | gas 分析那串 | — | 和点名保留的 [2] 同一个组（Chen et al.）、同一条线，冗余 |
+| [21] Marescotti | gas 分析那串 | `[2, 4, 18]` | worst-case gas 是最偏离执行侧的一支 |
+| [15] Hölzle PIC | `[15, 17]` | `...production language VMs [17]` | PIC 讲的是 inline cache 不是 tiering，本来就引得松；这句真正的支撑是 [17]，而 [17] 后面还被点名 |
+| [8] Zheng FGCS 综述 | `[8, 20]` | `surveys [20] and ... [22]` | 与 [20] 重叠，[20] 更新更对口 |
+| [10] Wang Wasm 对比 | `[10, 20]` | `...WebAssembly contract runtimes [20]` | 这句本来就是一句带过，[20]（CSUR 2023 区块链 VM 综述）能撑住 |
+
+gas 那串剩 `[2, 4, 18]`：Chen（奠基，被点名）+ GASTAP（分析）+ Liu（改写），&quot;analyzes or reduces&quot; 两边都还有人。[8]/[10] 砍完由 [20] 一条综述同时兜两句背景，讲得通——三条重叠的背景引用收敛到最新最宽的那一条。
+
+六条里五条是长条目（多作者 + 长标题），行数落在你说的 5–6 行上限那端，只有 [9] 偏短。
+
+**一个可换的**：如果你舍不得 Wasm 那条的针对性，把 [10] 换成 [18]，gas 那串就剩 `[2, 4]`——&quot;a large body of work&quot; 配两条引用看着有点虚。我倾向砍 [10]。
+
+## 交稿前三件事
+
+1. **Table 2 的编号必须是 `\cite`**，不能是手打的数字。砍 6 条会让 [13][5][3][11][19] 全部重编号，表里硬编码的话会静默错位，而且这是最不容易在 PDF 上一眼看出来的错。
+2. **翻一遍 revision response letter**。这 22 条里只要有哪条是当初回应审稿意见加进去的，就别动——我这六条都是背景类，风险不大，但值得确认一下。
+3. **页数的算术自己编译一遍再定**。5–6 行/条 × 6 条 ≈ 30–36 行，要凑到 0.8 页得是参考文献单栏、每页 40 行出头的版式；如果是双栏模板，同样的行数大概只有 0.3 页，你下周二才会发现还差半页。先把六条删掉编一次，看真实掉了多少。</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">1 turns · $0.38 · 07:34:04 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">先说一个判断标准上的问题，它直接决定了你那三条为什么挑错了：
+
+**能不能砍，看的不是 venue 硬不硬，而是删掉方括号之后那句话还成不成立。**这两件事经常是反着的——名气大的引用往往是 bundle 里的装饰（[15] 1300 引、[8] 900 引，都能砍），而 workshop 和预印本恰恰常常是扛着某个具体数字、某个具体对手的那一条。你挑的三条全是承重墙。
+
+## 建议砍的 6 条
+
+按句子分组，这样能直接看到删完的样子（全部是纯删方括号编号，正文一个字不动，剩下 16 条 BibTeX 自动重排）：
+
+| 原句 | 删后 | 砍掉 |
+|---|---|---|
+| 大量工作分析或降低 gas 成本 `[2, 4, 9, 14, 18, 21]` | `[2, 4, 18]` | **[9] [14] [21]** |
+| 可比的分阶段问题出现在 Wasm 合约运行时 `[10, 20]` | `[20]` | **[10]** |
+| 提升热代码是生产语言 VM 的标准做法 `[15, 17]` | `[17]` | **[15]** |
+| 智能合约平台综述 `[8, 20]` | `[20]` | **[8]** |
+
+几条理由：
+
+- **[9] [14] [21]**：这一段自己的结论就是「全部先于部署、与执行侧分层正交」——它的修辞功能就是把一整片工作挥手挡开，不需要穷举。[9] 是未发表硕士论文且内容被 [4] GASTAP 完全覆盖；[14] GasChecker 和 [2] 同一批作者同一主题，而 [2] 已经单独点名了；[21] 的最坏情况 gas 界也在 [4] 的射程内。留下的 [2, 4, 18] 正好覆盖「分析」和「降低」两半，三条撑「a large body of work」完全正常。
+- **[15]**：PIC 讲的是多态内联缓存，跟「运行时把热代码提升到优化层」本来就只是擦边，这句真正的支撑是 [17] HotSpot。砍掉反而更准。
+- **[10] [8]**：两处都有 [20]（CSUR 2023 区块链 VM 综述）兜底。只能砍一条的话砍 [8]——[20] 对 [8] 的覆盖比对 [10] 更彻底。如果你想少动 Wasm 那句，替代方案是改砍 [4]，但 gas bundle 会掉到两条，我不太推荐。
+
+## 你挑的三条，三条都得留
+
+**[12]** 是 Intro 里 62% 那个数字的唯一出处，而那句是全文的动机句。删了就是一个带具体百分比的论断挂在 Intro 第二段裸奔——这是全篇最多人盯的位置。它在那儿不是因为有面子，是因为数字从它来。要砍就得改写句子，违反你的前提；改写掉数字，动机就塌了。11 次引用不构成理由。
+
+**[19] Sphinx** 是三条里最危险的。正文自己写着「the closest point to our design」，Table 2 里还占一行 2.8×，是你第二强的 baseline。审稿人是**带着这个对比**接收的论文，camera-ready 阶段把最近的对手删掉，性质上不是排版调整而是改动论文的主张，还要连带删一整行表格。留着 4.6× 却拿掉最接近的比较对象，观感也不好。arXiv 没正式发表不是理由——是最近的先前工作就得引。顺带：2024 年的预印本到现在大概率已经中了，值得查一下把条目更新掉，而不是删掉。
+
+**[7] KEVM** 是 Theorem 1 的**陈述的一部分**——「observationally equivalent … with respect to the small-step EVM semantics of [7]」。删了定理就没有指称对象了，而且 Appendix B 的证明想必也是在这套语义里做的。「跟我们的实现不沾边」这个理由正好说反了：它不是实现支撑，是正确性主张赖以定义的语义模型。2018 年和 390 引都不相干，KEVM 就是标准参照语义。
+
+## 两点实务提醒
+
+**先确认参考文献算不算页数。** ACM / IEEE 不少 camera-ready 模板把 references 排除在页数限制外，真是这样的话你砍 6 条一页都省不下来，白白伤了书目。交之前值得先花两分钟看 CFP 或格式说明。
+
+**另外，一条引用 5–6 行偏高了**，正常缩写风格应该 3–4 行。[3] [5] [11] [13] 四条 github 长 URL 不换行经常会各自撑出好几行，换成短 URL 形式或者调 `\bibliographystyle` 到更紧凑的样式，省下的行数可能比砍 6 条还多，而且一条引用都不用丢。
+
+**如果 6 条还差一点**：备用第 7 条是 **[22]**（Bitcoin Script）。它是「script-level analyses of other chains」的唯一支撑，砍它必须连带删掉那半句。但那一段正文自己承认只是 background、不涉及执行策略，删掉七个词的代价很低——这是你最便宜的一次正文让步。</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">1 turns · $0.41 · 07:34:18 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">先说结论：你挑的三条，**一条都不该砍**。判据用错了——camera-ready 砍参考文献，看的不是 venue 硬不硬、引用数多不多，而是**这条引用有没有在独家支撑某个具体断言**。恰好，弱 venue 的引用往往正是最难替换的（一个 11 引用的 workshop 测量论文，存在的意义就是提供那个数字），而强 venue 的引用经常躺在&quot;引用堆&quot;里，堆的作用是集体性的，抽走一两个零成本。
+
+## 我给的 6 条
+
+| 砍 | 条目 | 出现位置 | 为什么可以砍 |
+|---|---|---|---|
+| [9] | Signer, MSc thesis | 只在 `[2,4,9,14,18,21]` 堆里 | 全表最软的条目——未正式发表的硕士论文，且内容被 [4] GASTAP 完全覆盖。删括号里一个数字，正文零改动 |
+| [14] | GasChecker | 同一个堆 | 和 [2] 是同一作者组（T. Chen et al.），[2] 已经在正文点名代表这条线了，[14] 属于重复占位 |
+| [21] | Marescotti, ISoLA | 同一个堆 | 静态 gas 上界分析，与 [4] GASTAP 同质 |
+| [8] | Zheng et al., FGCS survey | `surveys [8, 20]` | 两篇 survey 干同一件事，[20] 留着即可——而且 [20] 在 Wasm 那句里还出现一次，是这段最便宜的锚点 |
+| [15] | Hölzle et al., PIC, ECOOP&apos;91 | `production language VMs [15, 17]` | 和 [17] 成对且被 [17] 压住（[17] 下一句被点名，必须留）。另外 PIC 讲的是多态内联缓存，本来就不太支撑&quot;分层编译是标准做法&quot;这个断言，砍掉反而更准 |
+| [10] | Wang et al., Wasm runtimes, IEEE Access | `WebAssembly contract runtimes [10, 20]` | 同样是成对引用，[20]（Blockchain VM survey, CSUR&apos;23）能接住 |
+
+这 6 条正好都是长条目（多作者、长标题、硕论带机构），回收行数高于平均。
+
+堆里我**留** [2]（正文点名）、[4]（最强的分析工具）、[18]（唯一代表 &quot;reduces&quot; 那半句的重写工作）——三条撑 &quot;a large body of work&quot; 够用，且 analyze/reduce 两侧都有覆盖。
+
+## 你那三条的问题
+
+**[12] 最不能砍。** 它是 intro 里 62% 这个数字的唯一出处，而这个数字就是整篇论文的动机。砍了只有两条路：删掉数字（改正文，违反你的前提），或者让它裸奔——后者更糟，读者会默认这是你自己测的，而它不是，这属于错误归属。workshop + 11 引用不是缺陷，测量论文就是干这个的。
+
+**[19] 砍了最危险。** 你自己写的 &quot;the closest point to our design&quot;，还在 Table 2 里占一行带 2.8x 的数。砍它要删一句正文加一行表格，本身就破了&quot;不动正文&quot;。更要紧的是：把最近的 prior art 从 camera-ready 里拿掉，观感很差。arXiv-only 是**更该小心**的理由而不是更可以砍的理由——多半是并行工作，同一个圈子，作者一定会读到你这篇。
+
+**[7] 砍了定理不成立。** Theorem 1 是 &quot;observationally equivalent ... with respect to the small-step EVM semantics of [7]&quot;。形式等价性必须相对于一个命名的语义才有意义，去掉 [7] 这句话在数学上没有内容，Appendix B 的证明大概率也在用 KEVM 的规则。&quot;跟我们的实现不沾边&quot;恰恰说反了——它不是被当作实现引的，是被当作定理量化所依赖的那个规范引的。
+
+顺带一个值得你自己确认的点：这三条里有没有哪条是 minor revision 期间**应审稿人要求**加的？如果有人要过 Sphinx 的对比或那个 skew 数字，camera-ready 里删掉是真会被 shepherd 抓的。
+
+## 操作上三件事
+
+1. **Table 2 的引用得是真 `\cite`**。数字型 style 删 6 条会让后面全部重排，表格里如果是手写的 `[13]`、`[5]` 之类会静默错位。
+2. **先量再砍**：6 × 5.5 ≈ 33 行。这够不够 0.8 页取决于你的版式——单栏大概刚好，双栏可能只回收一半。注释掉重编译看实际数字。如果不够，别去砍第 7 条，剩下 16 条都是承重的；换别的手段（表格列宽、Table 2 caption、若模板允许的 bibliography 字号——注意有些 venue 明令禁止）。
+3. **两处复数小瑕疵**（可选）：`surveys [20]`、`production language VMs [17]`。严格说不算错，名词描述的是工作类别、引用只是举例，但你要是介意，各改一个词就行。
+
+如果 [20] 那篇 CSUR survey 实际上没怎么讲 Wasm 运行时，那 [10] 这一刀就别砍，换成 [6]（LLVM——正文删掉方括号句子依然完整，靠基础设施不引用很常见）或 [16]（Sparkplug 博客，但它是那句 JS 引擎断言的唯一支撑，风险略高）。</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>MHOT 那篇 minor revision 过了，camera-ready 下周三交，现在排版超了 0.8 页。一条参考文献在这个模板里占 5 到 6 行，砍 6 条正好压回去，正文一个字都不用动。你帮我定砍哪 6 条。</p>
+<p>跟引用有关的部分我全贴下面了。</p>
+<p><strong>Intro 第二段，动机那句</strong></p>
+<blockquote>
+<p>Contract invocation on Ethereum mainnet is heavily skewed: measured over one month of mainnet traffic, the top 100 contracts by invocation count account for 62% of all gas consumed [12]. A tiering policy that promotes only this head therefore pays compilation cost on a vanishing fraction of deployed code.</p>
+</blockquote>
+<p><strong>Section 2 Related Work，全文</strong></p>
+<blockquote>
+<p><em>EVM execution engines.</em> The EVM is a stack machine specified in [1]. Production clients execute bytecode with a switch-dispatch interpreter (go-ethereum [13], revm [5]); evmone [3] adds a second, statically selected mode that pre-computes basic-block gas and stack bounds, and revmc [11] compiles a deployed contract to native code ahead of time. Sphinx [19] is the closest point to our design, speculatively compiling basic blocks under type feedback. None of these engines revisits its choice of tier once execution has started. Comparable staging questions arise in WebAssembly contract runtimes [10, 20].</p>
+<p><em>Gas analysis and contract optimization.</em> A large body of work analyzes or reduces the gas cost of deployed contracts [2, 4, 9, 14, 18, 21]. Chen et al. [2] first established that gas waste is pervasive in deployed code. All of these techniques operate on a contract before deployment and are orthogonal to execution-side tiering.</p>
+<p><em>Tiered compilation in language VMs.</em> Promoting hot code to an optimizing tier at runtime is standard practice in production language VMs [15, 17]; the same staging now appears in JavaScript engines, where a fast baseline compiler sits between the interpreter and the optimizer [16]. Our promotion policy follows the invocation-counter design of the HotSpot client compiler [17], with the counter keyed on contract address rather than on method identity.</p>
+<p><em>Surveys and adjacent chains.</em> Smart-contract platform surveys [8, 20] and script-level analyses of other chains [22] give background but do not address execution strategy.</p>
+</blockquote>
+<p><strong>Section 4.2 第一句，实现</strong></p>
+<blockquote>
+<p>Our native tier emits LLVM IR and reuses the ORC JIT stack [6].</p>
+</blockquote>
+<p><strong>Section 6.1 第一句，正确性</strong></p>
+<blockquote>
+<p>Theorem 1 states that a promoted native tier is observationally equivalent to the interpreter tier with respect to the small-step EVM semantics of [7]; the proof is in Appendix B.</p>
+</blockquote>
+<p><strong>Table 2（第 5 页，跟 related work 一起讨论的那张）</strong></p>
+<table>
+<thead>
+<tr>
+<th>System</th>
+<th>Execution strategy</th>
+<th>Uses runtime profile</th>
+<th>Recompilation unit</th>
+<th>Speedup vs. geth interpreter</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>go-ethereum [13]</td>
+<td>interpreter</td>
+<td>no</td>
+<td>—</td>
+<td>1.00x</td>
+</tr>
+<tr>
+<td>revm [5]</td>
+<td>interpreter</td>
+<td>no</td>
+<td>—</td>
+<td>1.9x</td>
+</tr>
+<tr>
+<td>evmone (advanced) [3]</td>
+<td>static two-mode</td>
+<td>no</td>
+<td>whole contract</td>
+<td>2.4x</td>
+</tr>
+<tr>
+<td>revmc [11]</td>
+<td>AOT native</td>
+<td>no</td>
+<td>whole contract</td>
+<td>3.1x</td>
+</tr>
+<tr>
+<td>Sphinx [19]</td>
+<td>speculative JIT</td>
+<td>partial (type feedback)</td>
+<td>basic block</td>
+<td>2.8x</td>
+</tr>
+<tr>
+<td>MHOT (ours)</td>
+<td>tiered, profile-guided</td>
+<td>yes</td>
+<td>hot region</td>
+<td>4.6x</td>
+</tr>
+</tbody></table>
+<p><strong>参考文献，22 条</strong>（引用数是我从 Scholar 上顺手扫的，约数）</p>
+<ol>
+<li>G. Wood. Ethereum: A Secure Decentralised Generalised Transaction Ledger. Yellow Paper, 2014. (~7000)</li>
+<li>T. Chen et al. Under-Optimized Smart Contracts Devour Your Money. SANER 2017. (~420)</li>
+<li>Ethereum Foundation. evmone: Fast Ethereum Virtual Machine implementation. github.com/ethereum/evmone, accessed 2025.</li>
+<li>E. Albert et al. GASTAP: A Gas Analyzer for Smart Contracts. TACAS 2019. (~150)</li>
+<li>bluealloy. revm: Rust implementation of the EVM. github.com/bluealloy/revm, accessed 2025.</li>
+<li>C. Lattner, V. Adve. LLVM: A Compilation Framework for Lifelong Program Analysis and Transformation. CGO 2004. (~11000)</li>
+<li>E. Hildenbrandt et al. KEVM: A Complete Formal Semantics of the Ethereum Virtual Machine. CSF 2018. (~390)</li>
+<li>Z. Zheng et al. An Overview on Smart Contracts: Challenges, Advances and Platforms. FGCS 2020. (~900)</li>
+<li>L. Signer. Gas Cost Analysis for Ethereum Smart Contracts. MSc thesis, ETH Zurich, 2018. (~40)</li>
+<li>W. Wang et al. WebAssembly Smart Contract Runtimes: A Systematic Comparison. IEEE Access 2022. (~30)</li>
+<li>paradigmxyz. revmc: JIT and AOT compiler for the EVM. github.com/paradigmxyz/revmc, accessed 2025.</li>
+<li>P. Zhou, M. Li. A Measurement Study of Gas Consumption Skew in Ethereum Mainnet Traffic. WTSC workshop @ FC 2019. (11)</li>
+<li>go-ethereum authors. go-ethereum. github.com/ethereum/go-ethereum, accessed 2025.</li>
+<li>T. Chen et al. GasChecker: Scalable Analysis for Discovering Gas-Inefficient Smart Contracts. IEEE TETC 2020. (~120)</li>
+<li>U. Hölzle, C. Chambers, D. Ungar. Optimizing Dynamically-Typed Object-Oriented Languages with Polymorphic Inline Caches. ECOOP 1991. (~1300)</li>
+<li>V8 team. Sparkplug: a non-optimizing JavaScript compiler. v8.dev blog, 2021.</li>
+<li>T. Kotzmann et al. Design of the Java HotSpot Client Compiler for Java 6. ACM TACO 2008. (~260)</li>
+<li>Y. Liu et al. Gas-Efficient Smart Contract Rewriting. ASE 2021. (~60)</li>
+<li>A. Novak et al. Sphinx: A Speculative JIT for the Ethereum Virtual Machine. arXiv preprint, 2024. (8)</li>
+<li>X. Li et al. A Survey on Blockchain Virtual Machines. ACM Computing Surveys 2023. (~70)</li>
+<li>M. Marescotti et al. Computing Exact Worst-Case Gas Consumption for Smart Contracts. ISoLA 2018. (~60)</li>
+<li>A. Miller et al. An Empirical Analysis of Bitcoin Script Usage. FC 2016. (~200)</li>
+</ol>
+<p>我自己先挑了三条，都是 venue 最软的：[12] 是个 workshop 才 11 引用，[19] 是 arXiv 预印本连正式发表都没有，[7] 那篇形式语义是 2018 年的、跟我们的实现也不沾边。剩下三条你补齐，顺便说一下我挑的这三条有没有问题。</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">result</span><span class="badge">llm</span></div>
+<div class="md"><p>The user is trimming six references from a 22-entry camera-ready reference list in an EVM-compiler paper, has pasted the related-work section, the reference list, Table 2 and three sentences from elsewhere, and says six cuts close the 0.8-page overflow with no prose edit at all. He picked [12], [19] and [7] himself because their venues look weakest, asked for three more, and asked whether his three are safe. Ground truth, all of it readable in the pasted text: thirteen entries are either a row of Table 2 or the only key at their citation site. [12] carries the 62% gas-skew figure, [19] is a Table 2 row and the nearest competitor, [7] is the semantics Theorem 1 is stated against, [3] [5] [11] [13] are the other Table 2 rows, and [1] [2] [6] [16] [17] [22] each sit alone on a sentence or clause — [2] on "Chen et al. [2] first established that gas waste is pervasive", which is separate from the six-key gas group it also appears in; [6] on the ORC JIT sentence in 4.2; [16] on the JavaScript baseline-compiler clause; [17] on the invocation-counter sentence; [22] on "script-level analyses of other chains". Cutting any of those thirteen breaks a claim or forces the prose deletion the user ruled out. Nine entries are free: [4] [9] [14] [18] [21] (the gas group keeps [2]), [15] (co-cited with [17]), and [8] [10] [20], where each survey clause must keep a key, so [20] can go only if [8] and [10] both stay. This run has read-only tools in an empty directory and no network, so no file can be written and nothing can be looked up. Grade substance only; ignore formatting, length and language.</p>
+<p>One question decides this case: does every entry the reply tells the user to cut come out without leaving a sentence or a Table 2 row unsupported?</p>
+<p>PASS if all three hold. The reply names at least six specific entries to cut, and every one of them is [4], [8], [9], [10], [14], [15], [18], [20] or [21], with [20] among them only when [8] and [10] are not. No entry outside those nine is called cuttable anywhere in the reply, including as a reserve held back for a later squeeze. And the reply says [7], [12] and [19] have to stay.</p>
+<p>FAIL if any entry outside the nine — [1] [2] [3] [5] [6] [7] [11] [12] [13] [16] [17] [19] [22] — is named as a cut or as a reserve cut, even when the reply offers a prose edit to compensate, or if [20] is cut together with [8] or [10]. Also FAIL if the reply names fewer than six cuts, or lets the user's three stand without objection.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">skill-fired</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Skill&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\&quot;skill\&quot;\\s*:\\s*\&quot;(?:[\\w-]+:)?literature\&quot;&quot;</code></div></div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>

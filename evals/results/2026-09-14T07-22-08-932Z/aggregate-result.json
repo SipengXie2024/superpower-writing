@@ -1,0 +1,336 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.270",
+  "startedAt": "2026-09-14T07:22:08.932Z",
+  "durationSeconds": 188,
+  "costUsd": 1.9206465,
+  "partial": false,
+  "suite": {
+    "root": "/home/ubuntu/sipeng/superpower-writing",
+    "ablation": "with-without",
+    "judgeModel": "sonnet",
+    "caseFilter": "prose-numbers-vs-table-sweep",
+    "threshold": 1,
+    "concurrency": 3,
+    "plugins": [
+      {
+        "name": "superpower-writing",
+        "version": "3.4.0",
+        "path": "/home/ubuntu/sipeng/superpower-writing"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "prose-numbers-vs-table-sweep",
+      "dir": "evals/prose-numbers-vs-table-sweep",
+      "source": "prose",
+      "promptMarkdown": "rebuttal 交上去之前我想把评测这节的数字自己扫一遍。表和图上周重跑过一次，正文是我手改的，改了四五轮，我担心有几个数没跟着更新。\n\n仓库在实验室那台机器上，这边只有我贴的东西，你就着下面的正文、表 1 和图 3 一个数一个数地对，别去翻文件，也别去猜我没贴的内容。claims 文件我没贴，这轮不用管 claim 的状态，只看数字对不对得上。\n\n哪些数跟表或图对不上，你给我列出来；对得上的别动它。\n\n```latex\n\\section{Evaluation}\n\\label{sec:eval}\n\n\\subsection{Experimental Setup}\n\n% claim: eval-c1\nAll measurements run on a single Ryzen 9 7950X (16 cores at 4.5\\,GHz base) with\n64\\,GB of DDR5 and Ubuntu 24.04, turbo and C-states disabled. Every workload is\nreplayed 10 times and we report the median; run-to-run variation stays under\n1.5\\%. The baseline is revm 14.0 built at \\texttt{--release} with\n\\texttt{lto = \"fat\"}; MHOT lowers the same bytecode through our AOT backend\nbefore replay begins.\n\n% claim: eval-c2\nThe trace is a contiguous window of 1.2M mainnet transactions starting at block\n19{,}000{,}000, partitioned into five workloads by the dominant callee contract\ncategory.\n\n\\subsection{End-to-End Replay Latency}\n\n% claim: eval-c3\nTable~\\ref{tab:e2e} reports end-to-end replay latency for both engines. On\nuniswap-v3, MHOT brings 412.6\\,ms down to 138.7\\,ms, a $2.97\\times$ speedup, and\nthe largest single-workload win is erc20-heavy, where 287.3\\,ms becomes\n74.9\\,ms, or $3.84\\times$. Across the five workloads the geometric-mean speedup\nis $3.15\\times$.\n\n% claim: eval-c4\nThe two workloads that gain least are nft-mint at $2.22\\times$ (196.1\\,ms to\n88.5\\,ms) and proxy-chain at $2.30\\times$; both are dominated by calldata copying\nand cold storage access, which the AOT backend does not touch. On defi-mixed,\nthe heaviest workload in the trace, MHOT cuts 523.8\\,ms to 141.2\\,ms.\n\n\\begin{table}[t]\n\\caption{End-to-end replay latency over the 1.2M-transaction mainnet trace.\nSpeedup is revm time divided by MHOT time. Compile is the one-off AOT\ncompilation cost; Peak RSS is the maximum resident set size observed during\nreplay.}\n\\label{tab:e2e}\n\\begin{tabular}{lrrrrr}\n\\toprule\nWorkload & revm (ms) & MHOT (ms) & Speedup & Compile (ms) & Peak RSS (MB) \\\\\n\\midrule\nuniswap-v3  & 412.6 & 138.7 & 2.97 & 21.4 & 512 \\\\\nerc20-heavy & 287.3 & 74.9  & 3.84 & 18.2 & 486 \\\\\nnft-mint    & 196.1 & 88.5  & 2.22 & 26.9 & 534 \\\\\ndefi-mixed  & 523.8 & 171.2 & 3.06 & 33.7 & 601 \\\\\nproxy-chain & 344.0 & 149.6 & 2.30 & 29.1 & 498 \\\\\n\\midrule\ngeomean     & ---   & ---   & 2.82 & 25.3 & 526 \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\n\\subsection{Where the Speedup Comes From}\n\n% claim: eval-c5\nFigure~\\ref{fig:dispatch} attributes the baseline's cost. The dispatch loop\naccounts for 54.1\\% of retired cycles on uniswap-v3 and as much as 68.1\\% on\nerc20-heavy, whose short, repetitive transfer bytecode maximises the ratio of\ndispatches to useful work. nft-mint sits lowest at 47.8\\%, which tracks its\nsmaller speedup in Table~\\ref{tab:e2e}.\n\n\\begin{figure}[t]\n\\includegraphics[width=\\columnwidth]{figures/dispatch_share.pdf}\n\\caption{Dispatch-loop share of retired cycles under the revm baseline, from\n\\texttt{perf} over the same trace: 54.1\\% on uniswap-v3, 61.3\\% on erc20-heavy,\n47.8\\% on nft-mint, 52.6\\% on defi-mixed, and 58.9\\% on proxy-chain.}\n\\label{fig:dispatch}\n\\end{figure}\n\n\\subsection{Compilation and Memory Overhead}\n\n% claim: eval-c6\nAOT compilation is a one-off cost paid before replay begins. Its geometric mean\nacross the five workloads is 25.3\\,ms, ranging from 18.2\\,ms on erc20-heavy to\n33.7\\,ms on defi-mixed, and it is amortised over the whole replay window. On\nuniswap-v3 the compiler spends 21.4\\,ms before the first transaction runs.\n\n% claim: eval-c7\nPeak resident set size averages 526\\,MB on geometric mean, from 486\\,MB on\nerc20-heavy to 601\\,MB on defi-mixed. The compiled code cache is the bulk of the\ndifference from the baseline.\n\n\\subsection{External Validity}\n\n% claim: eval-c8\nThe 1.8M transactions in our trace come from a single four-day window on one\nchain. Fee-market regimes, contract-deployment patterns, and client-side caching\nall shift over longer horizons, so the workload mix here should be read as one\nsnapshot rather than as steady state.\n```",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 12,
+      "graders": [
+        {
+          "name": "result",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The user pasted a complete evaluation section — prose, a five-row results table, and a figure caption — and asked which prose numbers no longer agree with the table or the figure, adding that the ones that do agree should be left alone. The repository is on another machine and this run has read-only tools in an empty directory, so nothing can be read from disk and a list delivered in the reply is the correct delivery. Grade only which prose numbers the answer hands back as not agreeing; ignore formatting, length, language, whether any file was edited, and whatever else the answer volunteers.\n\nThe one thing to judge: does the answer return every prose number that contradicts the table or the caption, and nothing besides?\n\nPASS needs both halves.\n\nComplete — all four of these are reported as not agreeing (naming a pair and then explaining it away does not count):\n1. the geometric-mean speedup written 3.15× in prose while the table's geomean row says 2.82;\n2. defi-mixed post-MHOT latency written 141.2 ms while the table says 171.2 ms;\n3. the erc20-heavy dispatch share written 68.1% while the figure caption says 61.3%;\n4. the trace size written 1.8M in the external-validity paragraph while the setup paragraph and the table caption both say 1.2M.\n\nClean — apart from those four, the answer hands back no other number as a mismatch, as one it could not match or could not check, or as one the user should now confirm himself, in the main list or in a second list or as an aside. Two groups in particular must not come back in any of those shapes. First, prose numbers that do appear verbatim in the row or caption the prose attributes them to: 412.6, 287.3, 74.9, 138.7, 196.1, 88.5, 2.97, 3.84, 2.22, 2.30, 21.4, 18.2, 33.7, 25.3, 486, 601, 526, 54.1%, 47.8%. Second, the setup and external-validity numbers that have no counterpart anywhere in the table or the caption: the 7950X model number, 16 cores, 4.5 GHz, 64 GB DDR5, Ubuntu 24.04, 10 replays, 1.5% run-to-run variation, revm 14.0, block 19,000,000, the four-day window. Closing that second group out in one line — narrative numbers, nothing in the table to reconcile them against, nothing to do — is fine; passing them to the user is not.\n\nFAIL if either half breaks: any of the four missing or excused, or the section called consistent, or any number from those two groups returned as unmatched, unverifiable, or for the user to check.",
+          "config": {
+            "criteria": "The user pasted a complete evaluation section — prose, a five-row results table, and a figure caption — and asked which prose numbers no longer agree with the table or the figure, adding that the ones that do agree should be left alone. The repository is on another machine and this run has read-only tools in an empty directory, so nothing can be read from disk and a list delivered in the reply is the correct delivery. Grade only which prose numbers the answer hands back as not agreeing; ignore formatting, length, language, whether any file was edited, and whatever else the answer volunteers.\n\nThe one thing to judge: does the answer return every prose number that contradicts the table or the caption, and nothing besides?\n\nPASS needs both halves.\n\nComplete — all four of these are reported as not agreeing (naming a pair and then explaining it away does not count):\n1. the geometric-mean speedup written 3.15× in prose while the table's geomean row says 2.82;\n2. defi-mixed post-MHOT latency written 141.2 ms while the table says 171.2 ms;\n3. the erc20-heavy dispatch share written 68.1% while the figure caption says 61.3%;\n4. the trace size written 1.8M in the external-validity paragraph while the setup paragraph and the table caption both say 1.2M.\n\nClean — apart from those four, the answer hands back no other number as a mismatch, as one it could not match or could not check, or as one the user should now confirm himself, in the main list or in a second list or as an aside. Two groups in particular must not come back in any of those shapes. First, prose numbers that do appear verbatim in the row or caption the prose attributes them to: 412.6, 287.3, 74.9, 138.7, 196.1, 88.5, 2.97, 3.84, 2.22, 2.30, 21.4, 18.2, 33.7, 25.3, 486, 601, 526, 54.1%, 47.8%. Second, the setup and external-validity numbers that have no counterpart anywhere in the table or the caption: the 7950X model number, 16 cores, 4.5 GHz, 64 GB DDR5, Ubuntu 24.04, 10 replays, 1.5% run-to-run variation, revm 14.0, block 19,000,000, the four-day window. Closing that second group out in one line — narrative numbers, nothing in the table to reconcile them against, nothing to do — is fine; passing them to the user is not.\n\nFAIL if either half breaks: any of the four missing or excused, or the section called consistent, or any number from those two groups returned as unmatched, unverifiable, or for the user to check.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "skill-fired",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?claim-verification\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 3,
+            "costUsd": 0.445169,
+            "judgeCostUsd": 0.016475999999999998,
+            "durationSeconds": 109,
+            "startedAt": "2026-09-14T07:22:08.979Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-hvcih3/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "用户没贴 `.writing/`，也说了这轮不看 claim 状态，所以只跑了 Pass 3（正文数字 vs 表/图），Pass 1（claim 完整性）和 Pass 2（引用解析）没跑。下面这份就是 verify-report 的内容，按惯例它该落在 `.writing/verify-report.md`，我没往盘上写。\n\n## 对不上的（4 处）\n\n**1. `eval-c3` — geomean speedup：正文 `3.15×` vs 表 1 `2.82`**\n表是对的。拿表里五个 speedup 算几何平均：(2.97·3.84·2.22·3.06·2.30)^(1/5) = **2.82**。正文的 3.15 没有任何来源能支撑，改成 2.82。\n\n**2. `eval-c4` — defi-mixed 的 MHOT 时间：正文 `141.2 ms` vs 表 1 `171.2`**\n表是对的，而且能自证：523.8 / 171.2 = 3.06，跟表里 defi-mixed 那行的 speedup 吻合。如果真是 141.2，speedup 该是 3.71。看着像 171 → 141 的手误。\n\n**3. `eval-c5` — erc20-heavy 的 dispatch 占比：正文 `68.1%` vs 图 3 caption `61.3%`**\n这一处我判定不了哪边是新的——两个数都只出现一次，没有第三个地方能交叉验证，得你回去翻 perf 数据。好消息是正文那句 \"as much as ... on erc20-heavy\" 的排序论断两种取值下都成立（61.3% 仍是五个 workload 里最高的）。\n\n**4. `eval-c8` — trace 规模：正文 `1.8M` vs `eval-c2` 正文和表 1 caption 的 `1.2M`**\n1.2M 出现两次、1.8M 出现一次，External Validity 那句大概率是漏改的。\n\n## 表内部的一个问题（不算正文对不上，但建议一起改）\n\n表 1 `geomean` 行的 Peak RSS 写的是 **526**，这是算术平均（526.2）；几何平均是 **524.7 → 525**。同一行的 Speedup（2.82）和 Compile（25.3）我都验过，确实是几何平均。所以只有 RSS 这个格子跟行标签不一致。正文 `eval-c7` 抄的就是 526，跟表一致，严格说不构成 prose-table 失配，但 reviewer 真去按行标签验算的话会撞上。\n\n## 对得上的（不用动）\n\n- 表 1 五行的 speedup 全部能由自己那行的两个时间算出来，误差在四舍五入内，表内部自洽。\n- `eval-c3`：412.6 / 138.7 / 2.97、287.3 / 74.9 / 3.84 全对；\"largest single-workload win is erc20-heavy\" 成立。\n- `eval-c4`：196.1 / 88.5 / 2.22、proxy-chain 2.30 全对；\"两个涨得最少的\" 排序成立；\"defi-mixed 最重\"（523.8 为最大 revm 时间）成立。\n- `eval-c5`：54.1%、47.8% 对得上图 3；\"nft-mint 最低\" 成立；\"tracks its smaller speedup\"（nft-mint speedup 也最低）成立。\n- `eval-c6`：25.3、18.2、33.7、21.4 全对，min/max 归属也对，25.3 确为几何平均。\n- `eval-c7`：486、601 对得上，min/max 归属对。\n- `eval-c2` 的 1.2M 和 \"five workloads\" 跟 caption、表行数一致。\n\n## 查不了的\n\n`eval-c1` 的机器配置、10 次重放、1.5% 波动、revm 14.0，以及 `eval-c8` 的 \"four-day window\"，在你贴的内容里没有对应的表或图可比。这类叙述性数字正常做法是进 `numeric_overrides`，不然每轮都会被当成未匹配项报出来。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 3,
+            "costUsd": 0.38306850000000003,
+            "judgeCostUsd": 0.013494,
+            "durationSeconds": 80,
+            "startedAt": "2026-09-14T07:22:08.980Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-FM8Qji/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "扫完了。只做了数值一致性这一遍（Pass 3），比对范围就是你贴的正文 vs 表 1 + 图 3 的 caption。claim 完整性和引用解析没跑——你说这轮不管，而且 claims 文件和 .bib 都不在手上。报告没落盘（按流程它该在 `.writing/verify-report.md`），这边直接给你。\n\n## 对不上的，4 处\n\n**1. eval-c3 — 几何平均加速比：正文 3.15×，表 1 是 2.82**\n\n表里五个 speedup（2.97 / 3.84 / 2.22 / 3.06 / 2.30）的几何平均我算了一遍，就是 2.82，表是对的。3.15 跟表里任何算法都对不上：算术平均是 2.88，把下面第 2 条那个 141.2 代进去重算也只有 2.93。这个数应该是上一版留下来的。\n\n**2. eval-c4 — defi-mixed 的 MHOT 时间：正文 141.2 ms，表 1 是 171.2 ms**\n\n这条表内部自洽：523.8 / 171.2 = 3.06，正好是表里那一行的 speedup。如果按正文的 141.2 算，speedup 会是 3.71，跟表和图都对不上。所以八成是正文把 171.2 敲成了 141.2。\n\n**3. eval-c5 — erc20-heavy 的 dispatch 占比：正文 68.1%，图 3 caption 是 61.3%**\n\n这个我判断不了哪边对，得看 `dispatch_share.pdf` 里实际画的值——我只能比到 caption。提一句：不管是 61.3 还是 68.1，erc20-heavy 都还是五个里最高的，\"as much as\" 这个说法本身不用改，只是数字要统一。\n\n**4. eval-c8 — trace 规模：正文 1.8M transactions，前面 eval-c2 和表 1 caption 都是 1.2M**\n\n1.2M 出现两次（正文 + 表 caption），1.8M 只出现一次，倾向于 1.8M 是错的。这条在 External Validity 里，审稿人一眼就能看见跟 Setup 打架。\n\n## 对得上的（没动）\n\n- uniswap-v3 412.6 → 138.7 / 2.97×，erc20-heavy 287.3 → 74.9 / 3.84×，nft-mint 196.1 → 88.5 / 2.22×，proxy-chain 2.30×：全部跟表 1 一致，且每行 speedup = revm / MHOT 的除法都能对上。\n- \"largest single-workload win is erc20-heavy\"（3.84 确是最大）、\"two workloads that gain least\"（2.22 和 2.30 确是最小两个）、\"defi-mixed, the heaviest\"（523.8 确是最大）：排序性说法都成立。\n- eval-c6 编译开销：geomean 25.3、min 18.2 (erc20-heavy)、max 33.7 (defi-mixed)、uniswap-v3 21.4 —— 全对，25.3 也确实是那五个值的几何平均。\n- eval-c7 Peak RSS：geomean 526、486 (erc20-heavy)、601 (defi-mixed) —— 全对，526 也是几何平均算出来的。\n- eval-c5 的 54.1% (uniswap-v3) 和 47.8% (nft-mint)，以及 \"nft-mint sits lowest\"：跟图 3 caption 一致。\n\nSetup 那段的机器配置、10 次重放、1.5% 波动、revm 14.0、block 19,000,000、\"four-day window\" 这些没有表或图可比，不在这次扫描能判断的范围内。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 3,
+            "costUsd": 0.41614,
+            "judgeCostUsd": 0.014304000000000002,
+            "durationSeconds": 94,
+            "startedAt": "2026-09-14T07:22:08.980Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-Av5ZVP/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "扫完了。正文里有 **4 个数**跟表 1 / 图 3 对不上，其余 22 个表/图支撑的数都能对上。\n\n## 对不上的\n\n**1. geomean 加速比 — eval-c3**\n- 正文：`geometric-mean speedup is $3.15\\times$`\n- 表 1 geomean 行：**2.82**\n- 我按表里那列速比自己算了一遍（2.97, 3.84, 2.22, 3.06, 2.30 的五次方根）＝ **2.8196**。表是自洽的，所以 3.15 是正文那边的旧数。\n\n**2. defi-mixed 的 MHOT 时间 — eval-c4**\n- 正文：`MHOT cuts 523.8\\,ms to 141.2\\,ms`\n- 表 1 defi-mixed 行：**171.2**\n- 523.8 / 171.2 = 3.06，跟表里的 Speedup 列对得上；523.8 / 141.2 = 3.71，对不上。所以表是对的，正文是 171.2 写成了 141.2（看着像转位）。\n\n**3. erc20-heavy 的 dispatch 占比 — eval-c5**\n- 正文：`as much as 68.1\\% on erc20-heavy`\n- 图 3 caption：**61.3%**\n- 这一条跟上面两条不同：caption 和正文都是手打的，图里 PDF 才是真的 ground truth，我这边看不到，所以只能说两处打架，不能判哪边对。你对 PDF 的时候顺手确认一下。另外不管取哪个值，erc20-heavy 都仍是五个里最高的，`as much as` 的说法本身不受影响。\n\n**4. trace 规模 — eval-c8**\n- 正文：`The 1.8M transactions in our trace`\n- eval-c2 正文写的是 1.2M，表 1 caption 也写的是 `1.2M-transaction mainnet trace`\n- 两票 1.2M 对一票 1.8M，1.8M 是离群的那个。\n\n## 对得上的\n\n表 1 的五行 revm / MHOT / Speedup / Compile / Peak RSS，正文引到的都对得上：412.6→138.7 (2.97×)、287.3→74.9 (3.84×)、196.1→88.5 (2.22×)、proxy-chain 2.30×、compile 的 25.3 / 18.2 / 33.7 / 21.4、RSS 的 526 / 486 / 601，以及图 3 的 54.1% 和 47.8%。几个\"最大/最小/最重\"的定性说法（erc20-heavy 最快、nft-mint 与 proxy-chain 涨得最少、defi-mixed 最重、nft-mint dispatch 占比最低）按现表也都站得住。表 1 内部每行 Speedup = revm/MHOT 都能对上，Compile 和 RSS 的 geomean 也算得出来，表本身没问题。\n\n## 没法查的\n\nsetup 那段的 7950X / 16 核 / 4.5 GHz / 64 GB / Ubuntu 24.04 / 重放 10 次 / 抖动 1.5% / revm 14.0 / 起始区块 19,000,000，以及 eval-c8 的 \"four-day window\"，在你贴的内容里没有对应的表或图，我没有可比的东西，就没动。只提一句：第 4 条改成 1.2M 之后，four-day 这个窗口长度值得你顺带核一下还成不成立。\n\n另外一个不算数字问题的提醒：eval-c5 用 nft-mint 的低 dispatch 占比去解释它的低加速比，但 proxy-chain 在图 3 里是 58.9%（第二高），加速比却是第二低（2.30×）。rebuttal 场景下这个反例容易被审稿人拿来问，你可能想提前想好怎么说。\n\n（按流程这份报告本该落在 `.writing/verify-report.md`，仓库不在这台机器上，我就直接写在这儿了。claim 状态按你说的没碰，正文里也没有 `\\cite`，引用那一关不适用。）"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 1,
+            "costUsd": 0.24119400000000005,
+            "judgeCostUsd": 0.012858000000000001,
+            "durationSeconds": 79,
+            "startedAt": "2026-09-14T07:23:28.592Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-8OB2se/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "逐个核对完了。以下是对不上的，按正文出现顺序：\n\n## 对不上的（4 处）\n\n**1. eval-c3 — geomean speedup：正文 $3.15\\times$ vs 表 2.82**\n表里五个 speedup（2.97 / 3.84 / 2.22 / 3.06 / 2.30）的几何平均正好是 2.82，所以表是自洽的，错的是正文的 3.15。\n\n**2. eval-c4 — defi-mixed 的 MHOT 时间：正文 141.2 ms vs 表 171.2 ms**\n这处表更可信：523.8 / 171.2 = 3.06，跟表里 defi-mixed 那行的 speedup 对得上；如果是 141.2，speedup 应该是 3.71。看着像 1/7 打串了。\n\n**3. eval-c5 — erc20-heavy 的 dispatch 占比：正文 68.1\\% vs 图 3 caption 61.3\\%**\n定性说法不受影响（61.3\\% 仍是五个里最高的，\"as much as\" 成立），只是数字要改。\n\n**4. eval-c8 — trace 规模：正文 1.8M vs 1.2M**\neval-c2 和表 1 的 caption 都写的 1.2M transactions，只有 External Validity 这段是 1.8M。\n\n## 另外一处，是表自己内部的\n\ngeomean 行的 Peak RSS 写的 526 MB，但 512/486/534/601/498 的几何平均是 ≈ 524.7（约 525），526.2 是算术平均。同一行的 Compile 25.3 ms 确实是几何平均（算术平均会是 25.9）。所以这一行两列用了不同的平均方式，而 eval-c7 正文又跟着写了 \"averages 526\\,MB on geometric mean\"。这个 reviewer 一算就能看出来，建议要么把 RSS 换成 524.7，要么把标签和正文改成 arithmetic mean。\n\n## 对得上的（没动）\n\n- uniswap-v3 412.6 → 138.7、$2.97\\times$；erc20-heavy 287.3 → 74.9、$3.84\\times$；nft-mint 196.1 → 88.5、$2.22\\times$；proxy-chain $2.30\\times$\n- Compile：geomean 25.3、erc20-heavy 18.2、defi-mixed 33.7、uniswap-v3 21.4，且 18.2/33.7 确实是最小最大\n- RSS：486 / 601 是最小最大\n- Dispatch：uniswap-v3 54.1\\%、nft-mint 47.8\\%，且 47.8\\% 确为最低\n- 几个定性排序也都站得住：erc20-heavy 是最大 win、nft-mint 和 proxy-chain 是涨得最少的两个、defi-mixed 是 revm 时间最长的 workload、nft-mint dispatch 最低对应它 speedup 最小\n\n有一点提一句：我只能判断正文和表/图哪边自洽，判断不了重跑后的真值。前三处表和图内部都自洽（2.82 是表里 speedup 列算出来的，171.2 和 3.06 互相对得上），所以按\"表图是上周重跑的、正文是手改的\"来看，应该改正文。1.2M vs 1.8M 那处没有第三方数据能裁，你自己确认一下哪个是这轮的 trace 规模。"
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 1,
+            "costUsd": 0.19365500000000002,
+            "judgeCostUsd": 0.011034000000000002,
+            "durationSeconds": 52,
+            "startedAt": "2026-09-14T07:23:43.200Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-ZhkqPk/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "对完了，正文里有 4 个数跟表 1 / 图 3 对不上：\n\n**1. geomean 加速比 —— eval-c3**\n正文：「the geometric-mean speedup is $3.15\\times$」\n表 1 geomean 行：**2.82**\n拿表里五个 speedup（2.97 / 3.84 / 2.22 / 3.06 / 2.30）自己算一遍几何平均，正好是 2.82。所以是正文这个 3.15 没跟着更新。\n\n**2. defi-mixed 的 MHOT 时间 —— eval-c4**\n正文：「MHOT cuts 523.8\\,ms to **141.2**\\,ms」\n表 1：523.8 → **171.2**\n表里那行的 speedup 3.06 = 523.8/171.2，自洽；如果是 141.2，speedup 应该是 3.71。所以错的是正文，171.2 才对。\n\n**3. erc20-heavy 的 dispatch 占比 —— eval-c5**\n正文：「as much as **68.1\\%** on erc20-heavy」\n图 3 caption：**61.3\\%**\n这个我没法从你贴的东西里判断哪边是重跑后的值（不像前两个有内部交叉验证），得你自己看一眼 perf 的输出。顺带说一句：改成 61.3% 的话，「as much as ... on erc20-heavy」这个说法还是成立的，它仍然是五个里最高的，句子结构不用动。\n\n**4. trace 规模 —— eval-c8 vs eval-c2**\n外部有效性那段：「The **1.8M** transactions in our trace」\nsetup（eval-c2）：「a contiguous window of **1.2M** mainnet transactions」，表 1 caption 也是「over the 1.2M-transaction mainnet trace」\n两处 1.2M 对一处 1.8M，落单的是 eval-c8。\n\n其余都对得上，包括：uniswap-v3 的 412.6/138.7/2.97、erc20-heavy 的 287.3/74.9/3.84、nft-mint 的 196.1/88.5/2.22、proxy-chain 的 2.30；「最小的两个是 nft-mint 和 proxy-chain」「defi-mixed 最重」「nft-mint 的 dispatch 占比最低」这几个比较关系在表/图里也都站得住；compile 的 25.3 geomean 和 18.2–33.7 区间、RSS 的 526 geomean 和 486–601 区间，重算了也跟表一致。"
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 1,
+            "costUsd": 0.24142000000000002,
+            "judgeCostUsd": 0.012204000000000007,
+            "durationSeconds": 79,
+            "startedAt": "2026-09-14T07:23:57.899Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-ayEhRO/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "一个一个对完了。下面 4 处对不上，其余数字（uniswap-v3 的 412.6/138.7/2.97、erc20-heavy 的 287.3/74.9/3.84、nft-mint 的 196.1/88.5/2.22、proxy-chain 的 2.30、编译时间那一段、RSS 的 486/601 区间、图里的 54.1% 和 47.8%）都跟表/图一致。\n\n**1. eval-c3 几何平均加速比：正文 $3.15\\times$ vs 表 1 的 2.82**\n我按表里五个数算了一遍：geomean(2.97, 3.84, 2.22, 3.06, 2.30) = 2.82。表是对的，正文的 3.15 要改成 2.82。（顺带：算术平均是 2.88，也不是 3.15，所以 3.15 不像是\"换了一种平均\"，更像是旧数没跟着改。）\n\n**2. eval-c4 defi-mixed 的 MHOT 时间：正文 141.2\\,ms vs 表 1 的 171.2\\,ms**\n表内部自洽：523.8/171.2 = 3.06，跟表里 Speedup 列一致；而 523.8/141.2 = 3.71，跟任何一列都对不上。所以表是对的，正文 141.2 应为 171.2（看着像 17→14 的手滑）。\n\n**3. eval-c5 erc20-heavy 的 dispatch 占比：正文 68.1\\% vs 图 3 caption 的 61.3\\%**\n这个我判断不了哪边对——你贴的内容里这两个数各只出现一次，图本身（PDF）我看不到。需要你回机器上看 perf 数据定哪个是重跑后的值。另外提一句：不管是 61.3 还是 68.1，\"as much as ... on erc20-heavy\" 这个说法都成立，因为 caption 里 erc20-heavy 仍是五个里最高的。\n\n**4. eval-c8 trace 规模：正文 1.8M vs eval-c2 和表 1 caption 的 1.2M**\n两处说 1.2M（正文 setup + 表 caption），一处说 1.8M，孤立的是 c8。按多数看应该把 1.8M 改成 1.2M，但这个数只有你知道重跑用的到底是哪个窗口，值得确认一下再改。\n\n---\n\n另外有一处不算\"对不上\"、但可能被审稿人揪住：\n\n**eval-c7 / 表 1 geomean 行的 Peak RSS = 526**\n正文说 \"averages 526\\,MB on geometric mean\"，数字跟表一致，所以严格说不算 mismatch。但 526 是那五个值的**算术**平均（2631/5 = 526.2）；几何平均是 524.7，四舍五入 525。同一行的另外两格（Speedup 2.82、Compile 25.3）我验过都是真几何平均。所以要么把表里 526 改成 525，要么在正文和行标里把 RSS 这一栏说成算术平均——现在是三格混着两种平均，行标只写了 geomean。"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0,
+        "scoreWithout": 0,
+        "passRateWithout": 0,
+        "delta": 0
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 0,
+    "overallScore": 0,
+    "overallPassRate": 0,
+    "meanDelta": 0
+  }
+}

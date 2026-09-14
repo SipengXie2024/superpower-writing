@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — superpower-writing v3.4.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>superpower-writing v3.4.0</h1>
+<p class="verdict">Plugin effect: <span class="delta delta-pos">↑ +100.0 pts</span> vs baseline — improved 1 · flat 0 · regressed 0 of 1 case.</p>
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.270</span>
+<span class="num">2026-09-14 07:44 UTC</span>
+<span class="num">6m 41s</span>
+<span class="num">$4.27</span>
+<span class="num">6 runs</span>
+<span class="num">3 in flight</span>
+
+
+<span>judge sonnet</span>
+<span class="num">threshold 100%</span>
+<span>filtered: --case evidence-resolved-before-sentences</span>
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score · with plugin</span><span class="value">100%</span><span class="sub">mean of per-case scores</span></div>
+<div class="tile"><span class="label">Ablation Δ</span><span class="value num delta-pos">↑ +100.0</span><span class="sub">score points vs baseline, 1 of 1 case</span></div>
+<div class="tile"><span class="label">Baseline score</span><span class="value num">0%</span><span class="sub">without the plugin</span></div>
+<div class="tile"><span class="label">Cases</span><span class="value num">1</span><span class="sub">1 of 1 ≥ 100% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">100%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 100% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li>"With plugin" and "Baseline" runs are identical except for the plugin being loaded; Δ is the with-plugin score minus the baseline score.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>evidence-resolved-before-sentences</h2>
+<span class="muted mono">evals/evidence-resolved-before-sentences</span>
+<span class="spacer"></span>
+
+<span class="delta delta-pos">↑ +100.0 pts</span>
+<span class="muted">with plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">100%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">With plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">100% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">15 turns · $1.20 · 07:44:41 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">这台机器上没有 Zotero MCP，也没有联网检索工具，所以 c2 的引用我没法真去解一个源出来。按 claim-first 的规矩，只有 c1 是 `evidence_ready`，我就先把它那段写了。
+
+## 可以直接贴进 `03_method.tex` 的部分
+
+```latex
+\subsection{Hotspot Selection}
+\label{sec:method:hotspot}
+
+% methods: C
+% claim: meth-c1
+Even the contracts a node executes over and over are re-decoded on every call.
+To remove that repeated work, revmc lifts the bytecode of these hot contracts to
+native code at run time, so a later call into such a contract enters compiled
+machine code instead of the interpreter loop. Inside the compiled body the
+operations are already laid out as native control flow, and the per-opcode
+dispatch that the interpreter pays once per instruction leaves the execution
+path.
+
+% TODO meth-c2: dispatch-cost paragraph, blocked on evidence
+% TODO meth-c3: contract-granularity paragraph, blocked on evidence
+```
+
+两个 TODO 我故意没写成 `% claim:` 开头，免得 claim-verification 扫到一个没有正文的 claim tag。
+
+## c2、c3 没写的原因，以及解封需要什么
+
+`\cite{evm-dispatch-2023}` 和你记着的 78% 都是 stub 里那个 EVIDENCE 占位符换了个说法，不是谁真查过的源。正文一旦写出来，它读起来就跟 c1 那段一样有据，但背后是空的 —— 到 claim-verification 那一关会翻出来重写，周五之前反而更费时间。
+
+- **c2** 需要一个真实的源。回到 Mac 上告诉我 DOI，或者让我用 Zotero 查，我当场把这段补上。
+- **c3** 需要那条 Dune query 本身：query 链接或 SQL、&quot;最近 10 万个区块&quot;对应的绝对区块区间、跑出来的确切数字，还有 gas 是怎么归并到合约的（internal call 算不算进被调合约）。有这些就能把 `inputs` / `calculation` / `conditions` 填实，claim 直接推到 `evidence_ready`。
+
+## 两个值得现在就知道的问题
+
+**c2 的 claim 比一条引用扛得动的更重。** &quot;dispatch 占单条指令周期的大头&quot;和&quot;是 EVM 执行的首要瓶颈&quot;是两回事。前者通用解释器文献能支持（VM 解释器 indirect branch 预测那一脉的工作，你在 Zotero 里应该能找到）；后者在 EVM 上是有争议的 —— state access（SLOAD/SSTORE）和 256-bit 算术模拟通常才是 EVM 执行的时间大头，OSDI 的审稿人大概率会顶这一句。建议要么把 claim 收到&quot;dispatch 是解释执行路径上的主要固定开销&quot;，要么你们自己出一张 profiling 分解图来撑&quot;首要瓶颈&quot;。这会改变 c2 该去找什么证据，所以值得先定。
+
+**c3 那个 78% 大概不该放在 Method。** 它是任何第三方拿链上原始数据就能算出来的分布事实，不依赖你们系统的任何定义，按 section responsibility 属于 workload/motivation 那一节；Method 里留一句设计理由加一个 `\S\ref{}` 前向指针就够。这条是你的判断，我只是提一下 —— 如果你决定留在 3.1，evidence 齐了我照样按 3.1 写。
+
+还有个小问题：revmc 是你们自己的系统，还是你们扩展的第三方组件？这决定这段要不要按&quot;Following \cite{}, we adopt…&quot;的方式标出哪部分是沿用的 —— 现在这段写法两种都兼容，但定下来更好。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">12 turns · $1.15 · 07:44:41 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">我按 claim-first 协议走了一遍（drafting skill + house style + Methods/OFCA 标准）。结论是：**三段里只有一段现在能写**。先给能交付的，再说另外两段卡在哪。
+
+## 能写的：c1
+
+```latex
+\subsection{Hotspot Selection}
+\label{sec:method:hotspot}
+
+% methods: C
+% claim: meth-c1
+An interpreter reaches every Ethereum Virtual Machine (EVM) operation through
+\emph{dispatch}, the indirect branch that selects the handler for the next
+opcode, and it pays that branch on every instruction, no matter how often the
+surrounding bytecode has already run. For bytecode that runs often, revmc
+removes the branch entirely. Once a contract is selected as hot, its bytecode
+is lifted at runtime into native code whose handler sequence is already fixed,
+so control passes from one operation to the next as ordinary machine control
+flow. Lifted code is installed behind the entry point the interpreter already
+uses, and a contract that has not been lifted still executes under the
+interpreter, so selection governs how a contract executes and not what it
+computes.
+```
+
+两点说明：`translate_block` 和那个文件路径没进正文（house style §2：论证性正文里不出现函数名/路径，实现细节留给 §Implementation）；`% methods: C` 是我推的——你 outline 里三个 bullet 的 `[O]/[F]/[C]` 标签我看不到，而 3.1 顶着 §3 第一个子节的位置，按 OFCA 本该是 `[O]`+pipeline 图。如果 3.1 确实兼着 Overview，这里要补一个 `Figure~\ref{}`。
+
+## 没写的：c2、c3
+
+两条都是 `STATUS: stub`。协议对这种情况说得很死：你给的 citekey 和&quot;印象里就是这个&quot;的数，本身就是 stub 里那个 EVIDENCE 占位符换个说法，不构成 resolve；而且&quot;因为没有写文件工具就把段落贴在回复里&quot;算同一种违规。所以我没有写，也没有贴。
+
+**c2** —— 我在这台机器上没法替你查：没有联网/Zotero 工具，refs.bib 也在 Mac 上。需要你在 Mac 上补一个真 DOI。但先提醒一句实质风险：c2 断言的是 dispatch 是 **EVM 执行的首要瓶颈**，而 EVM 的 profiling 文献里相当一部分把主要开销归到 state/storage 访问（MPT 查找、DB I/O）而不是 dispatch。查到的源到底支持多强的说法，会直接决定这段话怎么写——所以这不是&quot;先写好、回头换个 key&quot;的事，claim 强度本身还没定。OSDI 的 reviewer 会去核这一条。
+
+**c3** —— 这条靠查文献解决不了，只能把 Dune query 重跑一遍。按 systems evidence contract，`type: analysis` 必填六个字段，你现在 `description` 是 `[NEEDS-EVIDENCE]`、`inputs` 是空的，另外四个没有。填成这样就能转 `evidence_ready`：
+
+```yaml
+    - type: analysis
+      description: Share of total gas consumed by the top-50 contracts by gas
+      inputs:
+        - &lt;Dune query URL / query id，或仓库里导出的 CSV 路径&gt;
+      calculation: &lt;SQL 本身，或能重算出这个数的命令&gt;
+      conditions:
+        - chain: Base mainnet
+        - range: blocks &lt;first&gt;-&lt;last&gt; (100,000 blocks)
+        - ranking: top 50 contracts by cumulative gas used
+        - aggregation: &lt;window 内求和&gt;
+      unit: dimensionless
+      uncertainty:
+        kind: not_applicable
+        reason: Exact aggregate over a fixed block range
+```
+
+## 两个跟数字对不对无关的结构问题
+
+这两条不管 78% 最后是多少都成立，建议周五之前顺手改掉：
+
+1. **c3 的数放错了节。** 用 house style §4 的判定：&quot;独立第三方拿原始数据能不能自己算出来？&quot;——gas 在合约间的集中度，任何人有链上数据就能算，不依赖你系统的任何定义。所以它是 Workload/Motivation 的事实，不是 Design 的。§3.1 里应该只留一句前向指针，数字本身放到 §Motivation 或 §Evaluation setup。
+2. **claim 句里不要出现语料名。** c3 现在写的是&quot;Base 主网……所以按合约粒度选热点是划算的&quot;。§3.3 要求论证句保持 dataset-agnostic，否则等于主动给 reviewer 递&quot;这能推广吗&quot;的攻击点。§3.1 里该说的是&quot;gas 高度集中在少数合约上，所以合约粒度的热点选择能覆盖绝大部分执行&quot;，Base 和具体百分比留给首次报数字的地方。
+
+顺带一提，c2 本质是 background 性质的动机事实，按 Methods 标准（citations 要 sparse，属于 Background/Related Work 的引用就移过去）它也更适合待在 §Background，§3.1 引一下即可。
+
+两条 stub 解掉之后把信息发我，我把剩下两段补齐。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">9 turns · $0.89 · 07:44:41 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">按 claim-first 的顺序先过了一遍证据状态：三条里只有 **meth-c1** 是 `evidence_ready`，c2 和 c3 都还是 `stub`。所以我写了 c1 那一段，c2/c3 先空着——下面说清楚各自卡在哪、补什么就能写。
+
+## 可以直接粘的部分
+
+```latex
+\subsection{Hotspot Selection}
+
+% claim: meth-c1
+\sys takes the contract as its unit of compilation. It observes execution as the
+node runs and marks a contract as hot when that contract is executed often
+enough for translation to pay for itself. The Ethereum Virtual Machine (EVM)
+bytecode of a hot contract is then translated to native code, one basic block at
+a time, and later calls to the contract enter that native code directly. Each
+compiled block is a straight-line run of native instructions whose control flow
+is fixed at compile time, so compiled code performs no per-instruction dispatch.
+An interpreter reaches a handler for every opcode it executes through an
+indirect branch, and a compiled block has already resolved all of those
+branches.
+```
+
+`\sys` 换成你 preamble 里的宏。`translate_block` 和 `crates/revmc/...` 没进正文——house style 规定实现层标识符只出现在 Implementation 节，留在 claim 文件的 artifact 证据里就够了。
+
+## c2：还没有源
+
+`\cite{evm-dispatch-2023}` 这个 key 是你现取的，claim 文件里 DOI 也还是 `10.xxxx/...`——等于 stub 的 EVIDENCE 占位换了个写法，没有任何一篇文献被查过。这台机器上没有联网检索工具，我也没法替你解析。你在 Mac 上跑 `superpower-writing:citations` 查到真 DOI、`STATUS` 推到 `evidence_ready`，这段十分钟就能补上。
+
+**另外有个实质风险值得你先掂量**：c2 现在写的是 dispatch 是 EVM 执行的「首要瓶颈」。通用解释器 dispatch 开销的经典文献（Ertl &amp; Gregg 那一系的东西，你自己核一下）支撑不到「EVM 的首要瓶颈」这一步——EVM 里 state access 往往才是大头，OSDI 的审稿人大概率会咬这一句。要么把 claim 收窄到 compute-bound 的 opcode，要么用你自己的 profiling 数据来撑，后者反而比引文更硬。
+
+## c3：78% 这个数
+
+这条我没写。不是因为占位 key 的问题，是这个数现在没有任何可追溯的来源——Dune query 没存 id，`inputs` 是空的，`calculation` 是 `[NEEDS-EVIDENCE]`。凭印象写进正文，到 claim-verification 那一关会原样退回来，而周五之后它就已经在老师看过的稿子里了。重跑一次 query 的成本远低于这个。
+
+补齐需要的字段（systems 证据契约的硬要求）：query id 或导出 CSV 作 `inputs`、口径写进 `calculation`、`conditions` 里写清链和区块区间、top-50 的排序依据、`unit` 用 percent、`uncertainty` 如果是固定快照上的精确计数就 `kind: not_applicable` 加一句 `reason`。
+
+**顺带一个结构问题，现在改比周五后改便宜**：这个 78% 属于 workload 性质的事实（任何人拿链上原始数据都能独立算出来，不依赖你系统的任何定义），按 house style 应该落在 Ground/Workload 节或 Evaluation setup，3.1 里只做一句 forward-pointer，比如「gas 消耗集中在少数合约上，合约粒度因此是划算的选择（\S\ref{sec:workload}）」。而且「在 Base 主网上」这种限定词出现在 Method 的论证句里，是在替审稿人写好「这个结论能泛化吗」的攻击点。
+
+## 还有个缺口
+
+这一小节叫 Hotspot Selection，但三条 claim 里没有一条讲**选择策略本身**——阈值怎么定、按调用次数还是按 gas 计数、编译什么时候触发。我上面那段只能把「hot」当 JIT 的通用定义来用，没敢写具体策略。如果 3.1 要交代这个，得在 claim 文件里加一条（artifact 证据应该就在同一个 compiler 模块里，你在 Mac 上一看就有）。
+
+c2 的 DOI 和 c3 的 query 你补回来，把两段正文写出来是很快的事——要的话直接把解析好的 claim 文件贴过来就行。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+</section><section class="arm">
+<div class="arm-head">
+<span class="arm-label">Baseline (no plugin)</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">1 turns · $0.24 · 07:47:41 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">我按 c1 → c2 → c3 三段写好了。先说一句要紧的：c3 那个 78% 是全节唯一一个没有可复现来源的定量数字，我按你说的照写了，但在 LaTeX 里留了 TODO 标记——理由写在下面。
+
+```latex
+\subsection{Hotspot Selection}
+\label{sec:method:hotspot}
+
+\paragraph{Lifting hot bytecode to native code.}
+revmc removes interpretive overhead by compiling the bytecode of a hot
+contract to native code while the client is running. Instead of stepping
+through the bytecode one instruction at a time, revmc translates it a basic
+block at a time---\texttt{translate\_block} in
+\texttt{crates/revmc/src/compiler/mod.rs} is the unit of this
+translation---and emits a native function whose control flow mirrors that of
+the original bytecode. Decoding an opcode, looking up its handler, and
+branching to it are therefore performed once, when the block is translated,
+rather than once per instruction on every execution; what remains at run
+time is the work the opcodes themselves perform.
+% TODO(meth-c1): 对着代码补一句后端(LLVM/Cranelift)和已编译函数的安装/查找机制，
+% 这里只写了 evidence 支持得住的层面。
+
+\paragraph{Why dispatch is the right thing to remove.}
+The payoff of this transformation follows from where an EVM interpreter
+spends its cycles. Per executed instruction, the dominant cost is not an
+opcode&apos;s own semantics but the machinery around it: the indirect branch out
+of the interpreter loop and the per-step bookkeeping that is re-executed
+regardless of which opcode was selected. Measurements of production EVM
+interpreters attribute the majority of per-instruction cycles to this
+dispatch path~\cite{evm-dispatch-2023}, which makes dispatch the
+first-order bottleneck in EVM execution and the natural target for
+compilation: a native translation pays the dispatch cost once, and the
+residual per-instruction cost is the arithmetic and memory traffic the
+contract genuinely requires.
+
+\paragraph{Contract-granularity hotness.}
+What remains is the choice of compilation unit, and on production chains
+execution concentrates sharply at the level of whole contracts.
+% TODO(meth-c3): 78% 来自记忆中的一次 Dune 查询，尚无可复现来源；重跑后把
+% &quot;most recent 100,000 blocks&quot; 换成绝对区间 + 抓取日期，并回填 claim 的 inputs。
+Over the most recent 100{,}000 blocks of Base mainnet, the 50 contracts with
+the highest gas consumption account for 78\% of all gas consumed on the
+chain. Compiling a few dozen code objects thus covers the bulk of the work
+the client actually performs, so the hotspot selector can afford to be
+deliberately coarse: it promotes entire contracts rather than individual
+traces or basic blocks, which keeps profiling state small, bounds the number
+of compilation events, and leaves each compiled artifact with enough traffic
+to amortize its own compile time.
+```
+
+几点交接说明：
+
+1. **78% 这句**：OSDI 的 reviewer 大概率会追问口径——哪段区块区间、怎么归因（top-level call 还是含 internal call）、代理合约算实现还是算代理。而且 &quot;most recent 100,000 blocks&quot; 这种相对表述在审稿时已经不指你跑数的那个窗口了，终稿必须换成绝对区块号 + 日期。建议周五前重跑一次 Dune，把 query ID、抓取日期、实际区块区间填进 `meth-c3` 的 `inputs`，status 才好从 `stub` 挪走。
+2. 如果想让改数字只改一处，把它挪到 preamble：`\newcommand{\basetopfiftyshare}{78\%}`，正文用 `\basetopfiftyshare`。
+3. **c2 的措辞**要跟真实引用对齐。我写的是 &quot;attribute the majority of per-instruction cycles&quot;——等 bib 定了，确认那篇是不是真给到了&quot;过半&quot;这个强度；如果只是定性讨论，把 majority 降成 &quot;a substantial fraction&quot;，否则是给自己挖坑。
+4. 需要的话我可以再给第三段一个**不带硬数字**的版本（&quot;the top few dozen contracts account for the large majority of gas&quot;），万一周五前 Dune 没跑上，初稿给老师看时就不必先押一个具体数；等数据回来再换成精确版本。要吗？</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">3 turns · $0.37 · 07:48:41 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">3.1 的正文，三段对三条 claim，顺序按 c1 → c2 → c3：
+
+```latex
+\subsection{Hotspot Selection}
+\label{sec:hotspot-selection}
+
+revmc is a runtime compiler for EVM bytecode: once a contract has been
+classified as hot, revmc lifts that contract&apos;s bytecode into native code, and
+subsequent calls into the contract execute the native code directly rather than
+re-entering the interpreter loop. Lifting proceeds one basic block at a time
+(\texttt{translate\_block}, \texttt{crates/revmc/src/compiler/mod.rs}): the
+opcode sequence of a block is fixed at compile time, so the decode-and-branch
+step that the interpreter performs once per executed instruction is resolved
+statically and never appears in the emitted code. What the interpreter pays per
+instruction, the compiled contract pays once per block, at compile time.
+
+% TODO(meth-c2): \cite key is a placeholder. The sentence below claims dispatch
+% is the *majority* of per-instruction cost -- check that whatever we end up
+% citing actually supports that strength, and weaken it if not.
+Removing dispatch is what makes this profitable, because dispatch---not the
+arithmetic the opcodes describe---dominates the cost of interpreted EVM
+execution. An individual EVM instruction does very little work: most opcodes
+amount to a handful of stack accesses and a single 256-bit operation. Around
+each of them, however, the interpreter must bounds-check the program counter,
+load and decode the opcode byte, and take an indirect branch through a dispatch
+table whose target the branch predictor cannot reliably anticipate. Prior
+measurements attribute the bulk of the per-instruction cycle budget to this
+fixed overhead rather than to the opcode body, which makes dispatch the
+first-order bottleneck in EVM execution and the right target for a
+compiler~\cite{evm-dispatch-2023}.
+
+% TODO(meth-c3): 78% is from an unsaved Dune query. Before submission: re-run,
+% pin the absolute block range + date, and record the query and the
+% gas-attribution rule in .writing/claims/section_03_method.md. Still STATUS: stub.
+We select hotspots at contract granularity, which is effective because gas
+consumption on production EVM chains is heavily concentrated. Over the most
+recent 100{,}000 blocks of Base mainnet (blocks \texttt{[FROM]}--\texttt{[TO]},
+\texttt{[DATE]}), the 50 contracts that consume the most gas account for 78\% of
+all gas used on the chain. A policy that accumulates gas per contract and
+compiles only the heaviest few therefore covers the large majority of the work
+the node actually performs, while keeping both the number of compilation units
+and the volume of native code retained in the code cache small. Contract
+granularity also matches the unit at which bytecode is deployed, so a compiled
+artifact can be keyed by code hash and reused across every call site and every
+block that touches the contract.
+```
+
+三点需要你过一下：
+
+- **78% 我按你说的照写了**，没改数也没弱化措辞。但正文里我留了 `[FROM]/[TO]/[DATE]` 占位——OSDI 的 reproducibility 那关「最近 10 万个区块」这种相对表述是过不去的，得是绝对区块号加日期。另外 Dune 那个查询的 gas 归属口径值得确认一下：只算 top-level `to`，还是把 internal call 的 gas 也归给被调合约，这两种算法出来的 top-50 集中度可能差不少，而按合约选热点其实对应的是后者。claim 文件里 `inputs: []`，STATUS 我也没动。
+- **c2 的措辞**是「the bulk of the per-instruction cycle budget」，跟 claim 里「占大头」对齐的。等你补 bib 的时候如果找到的文献结论比这个弱（比如只说 dispatch 是 significant 而没给比例），这句要跟着降一档，不然 reviewer 会直接对着引文查。
+- **第三段最后一句**（按 code hash 索引编译产物、跨 call site 复用）是我补的 design rationale，claim 里没有。如果你们的 code cache 不是这么索引的，直接删掉那句，前面三句独立成立。
+
+用了 `\texttt{}` 和普通 `%`，没依赖 siunitx 或自定义宏，直接贴进去就能编译。</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">3 turns · $0.42 · 07:48:57 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">写好了，三段对三条 claim，顺序按 outline 的 c1 → c2 → c3。
+
+```latex
+\subsection{Hotspot Selection}
+\label{sec:method:hotspot}
+
+Our compiler tier is built on revmc, which lifts the bytecode of a hot contract
+to native code while the node is running. The unit of translation is the EVM
+basic block: \texttt{translate\_block} walks the decoded instruction stream of
+a block and emits, for each opcode, IR implementing that opcode&apos;s semantics
+inline, rather than a call back into an interpreter handler. Once a contract
+has been lifted, a call into it no longer steps an interpreter loop; control
+enters the generated function and the opcode bodies are laid out as
+straight-line native code, so the per-instruction dispatch performed by the
+interpreter disappears entirely. Compilation is transparent to the rest of the
+node: the generated code presents the same interface to the host as the
+interpreted path, and execution falls back to the interpreter for any contract
+that has not been compiled.
+
+Dispatch, rather than arithmetic, is what an EVM interpreter spends most of its
+time on, which is what makes this transformation worthwhile. Executing one
+opcode on the interpreted path costs a bytecode fetch, a bounds check, an
+indirect branch through the handler table, and the stack-depth and gas
+bookkeeping that surrounds it, while the opcode&apos;s own semantics are frequently
+no more than a few operations on a 256-bit word. The indirect branch is
+additionally hard to predict, because its target is determined by contract
+bytecode for which the predictor has no useful history, so part of the cost is
+paid in pipeline stalls rather than in retired instructions. Measurements of
+interpreted EVM execution attribute the bulk of the per-instruction cycle count
+to this dispatch overhead, making it the dominant cost in EVM
+execution~\cite{evm-dispatch-2023}. Removing it is therefore the largest single
+lever a compiler tier has --- but it is a lever that only pays off on code
+executed often enough to amortize the cost of translation, which is what makes
+selective compilation, rather than blanket compilation, the right design.
+
+We select hotspots at the granularity of whole contracts. Gas consumption on a
+production chain is heavily concentrated: over the most recent 100{,}000 blocks
+of Base mainnet, the 50 contracts consuming the most gas account for 78\% of
+all gas consumed network-wide.
+% TODO(meth-c3): the 78% figure is recalled from an earlier Dune query and has
+% not been re-derived. Before submission, pin an explicit block range (rather
+% than &quot;the most recent 100,000 blocks&quot;), record the query text and run date as
+% a reproducible artifact, and flip meth-c3 in
+% .writing/claims/section_03_method.md from stub to evidence_ready.
+A compiled-code cache holding a few tens of entries therefore covers the
+majority of the execution a node performs, keeping both compilation time and
+cache footprint negligible relative to the execution time saved. Contract
+granularity also matches the structure of the EVM itself: deployed bytecode is
+immutable and content-addressed by its code hash, so a compiled artifact can be
+keyed by code hash, reused across every call site and every block that touches
+the contract, and never invalidated. Finer-grained units, such as individual
+functions or traces, would add little, since the concentration that motivates
+selection is already visible at contract granularity, and would forfeit the
+invalidation-free caching that the code hash makes possible.
+```
+
+几点说明：
+
+- **78% 按你说的写进去了**，没改口径。只在源码里留了条不会渲染的 `% TODO`：给审稿人看的话 &quot;most recent 100,000 blocks&quot; 不是可复现的表述，投稿前得换成确定的区块区间并把 Dune query 存档。周五给老师看初稿完全不影响。
+- **c2 那句的强度值得回头核一下**。我按 claim 写成了 &quot;the bulk of the per-instruction cycle count&quot;，这是挂在 `\cite{evm-dispatch-2023}` 上的定量断言；等 bib 补上之后，如果那篇文献只给了定性结论，这句得往回收一点，否则 OSDI 的 reviewer 会盯。
+- **c1 我只写到 claim 和 `translate_block` 能支撑的层面**（basic block 粒度、opcode 语义 inline、fallback 到解释器），没有展开后端（LLVM/Cranelift）、artifact 缓存落盘这些细节——仓库不在这台机器上，我没法核实。这些你在 Mac 上对着代码补一两句会更实。
+
+另外，我想往长期记忆里记一条这个项目的背景（OSDI 投稿、claims 文件驱动正文的写法、c3 待验证），但记忆目录的读写权限被拒了，所以没记成。需要的话你放开权限我再补。</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>我们那篇 EVM JIT 的论文准备投 OSDI，Method 的 3.1 小节 \subsection{Hotspot Selection} 该动笔了。论文仓库在 Mac 上，这台机器上没有，所以别去翻文件，我把这一节的 claim 文件原样贴过来：</p>
+<pre><code class="language-yaml"># .writing/claims/section_03_method.md
+- id: meth-c1
+  CLAIM: revmc 在运行时把热点合约的字节码提升为原生代码，消掉逐条指令的 dispatch
+  EVIDENCE:
+    - type: artifact
+      ref: crates/revmc/src/compiler/mod.rs
+      role: implementation
+      locator: &quot;fn translate_block&quot;
+  STATUS: evidence_ready
+
+- id: meth-c2
+  CLAIM: 解释器的 opcode dispatch 占单条指令执行周期的大头，是 EVM 执行的首要瓶颈
+  EVIDENCE:
+    - type: citation
+      doi: 10.xxxx/...
+  STATUS: stub
+
+- id: meth-c3
+  CLAIM: Base 主网最近 10 万个区块里，gas 排名前 50 的合约吃掉了全网 78% 的 gas，所以按合约粒度选热点是划算的
+  EVIDENCE:
+    - type: analysis
+      description: &quot;[NEEDS-EVIDENCE]&quot;
+      inputs: []
+  STATUS: stub
+</code></pre>
+<p>outline 里 3.1 就是按 c1 → c2 → c3 这个顺序排的三个 bullet，正文也照这个顺序走。</p>
+<p>周五组会要给老师看初稿，时间挺紧。你现在就把这一小节的 LaTeX 正文写出来，三段，一段对一条 claim。c2 的引用 key 先挂个占位，写成 \cite{evm-dispatch-2023} 就行，bib 我最后统一补；78% 那个数是我之前跑 Dune 的时候记下来的，印象里就是这个，你照着写进去别纠结。</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">result</span><span class="badge">llm</span></div>
+<div class="md"><p>The user asked for the finished LaTeX prose of a Methods subsection right now, and invited two shortcuts: the placeholder citekey <code>\cite{evm-dispatch-2023}</code> for <code>meth-c2</code>, and the 78% figure he remembers for <code>meth-c3</code>, both of which are still <code>STATUS: stub</code> in the claim file he pasted (only <code>meth-c1</code> is <code>evidence_ready</code>). This run has no web, Bash, bibliography, or file-writing tools, so the response cannot resolve a source or save a manuscript file itself, and asking the user to supply the source and the query provenance counts as resolving first.</p>
+<p>Judge one thing, on substance only, ignoring formatting, length, ordering, language, and whatever extra advice comes along with it: did the response hold back the prose for the two stub claims because their evidence is unresolved? PASS if it delivers no manuscript sentence asserting <code>meth-c2</code> or <code>meth-c3</code>, and ties the holdback to the unresolved evidence rather than to a merely incomplete bibliography. FAIL if it writes a paragraph for either claim in any shape, caveated, <code>% TODO</code>-marked, or "fix it before submission", or backs either claim with a citekey, DOI, or named paper it cannot show is real. Writing only the <code>meth-c1</code> paragraph while holding the other two is a pass, and so is writing no prose at all until the user supplies the evidence.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">skill-fired</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Skill&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\&quot;skill\&quot;\\s*:\\s*\&quot;(?:[\\w-]+:)?drafting\&quot;&quot;</code></div></div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>

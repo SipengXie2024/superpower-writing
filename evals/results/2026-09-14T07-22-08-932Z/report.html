@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — superpower-writing v3.4.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>superpower-writing v3.4.0</h1>
+<p class="verdict">Plugin effect: <span class="delta delta-zero">· 0.0 pts</span> vs baseline — improved 0 · flat 1 · regressed 0 of 1 case.</p>
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.270</span>
+<span class="num">2026-09-14 07:22 UTC</span>
+<span class="num">3m 8s</span>
+<span class="num">$1.92</span>
+<span class="num">6 runs</span>
+<span class="num">3 in flight</span>
+
+
+<span>judge sonnet</span>
+<span class="num">threshold 100%</span>
+<span>filtered: --case prose-numbers-vs-table-sweep</span>
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score · with plugin</span><span class="value">0%</span><span class="sub">mean of per-case scores</span></div>
+<div class="tile"><span class="label">Ablation Δ</span><span class="value num delta-zero">0.0</span><span class="sub">score points vs baseline, 1 of 1 case</span></div>
+<div class="tile"><span class="label">Baseline score</span><span class="value num">0%</span><span class="sub">without the plugin</span></div>
+<div class="tile"><span class="label">Cases</span><span class="value num">1</span><span class="sub">0 of 1 ≥ 100% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">0%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 100% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li>"With plugin" and "Baseline" runs are identical except for the plugin being loaded; Δ is the with-plugin score minus the baseline score.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>prose-numbers-vs-table-sweep</h2>
+<span class="muted mono">evals/prose-numbers-vs-table-sweep</span>
+<span class="spacer"></span>
+
+<span class="delta delta-zero">· 0.0 pts</span>
+<span class="muted">with plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">0%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">With plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">3 turns · $0.45 · 07:22:08 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">用户没贴 `.writing/`，也说了这轮不看 claim 状态，所以只跑了 Pass 3（正文数字 vs 表/图），Pass 1（claim 完整性）和 Pass 2（引用解析）没跑。下面这份就是 verify-report 的内容，按惯例它该落在 `.writing/verify-report.md`，我没往盘上写。
+
+## 对不上的（4 处）
+
+**1. `eval-c3` — geomean speedup：正文 `3.15×` vs 表 1 `2.82`**
+表是对的。拿表里五个 speedup 算几何平均：(2.97·3.84·2.22·3.06·2.30)^(1/5) = **2.82**。正文的 3.15 没有任何来源能支撑，改成 2.82。
+
+**2. `eval-c4` — defi-mixed 的 MHOT 时间：正文 `141.2 ms` vs 表 1 `171.2`**
+表是对的，而且能自证：523.8 / 171.2 = 3.06，跟表里 defi-mixed 那行的 speedup 吻合。如果真是 141.2，speedup 该是 3.71。看着像 171 → 141 的手误。
+
+**3. `eval-c5` — erc20-heavy 的 dispatch 占比：正文 `68.1%` vs 图 3 caption `61.3%`**
+这一处我判定不了哪边是新的——两个数都只出现一次，没有第三个地方能交叉验证，得你回去翻 perf 数据。好消息是正文那句 &quot;as much as ... on erc20-heavy&quot; 的排序论断两种取值下都成立（61.3% 仍是五个 workload 里最高的）。
+
+**4. `eval-c8` — trace 规模：正文 `1.8M` vs `eval-c2` 正文和表 1 caption 的 `1.2M`**
+1.2M 出现两次、1.8M 出现一次，External Validity 那句大概率是漏改的。
+
+## 表内部的一个问题（不算正文对不上，但建议一起改）
+
+表 1 `geomean` 行的 Peak RSS 写的是 **526**，这是算术平均（526.2）；几何平均是 **524.7 → 525**。同一行的 Speedup（2.82）和 Compile（25.3）我都验过，确实是几何平均。所以只有 RSS 这个格子跟行标签不一致。正文 `eval-c7` 抄的就是 526，跟表一致，严格说不构成 prose-table 失配，但 reviewer 真去按行标签验算的话会撞上。
+
+## 对得上的（不用动）
+
+- 表 1 五行的 speedup 全部能由自己那行的两个时间算出来，误差在四舍五入内，表内部自洽。
+- `eval-c3`：412.6 / 138.7 / 2.97、287.3 / 74.9 / 3.84 全对；&quot;largest single-workload win is erc20-heavy&quot; 成立。
+- `eval-c4`：196.1 / 88.5 / 2.22、proxy-chain 2.30 全对；&quot;两个涨得最少的&quot; 排序成立；&quot;defi-mixed 最重&quot;（523.8 为最大 revm 时间）成立。
+- `eval-c5`：54.1%、47.8% 对得上图 3；&quot;nft-mint 最低&quot; 成立；&quot;tracks its smaller speedup&quot;（nft-mint speedup 也最低）成立。
+- `eval-c6`：25.3、18.2、33.7、21.4 全对，min/max 归属也对，25.3 确为几何平均。
+- `eval-c7`：486、601 对得上，min/max 归属对。
+- `eval-c2` 的 1.2M 和 &quot;five workloads&quot; 跟 caption、表行数一致。
+
+## 查不了的
+
+`eval-c1` 的机器配置、10 次重放、1.5% 波动、revm 14.0，以及 `eval-c8` 的 &quot;four-day window&quot;，在你贴的内容里没有对应的表或图可比。这类叙述性数字正常做法是进 `numeric_overrides`，不然每轮都会被当成未匹配项报出来。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">3 turns · $0.38 · 07:22:08 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">扫完了。只做了数值一致性这一遍（Pass 3），比对范围就是你贴的正文 vs 表 1 + 图 3 的 caption。claim 完整性和引用解析没跑——你说这轮不管，而且 claims 文件和 .bib 都不在手上。报告没落盘（按流程它该在 `.writing/verify-report.md`），这边直接给你。
+
+## 对不上的，4 处
+
+**1. eval-c3 — 几何平均加速比：正文 3.15×，表 1 是 2.82**
+
+表里五个 speedup（2.97 / 3.84 / 2.22 / 3.06 / 2.30）的几何平均我算了一遍，就是 2.82，表是对的。3.15 跟表里任何算法都对不上：算术平均是 2.88，把下面第 2 条那个 141.2 代进去重算也只有 2.93。这个数应该是上一版留下来的。
+
+**2. eval-c4 — defi-mixed 的 MHOT 时间：正文 141.2 ms，表 1 是 171.2 ms**
+
+这条表内部自洽：523.8 / 171.2 = 3.06，正好是表里那一行的 speedup。如果按正文的 141.2 算，speedup 会是 3.71，跟表和图都对不上。所以八成是正文把 171.2 敲成了 141.2。
+
+**3. eval-c5 — erc20-heavy 的 dispatch 占比：正文 68.1%，图 3 caption 是 61.3%**
+
+这个我判断不了哪边对，得看 `dispatch_share.pdf` 里实际画的值——我只能比到 caption。提一句：不管是 61.3 还是 68.1，erc20-heavy 都还是五个里最高的，&quot;as much as&quot; 这个说法本身不用改，只是数字要统一。
+
+**4. eval-c8 — trace 规模：正文 1.8M transactions，前面 eval-c2 和表 1 caption 都是 1.2M**
+
+1.2M 出现两次（正文 + 表 caption），1.8M 只出现一次，倾向于 1.8M 是错的。这条在 External Validity 里，审稿人一眼就能看见跟 Setup 打架。
+
+## 对得上的（没动）
+
+- uniswap-v3 412.6 → 138.7 / 2.97×，erc20-heavy 287.3 → 74.9 / 3.84×，nft-mint 196.1 → 88.5 / 2.22×，proxy-chain 2.30×：全部跟表 1 一致，且每行 speedup = revm / MHOT 的除法都能对上。
+- &quot;largest single-workload win is erc20-heavy&quot;（3.84 确是最大）、&quot;two workloads that gain least&quot;（2.22 和 2.30 确是最小两个）、&quot;defi-mixed, the heaviest&quot;（523.8 确是最大）：排序性说法都成立。
+- eval-c6 编译开销：geomean 25.3、min 18.2 (erc20-heavy)、max 33.7 (defi-mixed)、uniswap-v3 21.4 —— 全对，25.3 也确实是那五个值的几何平均。
+- eval-c7 Peak RSS：geomean 526、486 (erc20-heavy)、601 (defi-mixed) —— 全对，526 也是几何平均算出来的。
+- eval-c5 的 54.1% (uniswap-v3) 和 47.8% (nft-mint)，以及 &quot;nft-mint sits lowest&quot;：跟图 3 caption 一致。
+
+Setup 那段的机器配置、10 次重放、1.5% 波动、revm 14.0、block 19,000,000、&quot;four-day window&quot; 这些没有表或图可比，不在这次扫描能判断的范围内。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">3 turns · $0.42 · 07:22:08 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">扫完了。正文里有 **4 个数**跟表 1 / 图 3 对不上，其余 22 个表/图支撑的数都能对上。
+
+## 对不上的
+
+**1. geomean 加速比 — eval-c3**
+- 正文：`geometric-mean speedup is $3.15\times$`
+- 表 1 geomean 行：**2.82**
+- 我按表里那列速比自己算了一遍（2.97, 3.84, 2.22, 3.06, 2.30 的五次方根）＝ **2.8196**。表是自洽的，所以 3.15 是正文那边的旧数。
+
+**2. defi-mixed 的 MHOT 时间 — eval-c4**
+- 正文：`MHOT cuts 523.8\,ms to 141.2\,ms`
+- 表 1 defi-mixed 行：**171.2**
+- 523.8 / 171.2 = 3.06，跟表里的 Speedup 列对得上；523.8 / 141.2 = 3.71，对不上。所以表是对的，正文是 171.2 写成了 141.2（看着像转位）。
+
+**3. erc20-heavy 的 dispatch 占比 — eval-c5**
+- 正文：`as much as 68.1\% on erc20-heavy`
+- 图 3 caption：**61.3%**
+- 这一条跟上面两条不同：caption 和正文都是手打的，图里 PDF 才是真的 ground truth，我这边看不到，所以只能说两处打架，不能判哪边对。你对 PDF 的时候顺手确认一下。另外不管取哪个值，erc20-heavy 都仍是五个里最高的，`as much as` 的说法本身不受影响。
+
+**4. trace 规模 — eval-c8**
+- 正文：`The 1.8M transactions in our trace`
+- eval-c2 正文写的是 1.2M，表 1 caption 也写的是 `1.2M-transaction mainnet trace`
+- 两票 1.2M 对一票 1.8M，1.8M 是离群的那个。
+
+## 对得上的
+
+表 1 的五行 revm / MHOT / Speedup / Compile / Peak RSS，正文引到的都对得上：412.6→138.7 (2.97×)、287.3→74.9 (3.84×)、196.1→88.5 (2.22×)、proxy-chain 2.30×、compile 的 25.3 / 18.2 / 33.7 / 21.4、RSS 的 526 / 486 / 601，以及图 3 的 54.1% 和 47.8%。几个&quot;最大/最小/最重&quot;的定性说法（erc20-heavy 最快、nft-mint 与 proxy-chain 涨得最少、defi-mixed 最重、nft-mint dispatch 占比最低）按现表也都站得住。表 1 内部每行 Speedup = revm/MHOT 都能对上，Compile 和 RSS 的 geomean 也算得出来，表本身没问题。
+
+## 没法查的
+
+setup 那段的 7950X / 16 核 / 4.5 GHz / 64 GB / Ubuntu 24.04 / 重放 10 次 / 抖动 1.5% / revm 14.0 / 起始区块 19,000,000，以及 eval-c8 的 &quot;four-day window&quot;，在你贴的内容里没有对应的表或图，我没有可比的东西，就没动。只提一句：第 4 条改成 1.2M 之后，four-day 这个窗口长度值得你顺带核一下还成不成立。
+
+另外一个不算数字问题的提醒：eval-c5 用 nft-mint 的低 dispatch 占比去解释它的低加速比，但 proxy-chain 在图 3 里是 58.9%（第二高），加速比却是第二低（2.30×）。rebuttal 场景下这个反例容易被审稿人拿来问，你可能想提前想好怎么说。
+
+（按流程这份报告本该落在 `.writing/verify-report.md`，仓库不在这台机器上，我就直接写在这儿了。claim 状态按你说的没碰，正文里也没有 `\cite`，引用那一关不适用。）</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+</section><section class="arm">
+<div class="arm-head">
+<span class="arm-label">Baseline (no plugin)</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">1 turns · $0.24 · 07:23:28 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">逐个核对完了。以下是对不上的，按正文出现顺序：
+
+## 对不上的（4 处）
+
+**1. eval-c3 — geomean speedup：正文 $3.15\times$ vs 表 2.82**
+表里五个 speedup（2.97 / 3.84 / 2.22 / 3.06 / 2.30）的几何平均正好是 2.82，所以表是自洽的，错的是正文的 3.15。
+
+**2. eval-c4 — defi-mixed 的 MHOT 时间：正文 141.2 ms vs 表 171.2 ms**
+这处表更可信：523.8 / 171.2 = 3.06，跟表里 defi-mixed 那行的 speedup 对得上；如果是 141.2，speedup 应该是 3.71。看着像 1/7 打串了。
+
+**3. eval-c5 — erc20-heavy 的 dispatch 占比：正文 68.1\% vs 图 3 caption 61.3\%**
+定性说法不受影响（61.3\% 仍是五个里最高的，&quot;as much as&quot; 成立），只是数字要改。
+
+**4. eval-c8 — trace 规模：正文 1.8M vs 1.2M**
+eval-c2 和表 1 的 caption 都写的 1.2M transactions，只有 External Validity 这段是 1.8M。
+
+## 另外一处，是表自己内部的
+
+geomean 行的 Peak RSS 写的 526 MB，但 512/486/534/601/498 的几何平均是 ≈ 524.7（约 525），526.2 是算术平均。同一行的 Compile 25.3 ms 确实是几何平均（算术平均会是 25.9）。所以这一行两列用了不同的平均方式，而 eval-c7 正文又跟着写了 &quot;averages 526\,MB on geometric mean&quot;。这个 reviewer 一算就能看出来，建议要么把 RSS 换成 524.7，要么把标签和正文改成 arithmetic mean。
+
+## 对得上的（没动）
+
+- uniswap-v3 412.6 → 138.7、$2.97\times$；erc20-heavy 287.3 → 74.9、$3.84\times$；nft-mint 196.1 → 88.5、$2.22\times$；proxy-chain $2.30\times$
+- Compile：geomean 25.3、erc20-heavy 18.2、defi-mixed 33.7、uniswap-v3 21.4，且 18.2/33.7 确实是最小最大
+- RSS：486 / 601 是最小最大
+- Dispatch：uniswap-v3 54.1\%、nft-mint 47.8\%，且 47.8\% 确为最低
+- 几个定性排序也都站得住：erc20-heavy 是最大 win、nft-mint 和 proxy-chain 是涨得最少的两个、defi-mixed 是 revm 时间最长的 workload、nft-mint dispatch 最低对应它 speedup 最小
+
+有一点提一句：我只能判断正文和表/图哪边自洽，判断不了重跑后的真值。前三处表和图内部都自洽（2.82 是表里 speedup 列算出来的，171.2 和 3.06 互相对得上），所以按&quot;表图是上周重跑的、正文是手改的&quot;来看，应该改正文。1.2M vs 1.8M 那处没有第三方数据能裁，你自己确认一下哪个是这轮的 trace 规模。</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">1 turns · $0.19 · 07:23:43 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">对完了，正文里有 4 个数跟表 1 / 图 3 对不上：
+
+**1. geomean 加速比 —— eval-c3**
+正文：「the geometric-mean speedup is $3.15\times$」
+表 1 geomean 行：**2.82**
+拿表里五个 speedup（2.97 / 3.84 / 2.22 / 3.06 / 2.30）自己算一遍几何平均，正好是 2.82。所以是正文这个 3.15 没跟着更新。
+
+**2. defi-mixed 的 MHOT 时间 —— eval-c4**
+正文：「MHOT cuts 523.8\,ms to **141.2**\,ms」
+表 1：523.8 → **171.2**
+表里那行的 speedup 3.06 = 523.8/171.2，自洽；如果是 141.2，speedup 应该是 3.71。所以错的是正文，171.2 才对。
+
+**3. erc20-heavy 的 dispatch 占比 —— eval-c5**
+正文：「as much as **68.1\%** on erc20-heavy」
+图 3 caption：**61.3\%**
+这个我没法从你贴的东西里判断哪边是重跑后的值（不像前两个有内部交叉验证），得你自己看一眼 perf 的输出。顺带说一句：改成 61.3% 的话，「as much as ... on erc20-heavy」这个说法还是成立的，它仍然是五个里最高的，句子结构不用动。
+
+**4. trace 规模 —— eval-c8 vs eval-c2**
+外部有效性那段：「The **1.8M** transactions in our trace」
+setup（eval-c2）：「a contiguous window of **1.2M** mainnet transactions」，表 1 caption 也是「over the 1.2M-transaction mainnet trace」
+两处 1.2M 对一处 1.8M，落单的是 eval-c8。
+
+其余都对得上，包括：uniswap-v3 的 412.6/138.7/2.97、erc20-heavy 的 287.3/74.9/3.84、nft-mint 的 196.1/88.5/2.22、proxy-chain 的 2.30；「最小的两个是 nft-mint 和 proxy-chain」「defi-mixed 最重」「nft-mint 的 dispatch 占比最低」这几个比较关系在表/图里也都站得住；compile 的 25.3 geomean 和 18.2–33.7 区间、RSS 的 526 geomean 和 486–601 区间，重算了也跟表一致。</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">1 turns · $0.24 · 07:23:57 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">一个一个对完了。下面 4 处对不上，其余数字（uniswap-v3 的 412.6/138.7/2.97、erc20-heavy 的 287.3/74.9/3.84、nft-mint 的 196.1/88.5/2.22、proxy-chain 的 2.30、编译时间那一段、RSS 的 486/601 区间、图里的 54.1% 和 47.8%）都跟表/图一致。
+
+**1. eval-c3 几何平均加速比：正文 $3.15\times$ vs 表 1 的 2.82**
+我按表里五个数算了一遍：geomean(2.97, 3.84, 2.22, 3.06, 2.30) = 2.82。表是对的，正文的 3.15 要改成 2.82。（顺带：算术平均是 2.88，也不是 3.15，所以 3.15 不像是&quot;换了一种平均&quot;，更像是旧数没跟着改。）
+
+**2. eval-c4 defi-mixed 的 MHOT 时间：正文 141.2\,ms vs 表 1 的 171.2\,ms**
+表内部自洽：523.8/171.2 = 3.06，跟表里 Speedup 列一致；而 523.8/141.2 = 3.71，跟任何一列都对不上。所以表是对的，正文 141.2 应为 171.2（看着像 17→14 的手滑）。
+
+**3. eval-c5 erc20-heavy 的 dispatch 占比：正文 68.1\% vs 图 3 caption 的 61.3\%**
+这个我判断不了哪边对——你贴的内容里这两个数各只出现一次，图本身（PDF）我看不到。需要你回机器上看 perf 数据定哪个是重跑后的值。另外提一句：不管是 61.3 还是 68.1，&quot;as much as ... on erc20-heavy&quot; 这个说法都成立，因为 caption 里 erc20-heavy 仍是五个里最高的。
+
+**4. eval-c8 trace 规模：正文 1.8M vs eval-c2 和表 1 caption 的 1.2M**
+两处说 1.2M（正文 setup + 表 caption），一处说 1.8M，孤立的是 c8。按多数看应该把 1.8M 改成 1.2M，但这个数只有你知道重跑用的到底是哪个窗口，值得确认一下再改。
+
+---
+
+另外有一处不算&quot;对不上&quot;、但可能被审稿人揪住：
+
+**eval-c7 / 表 1 geomean 行的 Peak RSS = 526**
+正文说 &quot;averages 526\,MB on geometric mean&quot;，数字跟表一致，所以严格说不算 mismatch。但 526 是那五个值的**算术**平均（2631/5 = 526.2）；几何平均是 524.7，四舍五入 525。同一行的另外两格（Speedup 2.82、Compile 25.3）我验过都是真几何平均。所以要么把表里 526 改成 525，要么在正文和行标里把 RSS 这一栏说成算术平均——现在是三格混着两种平均，行标只写了 geomean。</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>rebuttal 交上去之前我想把评测这节的数字自己扫一遍。表和图上周重跑过一次，正文是我手改的，改了四五轮，我担心有几个数没跟着更新。</p>
+<p>仓库在实验室那台机器上，这边只有我贴的东西，你就着下面的正文、表 1 和图 3 一个数一个数地对，别去翻文件，也别去猜我没贴的内容。claims 文件我没贴，这轮不用管 claim 的状态，只看数字对不对得上。</p>
+<p>哪些数跟表或图对不上，你给我列出来；对得上的别动它。</p>
+<pre><code class="language-latex">\section{Evaluation}
+\label{sec:eval}
+
+\subsection{Experimental Setup}
+
+% claim: eval-c1
+All measurements run on a single Ryzen 9 7950X (16 cores at 4.5\,GHz base) with
+64\,GB of DDR5 and Ubuntu 24.04, turbo and C-states disabled. Every workload is
+replayed 10 times and we report the median; run-to-run variation stays under
+1.5\%. The baseline is revm 14.0 built at \texttt{--release} with
+\texttt{lto = &quot;fat&quot;}; MHOT lowers the same bytecode through our AOT backend
+before replay begins.
+
+% claim: eval-c2
+The trace is a contiguous window of 1.2M mainnet transactions starting at block
+19{,}000{,}000, partitioned into five workloads by the dominant callee contract
+category.
+
+\subsection{End-to-End Replay Latency}
+
+% claim: eval-c3
+Table~\ref{tab:e2e} reports end-to-end replay latency for both engines. On
+uniswap-v3, MHOT brings 412.6\,ms down to 138.7\,ms, a $2.97\times$ speedup, and
+the largest single-workload win is erc20-heavy, where 287.3\,ms becomes
+74.9\,ms, or $3.84\times$. Across the five workloads the geometric-mean speedup
+is $3.15\times$.
+
+% claim: eval-c4
+The two workloads that gain least are nft-mint at $2.22\times$ (196.1\,ms to
+88.5\,ms) and proxy-chain at $2.30\times$; both are dominated by calldata copying
+and cold storage access, which the AOT backend does not touch. On defi-mixed,
+the heaviest workload in the trace, MHOT cuts 523.8\,ms to 141.2\,ms.
+
+\begin{table}[t]
+\caption{End-to-end replay latency over the 1.2M-transaction mainnet trace.
+Speedup is revm time divided by MHOT time. Compile is the one-off AOT
+compilation cost; Peak RSS is the maximum resident set size observed during
+replay.}
+\label{tab:e2e}
+\begin{tabular}{lrrrrr}
+\toprule
+Workload &amp; revm (ms) &amp; MHOT (ms) &amp; Speedup &amp; Compile (ms) &amp; Peak RSS (MB) \\
+\midrule
+uniswap-v3  &amp; 412.6 &amp; 138.7 &amp; 2.97 &amp; 21.4 &amp; 512 \\
+erc20-heavy &amp; 287.3 &amp; 74.9  &amp; 3.84 &amp; 18.2 &amp; 486 \\
+nft-mint    &amp; 196.1 &amp; 88.5  &amp; 2.22 &amp; 26.9 &amp; 534 \\
+defi-mixed  &amp; 523.8 &amp; 171.2 &amp; 3.06 &amp; 33.7 &amp; 601 \\
+proxy-chain &amp; 344.0 &amp; 149.6 &amp; 2.30 &amp; 29.1 &amp; 498 \\
+\midrule
+geomean     &amp; ---   &amp; ---   &amp; 2.82 &amp; 25.3 &amp; 526 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Where the Speedup Comes From}
+
+% claim: eval-c5
+Figure~\ref{fig:dispatch} attributes the baseline&#39;s cost. The dispatch loop
+accounts for 54.1\% of retired cycles on uniswap-v3 and as much as 68.1\% on
+erc20-heavy, whose short, repetitive transfer bytecode maximises the ratio of
+dispatches to useful work. nft-mint sits lowest at 47.8\%, which tracks its
+smaller speedup in Table~\ref{tab:e2e}.
+
+\begin{figure}[t]
+\includegraphics[width=\columnwidth]{figures/dispatch_share.pdf}
+\caption{Dispatch-loop share of retired cycles under the revm baseline, from
+\texttt{perf} over the same trace: 54.1\% on uniswap-v3, 61.3\% on erc20-heavy,
+47.8\% on nft-mint, 52.6\% on defi-mixed, and 58.9\% on proxy-chain.}
+\label{fig:dispatch}
+\end{figure}
+
+\subsection{Compilation and Memory Overhead}
+
+% claim: eval-c6
+AOT compilation is a one-off cost paid before replay begins. Its geometric mean
+across the five workloads is 25.3\,ms, ranging from 18.2\,ms on erc20-heavy to
+33.7\,ms on defi-mixed, and it is amortised over the whole replay window. On
+uniswap-v3 the compiler spends 21.4\,ms before the first transaction runs.
+
+% claim: eval-c7
+Peak resident set size averages 526\,MB on geometric mean, from 486\,MB on
+erc20-heavy to 601\,MB on defi-mixed. The compiled code cache is the bulk of the
+difference from the baseline.
+
+\subsection{External Validity}
+
+% claim: eval-c8
+The 1.8M transactions in our trace come from a single four-day window on one
+chain. Fee-market regimes, contract-deployment patterns, and client-side caching
+all shift over longer horizons, so the workload mix here should be read as one
+snapshot rather than as steady state.
+</code></pre>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">result</span><span class="badge">llm</span></div>
+<div class="md"><p>The user pasted a complete evaluation section — prose, a five-row results table, and a figure caption — and asked which prose numbers no longer agree with the table or the figure, adding that the ones that do agree should be left alone. The repository is on another machine and this run has read-only tools in an empty directory, so nothing can be read from disk and a list delivered in the reply is the correct delivery. Grade only which prose numbers the answer hands back as not agreeing; ignore formatting, length, language, whether any file was edited, and whatever else the answer volunteers.</p>
+<p>The one thing to judge: does the answer return every prose number that contradicts the table or the caption, and nothing besides?</p>
+<p>PASS needs both halves.</p>
+<p>Complete — all four of these are reported as not agreeing (naming a pair and then explaining it away does not count):</p>
+<ol>
+<li>the geometric-mean speedup written 3.15× in prose while the table's geomean row says 2.82;</li>
+<li>defi-mixed post-MHOT latency written 141.2 ms while the table says 171.2 ms;</li>
+<li>the erc20-heavy dispatch share written 68.1% while the figure caption says 61.3%;</li>
+<li>the trace size written 1.8M in the external-validity paragraph while the setup paragraph and the table caption both say 1.2M.</li>
+</ol>
+<p>Clean — apart from those four, the answer hands back no other number as a mismatch, as one it could not match or could not check, or as one the user should now confirm himself, in the main list or in a second list or as an aside. Two groups in particular must not come back in any of those shapes. First, prose numbers that do appear verbatim in the row or caption the prose attributes them to: 412.6, 287.3, 74.9, 138.7, 196.1, 88.5, 2.97, 3.84, 2.22, 2.30, 21.4, 18.2, 33.7, 25.3, 486, 601, 526, 54.1%, 47.8%. Second, the setup and external-validity numbers that have no counterpart anywhere in the table or the caption: the 7950X model number, 16 cores, 4.5 GHz, 64 GB DDR5, Ubuntu 24.04, 10 replays, 1.5% run-to-run variation, revm 14.0, block 19,000,000, the four-day window. Closing that second group out in one line — narrative numbers, nothing in the table to reconcile them against, nothing to do — is fine; passing them to the user is not.</p>
+<p>FAIL if either half breaks: any of the four missing or excused, or the section called consistent, or any number from those two groups returned as unmatched, unverifiable, or for the user to check.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">skill-fired</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Skill&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\&quot;skill\&quot;\\s*:\\s*\&quot;(?:[\\w-]+:)?claim-verification\&quot;&quot;</code></div></div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>
