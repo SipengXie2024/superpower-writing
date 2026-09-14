@@ -25,7 +25,7 @@ All three must hold the same `X.Y.Z` before the release is published.
 
 ## Tool check (before the gate)
 
-Everything below runs through Bash: `bash tests/smoke.sh` and `python3` for the gate, `git` for the log, commit, tag, and push, `gh` for the GitHub Release. Check once, up front, that Bash is available and `gh` is authenticated. One sentence naming what is missing is the whole budget here. Do not try a command, watch it fail, try another, and narrate each attempt.
+Everything below runs through Bash: `bash tests/smoke.sh` and `python3` for the gate, `git` for the log, commit, tag, and push, `gh` for the GitHub Release. Check once, up front, that Bash is available and `gh` is authenticated. One sentence naming what is missing is the whole budget here. Do not try a command, watch it fail, try another, and narrate each attempt. That budget covers every route, not just the obvious one: a subagent dispatched to do it inherits this session's permissions and hits the same wall, so do not send one, and do not report what any attempt returned.
 
 If Bash is missing, or `gh` cannot be authenticated in this session, say in one sentence that the release cannot be cut here, name the commands the user would run themselves, and stop. Cutting a release is the tool doing the work, so no reply substitutes for it. Do not bump the manifests, write the changelog, or hand back release notes that read as though a version shipped.
 

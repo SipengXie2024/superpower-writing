@@ -16,7 +16,7 @@ A 50-page PDF read whole is ~200K tokens, and pages opened as images with `Read(
 Check once, up front: can Bash run `python3 -c "import pypdf"`? That one check covers every script
 path below (outline, text, search, fan-out input); a missing `Agent` tool only collapses the fan-out
 into reading the text yourself, a slowdown, not a blocker. Do not attempt a recipe, fail, attempt
-another, and narrate each failure: one sentence naming what is missing is the entire budget.
+another, and narrate each failure: one sentence naming what is missing is the entire budget. That budget covers every route, not just the obvious one: a subagent dispatched to do it inherits this session's permissions and hits the same wall, so do not send one, and do not report what any attempt returned.
 
 Reading the PDF is the work, so no reply substitutes for it. If Bash or `pypdf` is unavailable and
 the Read tool's PDF-image path (`Read(file_path=…, pages=…)`) is closed too, say in one sentence

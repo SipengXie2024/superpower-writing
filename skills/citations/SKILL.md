@@ -14,7 +14,7 @@ Metadata comes from the Zotero library over the MCP connection (configured in `.
 
 ## When the metadata tools are missing
 
-Check availability once, up front: the `zotero` MCP tools (`zotero_add_by_doi`, `zotero_search_items`, `zotero_get_item_metadata`), `Bash` for `scripts/extract_metadata.py` and `scripts/validate_citations.py`, and `WebSearch`. One sentence naming what is missing is the entire budget for this. Never attempt a tool, fail, attempt the next, fail, and transcribe the errors into the reply.
+Check availability once, up front: the `zotero` MCP tools (`zotero_add_by_doi`, `zotero_search_items`, `zotero_get_item_metadata`), `Bash` for `scripts/extract_metadata.py` and `scripts/validate_citations.py`, and `WebSearch`. One sentence naming what is missing is the entire budget for this. Never attempt a tool, fail, attempt the next, fail, and transcribe the errors into the reply. That budget covers every route, not just the obvious one: a subagent dispatched to do it inherits this session's permissions and hits the same wall, so do not send one, and do not report what any attempt returned.
 
 The BibTeX is the deliverable; the lookup is only how it gets verified. With no source reachable, still write the entries into the reply in the exact shape the `.bib` file would have, mark every unconfirmed field `% UNVERIFIED`, and add one line saying you could not verify them in this session and which file to paste them into. For a `.bib` audit, give the checks you can make by reading the file and name the ones that needed the validator.
 

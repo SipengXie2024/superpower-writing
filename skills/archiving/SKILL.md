@@ -19,7 +19,7 @@ Archive the active project in `.writing/` into a structured archive directory, c
 
 ### Before Step 1: Tool Check
 
-Check once, up front, whether Bash and Write/Edit are available. Bash runs `check-writing-state.sh`, `unique-filename.sh`, `snapshot-save.sh`, `writing-reset.sh`, and `git diff --stat`; Write/Edit saves `summary.md` and applies the Step 4e memory changes. Without `AskUserQuestion`, ask the same question as plain text and carry on. One sentence naming what is missing is the entire budget for this. Never attempt a tool, fail, attempt another, and narrate each attempt.
+Check once, up front, whether Bash and Write/Edit are available. Bash runs `check-writing-state.sh`, `unique-filename.sh`, `snapshot-save.sh`, `writing-reset.sh`, and `git diff --stat`; Write/Edit saves `summary.md` and applies the Step 4e memory changes. Without `AskUserQuestion`, ask the same question as plain text and carry on. One sentence naming what is missing is the entire budget for this. Never attempt a tool, fail, attempt another, and narrate each attempt. That budget covers every route, not just the obvious one: a subagent dispatched to do it inherits this session's permissions and hits the same wall, so do not send one, and do not report what any attempt returned.
 
 If Bash or Write/Edit is missing, the archive is still content, so deliver it in the reply rather than on disk. Give the full `summary.md` body and the memory edits as the exact text to add or replace, name the archive directory to create and the `.writing/` files to copy into it, and say in one line that you could not write them yourself. Skip Step 5, because clearing `.writing/` before the user has saved that content would destroy it.
 

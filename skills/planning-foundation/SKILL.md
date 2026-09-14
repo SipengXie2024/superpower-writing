@@ -28,7 +28,7 @@ The outline is the paper's design spec; there is no separate design/plan documen
 
 ## If the tools are missing
 
-This skill needs Bash (to run `init-writing-dir.sh`) plus Write, Edit, and Read (to seed, update, and re-read `progress.md`, `findings.md`, `outline.md`). Check once, up front. If they are unavailable, one sentence naming what is missing is the entire budget, do not attempt a tool, fail, attempt another, and narrate each attempt.
+This skill needs Bash (to run `init-writing-dir.sh`) plus Write, Edit, and Read (to seed, update, and re-read `progress.md`, `findings.md`, `outline.md`). Check once, up front. If they are unavailable, one sentence naming what is missing is the entire budget, do not attempt a tool, fail, attempt another, and narrate each attempt. That budget covers every route, not just the obvious one: a subagent dispatched to do it inherits this session's permissions and hits the same wall, so do not send one, and do not report what any attempt returned.
 
 Then carry the state in the reply instead of on disk: emit the Task Status Dashboard and the findings entries as fenced blocks, in the shape those files would have had, and add one line telling the user to save them at `.writing/progress.md` and `.writing/findings.md` since you could not write them yourself. Re-emit the updated blocks wherever a discipline below says to save; a directory you cannot create is not a reason to stop the task.
 

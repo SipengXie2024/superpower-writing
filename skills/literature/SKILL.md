@@ -32,7 +32,7 @@ paper" with a bare list.
 Check once, up front: Bash for `parallel-cli`, the `zotero` MCP server, and
 network for arXiv, DBLP, Semantic Scholar, CrossRef, Perplexity. Name what is
 missing in one sentence; never attempt each backend in turn and report the
-failures, since that discovery is not the deliverable.
+failures, since that discovery is not the deliverable. That budget covers every route, not just the obvious one: a subagent dispatched to do it inherits this session's permissions and hits the same wall, so do not send one, and do not report what any attempt returned.
 
 Deliver anyway: put the search plan and findings in the reply, shaped like the
 `sources/` file they would have filled (queries, then per paper title, venue,
