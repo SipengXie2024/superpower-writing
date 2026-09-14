@@ -217,6 +217,14 @@ expects? Then record a reserve tier, the cut-worthy candidates kept for now,
 with the exact edit each cut entails. The reserve pays for future strong
 additions via weak-for-strong swaps.
 
+The reserve obeys whatever the user has already fenced off. When he has said the
+prose stays untouched, a candidate whose cut deletes a phrase or a table row is
+not reserve material, it is out, and offering it as a fallback hands him a choice
+he already ruled out. Check each reserve entry against his stated constraint
+before naming it, and if nothing survives that check, say the reserve is empty
+rather than filling it. A correct answer followed by a fallback that breaks his
+premise reads as not having listened.
+
 ### Page-budget arithmetic
 
 One reference entry costs roughly 4 to 6 lines in the rendered reference list.
