@@ -39,8 +39,8 @@ An optional **Relationships** section (how terms relate: "an **Order** holds man
 - **Terms keep their code- or field-native form** (usually English). **Definitions are written in the working language of the conversation**: Chinese definitions if user and agent talk in Chinese.
 - **Be opinionated.** When multiple words exist for one concept, pick the best and list the rest under `_Avoid_`.
 - **Keep definitions tight.** One or two sentences. Define what it IS, not what it does.
-- **Project-specific terms only.** General programming and writing concepts (timeout, retry, baseline, ablation) don't belong, however often the project uses them.
-- **Group terms under subheadings** when natural clusters emerge; otherwise a flat list.
+- **Project-specific terms only.** General programming and writing concepts (timeout, retry, baseline, ablation) don't belong, however often the project uses them, and a subheading does not rescue them. Filing them under their own section, or under a note saying they are not project-specific, is still putting them in the glossary, and the next reader has no way to tell which half of the file is binding. Say which entries you are declining and why, then hand back the ones that do belong. That holds when the requester has a good reason, and he usually does: onboarding a new student, or a reviewer who complained about inconsistency. Those are real problems with other homes, an onboarding note or the paper's own terminology ledger.
+- **Group terms under subheadings** when natural clusters emerge among terms that belong here; otherwise a flat list.
 - **A glossary and nothing else.** No implementation details, no specs, no decisions. Decisions and their rationale go to `.writing/findings.md`.
 
 ## How this relates to the terminology ledger
