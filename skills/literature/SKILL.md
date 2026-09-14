@@ -236,6 +236,17 @@ axes and bare-dash rows read as filler. Cell judgments come only from claims
 the prose or a verified source supports; an unsupported cell gets an explicit
 n/a marker, never an invented value.
 
+When the user rejects the dash too, the entry leaves the table. That is the move
+the rule above already implies, and it is the only one left: a row is itself the
+claim that the entry is comparable on those axes, and a group heading annotates
+that claim without retracting it. Regrouping the table, or renaming the last
+column to something the empty cells can answer, still hands the reader the
+comparison. Give those entries a paragraph, or a second small table carrying its
+own columns, and say in one line why the axes do not apply. A figure recalled
+from memory is an invented value here as much as a guessed one, however confident
+the recollection: only numbers the user supplied, or a source open in front of
+you states, may fill a cell.
+
 ### Novelty-risk scanning
 
 Every literature search doubles as competitor discovery. When a found system
