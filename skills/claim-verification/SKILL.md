@@ -1,6 +1,6 @@
 ---
 name: claim-verification
-description: Evidence-reliability check. Walks every % claim tag in LaTeX manuscript/*.tex, confirms \cite{} citekeys resolve against .writing/refs.bib (exported from Zotero), runs semantic match against network-fetched abstracts to catch hallucinated or mismatched citations, optionally checks numeric/table consistency, flags any [NEEDS-EVIDENCE] or draft-only markers. Use when a draft is ready to hand to the human author, before submission, after a round of manual revisions, or on demand for a single section, including "检查一下引用", "核对claim", "verify citations", "查查有没有编造的引用".
+description: Evidence-reliability check over a LaTeX draft. Walks every % claim tag, confirms \cite{} citekeys resolve against .writing/refs.bib, matches each citation against the cited source's own abstract to catch hallucinated ones, and sweeps prose numbers against the tables and figure captions they came from. Use when a draft needs checking before submission, after manual revisions, or one section on demand, including "检查一下引用", "核对claim", "verify citations", and equally "把评测这节的数字扫一遍", "正文的数跟表对不对得上". A numbers-only sweep with no citation question attached is still this skill.
 ---
 
 # Claim Verification

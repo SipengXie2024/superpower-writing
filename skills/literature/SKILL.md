@@ -2,13 +2,13 @@
 name: literature
 description: >-
   Find and review academic literature. Use when the user wants to search
-  papers, survey the state of a research direction, look up a paper or
-  dataset, find baselines or related work, enrich a related-work section or
-  comparison table, screen weak citations, or verify that cited works exist.
-  Routes through Zotero semantic search for in-library papers, parallel-cli
-  web search, a deep-research fallback, and direct arXiv, DBLP, Semantic
-  Scholar, and CrossRef access. Chinese triggers: 搜文献, 综述某方向,
-  查论文或数据集, 找 baseline, 补充对比表, 文献核验.
+  papers, survey a research direction, look up a paper or dataset, find
+  baselines or related work, fill or prune a related-work section or
+  comparison table, screen weak citations, or verify that cited works
+  exist. Choosing which references to cut when over a page budget, and
+  refusing to invent numbers for an empty comparison-table row, both
+  belong here. Chinese triggers: 搜文献, 综述某方向, 查论文或数据集,
+  找 baseline, 补充对比表, 文献核验, 超页数砍引用, 对比表有几行没数据.
 allowed-tools: Read Write Edit Bash
 ---
 
