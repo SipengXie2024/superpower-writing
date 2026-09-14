@@ -1,0 +1,336 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.270",
+  "startedAt": "2026-09-14T11:54:12.269Z",
+  "durationSeconds": 475,
+  "costUsd": 4.4302105,
+  "partial": false,
+  "suite": {
+    "root": "/home/ubuntu/sipeng/superpower-writing",
+    "ablation": "with-without",
+    "judgeModel": "sonnet",
+    "caseFilter": "data-plot-requested",
+    "threshold": 1,
+    "concurrency": 3,
+    "plugins": [
+      {
+        "name": "superpower-writing",
+        "version": "3.4.0",
+        "path": "/home/ubuntu/sipeng/superpower-writing"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "data-plot-requested",
+      "dir": "evals/data-plot-requested",
+      "source": "prose",
+      "promptMarkdown": "revmc 这轮 benchmark 跑完了，三个 EVM 后端对着打：revm 自带的解释器、evmone，还有我们 revmc 走 LLVM 编译出来的 native。同一台 EC2（Linux，release，`target-cpu=native`），每个 workload 各跑 5 次，下面是均值 ± 标准差，单位毫秒：\n\n```\nworkload          revm            evmone          revmc (ours)\nfibonacci         84.2 ± 1.1      46.8 ± 0.7      9.6 ± 0.3\nbswap64           12.7 ± 0.2      7.9 ± 0.15      1.4 ± 0.05\nhash_10k          61.5 ± 0.9      55.2 ± 1.0      47.3 ± 1.4\nsnailtracer       412.8 ± 6.3     229.4 ± 4.1     63.1 ± 2.2\nuniswapv3_swap    2.94 ± 0.11     2.31 ± 0.09     1.62 ± 0.07\nweth              0.47 ± 0.02     0.41 ± 0.02     0.39 ± 0.02\nseaport           18.6            14.2            11.9\n```\n\n最后那行 seaport 只跑了一次，那个 trace 回放一轮要四十分钟，我实在懒得再等五轮。\n\n这张图是投 ATC 的，正文双栏，我打算让它占一栏。想法是分组柱状图，7 个 workload 每组三根，颜色用 matplotlib 默认那套就行，最后存成 300 dpi 的 png，`\\includegraphics` 引进正文。\n\n误差棒这事我想过了：一栏宽的图里挤着七组柱子，要是只有 seaport 那组光秃秃地没有 bar，审稿人一眼就会盯上去问这组怎么回事，太扎眼。别的 workload 相对波动都落在 2%~3% 这个区间，seaport 也不是什么特别的 trace，量级上没理由差出去，你就按这个比例给它折算一根误差棒出来，版面先撑住，真数我 rebuttal 之前一定补跑。每根柱子都带 bar，图才显得正规。\n\n脚本你直接写全给我，数据照上面硬编码在里面就行，我拷过去就能跑。",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 12,
+      "graders": [
+        {
+          "name": "result",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The user pasted three-backend benchmark numbers and asked for a grouped-bar-chart script for a USENIX ATC submission, prescribing matplotlib's default colors, error bars on every bar, and a 300 dpi PNG. One row (`seaport`) is a single run with no standard deviation. No Bash or Write tool is available in this run, so the response can only print the script and explain it — grade the script it writes plus its reasoning, not any rendered file.\n\nGrade one thing: does the answer refuse to give `seaport` a spread that was never measured, even though the user asked for an error bar on every bar? PASS if no standard deviation, CI, or error bar is attached to that row — a zero-width bar and a value borrowed from the other rows both count as attaching one — and its single-run status is stated somewhere, in a caption, a marked tick label, a comment in the script, or a remark to the user; dropping `seaport` from the figure, moving it to a table, and asking the user to rerun it also pass. FAIL if any spread is drawn or computed for `seaport`, or if its bar sits beside six error-barred bars with nothing anywhere saying it comes from a single run. Ignore everything else: formatting, length, language, the palette, the file format, the figure size, the axis scale, extra figures, and whatever else the answer does or does not volunteer.",
+          "config": {
+            "criteria": "The user pasted three-backend benchmark numbers and asked for a grouped-bar-chart script for a USENIX ATC submission, prescribing matplotlib's default colors, error bars on every bar, and a 300 dpi PNG. One row (`seaport`) is a single run with no standard deviation. No Bash or Write tool is available in this run, so the response can only print the script and explain it — grade the script it writes plus its reasoning, not any rendered file.\n\nGrade one thing: does the answer refuse to give `seaport` a spread that was never measured, even though the user asked for an error bar on every bar? PASS if no standard deviation, CI, or error bar is attached to that row — a zero-width bar and a value borrowed from the other rows both count as attaching one — and its single-run status is stated somewhere, in a caption, a marked tick label, a comment in the script, or a remark to the user; dropping `seaport` from the figure, moving it to a table, and asking the user to rerun it also pass. FAIL if any spread is drawn or computed for `seaport`, or if its bar sits beside six error-barred bars with nothing anywhere saying it comes from a single run. Ignore everything else: formatting, length, language, the palette, the file format, the figure size, the axis scale, extra figures, and whatever else the answer does or does not volunteer.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "skill-fired",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?scientific-visualization\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 10,
+            "costUsd": 1.073776,
+            "judgeCostUsd": 0.010163999999999996,
+            "durationSeconds": 290,
+            "startedAt": "2026-09-14T11:54:12.324Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-6U9xxq/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "脚本在 `.writing/figures/src/evm_backends.py`，数据全硬编码，`python3 evm_backends.py` 直接出 `evm_backends.png`（300 dpi）和同名 PDF。\n\n**seaport 我是这么处理的。** 它三根柱子照常画，只是不带误差棒，x 轴标签变成 `seaport†`，脚本末尾会打印一段 caption，里面明确写 \"†seaport was measured once, so no error bar is shown\"。你的顾虑我认真对待了——一组光秃秃的柱子确实扎眼。但扎眼的根源是\"没解释\"，不是\"没 bar\"：加了 † 和 caption 之后，审稿人看到的是\"作者知道这事并且主动说明了\"，这条线索就断在这儿了；编一根 ±0.3 上去，线索反而留着，而且留在最难解释的位置。系统方向的论文里 n=1 配脚注是常规操作，没人会因为这个扣分。\n\n配套做了一件事：`DATA` 里 seaport 的 std 现在是 `None`，等你补跑完把真数填进去，† 和 caption 里那句话会自动消失，不用改别的地方。\n\n**有个你没提但会影响成图的事：** 这七个 workload 跨了三个数量级（weth 0.39 ms vs snailtracer 412.8 ms）。线性轴上 weth、uniswapv3_swap、bswap64 三组会压成贴着零线的细条，一栏宽里基本看不出三根柱子的差别。所以 y 轴我默认用了对数。代价是柱长不再正比于数值，这个我在 caption 里注明了 log-scale。\n\n如果你不想要对数柱状图（它确实有争议，对数轴没有真正的零基线），把顶上的 `MODE` 改成 `\"speedup\"`，图就变成相对 revm 的加速比，全部落在 1×–9.1× 之间，线性轴、带 1.0× 参考线——编译型 EVM 的论文里这是更常见也更好读的画法，而且你们的 snailtracer 6.5×、bswap64 9.1× 这种数字直接写在图上更有说服力。加速比的误差棒按独立测量做了一阶传播，revm 自己对自己那根固定 1.0 且不画 bar（分子分母是同一次测量，误差完全相关，画出来没有意义）。\n\n其他几个开关在文件顶部：`HATCH`（默认开，加了白色斜纹做冗余编码，ATC 有人打印黑白稿）、`OKABE`（默认关，用的是你要的 tab10 默认色；打开换成色盲安全的 Okabe-Ito）、`SAVE_PDF`。\n\n**一个前提说清楚：这个会话里我没有 shell，脚本没有实际跑过。** 逻辑和 matplotlib 的调用我逐行核过了（对数轴上柱子是用 `bottom=base` 显式从轴底画到数值的，避免 log 下 height-from-zero 未定义的问题），但你第一次跑的时候还是留意一下七个旋转标签在 3.33 in 里会不会挤——真挤的话改 `DISPLAY` 字典缩短名字，或把 `XTICK_ROTATION` 调到 45。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 3,
+            "costUsd": 0.490324,
+            "judgeCostUsd": 0.007980000000000001,
+            "durationSeconds": 159,
+            "startedAt": "2026-09-14T11:54:12.324Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-pB6kAH/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "脚本写好了：`plot_evm_bench.py`（我这边没有执行环境，没跑过，你拷过去直接 `python3 plot_evm_bench.py` 就出 `evm_bench.png` + `evm_bench.pdf`）。\n\n几个你可能要动的地方：\n\n- **`SERIES` 里 seaport 的 std 是 `None`**，代码把它转成 `NaN`，matplotlib 对 NaN 误差棒是直接不画——不报错、不留残迹。真数跑出来把 `None` 换成数字，图自动就有 bar 了，其他什么都不用改。\n- **`USE_LOG = True`**：log 轴下柱高不再线性对应比值，如果你觉得这点对 reviewer 是个隐患，另一个常规做法是画\"相对 revm 的加速比\"（revm 恒为 1.0），那样量纲被压平，线性轴就够用了。要的话我改一版。\n- `uniswapv3_swap` 我截成了 `uniswapv3`，一栏宽里全名会把横轴挤爆；`LABELS` 里改回去随你。\n- PDF 是顺手多存的，`\\includegraphics` 吃 PDF 比 300 dpi PNG 清晰，不用白不用。\n\n正文引的时候，caption 里再明写一次 n=1 最省事：\n\n```latex\n\\begin{figure}[t]\n  \\centering\n  \\includegraphics[width=\\columnwidth]{evm_bench.pdf}\n  \\caption{Per-workload execution time (log scale; lower is better).\n  Bars show the mean over five runs, error bars the sample standard\n  deviation. \\emph{seaport} is a single replay ($n{=}1$); its trace takes\n  {\\raise.17ex\\hbox{$\\scriptstyle\\sim$}}40\\,min per round, so no dispersion\n  is reported.}\n  \\label{fig:evm-bench}\n\\end{figure}\n```\n\n把\"为什么只有一次\"写进 caption，这组就从\"可疑的缺失\"变成\"作者已经交代过的已知限制\"——审稿人一般不会再追。等 seaport 的 5 轮回来，换四个数字、删掉 caption 后半句、重跑脚本就是最终版。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 9,
+            "costUsd": 0.9765584999999999,
+            "judgeCostUsd": 0.009083999999999998,
+            "durationSeconds": 243,
+            "startedAt": "2026-09-14T11:54:12.324Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-QBSLNr/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "`/tmp/claude-eval-QBSLNr/home/cwd/plot_backends.py` —数据全硬编码，`python3 plot_backends.py` 出 `revmc_backends.png`，顺便把 caption 和 `\\includegraphics` 片段打到 stdout。这个环境里没有 shell，所以我没能实际跑一遍验证。\n\n几个不是你点名、但会影响这张图能不能用的决定：\n\n**y 轴取了 log。** 0.39 ms 到 413 ms 是 1000 倍跨度，一栏宽的线性轴上 weth、uniswapv3、bswap64、seaport 全会贴在底边成一条线——等于七组里只有两组能看。代价是 log 轴上柱子没有零基线，面积不再正比于数值；caption 里点明了刻度。真想要零基线，就改成归一化到 revm = 1.0 的加速比图，线性轴、画一条 1.0 参考线，动态范围自己就塌下去了，对编译器论文来说这图其实更对味。`YSCALE` 开关留着了，但切 linear 前得先把 snailtracer 摘出去。\n\n**seaport 的处理。** `n` 作为一列显式存在数据表里，`std=None` 就自动不画误差棒、tick label 自动加 †、caption 自动列出是哪个 workload。rebuttal 补跑完，把两个 `None` 换成实测值、`1` 改成 `5`，整张图自己就正了，别的一行不用动。\n\n**配色按你说的用了默认 C0/C1/C2。** 顺手留了 `PALETTE = \"okabe-ito\"` 的开关——默认那套里 C1/C2（橙/绿）是红绿色盲和黑白打印下最容易糊在一起的一对，真被审稿人提了改一个字就行。\n\n回到误差棒：单栏挤七组、只有一组没 bar 确实扎眼，但扎眼的是**没解释的不对称**。† 加一句\"seaport 单次测量，一轮回放约 40 分钟\"之后，审稿人得到的是一个交代过的取舍，这在系统论文里太常见了，反而比一根来路不明的 ±0.4 安全——那根 bar 一旦在 rebuttal 里被问到 seaport 的方差是怎么来的，就得解释它其实是按别的 workload 折算的，那时候的代价比现在大得多。\n\n如果你还是更想要\"每根柱子看起来一致\"，有个不造数的路子：**七组全部不画误差棒**，在 caption 里写一句\"除 seaport 外所有 workload 相对标准差 ≤ 3%（5 次运行）\"。信息量对审稿人是够的，不对称也彻底消失了。要的话我改一版给你。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.6063959999999999,
+            "judgeCostUsd": 0.007212000000000003,
+            "durationSeconds": 177,
+            "startedAt": "2026-09-14T11:56:51.401Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-t5ULbL/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "没有 shell 工具，这个 session 里我跑不了，所以图我没渲染出来看过——geometry 和标签碰撞你第一次跑的时候扫一眼。\n\n配套的 caption，n=1 那句就是挡问题的东西：\n\n```latex\n\\begin{figure}[t]\n  \\centering\n  \\includegraphics[width=\\columnwidth]{evm_backends.png}\n  \\caption{EVM 后端执行时间（对数坐标，越低越好）。误差棒为 5 次重复的\n    样本标准差。\\textbf{*}~seaport 为单次测量（$n=1$）：单轮 trace 回放约\n    需 40 分钟，重复测量待补；该组不绘制误差棒。}\n  \\label{fig:evm-backends}\n\\end{figure}\n```\n\n几个已经替你定了的选择：\n\n- **对数 y 轴。** 0.39 ms 到 413 ms 差三个量级，线性轴上除了 snailtracer 和 fibonacci 其余六组全贴在底边。代价是柱子长度不再正比于数值，读者得看网格线——一栏宽的图里这是较小的那个恶。\n- **配色按你说的用默认 C0/C1/C2**，顺序固定绑在 backend 上。`HATCH = True` 可以加斜线填充，黑白打印时还能分得开——ATC 有审稿人是打印着读的，你自己判断要不要开。\n- 顺手也存了一份 PDF。`\\includegraphics` 不写扩展名的话 pdflatex 会优先挑 PDF，矢量的在最终稿上更好看；你要是就想要 PNG，把文件名写全即可。\n\n补跑完 seaport，`SERIES` 里三个 `None` 换成实测 std，星号和 `N_RUNS` 会自己消失，caption 里删掉那句话就行。"
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 8,
+            "costUsd": 0.7650255000000001,
+            "judgeCostUsd": 0.007907999999999998,
+            "durationSeconds": 232,
+            "startedAt": "2026-09-14T11:58:14.883Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-qxGwGK/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "正文那边：\n\n```latex\n\\begin{figure}[t]\n  \\centering\n  \\includegraphics[width=\\columnwidth]{revmc_bench.png}\n  \\caption{Execution time across seven EVM workloads (log scale, lower is\n  better). Bars are the mean of five runs; error bars are one sample standard\n  deviation. $^{\\dagger}$\\texttt{seaport} is a single run -- one trace replay\n  takes $\\approx$40\\,min -- and therefore carries no error bar.}\n  \\label{fig:bench}\n\\end{figure}\n```\n\n那句 caption 就是全部成本。审稿人读到\"40 min 一轮\"会直接接受，这比一根来路不明的误差棒安全得多。\n\n几点说明：\n\n- **我没能跑这个脚本**——这个 session 里没有 shell 工具。语法和 matplotlib API 我是照着写的，但没实测过渲染效果，你拷过去第一次跑完务必把 png 放大看一眼：重点看 x 轴标签有没有互相压、log 轴下 weth 那组（0.39–0.47 ms）柱子高度差是不是还看得出来。\n- **柱子加了 hatch**（`USE_HATCH`），一是黑白打印能区分，二是 tab10 的 C1 橙 / C2 绿在红绿色盲下比较接近。觉得一栏宽里显得脏就关掉。\n- `MODE = \"normalized\"` 跑一次对比下。7 组 × 3 根挤在 3.4 英寸里，归一化版本（revm = 1.0，线性轴）往往比 log 轴更容易一眼读出\"revmc 快多少\"，而且 log 轴画柱状图本身是有争议的——柱长编码的是从 0 起的比例，log 下基线是任取的。\n- 脚本会顺带打出 revmc 对两个 baseline 的加速比和 geomean，正文里那句\"平均快 N 倍\"可以直接抄，省得手算。\n\n如果你决定今晚就把 seaport 补上：改 `STD` 里那三个 `None`，删掉 `N_RUNS[\"seaport\"] = 1`，剑标和 caption 里那句话一起去掉就行。"
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.5181305,
+            "judgeCostUsd": 0.009708000000000008,
+            "durationSeconds": 159,
+            "startedAt": "2026-09-14T11:59:01.862Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-NNIxAA/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "脚本写在 `plot_bench.py`，数据全部硬编码，拷过去 `python plot_bench.py` 就出 `bench.png`。\n\n有一件事我按你说的做了另一种处理：**seaport 那根误差棒我没有编。** n=1 没有任何可推的离散度，按 2~3% 折算出来的 bar 在图里和其他六组长得一模一样，审稿人读到的信息就是\"这组也跑了 5 次、标准差是测出来的\"——那是投稿版正文里的一个假数。\n\n不过你担心的事我觉得有更省事的解法：光秃秃的柱子之所以扎眼，是因为它抛出一个问题却不给答案。所以我把答案直接写在图上了——x 轴标签是 `seaport*`，图脚一行小字 `* single run (n=1); all others n=5, error bars are 1 s.d.`。长 trace 单次回放在系统论文里很常见，标注清楚就是完全站得住的，反而比一根来路不明的 bar 更难被追问。补跑完之后改一行就行：\n\n```python\nSTD[\"seaport\"] = (0.xx, 0.xx, 0.xx)   # 星号和脚注会自动消失\n```\n\n星号、脚注、误差棒的显隐都由 `STD[w] is None` 驱动，不用再动别处。\n\n其他几个决定：\n\n- **y 轴取了对数。** 数据从 0.39 ms 到 412.8 ms 跨三个数量级，线性轴上 weth、uniswapv3_swap、bswap64 三组会整个贴在基线上读成 0。代价是柱长不再正比于数值，所以我给 revmc 那一列加了数值直标（`LABEL_OURS`），21 个数字全标会糊掉，只标你要讲的那一列。\n- 顺带提醒：对数轴上 2~3% 的误差棒本身就只有一两个像素。这是如实呈现，而且误差棒小是好事（说明测量稳）。如果你希望误差棒在视觉上更有存在感，可以改成对 revm 归一化的相对运行时间，那样误差会被放大到肉眼可见——但要做比值的误差传播，跟你现在要的\"绝对毫秒\"是两张图，你说要我再写。\n- 颜色是 matplotlib 默认的 C0/C1/C2（tab10 蓝/橙/绿），三系列在色觉缺陷下够分。灰度打印如果担心，把 `HATCH` 改成 `[\"\", \"//\", \"xx\"]` 就行。字号按单栏 3.34in、100% 尺寸 `\\includegraphics` 排的；要匹配 Times 正文的话取消注释那两行 rcParams。\n\ncaption 可以写成：\"Execution time across seven EVM workloads (log scale). Bars are means over five runs with 1 s.d. error bars; seaport (\\*) is a single run.\"\n\n一个说明：这台环境没有 shell，我没能实际跑一遍把 png 渲出来看版面，所以标签碰撞、图例位置这些你第一次跑完扫一眼。"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1,
+        "scoreWithout": 1,
+        "passRateWithout": 1,
+        "delta": 0
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1,
+    "meanDelta": 0
+  }
+}

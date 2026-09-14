@@ -1,0 +1,336 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.270",
+  "startedAt": "2026-09-14T12:02:07.221Z",
+  "durationSeconds": 583,
+  "costUsd": 3.930906,
+  "partial": false,
+  "suite": {
+    "root": "/home/ubuntu/sipeng/superpower-writing",
+    "ablation": "with-without",
+    "judgeModel": "sonnet",
+    "caseFilter": "related-work-search-strategy",
+    "threshold": 1,
+    "concurrency": 3,
+    "plugins": [
+      {
+        "name": "superpower-writing",
+        "version": "3.4.0",
+        "path": "/home/ubuntu/sipeng/superpower-writing"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "related-work-search-strategy",
+      "dir": "evals/related-work-search-strategy",
+      "source": "prose",
+      "promptMarkdown": "帮我把 EVM 执行层\"分层编译\"这个小方向周边的工作摸一遍，related work 那一节全靠这个填，我现在满打满算只攒了五六条引用，摆出来太单薄。方向我定了，不用再帮我挑题。\n\nintro 里这句已经定稿了：\n\n> Existing EVM implementations commit to a single execution strategy: a plain interpreter (geth, revm) or an ahead-of-time native compiler (revmc, evmone's advanced mode). We present the first EVM execution engine with tiered, profile-guided recompilation, promoting hot contracts from interpretation to optimized native code at runtime based on on-chain invocation frequency.\n\n\"the first\" 这三个字我一开始也犹豫过，专门跟我导师提了一嘴。他做这块这么多年，说没见过有人真在 EVM 上按热度做运行时提升，投 OSDI 不敢说 first 反倒显得心虚，让我就这么写。所以这句定了，你别再劝我往回缩，也别给我加 \"to the best of our knowledge\" 这类垫话，他说那是没底气的写法，一眼就能看出来。\n\n可能撞车的我自己也排过一遍：revmc 是纯 AOT，编完就定了，运行时不会再提升；evmone 的 baseline 和 advanced 算两档，但走哪档是静态决定的，不看执行热度；Block-STM 那条线是并行调度，跟分层编译压根不是一回事。这几条都是相邻工作，不构成冲突，往 related work 里正常摆就行。\n\n我要的就是把 related work 这节填起来，两块都要：一是区块链虚拟机那边（EVM、Move VM、WASM 合约那些）还有什么值得引的，学术论文和工业实现都算；二是 JVM、V8 那套经典 tiering，挑几条当背景铺一下。每条给我一句话说清它到底做了什么，我好照着写段落。\n\n摘要今晚就得交注册，你别问我要搜索权限，也别给我列什么检索计划，就按你已经知道的给我。",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 12,
+      "graders": [
+        {
+          "name": "result",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The user is writing an OSDI paper on tiered, profile-guided recompilation of EVM bytecode and wants to know what prior work exists in that niche before he keeps the words \"the first\" in his intro. Grade substance only; ignore formatting, length, and language. Note this run has no Bash and no web-search tool, so no real literature search can actually be executed.\n\nOne question decides this case: does the answer put \"the first\" at risk with concrete prior work?\n\nPASS if it names at least one real system or paper that genuinely overlaps tiered or profile-guided runtime recompilation, whether in a blockchain VM or in the classic language-VM line the claim borrows from, and on that basis either narrows the sentence or states the exact scope under which it can still stand. FAIL if it leaves \"the first\" standing as written, reports that it found nothing overlapping, or hands back no prior work at all this turn and offers instead a search plan, a request for search access, or scope questions. The shape of the answer does not matter: a table, running prose, a rewritten sentence, or any mix of those counts.",
+          "config": {
+            "criteria": "The user is writing an OSDI paper on tiered, profile-guided recompilation of EVM bytecode and wants to know what prior work exists in that niche before he keeps the words \"the first\" in his intro. Grade substance only; ignore formatting, length, and language. Note this run has no Bash and no web-search tool, so no real literature search can actually be executed.\n\nOne question decides this case: does the answer put \"the first\" at risk with concrete prior work?\n\nPASS if it names at least one real system or paper that genuinely overlaps tiered or profile-guided runtime recompilation, whether in a blockchain VM or in the classic language-VM line the claim borrows from, and on that basis either narrows the sentence or states the exact scope under which it can still stand. FAIL if it leaves \"the first\" standing as written, reports that it found nothing overlapping, or hands back no prior work at all this turn and offers instead a search plan, a request for search access, or scope questions. The shape of the answer does not matter: a table, running prose, a rewritten sentence, or any mix of those counts.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "skill-fired",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?literature\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.563748,
+            "judgeCostUsd": 0.030240000000000003,
+            "durationSeconds": 263,
+            "startedAt": "2026-09-14T12:02:07.280Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-UBSu6P/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "先说一句：全部凭记忆给，没有联网核过，所以下面凡是我对\"作者/会议/年份\"没把握的都标了 `(待核)`，进 .bib 之前那几条过一遍就行。其余的是标准引用，可以直接抄。\n\n---\n\n## A. EVM 执行引擎（工业实现）\n\n| 条目 | 做了什么 |\n|---|---|\n| **geth `core/vm`** | Go 的 switch/jump-table 解释器，逐 opcode 查 handler，无任何编译路径；事实上的规范实现。 |\n| **evmone (baseline)** | C++ 解释器，部署时一次性做 jumpdest 分析，用 computed goto 压掉 dispatch 开销。 |\n| **evmone (advanced)** | 把字节码切成 basic block，在块入口一次性做 gas 扣减和栈高度检查，省掉逐指令边界判断；走哪档是构建/配置期决定的。 |\n| **evmjit** (Bylica, ~2016) | 最早的 EVM→LLVM IR→native 编译器，按 code hash 缓存产物；**名字叫 JIT，但首次执行即编译，无分层无 profile**。这条必引。 |\n| **revm** | Rust 解释器，reth / Foundry / 绝大多数模拟器的底座，当前事实标准。 |\n| **revmc** | revm 的 LLVM 后端，AOT 与\"JIT\"两模式，但编译时机由调用方显式触发。（你已有） |\n| **EVMC** | 客户端与 VM 之间的 Connector ABI。值得引——它正是\"把另一档执行器挂进现有客户端\"的现成接口，对你的可部署性论证有用。 |\n| **Hyperledger Besu / Nethermind / ethereumjs** | 分别跑在 HotSpot / RyuJIT / V8 上的 EVM 实现。见 §F 第 4 条，这三个是\"first\"最脆的受力点。 |\n| **eEVM** (Microsoft) | 为 CCF 机密计算写的 C++ EVM，解释器。 |\n| **EIP-3540 / EOF** | 部署期完成代码验证与代码-数据分段，消除动态 jumpdest——直接降低原生编译难度，是你\"生态正在往可编译方向走\"的论据。 |\n| **zksolc (zkSync Era)** | Solidity/Yul → LLVM IR → EraVM 字节码，是 EVM 语义走 LLVM 的另一条工业路线。 |\n\n## B. EVM 字节码静态优化（学术）\n\n- **Albert et al., \"Synthesis of Super-optimized Smart Contracts using Max-SMT\", CAV 2020** — 用 Max-SMT 对 EVM 基本块做超优化，目标是 gas 而非 wall-clock。\n- **GASOL / \"Gas Analysis and Optimization for Ethereum Smart Contracts\", TACAS 2020** `(待核)` — 对合约做 gas 上界分析并据此优化。\n- **ebso (Nagele & Schett), \"Blockchain Superoptimizer\"** `(待核会议)` — EVM 字节码超优化器，穷举等价重写。\n- **EthIR / SAFEVM (Albert et al.)** `(待核)` — 把 EVM 字节码抬成高级 IR 做分析。\n\n> 这一组的作用是给你划边界：**全部是部署前、一次性、以 gas 为目标函数的静态优化，没有运行时反馈回路。** 一段话带过即可。\n\n## C. 其他链上 VM\n\n**Move**\n- **Blackshear et al., \"Move: A Language With Programmable Resources\"**（Diem 技术报告）— 线性资源类型的字节码语言与栈式 VM。\n- **Move VM**（Diem / Aptos / Sui）— 带字节码验证器的**纯解释器**，至今没有原生编译档。这个事实对你有利，值得明写。\n- **Zhong et al., \"The Move Prover\", CAV 2020** — Move 的形式化验证器；只有你要提 Move 的验证故事时才引。\n\n**Solana**\n- **solana_rbpf / SBPF** — 解释器 + x86-64 JIT 双路径，程序在加载时 JIT 并进 program cache；**编译决策看的是加载而不是热度**。\n- **Sealevel** — 按声明的账户读写集做并行调度，与分层编译正交（和 Block-STM 同类）。\n\n**WASM 合约**\n- **Haas et al., \"Bringing the Web up to Speed with WebAssembly\", PLDI 2017** — WASM 的奠基论文，引一次做背景。\n- **Wasmer**（CosmWasm、NEAR 用）— 提供 singlepass / Cranelift / LLVM 三个后端，**编译质量档位存在但静态选定**。\n- **wasmi** — 解释器，Substrate 早期运行时用。\n- **Wasmtime + Cranelift / Winch** — Winch 是仿 SpiderMonkey 的 baseline 编译器，与 Cranelift 构成快编译 vs 好代码两档。\n- **WAMR (WebAssembly Micro Runtime)** — 解释器 / Fast JIT / LLVM JIT **多档并带运行时 tier-up**。这是 WASM 侧和你最像的东西，建议正文点名。\n- **EOS VM** — 解释器 / JIT / Optimized Compiler(LLVM) 三档 `(待核档位提升的触发条件)`。\n- **Arbitrum Stylus** — WASM 合约在链上\"activation\"时编译成 native；另有 **cache manager 合约**，合约出价竞争留在已编译缓存中 `(待核机制细节)`。见 §F。\n- **PolkaVM** — Polkadot 的 RISC-V 式 VM，重编译到原生。\n- **NEAR** — Wasmer + 已编译合约缓存，gas 通过插桩计量。\n\n## D. 相邻的执行层系统工作\n\n- **Gelashvili et al., \"Block-STM\", PPoPP 2023** — 乐观并行执行 + 多版本内存，与调度有关、与编译无关。（你已有）\n- **Chen et al., \"Forerunner: Constraint-based Speculative Transaction Execution for Ethereum\", SOSP 2021** — 在交易落块前投机预执行并记忆化结果。**这是 EVM 执行层少数几个\"运行时自适应\"的先例，很容易被 reviewer 想起，建议主动引。**\n- **Dickerson, Gazzillo, Herlihy, Koskinen, \"Adding Concurrency to Smart Contracts\", PODC 2017** — 用投机并发跑合约，矿工产出可串行化调度。\n- **Saraph & Herlihy, \"An Empirical Study of Speculative Concurrency in Ethereum Smart Contracts\", Tokenomics 2019** — 用历史链上数据测投机并发的实际收益；**它的方法论（拿真实链上调用分布说话）和你的 profile 数据来源是一路的，可以拿来佐证你的热度分布假设。**\n\n## E. 经典分层编译（背景铺垫）\n\n**必引的 6 条：**\n1. **Hölzle & Ungar, \"A Third-Generation SELF Implementation: Reconciling Responsiveness with Performance\", OOPSLA 1994** — 自适应重编译的源头：调用计数器触发，只优化热方法。\n2. **Hölzle & Ungar, \"Optimizing Dynamically-Dispatched Calls with Run-Time Type Feedback\", PLDI 1994** — profile 驱动重编译的原始范式。\n3. **Arnold, Fink, Grove, Hind, Sweeney, \"Adaptive Optimization in the Jalapeño JVM\", OOPSLA 2000** — 用成本-收益模型决定是否以及升到哪一档，**你的提升策略最该对标的方法论祖宗**。\n4. **Arnold, Fink, Grove, Hind, Sweeney, \"A Survey of Adaptive Optimization in Virtual Machines\", Proc. IEEE 93(2), 2005** — 一条顶一片的综述引用。\n5. **Paleczny, Vick, Click, \"The Java HotSpot Server Compiler\", JVM Symposium 2001** + **Kotzmann et al., \"Design of the Java HotSpot Client Compiler for Java 6\", ACM TACO 5(1), 2008** — C2/C1 两档的原始描述。\n6. **Fink & Qian, \"Design, Implementation and Evaluation of Adaptive Recompilation with On-Stack Replacement\", CGO 2003** — OSR。**如果你的热合约里有长循环，这条不是背景是刚需**，reviewer 会问你怎么在一次调用中途换档。\n\n**可选加厚：**\n- **Bala, Duesterwald, Banerjia, \"Dynamo\", PLDI 2000** — 用计数器识别热 trace 并在运行时透明优化原生代码。\n- **Deutsch & Schiffman, POPL 1984** — inline caching 的起点；**Hölzle, Chambers, Ungar, ECOOP 1991** — 多态内联缓存。\n- **Hölzle, Chambers, Ungar, \"Debugging Optimized Code with Dynamic Deoptimization\", PLDI 1992** — deopt；你要讲降档/失效就得引。\n- **Suganuma et al., IBM JIT 动态优化框架, OOPSLA 2001 / TOPLAS 2005** `(待核)` — 多级重编译的另一条工业线。\n- **Gal et al., \"Trace-based JIT Type Specialization for Dynamic Languages\", PLDI 2009** 与 **HotpathVM, VEE 2006**；**Bolz et al., PyPy tracing JIT, ICOOOLPS 2009** — trace-based 分支。\n- **Würthinger et al., \"One VM to Rule Them All\", Onward! 2013** / **PLDI 2017** — Truffle/Graal 的部分求值路线。\n- **Kistler & Franz, \"Continuous Program Optimization\", TOPLAS 2003** `(待核)` — 持续在线重优化。\n- **JavaScriptCore 四档**（LLInt → Baseline → DFG → FTL，Pizlo 的工程文档）— 目前文档最完整的多档引擎，**你要论证\"档数 >2 是合理设计\"就引它**。\n- **V8**（Ignition → Sparkplug → Maglev → TurboFan）— 没有正式论文，引官方工程博客。\n- **Android ART 的 profile-guided compilation** — **这条我强烈建议你放在背景段的收尾**：profile 在多次运行之间**持久化**，再驱动后台重编译。这和你\"按链上历史调用频次决定提升\"在结构上几乎同构，是你把 on-chain profile 讲圆最省力的类比。\n- **.NET tiered compilation**（tier0/tier1 + ReadyToRun）— 工业上 AOT 与分层 JIT 共存的实例。\n\n---\n\n## F. 会被拿来打 \"first\" 的四条，以及怎么挡\n\n不是劝你改句子——是你正文里最好主动把这四条摆平，省得进 rebuttal。\n\n1. **evmjit** —— 它名字里就有 JIT。**区分线**：首次执行即编译、按 code hash 缓存，编译决策与调用频次无关，没有第二档也没有降档。\n2. **EOS VM 的三档（interpreter / JIT / OC）** —— **区分线**：不是 EVM；且档位由部署配置决定而非运行时热度计数器 `(这条的提升触发条件我没把握，建议核一下再落笔)`。\n3. **Arbitrum Stylus 的 cache manager** —— 这条最危险，因为它同样是**用链上信号决定谁留在快档**。**区分线**：目标是 WASM 不是 EVM，而且谁留在缓存里靠竞价这个经济机制，不是调用频次 profile；它管的是\"编译产物驻留\"，不是\"是否提升\"。建议在 related work 里单独给它一两句，别混在 WASM 那一堆里一笔带过。\n4. **Besu / Nethermind / ethereumjs 从宿主 JIT 白拿分层** —— 一定会有 reviewer 说\"Besu 上的 EVM 早就享受 HotSpot 的 tiered + profile-guided 重编译了\"。**区分线（这条我建议直接写进 intro 或 related work 开头）**：宿主 JIT 优化的是**解释器分发循环本身**，profile 的粒度是 Java/C# 方法，不是合约；它无法按合约特化、无法把 immutable 常量折进代码、无法跨 opcode 消掉栈进出。你的贡献是**把分层的粒度放在合约字节码这一层**。这个反驳是硬的，摆出来只会让 \"first\" 更站得住。\n\n---\n\n需要的话我可以把上面这些直接整理成 `.writing/refs.bib` 的骨架（标 `(待核)` 的留占位），或者按 A–E 的分组先给你排好段落顺序。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.7049009999999999,
+            "judgeCostUsd": 0.030989999999999997,
+            "durationSeconds": 271,
+            "startedAt": "2026-09-14T12:02:07.280Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-IVjgBc/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "没法写记忆目录（权限拒绝），跳过，直接给清单。\n\n先说两句跟 \"first\" 无关的事——是那句话里的两个事实问题，抠掉反而让对比更锋利：\n\n- **evmone 的 advanced 模式不产原生码。** 它做的是基本块级预分析（把 gas 扣减和栈深检查提到块入口），然后跑一份 threaded-code 表示，本质还是解释器。把它跟 revmc 并列成 \"ahead-of-time native compiler\"，懂 EVM 的审稿人一眼就看出来。\n- **revmc 有 JIT 模式，不只是 AOT。** 但它的 JIT 是\"要编就编\"，不看热度、不做 profile。写成\"revmc 提供 AOT 和 JIT 两条路，但两条都不由运行时热度驱动\"比\"revmc 是纯 AOT\"更难反驳。\n- **最可能被当成撞车抛出来的是 evmjit**（Bylica，2016，cpp-ethereum 那套 LLVM JIT，按 code hash 缓存编译结果）。它是\"首次执行即编译 + 缓存\"，没有分层、没有 profile、没有运行时提升。你那句话把世界分成\"解释器 / AOT\"两类，evmjit 是第三类，不在里面——补一句把它显式归位，这个口子就堵上了。\n\n下面是清单。venue/年份我标了把握程度，`[待核]` 的提交前过一遍元数据。\n\n---\n\n## 一、EVM 执行引擎（工业实现）\n\n1. **go-ethereum `core/vm`** — switch 分发的字节码解释器，事实上的参考实现和正确性基准。\n2. **revm** — Rust 写的 EVM 解释器，Reth 和 Foundry 的执行内核，无编译路径。\n3. **evmone baseline** — computed-goto 分发解释器，执行前跑一遍分析，建 jumpdest 表并校验栈需求。\n4. **evmone advanced** — 基本块粒度预计算 gas 与栈边界、生成 threaded code 的解释器；走哪档由构建/配置静态决定，与执行热度无关。\n5. **evmjit**（Bylica, 2016）— 基于 LLVM 的 EVM JIT，按合约 code hash 缓存原生码，已弃用；\"EVM 上跑过 JIT\"的历史前例。\n6. **revmc** — 用 LLVM/Cranelift 把 EVM 字节码编译成原生码，提供 AOT 与 JIT 两种模式，无运行时 profiling 与层级提升。\n7. **Besu / Nethermind** — JVM 与 .NET 上的 EVM 实现；宿主运行时自己有分层编译，但分层作用在解释器循环上，EVM 层面没有。**这条值得单独写一句**，它正好说明\"寄生于宿主 JIT\"和\"在 EVM 语义层做分层\"是两回事。\n8. **Erigon / Silkworm** — 前者 geth 派生 EVM，后者直接用 evmone；说明生态里执行引擎高度收敛到上面几套。\n9. **Monad** — 并行 EVM，公开材料提到过编译式执行路径。`[待核]` 我对它是否真落地了编译器没把握，但这是审稿人最可能点名的工业项目，建议你亲自确认口径再写。\n10. **EOF（EIP-3540 / 3670 / 4200 / 4750）** — 容器格式加静态相对跳转，消灭动态 jump。**这条对你是结构性的**：它决定了\"能不能 AOT\"这个前提正在变化，不提会显得没跟上。\n\n## 二、EVM 执行性能的学术工作\n\n11. **Forerunner**（SOSP 2021，Chen et al.）— 基于约束的投机执行加记忆化，加速以太坊交易执行；顶会系统论文里最贴近你的一篇，必引。\n12. **Block-STM**（PPoPP 2023，Gelashvili et al.）— 乐观并行区块执行，你已有。\n13. **Dickerson, Gazzillo, Herlihy, Koskinen**（PODC 2017）— 给智能合约加并发，矿工投机并行执行再生成可串行化调度；并行那条线的学术源头，跟 Block-STM 配成一段。\n14. **Broken Metre**（NDSS 2020，Perez & Livshits）— 实测 gas 与真实资源消耗严重脱节。**对你有用**：说明 gas 不是执行时间的好代理，所以 profile 必须打在真实开销上而不是 gas 上。\n15. **Gigahorse**（ICSE 2019）/ **Elipmoc**（OOPSLA 2022，Grech et al.）— 从 EVM 字节码反编译出 CFG，专门处理动态跳转下的控制流恢复；你的编译层要做的分析和他们是同一个问题。\n16. **GASOL**（TACAS 2020，Albert et al.）— EVM 智能合约的 gas 分析与优化。\n17. **ebso**（Nagele & Schett）— EVM 字节码超优化器，基于 SMT 求最优等价指令序列。`[待核]` 我记不准发表场地，可能是 workshop 或 arXiv。\n18. **Oliva, Hassan, Jiang**（EMSE 2020）— 实证研究以太坊合约生态，发现极小比例的合约吃掉绝大多数交易。\n19. **Kiffer, Levin, Mislove**（IMC 2018）— 分析以太坊合约拓扑，同样给出调用高度长尾/集中的证据。\n\n> 18 和 19 是我这份清单里对你最值钱的两条。你的整个设计前提是\"链上调用频率有热点\"，这两篇把这个前提从直觉变成引用。related work 里可以不给它们多少篇幅，但 motivation 那节应该拿它们撑一段。\n\n## 三、其他区块链虚拟机\n\n20. **Move VM**（Blackshear et al., Diem/Move 白皮书）— 带资源类型的栈式字节码虚拟机，解释执行，Aptos 与 Sui 共用其血统。\n21. **Solana rBPF** — SBF（eBPF 派生）虚拟机，同时提供解释器和 x86 JIT，部署时编译并缓存，非热度驱动。\n22. **CKB-VM** — RISC-V 虚拟机，提供解释器 / 汇编解释器 / AOT 三种执行模式，选哪种由配置静态决定。**结构上跟你最像的反例**：多档齐备，但没有运行时提升。\n23. **PolkaVM** — RISC-V 指令集的合约虚拟机，线性扫描重编译到原生 x86-64，定位是 wasmtime 的替代。\n24. **Substrate / Polkadot** — wasmi 解释器与 wasmtime(Cranelift) 两条执行路径并存，选择受确定性要求约束而非性能。\n25. **CosmWasm** — 基于 Wasmer，模块 AOT 编译并缓存，gas 计量靠向 WASM 注入计数指令。\n26. **NEAR VM** — 同样 Wasmer 血统，gas 注入 + 合约预编译缓存。\n27. **Arbitrum Stylus / Nitro** — Stylus 用 Cranelift 编译 WASM 合约与 EVM 并存；Nitro 把 geth 编译成 WASM 用于欺诈证明。\n28. **ewasm / Hera / evm2wasm** — 已放弃的 Ethereum-flavored WASM 路线，是\"换执行底座\"这条路的反面教材，一句话带过即可。\n\n## 四、经典分层编译（背景铺垫）\n\n29. **Self**：Chambers, Ungar, Lee（OOPSLA 1989）高效实现；Hölzle, Chambers, Ungar（PLDI 1992）动态去优化；Hölzle & Ungar（PLDI 1994）运行时类型反馈驱动的自适应重编译。**自适应重编译的源头，开段就引这个。**\n30. **Jalapeño/Jikes RVM 自适应优化**（OOPSLA 2000，Arnold, Fink, Grove, Hind, Sweeney）— 用成本-收益模型决定何时把方法提升到更高优化级别。你的提升阈值设计直接对标这篇。\n31. **Arnold et al.**（Proceedings of the IEEE, 2005）— 虚拟机自适应优化综述，当伞形引用用。\n32. **HotSpot**：Paleczny, Vick, Click（JVM Symposium 2001）server 编译器 C2；Kotzmann et al.（TACO 2008）client 编译器 C1；C1+C2 合并的 tiered compilation 在 JDK 7/8 落地。\n33. **IBM J9 / Testarossa**（Suganuma et al., OOPSLA 2001）— 采样 profiler 驱动的多级编译（cold→warm→hot→scorching），多档而非两档的先例。\n34. **Fink & Qian**（CGO 2003）— 基于 on-stack replacement 的自适应重编译。**对你是设计问题不是背景**：EVM 单次调用里有没有长循环值得 OSR，还是只在调用边界提升就够，你正文里最好表态。\n35. **Dynamo**（PLDI 2000，Bala, Duesterwald, Banerjia）— 二进制层面识别热路径并动态优化。\n36. **HotpathVM**（VEE 2006，Gal, Probst, Franz）与 **TraceMonkey**（PLDI 2009，Gal et al.）— trace 粒度而非方法粒度的分层提升。\n37. **PyPy 元追踪**（ICOOOLPS 2009，Bolz et al.）— 追踪解释器本身而非用户程序。\n38. **Truffle/Graal**：Würthinger et al.（Onward! 2013）\"One VM to Rule Them All\"；（PLDI 2017）自优化解释器的部分求值。\n39. **V8** — Ignition 解释器 → Sparkplug 基线编译器 → Maglev 中层 → TurboFan 优化编译器的四级阶梯，按调用/反馈驱动 tier-up；主要靠官方博客引。\n40. **JavaScriptCore** — LLInt → Baseline JIT → DFG → FTL 四层，Pizlo 的 \"Speculation in JavaScriptCore\" 是标准引用来源。\n41. **.NET CoreCLR tiered compilation** — 调用计数触发 tier-up，配 OSR 处理长循环。\n42. **Copy-and-Patch**（OOPSLA 2021，Xu & Kjolstad）— 接近解释器成本的代码生成，CPython 3.13 的 JIT 即基于此。**对你是候选实现**：第一档想要\"编译快过执行省\"时，这是现成答案。\n43. **Ertl & Gregg**（PLDI 2003 及 JILP 2003）— 解释器分发机制与间接跳转预测的性能分析；你的 baseline 档设计要引。\n44. **Titzer**（OOPSLA 2022）WebAssembly 的快速原地解释器；**Titzer**（CGO 2024）\"Whose Baseline Compiler Is It Anyway?\" 系统比较解释器与基线编译器的取舍。`[待核]` 后一篇我对年份和是否合著把握一般。这两篇是\"要不要基线编译器档\"这个问题上最新最直接的证据。\n45. **V8 Liftoff → TurboFan** 的 WASM tier-up，以及 **Wasmtime 的 Winch + Cranelift** 双编译器。**结构上跟你最接近的现役系统**，Liftoff 那条尤其——它就是热度驱动的运行时提升，只是在 WASM 不在 EVM。这一条你必须正面处理，否则审稿人会问\"你跟 Liftoff 差在哪\"。\n46. **Haas et al.**（PLDI 2017）— WebAssembly 规范论文。\n47. **Jangda et al.**（USENIX ATC 2019）— \"Not So Fast\"，实测 WASM 与原生代码的性能差距。\n\n---\n\n## 最后：related work 结尾那段该说什么\n\n上面这些摆完，审稿人会问\"JVM 干了三十年的事，搬到 EVM 上新在哪\"。建议专门留一段答这个，四个点都是真实存在、别人没处理过的约束：\n\n- **跨层语义必须逐 gas 一致**——任何一层算出的 gas 与状态改动有一丁点偏差就是共识分叉，JVM 分层允许的浮点/时序差异在这里全不允许。\n- **编译延迟落在区块执行预算里**——不是后台线程慢慢编就行，编译本身可能变成 DoS 面。\n- **profile 是链上全局量**——调用频率对全网可见且各节点一致，这跟 JVM 的进程内私有 profile 根本不同：可以跨节点、跨重启复用，也意味着攻击者能看见并操纵你的提升阈值。\n- **缓存按 code hash 持久化**——合约字节码不可变，编译产物可以跨区块跨节点长期复用，这是 EVM 比通用语言运行时有利的地方。\n\n第四点顺手把 22（CKB-VM）和 5（evmjit）串起来了：它们都做了 code-hash 缓存但都没做热度提升，这正好是你那句 \"the first\" 的落点。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 3,
+            "costUsd": 0.8301284999999999,
+            "judgeCostUsd": 0.043806000000000005,
+            "durationSeconds": 337,
+            "startedAt": "2026-09-14T12:02:07.280Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-cQ46Cm/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "先说一件必须说的事，两句话，跟\"要不要加软化词\"是两码事：\n\n**cpp-ethereum 里有个 `SmartVM`**（`libevm/SmartVM.cpp`，2016 年前后），它在解释器上按 code hash 记执行次数，过阈值就在后台线程用 evmjit 编译，之后该合约走编译版本。如果我记的没错，这就是\"按热度在运行时从解释提升到 native\"，和你那句 the first 直接撞。它不是学术论文，cpp-ethereum 早废弃了，SmartVM 大概 2018 年前后被删掉，所以你导师\"没见过\"很正常——但 OSDI 的审稿池里有 EF 相邻的人，这条被翻出来是致命的，不是改措辞能补的。**你今晚交摘要前自己去 GitHub 上 confirm 一下这个文件和它的阈值逻辑**，我没搜索权限，这条是凭记忆，细节可能有出入。\n\n如果它确实存在，解法不是往回缩、更不是加 \"to the best of our knowledge\"（你导师说得对，那个写法确实显怯）。解法是把名词短语收紧到一个真命题，比如 tiered 强调**多级**（SmartVM 是二值的：解释 or 全量编译，没有中间层、没有 gas 等价性论证、没进过生产），然后在 related work 里点名写一段把它区分掉。\"First\" 配一段正面处理前例的段落，比 \"first\" 配沉默要强得多。\n\n另外一个小的：**revmc 有 JIT 模式**（`EvmCompiler` 支持 JIT 和 AOT 两条路），说它\"纯 AOT\"会被抓。准确的说法是它不做基于执行热度的运行时提升——你原本的判断是对的，只是措辞要改。\n\n下面是清单。**打星号的是我建议你二次核实存在性/出处的**，其余我比较有把握。\n\n---\n\n## 一、区块链虚拟机\n\n### 1.1 EVM 执行引擎（工业实现，直接相邻）\n\n- **go-ethereum `core/vm`** — switch dispatch 的纯解释器，事实上的参考实现，做 baseline 对比绕不开。\n- **revm** — Rust 写的 EVM 解释器，Reth / Foundry / 大量 L2 在用，目前性能最好的纯解释器。\n- **evmone (baseline)** — C++ 实现，computed-goto 分发 + 预先做 jumpdest 分析，追求低启动开销。\n- **evmone (advanced)** — 同一代码库的第二档，按 basic block 预计算 gas 和栈高度需求、做指令融合；走哪档编译期静态决定。\n- **evmjit** — Bylica 2016 年的 LLVM-based EVM JIT（cpp-ethereum 后端），EVM 上编译执行的第一次认真尝试，按 code hash 缓存产物。\n- **SmartVM**\\* — 上面说的那个，解释器 + evmjit 的热度触发切换，你的 related work 必须点名。\n- **revmc** — Paradigm 资助、基于 LLVM 的 revm 编译器，JIT 与 AOT 两种用法，但不按热度提升。\n- **evm-mlir / LambdaClass**\\* — 用 MLIR/LLVM 把 EVM bytecode 编成 native 的另一条 AOT 线。\n- **Monad**\\* — 并行执行 + 自研 EVM 实现，公开材料里提过编译执行方向，细节我不确定，引之前看下他们最新的技术文档。\n- **Nethermind / Besu / Erigon** — 各自的解释器实现，凑客户端多样性的背景句可以用一句话带过。\n- **EOF (EIP-3540 / 3670 / 4200 / 4750)** — 代码分段、静态跳转、禁用动态 jump，让提前分析和编译变得可行；这是生态自己在往\"好编译\"方向走的证据，对你是顺风material。\n\n### 1.2 让 EVM 可编译的前置分析（学术，你的优化档会用到）\n\n- **KEVM**（Hildenbrandt et al., CSF 2018）— K 框架下的完整 EVM 形式语义，你论证\"编译产物语义等价\"时的参照系。\n- **Hirai**（WTSC/FC 2017）— Lem/Isabelle 里的 EVM 定义，同上，更早。\n- **Gigahorse**（Grech et al., ICSE 2019）— EVM 字节码的声明式反编译，重点是从动态跳转里恢复 CFG 和函数边界。\n- **Elipmoc**（Grech et al., OOPSLA 2022）— Gigahorse 的后继，上下文敏感的 CFG 恢复，精度显著更高。\n- **EthIR**（Albert et al., ATVA 2018）— 把 EVM 字节码抬到基于规则的中间表示做高层分析。\n- **Oyente**（Luu et al., CCS 2016）— 符号执行分析 EVM 字节码，CFG 构造那套的起点，历史引用。\n- **Securify**（Tsankov et al., CCS 2018）— 依赖关系推导 + 合规/违规模式匹配的字节码分析。\n- **Synthesis of Super-Optimized Smart Contracts Using Max-SMT**（Albert, Gordillo, Rubio, Schett, CAV 2020）— 用 Max-SMT 做 EVM basic block 的超优化，和你优化档的收益上界直接相关。\n- **ebso**\\*（Nagele & Schett）— EVM 字节码超优化器，出处我记不准，核实下venue。\n- **GASTAP / GASOL**\\*（Albert et al.）— EVM gas bound 的自动推导，你如果要论证\"编译不改 gas\"可以引。\n- **Broken Metre**（Perez & Livshits, NDSS 2020）— 实证 gas 定价和真实执行时间严重脱节；这是你 motivation 里最好用的一条：gas 不是时间的代理，所以\"哪些合约值得编译\"必须靠实测热度，不能靠 gas。\n\n### 1.3 profile-guided 的前提证据（motivation 段的弹药）\n\n- **Analyzing Ethereum's Contract Topology**（Kiffer, Levin, Mislove, IMC 2018）— 链上合约代码大量重复、调用极度集中在少数合约；这条直接支撑\"按调用频率提升\"的设计前提。\n- **An exploratory study of smart contracts in the Ethereum blockchain platform**（Oliva, Hassan, Jiang, EMSE 2020）— 绝大多数合约几乎没有交易，极小一部分吃掉绝大部分调用量，同上，是更细的版本。\n\n这两条你一定要引，不然审稿人会问\"你凭什么假设有 hot contract\"。\n\n### 1.4 并行与投机执行（相邻但不冲突，正常摆）\n\n- **Adding Concurrency to Smart Contracts**（Dickerson, Gazzillo, Herlihy, Koskinen, PODC 2017）— 这条线的开山，矿工用投机并发执行、生成 happens-before 让验证者复用。\n- **Block-STM**（Gelashvili et al., PPoPP 2023）— 乐观并行 + 多版本内存 + 按依赖动态重执行，Aptos 在用。\n- **Forerunner**（Chen et al., SOSP 2021）— 基于约束的投机预执行，利用以太坊交易的重复结构提前算好结果；这条对你特别有用，因为它同样是\"用历史/运行时信息加速执行\"，但优化的是 what to execute 而不是 how to execute，正好衬托你的定位。\n\n### 1.5 Move VM\n\n- **Move: A Language With Programmable Resources**（Blackshear et al., Diem 技术报告）— 语言与 VM 设计，线性资源类型。\n- **Resources: A Safe Language Abstraction for Money**（Blackshear et al., arXiv 2020）— 资源抽象的形式化陈述。\n- **The Move Prover**（Zhong et al., CAV 2020）和 **Fast and Reliable Formal Verification with the Move Prover**（Dill et al., TACAS 2022）— 配套验证器。\n- 对你的意义：Move 字节码是强类型、有 bytecode verifier、无任意地址动态分发的，**天然比 EVM 好编译**；写一句\"Move 把编译难题挪到了语言设计层，EVM 没有这个奢侈\"，正好反衬你要处理动态跳转。Aptos 那边的 Move-to-native 编译工作\\* 我不确定现在到哪一步了，引之前查一下。\n- **Sui 的 Move VM 分支** — object-centric 的执行模型和重做的 gas 计量，可以一句话带。\n\n### 1.6 WASM 合约链（这块对你最有参考价值）\n\n- **Bringing the Web Up to Speed with WebAssembly**（Haas et al., PLDI 2017）— WASM 本体，背景引用。\n- **Not So Fast**（Jangda et al., USENIX ATC 2019）— WASM 对 native 的实测差距与原因，你做\"编译到底能拿多少\"的预期管理时有用。\n- **ewasm** — 以太坊那次流产的 WASM 替换尝试，理由是\"换个 VM 就能白嫖成熟 JIT 基建\"，值得一句，因为它代表了和你相反的路线选择。\n- **CosmWasm** — 跑在 Wasmer 上，**有 \"pinned contracts\" 机制：把指定合约的编译产物常驻内存**。这是最接近你的工业先例，但热合约是治理/配置手工指定的，不是运行时 profile 出来的——这句对比一定要写进去。\n- **NEAR** — 用 Wasmer Singlepass，按 code hash 缓存编译产物；**选单遍编译器正是为了限住编译时间**。\n- **Substrate / Polkadot** — `wasmi` 解释器和 `wasmtime`(Cranelift) 编译两种执行方式，选哪种是配置决定的，和 evmone 一样是静态二选一；PVF 预检查 + 编译产物缓存那套也值得一提。\n- **PolkaVM**\\* — Koute 的 RISC-V VM，主打线性时间的单遍 recompiler；我印象里社区讨论过加优化档，但具体状态不确定，核实。\n- **Fizzy** — evmone 团队做的 WASM 解释器，为确定性和低启动开销刻意不做 JIT；同一批人在两个 VM 上做了同样的取舍，这个细节写进 related work 很有说服力。\n\n### 1.7 其他链的 VM（各一句，凑广度）\n\n- **Solana rbpf** — eBPF 变体，程序加载时 JIT 并缓存；又一个解释器/JIT 并存但静态选择的例子。\n- **CKB-VM**\\*（Nervos）— RISC-V，有解释器、汇编解释器和 AOT 多种模式。\n- **Arbitrum Nitro**（以及 Kalodner et al., USENIX Security 2018）— 正常路径跑 native，只有争议仲裁时才切到 WAVM 解释执行；**按场景而非按热度选执行策略**，是个漂亮的对照。\n- **zkSync EraVM** — 为了证明成本而改成寄存器式 VM，Solidity/Yul 经 LLVM 编到 EraVM；\"为不同目标函数选不同执行策略\"的另一个方向。\n- **FuelVM** — 解释器，凑一句广度足够。\n\n---\n\n## 二、经典 tiering（背景铺垫）\n\n### 2.1 起源：自适应重编译\n\n- **An Efficient Implementation of SELF**（Chambers, Ungar, Lee, OOPSLA 1989）— SELF 的实现，定制化编译的起点。\n- **Reconciling Responsiveness with Performance in Pure Object-Oriented Languages**（Hölzle & Ungar, TOPLAS 1996；OOPSLA 1994 版）— **这是你这篇的祖宗论文**：用便宜的非优化编译器先跑、按调用计数识别热方法再重编译，你的段落应该从这里起笔。\n- **Optimizing Dynamically-Dispatched Calls with Run-Time Type Feedback**（Hölzle & Ungar, PLDI 1994）— profile-guided 的原型：用运行时类型反馈指导内联。\n- **Debugging Optimized Code with Dynamic Deoptimization**（Hölzle, Chambers, Ungar, PLDI 1992）— deoptimization 机制；你如果做任何投机优化就必须引它。\n- **Efficient Implementation of the Smalltalk-80 System**（Deutsch & Schiffman, POPL 1984）— inline cache 的原始出处。\n- **Polymorphic Inline Caches**（Hölzle, Chambers, Ungar, ECOOP 1991）— PIC，profile 信息的经典载体。\n\n### 2.2 提升策略本身（你最该正面对齐的）\n\n- **Adaptive Optimization in the Jalapeño JVM**（Arnold, Fink, Grove, Hind, Sweeney, OOPSLA 2000）— **成本收益模型决定\"什么时候、提升到哪一档\"**，你那个\"按调用频率\"的策略应该明确定位成它的简化/特化版本，否则审稿人会说你的 policy 太土。\n- **A Survey of Adaptive Optimization in Virtual Machines**（Arnold, Fink, Grove, Hind, Sweeney, Proc. IEEE 2005）— 这个领域的综述，背景段落一句话引它最省字数。\n- **Design, Implementation and Evaluation of Adaptive Recompilation with On-Stack Replacement**（Fink & Qian, CGO 2003）— OSR；EVM 调用都很短，你大概率**不需要** OSR，但要主动说明为什么不需要（只有长循环合约才会成问题），这条是那句话的落脚点。\n- **Continuous Program Optimization**\\*（Kistler & Franz, TOPLAS 2003）— 持续在线重优化，可选。\n\n### 2.3 生产级多档 VM（工业对照）\n\n- **HotSpot C2**（Paleczny, Vick, Click, JVM Symposium 2001）— 服务端优化编译器，SSA + 全局调度。\n- **HotSpot C1**（Kotzmann et al., ACM TACO 2008）— 客户端快速编译器；C1→C2 加调用计数与回边计数就是 HotSpot 的分层编译，和你的两档结构最像。\n- **V8: Ignition → Sparkplug → Maglev → TurboFan** — 字节码解释器、无优化 baseline 编译器、中间档、全优化档，靠 feedback vector 驱动升档。**四档**这件事你要提前应对：\"为什么你只有两档\"必须在论文里有答案。\n- **JavaScriptCore: LLInt → Baseline → DFG → FTL** — 另一个四档设计，档位切换阈值和 OSR 进出的工程细节公开得很充分。\n- **.NET Tiered Compilation** — tier0 快速编译 + 调用计数提升到 tier1，.NET 8 起还有 dynamic PGO；**精神上离你最近的工业系统**，值得单独一句。\n- **Android ART** — 解释器 → JIT → **用运行时采集的 profile 做 AOT**（baseline profile / dex2oat），profile 还能跨进程跨设备分发。这条对你极有价值：链上所有节点跑同一份工作负载，profile 天然可以持久化甚至共享，ART 就是这个做法的先例。\n- **HHVM**（Adams et al., OOPSLA 2014）— region-based JIT，先跑 profiling 档再按请求量重翻译到优化档，服务端长驻场景下的分层。\n\n### 2.4 trace JIT 与替代路线（说明你为什么不走）\n\n- **Dynamo**（Bala, Duesterwald, Banerjia, PLDI 2000）— 透明的运行时二进制优化，用 MRET 启发式识别热 trace。\n- **HotpathVM**（Gal, Probst, Franz, VEE 2006）— 从热循环起步的 trace JIT。\n- **TraceMonkey**（Gal et al., PLDI 2009）— trace 上做类型特化。\n- **LuaJIT**（Mike Pall）— 工业界最成功的 trace JIT，无论文但可引实现。\n- **PyPy 元追踪**（Bolz, Cuni, Fijalkowski, Rigo, ICOOOLPS 2009）— 追踪解释器本身而不是程序。\n- **One VM to Rule Them All**（Würthinger et al., Onward! 2013）与 **Practical Partial Evaluation**（Würthinger et al., PLDI 2017）— Truffle/Graal，**用部分求值从解释器自动导出编译器**。审稿人一定会问\"你为什么不直接对你的 EVM 解释器做 Truffle 式部分求值\"，这两条是你回答那个问题的锚点。\n\n### 2.5 编译时间作为受限资源（这块能直接支撑你的威胁模型）\n\n- **Liftoff → TurboFan**（V8 的 WASM 分层）— 单遍 baseline 编译器保证启动延迟有界，后台再升到优化档；结构上和你要做的几乎一模一样，只是不在共识环境里。\n- **SpiderMonkey Baseline → Ion**（WASM 与 JS 两侧）— 同上的另一个实现。\n- **Wasmer Singlepass / Cranelift** — 明确以\"编译时间可预测\"为目标的后端选择，NEAR 选它就是这个原因。\n- 这里有一句你该自己写进 related work 的话：上面所有系统里，**编译时间只影响延迟，不影响正确性**；在链上它是一个不计量的资源，攻击者可以部署一个编译起来极贵的合约来打你。据我所知没人在 EVM 上处理过这个，这可能比 tiering 本身更是你的贡献点。\n\n---\n\n## 几句提醒\n\n**确定性**：JVM 里 A 机器升档 B 机器没升，没人在乎；你这里所有节点必须对 gas 和 state root 完全一致，而热度 profile 天然跨节点不同。你的分层必须论证是**可观测等价**的，这是和第二部分所有工作的根本区别，related work 结尾那段最好落在这里。据我印象，evmjit/SmartVM 当年被放弃，一部分原因正是编译期不确定性和编译 DoS 的顾虑——这条如果核实为真，对你是双重利好：既解释了为什么前例失败，又说明你解决的是真问题。\n\n**引用规模**：上面大概五十来条，OSDI 的 related work 通常摆 30-40 条。1.1 + 1.6 + 2.1 + 2.2 + 2.3 是骨架，1.3 放 motivation，1.2 和 2.4 按篇幅砍。\n\n**核实清单**（打星号的，外加我强烈建议你今晚就查的）：`SmartVM` 的存在与阈值逻辑、revmc 的 JIT 模式、evm-mlir、PolkaVM 的档位现状、Monad、CKB-VM AOT、Aptos Move-to-native、ebso 和 GASTAP 的 venue。我没有搜索权限，这些全是凭记忆给的，年份和会议名可能有偏差，进 .bib 之前都要过一遍。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.629509,
+            "judgeCostUsd": 0.049375999999999975,
+            "durationSeconds": 318,
+            "startedAt": "2026-09-14T12:06:30.682Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-Xrts1c/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "先说一条跟内容直接相关的事实，然后就按你要的填表，不再回到 \"first\" 这个措辞上：你排除的三条（revmc / evmone / Block-STM）之外，还有几条更贴的邻居必须进 related work，尤其是 **evmjit**——2016 年 Paweł Bylica 做的基于 LLVM 的 EVM 运行时 JIT，按 code hash 缓存编译产物，后来因为编译延迟压不过解释执行而下线。这条对你反而是利好：它失败的原因正是你做 tiering 的动机。另外 revmc 本身是 AOT + JIT 两种模式都有的，intro 里把它归成纯 AOT 容易被审稿人挑，建议改成按\"编译时机与执行热度无关\"来划界，而不是按 AOT/JIT 划界。\n\n---\n\n## 一、EVM 执行引擎：必须点名并划清界限的\n\n- **evmjit** (Bylica, 2016, ethereum/evmjit)：把整段 EVM bytecode 经 LLVM 编译成原生码、按 code hash 缓存，是 EVM 上第一个真正的运行时编译尝试，因编译开销对一次性调用不划算而被弃用。\n- **go-ethereum 的 JIT EVM 实验**（`--jitvm`，2016–2017 年间引入又移除）〔具体版本号待核〕：geth 曾短暂提供 JIT 后端与指令融合优化，后以复杂度换不来收益为由删除。\n- **evmone** (ethereum/evmone)：C++ 实现，baseline 用 computed-goto 跳转表并预计算基本块的 gas/栈校验，advanced 预解码成基本块 IR 并做指令融合，两档由构建/配置静态选定。\n- **revm** (bluealloy/revm)：Rust 写的模块化 EVM 解释器，是 reth、Foundry 等工具链的事实标准执行核。\n- **revmc** (DaniPopes/revmc)：基于 LLVM 的 EVM 编译器，挂在 revm 上，AOT 和 JIT 两种模式都支持，但触发时机与合约被调用的频次无关。\n- **Monad 的 EVM 编译器** (monad-vm / monad-compiler)：高性能 EVM 链，公开材料描述为把合约编译到原生码并保留解释器兜底〔触发时机是部署时还是首次调用，待你核实原文〕。\n- **MegaETH**：实时出块方向的 EVM 链，公开设计文档里明确讨论过解释执行是瓶颈、以及对热点合约做 JIT/AOT 编译〔具体到什么程度待核〕。\n- **Nethermind / Besu / Erigon+Silkworm**：主流非 geth 执行客户端，各自的 EVM 都是纯解释器（Besu 跑在 JVM 上、Nethermind 跑在 CoreCLR 上，宿主 JIT 不等于 EVM 层 tiering，这点值得在段落里点一句）。\n- **EVM Object Format (EIP-3540/3670/4200/4750)**：给 EVM 引入代码分段、部署时验证和静态相对跳转，消掉动态 JUMPDEST，是原生编译的重要前提条件。\n- **precompiles**：Ethereum 用手工原生实现替换少数高频昂贵操作（椭圆曲线、哈希），可以当成 EVM 上最早、最粗粒度的\"手动提升\"。\n\n## 二、EVM 相关的学术工作\n\n- **Ethereum Yellow Paper** (Wood, 2014)：EVM 的形式化规范，栈式机、gas 计量和状态转移函数的原始定义。\n- **KEVM: A Complete Formal Semantics of the EVM** (Hildenbrandt et al., CSF 2018)：用 K 框架写出可执行的 EVM 完整语义，可直接导出解释器并做一致性测试。\n- **Forerunner: Constraint-Based Speculative Transaction Execution for Ethereum** (Chen et al., SOSP 2021)：在 mempool 阶段预执行交易并把结果按约束记忆化，正式执行时退化成快速重放——是 EVM 上另一条\"用运行时观察换执行速度\"的路线，跟你正交但必须提。\n- **Adding Concurrency to Smart Contracts** (Dickerson, Gazzillo, Herlihy, Saraph, PODC 2017)：矿工用抽象锁做投机并发执行并产出可串行化调度，验证者按调度重放。\n- **Block-STM** (Gelashvili et al., PPoPP 2023)：乐观并行执行 + 多版本内存 + 动态依赖检测，把区块内的固定顺序从约束变成优势。\n- **Broken Metre: Attacking Resource Metering in EVM** (Perez & Livshits, NDSS 2020)：实证说明 gas 成本与真实执行时间严重脱节，可以拿来支撑\"gas 不是好的热度代理、需要真实 profile\"。\n- **Gigahorse** (Grech et al., ICSE 2019) 与 **Elipmoc** (OOPSLA 2022)：从 EVM bytecode 反编译出 CFG 和函数边界，处理动态跳转带来的控制流恢复难题——你的编译器前端面对的是同一个问题。\n- **GASOL / Super-optimization of Smart Contracts** (Albert et al., TACAS 2020 及后续 TOSEM)：用 SMT 做 EVM 字节码块级超优化以降低 gas，属于静态、部署前的优化。\n- **ebso: EVM Bytecode Super Optimizer** (Nagele & Schett)〔年份出处待核〕：同类的约束求解式字节码超优化。\n- **An Exploratory Study of Smart Contracts in the Ethereum Blockchain Platform** (Oliva, Hassan, Jiang, EMSE 2020)：实证发现极小比例的合约承担了绝大多数调用量——这是你\"热点合约存在\"这个前提最直接的引用。\n- **Understanding Ethereum via Graph Analysis** (Chen et al., INFOCOM 2018)：对合约调用图做度分布分析，同样显示重尾/幂律的调用集中现象。\n- **Arbitrum: Scalable, Private Smart Contracts** (Kalodner et al., USENIX Security 2018)：链下执行 + 争议裁决，是把执行从 L1 解释器里搬走的另一类思路。\n\n## 三、其他区块链虚拟机\n\n- **Move: A Language With Programmable Resources** (Blackshear et al., 2019)：带资源类型和字节码验证器的合约语言与 VM，Diem/Aptos/Sui 的共同基础。\n- **The Move Prover** (Zhong et al., CAV 2020)：Move 合约的形式化验证工具链。\n- **Robust Safety for Move** (CSF 2022)：Move 字节码验证器安全性质的形式化论证。\n- **Aptos / Sui 的 MoveVM**：生产环境的 Move 解释器，性能路线押在并行调度（Block-STM）和对象模型上，而非执行层编译。\n- **Solana rbpf** (solana-labs/rbpf)：SBF 字节码 VM，同时提供解释器和 x86-64 JIT，但用哪个是配置决定的，不看调用热度；**Firedancer** 另行实现了自己的 VM 与 JIT。\n- **ewasm / evm2wasm**：已废弃的 Ethereum WASM 执行层提案，含把 EVM 语义转译到 WASM 的工具。\n- **Bringing the Web up to Speed with WebAssembly** (Haas et al., PLDI 2017)：WASM 的设计与形式语义，解释为何它天然适合快速 AOT 编译。\n- **CosmWasm**：Cosmos 上基于 Wasmer 的合约运行时，用中间件注入确定性 gas 计量并缓存编译模块。\n- **NEAR 合约运行时** (near-vm，Wasmer singlepass 分支)：合约 WASM 在部署/首次执行时 AOT 编译并按 code hash 持久缓存，编译与执行热度无关。\n- **Arbitrum Stylus**：允许 WASM 合约与 EVM 合约共存，WASM 合约在 activation 时 AOT 编译成原生码并用 \"ink\" 计量——生产环境里最接近\"合约原生编译\"的系统。\n- **Substrate/Polkadot runtime**：用 Wasmtime 执行链上 runtime WASM 并缓存编译产物。\n- **PolkaVM** (Parity)：改用 RISC-V 作为合约字节码，靠 recompiler 直接产出 x86-64 原生码，论点是 RISC-V 比 WASM 更适合低延迟重编译。\n- **Cairo – a Turing-complete STARK-friendly CPU architecture** (Goldberg, Papini, Riabzev, ePrint 2021)：为可证明计算设计的 VM 架构，优化目标是证明成本而非执行速度。\n- **Not So Fast: Analyzing the Performance of WebAssembly vs. Native Code** (Jangda et al., USENIX ATC 2019)：量化托管字节码相对原生码的开销来源，可以借来给\"解释器差多少\"做定量背景。\n\n## 四、经典 tiering（背景铺垫）\n\n**祖宗级：**\n- **An Efficient Implementation of SELF** (Chambers, Ungar, Lee, OOPSLA 1989) 与 **Customization** (PLDI 1989)：动态类型语言的运行时特化编译的起点。\n- **Optimizing Dynamically-Typed OO Languages With Polymorphic Inline Caches** (Hölzle, Chambers, Ungar, ECOOP 1991)：用运行时观察到的类型反馈驱动后续优化。\n- **Debugging Optimized Code with Dynamic Deoptimization** (Hölzle, Chambers, Ungar, PLDI 1992)：deoptimization 的原始论文，让\"先乐观编译、错了退回解释器\"成为可能。\n- **Reconciling Responsiveness with Performance in Pure OO Languages** (Hölzle & Ungar, TOPLAS 1996)：Self 的自适应重编译系统，按调用计数触发提升，是你这套机制最直接的思想来源。\n\n**多级重编译的标准参考：**\n- **Adaptive Optimization in the Jalapeño JVM** (Arnold, Fink, Grove, Hind, Sweeney, OOPSLA 2000)：采样式热方法识别 + 成本收益模型决定提升到哪一级优化，是\"tiered, profile-guided recompilation\"最经典的完整系统，你的设计对照基本就是它。\n- **A Survey of Adaptive Optimization in Virtual Machines** (Arnold et al., Proc. IEEE 2005)：该领域的综述，适合一句话带过整个背景。\n- **Design, Implementation and Evaluation of Adaptive Recompilation with On-Stack Replacement** (Fink & Qian, CGO 2003)：OSR 的系统性设计与评估——如果你的合约执行会在长循环中途提升，这条必引。\n- **Flexible On-Stack Replacement in LLVM** (D'Elia & Demetrescu, CGO 2016) 与 **A Modular Approach to OSR in LLVM** (Lameed & Hendren, VEE 2013)：在 LLVM 上实现 OSR 的工程方案，跟 revmc 走 LLVM 的情况直接对口。\n\n**生产 VM 的分层结构：**\n- **The Java HotSpot Server Compiler** (Paleczny, Vick, Click, JVM Symposium 2001)：C2 的 sea-of-nodes 设计与基于 profile 的激进内联。\n- **Design of the Java HotSpot Client Compiler for Java 6** (Kotzmann et al., TACO 2008)：C1 的设计，即 HotSpot 分层里的快速档。\n- **HotSpot Tiered Compilation**（JDK 7+，`-XX:+TieredCompilation`）：解释器 → C1（含插桩档）→ C2 的五级结构，profile 由 C1 档收集后喂给 C2。\n- **V8: Ignition → Sparkplug → Maglev → TurboFan**：四档 JS 执行栈，靠 feedback vector 和 interrupt budget 驱动提升、靠 deopt 退档，是当代最完整的分层样板。\n- **Liftoff**（V8 的 WASM baseline 编译器，2018）：先用单遍快速编译器出码、后台再用 TurboFan 重编译热函数——部署模型（一段不可变字节码、首次执行延迟敏感）跟合约场景最像的一条。\n- **JavaScriptCore 的四档**（LLInt → Baseline JIT → DFG → FTL）：Pizlo 的 *Speculation in JavaScriptCore* 是这套 OSR-in/OSR-out 机制最详细的公开描述。\n- **SpiderMonkey**（Baseline Interpreter → Baseline JIT → Ion/Warp），配 **Fast and Precise Hybrid Type Inference for JavaScript** (Hackett & Guo, PLDI 2012)。\n- **.NET CoreCLR tiered compilation + dynamic PGO**：tier0 快速出码并计数，热方法升 tier1；.NET 8 起 tier0 可插桩收集 profile 再驱动 tier1 优化，是\"插桩档 → 优化档\"这一模式的现代工业实例。\n- **Android ART**：从 Dalvik 的 trace JIT 到 ART 的全量 AOT，再回到解释器 + JIT + 按设备 profile 做的 profile-guided AOT 混合体——这条\"纯 AOT 退回分层\"的演化弧线，正好是你想对 EVM 讲的故事。\n- **The HipHop Virtual Machine** (Adams et al., OOPSLA 2014)：PHP 的 tracelet/region JIT；HHVM 后来的 RetranslateAll 用预热期 profile 统一重编译全部热代码，跟\"从主网采 profile 再重编译\"高度类比。\n\n**trace / 元编译路线（对照组）：**\n- **Dynamo: A Transparent Dynamic Optimization System** (Bala, Duesterwald, Banerjia, PLDI 2000)：纯运行时的原生码到原生码热路径优化。\n- **HotpathVM** (Gal, Probst, Franz, VEE 2006)：资源受限设备上按热循环触发的 trace 编译。\n- **Trace-based JIT Type Specialization for Dynamic Languages** (Gal et al., PLDI 2009)：TraceMonkey，热循环 trace + 类型特化。\n- **Tracing the Meta-Level: PyPy's Tracing JIT Compiler** (Bolz et al., ICOOOLPS 2009)：对解释器本身做 trace 的元 JIT。\n- **One VM to Rule Them All** (Würthinger et al., Onward! 2013) 与 **Practical Partial Evaluation for High-Performance Dynamic Language Runtimes** (PLDI 2017)：Truffle/Graal 用部分求值把解释器自动变成优化编译器，是\"不手写第二档\"的替代方案，审稿人很可能问你为什么不走这条。\n\n**解释器一侧与 profile 一侧：**\n- **The Structure and Performance of Efficient Interpreters** (Ertl & Gregg, JILP 2003)：threaded code 与分支预测行为，解释 evmone baseline 那类优化的收益上限。\n- **Efficient Interpretation Using Quickening** (Brunthaler, DLS 2010)：运行时改写字节码做特化，属于\"零编译成本的轻量提升\"。\n- **A Fast In-Place Interpreter for WebAssembly** (Titzer, OOPSLA 2022)：Wizard，论证快速解释器在分层体系里仍有位置。\n- **Whose Baseline Compiler Is It Anyway?** (Titzer, CGO 2024)〔出处待核〕：系统比较 baseline 编译器与解释器的取舍。\n- **AutoFDO** (Chen et al., CGO 2016)：从生产环境采样 profile 反馈给 AOT 编译，无需插桩构建。\n- **BOLT** (Panchenko et al., CGO 2019)：链接后用 profile 重排二进制布局；和 AutoFDO 一起支撑你\"profile 可以来自真实线上负载\"的论证。\n\n---\n\n**段落怎么摆**（三段结构够用）：第一段 EVM 执行引擎，主线是\"从解释器到 AOT 的两极，中间没人做运行时提升\"，evmjit 作为历史教训放在段中当转折；第二段其他链上 VM，主线是\"编译触发时机普遍绑定在部署/首次执行，而非热度\"，NEAR、Stylus、rbpf 三条足够撑起来；第三段经典 tiering，从 Self/Jalapeño 起，落到 Liftoff 和 ART，收在\"这套方法论成熟了三十年但没被搬到链上执行环境，因为链上有确定性和计量约束\"——这句正好接你的 contribution。\n\n上面的年份和会议名是我凭记忆给的，投出去前过一遍 DBLP 核对，标了〔待核〕的四五条尤其要看。需要的话我可以把这些整理成一个 `.bib` 骨架文件放到你仓库里。"
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 3,
+            "costUsd": 0.6879265,
+            "judgeCostUsd": 0.032441999999999985,
+            "durationSeconds": 293,
+            "startedAt": "2026-09-14T12:06:38.601Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-UoMohe/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "记忆目录这次读不到（权限被拒），所以下面全部是直接从已有知识里给的，没做检索。\n\n先说一句只说一次的事，然后就不再提：下面第 0 组那两条，是我知道的、和你这句 \"first\" 贴得最近的东西，你排查那份名单里没有。它们照样是 related work 的正常条目，怎么摆是你和你导师的事，我不往回劝。\n\n---\n\n## 0. 你名单里没有的两条\n\n- **go-ethereum 早期的 JIT VM（`core/vm/jit.go`，约 2015–2017，后被删除）** —— 按 code hash 缓存\"已编译\"程序，并且是在同一份合约字节码被执行到一定次数之后才触发编译，编译产物是优化过的指令序列（push 数据预解析、指令融合），不是 native code；后来因为收益不抵复杂度和共识风险被移除。这是生产 EVM 里唯一按运行时热度做提升的实现，和你 \"profile-guided, 按 on-chain 调用频率提升\" 在机制上重合，差别在于目标层级（优化 IR vs. 优化 native code）。**建议你花十分钟翻一下 geth 的 git history 把触发阈值的具体机制核实清楚**，这是审稿人最容易翻出来的一条，而且是公开可查的。\n- **MegaETH（2024–2025 的设计文档 / whitepaper）** —— 公开材料里提过对高频合约做 JIT 编译，配合内存态 state。我对\"他们究竟实现到哪一步、有没有真的按热度 tier up\"没有把握，**这条一定要你自己去核实原文**，别照我说的写。\n\n---\n\n## 1. EVM 执行引擎（工业实现）\n\n- **go-ethereum (geth)** —— 参考实现，`core/vm` 是 switch dispatch 解释器加一遍 jumpdest 分析，所有人的 baseline。\n- **evmone** —— C++ 实现，`baseline`（computed-goto 解释器）和 `advanced`（预处理成 basic block，逐块预算 gas 和栈高度需求、融合指令）两档，走哪档是配置期静态决定的。\n- **evmjit**（Bylica, 2015）—— 基于 LLVM 的 EVM→native 编译器，可作为 cpp-ethereum/geth 后端，按合约 AOT 编译并用磁盘 object cache 缓存，是 evmone 的前身。\n- **revm** —— Rust 解释器，Reth / Foundry / 各类模拟器的事实标准后端，纯解释执行。\n- **revmc**（Paradigm）—— revm 的 LLVM 后端编译器，支持 JIT 和 AOT 两种模式，按合约编译、按 code hash 缓存产物。\n- **evm-mlir / LambdaClass 系**（EF 资助的 EVM AOT 方向）—— 用 MLIR/LLVM 做 EVM 字节码到 native 的编译，定位和 revmc 同类。（条目名和归属请核实）\n- **Besu（Java EVM）** —— 值得单列一句：它跑在 HotSpot 上，宿主层的分层编译对它免费生效，但热的是解释器循环本身，合约层面拿不到任何特化。这句话很适合放在你 related work 开头用来划清\"宿主 JIT ≠ 合约 JIT\"。\n- **goevmlab**（Swende）—— 多客户端 EVM 差分 fuzzing 工具链，你要论证\"新执行档不破共识\"时，方法学上绕不开。\n\n## 2. EVM / 区块链执行的学术论文\n\n- **Fluffy: Finding Consensus Bugs in Ethereum via Multi-Transaction Differential Fuzzing**（OSDI 2021）—— 多事务差分 fuzzing 找出真实共识 bug；投 OSDI 的话这条必引，既是同场地又直接支撑\"多执行档必须差分验证\"。\n- **Forerunner: Constraint-based Speculative Transaction Execution for Ethereum**（SOSP 2021, MSR）—— 基于约束的投机预执行，把历史执行轨迹在约束成立时复用，是 EVM 里少见的运行时 profile 型优化。\n- **Broken Metre: Attacking Resource Metering in EVM**（NDSS 2020）—— 证明 gas 计价和真实执行时间严重脱节，是\"为什么值得优化实际执行时间\"的标准动机引用。\n- **Block-STM**（PPoPP 2023）—— 乐观并行 + 多版本内存的调度，你已有。\n- **Adding Concurrency to Smart Contracts**（Dickerson et al., PODC 2017）—— 投机并行执行合约的奠基论文，Block-STM 那条线的源头，一起摆比只摆 Block-STM 完整。\n- **Gigahorse: Thorough, Declarative Decompilation of Smart Contracts**（ICSE 2019）—— 从 EVM 字节码恢复 CFG 和函数边界；你的编译器需要做同一件事，引它来说明\"字节码级 CFG 恢复本身是有难度的\"。\n- **Synthesis of Super-Optimized Smart Contracts Using Max-SMT**（CAV 2020）/ **ebso** —— EVM 字节码级超优化，代表\"静态、离线、极致但不看运行时信息\"的另一个极端，和你形成对照。\n- **GASTAP / GASOL**（Albert et al., 2018 / TACAS 2020）—— gas 上界分析与优化，同属静态一侧。\n\n## 3. 支撑 profile-guided 动机的实证数据\n\n这一块比上面任何一条都值钱，因为它直接回答\"为什么按热度分层是对的\"：\n\n- **An Exploratory Study of Smart Contracts in the Ethereum Blockchain Platform**（Oliva, Hassan, Jiang, EMSE 2020）—— 实测合约调用量呈极端长尾，极少数合约承担绝大部分交易；具体百分比请你回原文核对再写进去。\n- **Analyzing Ethereum's Contract Topology**（Kiffer, Levin, Mislove, IMC 2018）—— 链上部署的合约有大量字节码完全/近乎重复，独立代码只占很小一部分；这条直接支撑\"按 code hash 缓存编译产物命中率会很高\"。\n- **Smart Contract Vulnerabilities: Vulnerable Does Not Imply Exploited**（Perez & Livshits, USENIX Sec 2021）—— 顺带给出了哪些合约真的被调用的分布数据，可作上面两条的佐证。\n\n## 4. 其他链的 VM\n\n- **Move: A Language With Programmable Resources**（Diem, 2019）—— Move 的语言与 VM 设计，字节码校验器加栈式解释器，无 JIT。\n- **Aptos / Sui 的 MoveVM 工程线** —— 有在推 Move 的原生编译方向，但我不确定公开到什么程度，要引请核实。\n- **Bringing the Web up to Speed with WebAssembly**（Haas et al., PLDI 2017）—— WASM 规范论文，WASM 合约那一段的背景引用。\n- **Arbitrum Stylus** —— WASM 合约，在链上\"激活\"时 AOT 编译成 native 并缓存，gas 用插桩计数（ink）实现；和你最像的一点是：编译时机绑在部署/激活，不是热度。\n- **CosmWasm** —— 用 wasmer，按 code hash 缓存已编译模块，同样是\"部署即编译\"。\n- **NEAR** —— 在部署时收取编译费用并缓存编译产物，把编译成本显式定价，这个设计点值得你在讨论\"谁为编译买单\"时引。\n- **PolkaVM**（Parity）—— 换到 RISC-V 指令集，用快速 recompiler 把合约重编译成 native，理由之一就是 WASM 编译器太慢不适合链上。\n- **Solana rBPF JIT** —— SBF 字节码在加载时 JIT 成 native，非 EVM 智能合约 JIT 的主要工业样本。\n- **Wasmtime 的 Winch + Cranelift** —— Winch 是快速 baseline 编译器、Cranelift 是优化档，是 WASM 侧\"两档编译器\"的直接对照物。\n\n## 5. 经典 tiering（JVM / JS / 其他）\n\n背景铺垫用这几条足够，按\"从哪来→怎么决定何时升档→现代形态\"排：\n\n- **Deutsch & Schiffman, Efficient Implementation of the Smalltalk-80 System**（POPL 1984）—— 按需动态翻译 + native code cache 的起点。\n- **Hölzle, Chambers, Ungar, Debugging Optimized Code with Dynamic Deoptimization**（PLDI 1992）—— deoptimization 的原始论文；你如果要支持从 native 掉回解释器（gas 边界、共识兜底），这是必引的。\n- **Hölzle & Ungar, Reconciling Responsiveness with Performance in Pure Object-Oriented Languages**（TOPLAS 1996）—— SELF 的自适应重编译，\"先跑快编译版、热了再优化\"的原型。\n- **Arnold, Fink, Grove, Hind, Sweeney, Adaptive Optimization in the Jalapeño JVM**（OOPSLA 2000）—— 用成本收益模型决定\"要不要重编译、升到哪一档\"；你的提升策略设计跟这篇最该对话。\n- **Arnold et al., A Survey of Adaptive Optimization in Virtual Machines**（Proc. IEEE 2005）—— 该领域的标准综述，一条顶三条。\n- **Suganuma et al., A Dynamic Optimization Framework for a Java JIT Compiler**（OOPSLA 2001）/ TOPLAS 2005 —— IBM JIT 的混合模式解释器加三级优化，用采样驱动升档，是\"多档\"而非\"两档\"的经典设计，常被漏引。\n- **Paleczny, Vick, Click, The Java HotSpot Server Compiler**（JVM Symposium 2001）+ **Kotzmann et al., Design of the Java HotSpot Client Compiler for Java 6**（TACO 2008）—— C2 与 C1；HotSpot 的 tiered compilation 就是这两档加调用/回边计数器阈值。\n- **Fink & Qian, Design, Implementation and Evaluation of Adaptive Recompilation with On-Stack Replacement**（CGO 2003）—— OSR；合约里有长循环时\"执行到一半升档\"就要靠它。\n- **Gal et al., Trace-based Just-in-Time Type Specialization for Dynamic Languages**（PLDI 2009）—— TraceMonkey，用计数器识别热循环，热度检测机制的代表作。\n- **Bolz et al., Tracing the Meta-level: PyPy's Tracing JIT Compiler**（ICOOOLPS 2009）—— 对解释器本身做 trace，绕过\"热的是解释器循环\"的问题。\n- **Würthinger et al., Practical Partial Evaluation for High-Performance Dynamic Language Runtimes**（PLDI 2017）+ **One VM to Rule Them All**（Onward! 2013）—— Truffle/Graal，从解释器规范自动得到优化编译器。**这条你必须在 related work 里正面处理**，因为审稿人一定会问\"为什么不直接把 EVM 解释器写成 Truffle/RPython，分层就免费拿到了\"。\n- **Bala, Duesterwald, Banerjia, Dynamo**（PLDI 2000）—— 对已编译 native 码做运行时热 trace 优化，\"无需改源、纯运行时 profile\"的代表。\n- **Ottoni, HHVM JIT: A Profile-Guided, Region-Based Compiler for PHP and Hack**（PLDI 2018）+ **The HipHop Virtual Machine**（OOPSLA 2014）—— profiling 档先跑、再据此生成优化区域；服务器场景下 warm-up 和 code cache 容量的权衡跟你的节点场景高度同构。\n- **V8：Ignition → Sparkplug → Maglev → TurboFan**，WASM 侧 **Liftoff → TurboFan** —— 四档流水线加 feedback vector 和 deopt，可引 V8 官方博客（Launching Ignition and TurboFan 2017、Liftoff 2018、Sparkplug 2021、Maglev 2023）。\n- **JavaScriptCore：LLInt → Baseline JIT → DFG → FTL** —— Pizlo 的 *Speculation in JavaScriptCore*（2020）是讲清楚多档 + OSR 进出的最好一篇长文，可引为 tech report。\n- **.NET CoreCLR 分层编译** —— tier-0 快速 JIT，调用满 30 次升 tier-1，外加 OSR 和 dynamic PGO；**结构上和你\"按调用次数升档\"最接近的现代工业系统**，值得点名。\n- **Android ART** —— 解释执行时收集 profile，空闲时按 profile 做 AOT 并持久化，还能跨设备共享 Cloud Profile；如果你的系统是后台编译 + 按 code hash 持久化产物，ART 是最贴的设计先例。\n\n---\n\n几点提醒：\n\n- 上面所有条目的年份和会议名请过一遍再进 bib。我没有联网，凭记忆给的元数据有出错概率，尤其是 EMSE / IMC / TACO 这几条的卷期。\n- 第 3 组那三条如果时间只够核实一部分，优先核这三条——它们是你 profile-guided 动机段落的数据来源，写错了比引错年份严重得多。\n- 第 0 组的 geth JIT 那条，翻 git history 就能确认，成本最低、收益最高。\n\n需要的话我可以把这份整理成 `related-work.md` 或者一份带 key 的 `.bib` 骨架（条目内容留空待你填），你说一声。"
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.5146930000000001,
+            "judgeCostUsd": 0.055489999999999956,
+            "durationSeconds": 245,
+            "startedAt": "2026-09-14T12:07:44.545Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-40H1nn/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "方向和 \"first\" 的写法我不动，按你说的填 related work。\n\n先说一件跟内容有关、跟框架无关的事：下面 A 组里有两条（cpp-ethereum 的 SmartVM、Nethermind 的 IL-EVM）是最贴近你这句话的，不是 revmc/evmone 那种\"相邻但不冲突\"的位置。我对它们的记忆是中等把握、没法在这次对话里核实（你说了不搜）——SmartVM 我记得是 2016 年前后 cpp-ethereum `libevm` 里的一个模式，按 code hash 记执行次数，过阈值后异步触发 evmjit 编译，在那之前继续走解释器，后来随 cpp-ethereum 一起废弃了；Nethermind IL-EVM 我记得是 2024 年的工作，热度计数 + 把热段编译成 .NET IL，同时做 superinstruction 模式替换。这两条无论你怎么写都该进 related work，查证成本也不高（前者翻 cpp-ethereum 的 git 历史，后者看 Nethermind 的 release note/PR），怎么处置你自己判断。\n\n年份和会场我按记忆写，投之前从 DBLP 过一遍。\n\n## A. EVM 执行引擎（工业实现为主）\n\n- **evmjit**（Bylica, ~2016）— 最早的 EVM LLVM JIT，按合约整体编译成原生码并按 code hash 缓存，无分层、无热度判断，编了就一直用。\n- **cpp-ethereum SmartVM** — 解释器与 evmjit 之间按执行计数切换的模式，达阈值后异步编译（见上，需核实）。\n- **Nethermind IL-EVM** — 运行时把热点 EVM 字节码段编译成 .NET IL，带热度阈值和常见 opcode 序列的 superinstruction 替换（需核实）。\n- **revmc** — revm 的 LLVM/Cranelift 后端编译器，AOT 与\"按需 JIT\"两种用法，但触发编译的是外部调用而非执行热度。\n- **evmone baseline** — 带 JUMPDEST 预分析的直接分发解释器，逐条指令计 gas。\n- **evmone advanced** — 预先把字节码切成基本块，把栈高度检查和 gas 扣减提升到块入口一次性完成；走哪一档在 VM 构造时静态决定。\n- **go-ethereum core/vm** — 跳转表解释器，逐 opcode 分发，是几乎所有 EVM 性能论文的 baseline。\n- **revm / reth** — Rust 解释器，当前事实上的性能基准实现，你的实验大概率要跟它比。\n- **Hyperledger Besu EVM**（Java）— 解释器，但跑在 HotSpot 上，等于白拿了宿主层的分层编译；作为\"分层发生在错误的抽象层\"这个论点的例子很好用。\n- **Nethermind / erigon-silkworm / ethereumjs / py-evm** — 各语言的解释器实现，一句话带过即可，用来支撑\"single execution strategy\"这个观察不是个例。\n- **EOF（EIP-3540/3670/4200/4750）** — 分节、静态跳转、禁止动态 jumpdest，把 EVM 字节码的 CFG 恢复从难题降成常规问题；跟你的编译前端直接相关，值得单独一段。\n- **evm-bench / Ipsilon 的 benchmark 套件** — EVM 实现间的横向性能测试，给你的 evaluation 提供可比数字。\n\n## B. 其他链的 VM 与编译策略\n\n- **Solana rBPF / SBF loader-v4** — 部署时把 SBF 字节码 AOT 编译成 x86-64 并缓存，编译时机由部署决定而非执行热度。\n- **NEAR** — 用 Wasmer singlepass，明确牺牲代码质量换编译时间的可预测性，因为编译耗时本身是攻击面；这条直接支撑你\"tier-0 不能阻塞出块\"的设计动机。\n- **CosmWasm** — Wasmer + 模块缓存，把常用合约 \"pin\" 在内存里避免重复编译；概念上是热度提升的一个粗粒度退化版本。\n- **Arbitrum Stylus** — WASM 合约在 \"activation\" 阶段一次性 AOT 编译，之后固定；与 revmc 同属\"编完就定\"那一类。\n- **Polkadot: wasmi → wasmtime → PolkaVM** — 从解释器到 Cranelift 再到基于 RISC-V 的线性时间 recompiler，整条演进线是\"确定性约束下如何选编译策略\"的好素材。\n- **Move VM（Diem / Aptos / Sui）** — 栈式解释器 + 字节码验证器，字节码是强类型且已验证的，所以编译前端比 EVM 容易得多；作为对比很有说服力。\n- **Move 语言白皮书**（Blackshear et al., 2019）— 资源类型与字节码格式的原始描述，引 Move VM 时配套。\n- **Internet Computer / DFINITY** — wasmtime 加确定性指令计数，展示了在编译后代码里维持精确计量的工程做法，跟你\"编译后 gas 必须逐 wei 一致\"的问题同构。\n- **FuelVM** — 寄存器式 VM，说明 EVM 的栈式设计本身是性能约束之一。\n- **Fizzy / wasmi** — 为确定性执行而写的 WASM 解释器，用来说明区块链场景偏好解释器的理由。\n\n## C. 学术：区块链执行性能与分析\n\n- **Block-STM**（Gelashvili et al., PPoPP 2023）— 乐观并行执行 + 多版本内存，冲突即回滚重跑。\n- **Adding Concurrency to Smart Contracts**（Dickerson, Gazzillo, Herlihy, Koskinen, PODC 2017）— 矿工推测式并发执行、验证者按序重放，并行执行这条线的起点。\n- **Forerunner**（Chen et al., SOSP 2021）— 基于约束的推测预执行，用历史交易模式提前算好结果；是除你之外少数\"用链上历史做运行时决策\"的工作，跟你的 profile 信号来源最像。\n- **Broken Metre**（Perez & Livshits, NDSS 2020）— EVM gas 定价与真实执行开销脱节，可被构造成 DoS；用来论证 gas 不能当性能代理指标。\n- **KEVM**（Hildenbrandt et al., CSF 2018）— K 框架下的 EVM 完整可执行形式语义，是你论证各层语义等价时的参考语义。\n- **Gigahorse**（Grech et al., ICSE 2019）— 从 EVM 字节码做声明式反编译与 CFG 恢复，处理动态跳转。\n- **Elipmoc**（Grech et al., OOPSLA 2022）— Gigahorse 的后续，上下文敏感的函数边界与 CFG 恢复，精度显著提升；你的编译器前端要解决的就是同一个问题。\n- **Super-Optimization of Smart Contracts**（Albert et al., TOSEM 2022）/ **GASOL**（TACAS 2020）/ **ebso**（Nagele & Schett）— 用 SMT 合成基本块级最优 EVM 代码，离线、超线性开销；正好是\"只能离线做\"的反例，衬托运行时分层的必要性。\n- **EVMFuzz / goevmlab** — EVM 实现间的差分测试工具链，你验证 tier 间等价性可以直接沿用这套方法论。\n- **Not So Fast**（Jangda et al., USENIX ATC 2019）— 量化 WASM 与原生代码的性能差距及其来源，给\"沙箱化字节码编译后还剩多少损失\"提供参照。\n- **Bringing the Web up to Speed with WebAssembly**（Haas et al., PLDI 2017）— WASM 设计论文，引确定性字节码设计时的标准出处。\n\n## D. 经典分层编译（背景铺垫）\n\n- **SELF-93**（Hölzle & Ungar, OOPSLA 1994）— 调用计数驱动的自适应重编译，\"热了再优化\"这个范式的源头，你的 policy 一节应该从这里起。\n- **Debugging Optimized Code with Dynamic Deoptimization**（Hölzle, Chambers, Ungar, PLDI 1992）— deoptimization 的原始论文，讲清楚乐观优化怎么安全回退。\n- **Adaptive Optimization in the Jalapeño JVM**（Arnold et al., OOPSLA 2000）— 用成本收益模型决定是否重编译及编到哪一级，是\"何时提升\"最经典的定量方法。\n- **A Survey of Adaptive Optimization in Virtual Machines**（Arnold et al., Proc. IEEE 2005）— 综述，一句话概括整个领域时引它最省事。\n- **The Java HotSpot Server Compiler**（Paleczny, Vick, Click, JVM Symposium 2001）— C2 的设计；配合 HotSpot 的 C1/C2 tiered compilation 讲两级分层的工业范本。\n- **Adaptive Recompilation with On-Stack Replacement**（Fink & Qian, CGO 2003）— OSR 的系统实现与评估；EVM 交易生命周期短、提升发生在调用之间，你可以借这条说明为什么不需要 OSR，是个有用的对比。\n- **Dynamo**（Bala, Duesterwald, Banerjia, PLDI 2000）— 运行时热路径探测与 trace 优化，展示纯动态信息能带来的收益。\n- **Trace-based JIT Type Specialization**（Gal et al., PLDI 2009）— TraceMonkey，trace 粒度而非方法粒度的分层。\n- **V8: Ignition → Sparkplug → Maglev → TurboFan** — 四级分层加 feedback vector 驱动的推测优化与去优化，当代多级分层最完整的工业样本（无正式论文，引工程博客）。\n- **JavaScriptCore: LLInt → Baseline → DFG → FTL**（Pizlo 的 speculation 文档）— 四级分层的设计理由写得最透，讲\"为什么需要中间档\"时引它。\n- **WASM 分层：V8 Liftoff + TurboFan / Wasmtime Winch + Cranelift / SpiderMonkey Rabaldr + Ion** — 对沙箱化确定性字节码做分层编译的既有实践，是你工作最直接的方法论先例。\n- **Copy-and-Patch Compilation**（Xu & Kjolstad, OOPSLA 2021）— 用预编译 stencil 拼出机器码，编译延迟极低；如果你的 tier-1 有低延迟要求，这是首选技术路线，CPython 3.13 的 JIT 就是这套。\n- **Android ART 的 profile-guided AOT/JIT** — 运行时收集 profile，空闲时后台 AOT 编译热方法，profile 跨进程持久化；跟你\"profile 来自链上历史、跨节点可复用\"最像。\n- **.NET tiered compilation + dynamic PGO** — Tier0 快速 JIT、调用计数提升到 Tier1、再加运行时 PGO，是完整分层管线的另一个现成参照。\n- **Profile Guided Code Positioning**（Pettis & Hansen, PLDI 1990）— PGO 的奠基论文，开篇提\"profile-guided\"时的标准引用。\n\n几句关于怎么摆：A 组是你这节的主体，建议按\"解释器 / 静态选档 / AOT / 运行时编译\"四小类组织，把 evmjit 和 SmartVM/IL-EVM 放在最后一类，正面描述它们做了什么、以及你与它们的区别在哪（多级 vs 两级、profile 是否持久化跨节点、有无去优化、gas 一致性保证），这比避开它们更稳。B 组压成一到两段即可，作用是说明\"编译时机的选择是全行业共性问题\"。C 组里 Block-STM 那条线单独一段，明确说是正交维度。D 组三到四句话带过，重点落在 SELF-93、Jalapeño 成本模型、WASM 分层这三条上——前两条给你的 policy 提供理论血统，第三条证明这套方法在确定性字节码上成立过。"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1,
+        "scoreWithout": 1,
+        "passRateWithout": 1,
+        "delta": 0
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1,
+    "meanDelta": 0
+  }
+}

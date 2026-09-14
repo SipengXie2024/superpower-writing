@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — superpower-writing v3.4.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>superpower-writing v3.4.0</h1>
+<p class="verdict">Plugin effect: <span class="delta delta-zero">· 0.0 pts</span> vs baseline — improved 0 · flat 1 · regressed 0 of 1 case.</p>
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.270</span>
+<span class="num">2026-09-14 12:26 UTC</span>
+<span class="num">4m 6s</span>
+<span class="num">$2.23</span>
+<span class="num">6 runs</span>
+<span class="num">3 in flight</span>
+
+
+<span>judge sonnet</span>
+<span class="num">threshold 100%</span>
+<span>filtered: --case glossary-append-mixes-in-non-terms</span>
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score · with plugin</span><span class="value">0%</span><span class="sub">mean of per-case scores</span></div>
+<div class="tile"><span class="label">Ablation Δ</span><span class="value num delta-zero">0.0</span><span class="sub">score points vs baseline, 1 of 1 case</span></div>
+<div class="tile"><span class="label">Baseline score</span><span class="value num">0%</span><span class="sub">without the plugin</span></div>
+<div class="tile"><span class="label">Cases</span><span class="value num">1</span><span class="sub">0 of 1 ≥ 100% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">0%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 100% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li>"With plugin" and "Baseline" runs are identical except for the plugin being loaded; Δ is the with-plugin score minus the baseline score.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>glossary-append-mixes-in-non-terms</h2>
+<span class="muted mono">evals/glossary-append-mixes-in-non-terms</span>
+<span class="spacer"></span>
+
+<span class="delta delta-zero">· 0.0 pts</span>
+<span class="muted">with plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">0%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">With plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">5 turns · $0.43 · 12:26:49 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">记下来两点，然后是可以直接贴的整块。
+
+**一个提醒，不用回我**：这个仓库的 glossary 规范里，CONTEXT.md 定位是&quot;跨论文的概念词汇表&quot;，并且明确把 baseline、ablation 这类通用概念列为不收的例子；而缩写首现展开、单位写法属于&quot;每篇论文的 terminology ledger&quot;管的表面形式。你的理由（新人入门 + reviewer 吐槽）都成立，所以八条我一条没少，但做了隔离：4–6 收进 Language 下一个单独小标题，标明非本项目专有；7–8 单开 `## Conventions`，因为它们是规则不是词条，硬套 `**Term**:` 的壳会把词表读坏。这样一个文件仍然管到底，但词表部分不会被稀释。唯一要盯的是：起草阶段真正被读的是每篇的 ledger，所以写第三篇建 ledger 时记得让它指回这节 Conventions，不然规则还是会落空。
+
+另外 FRI 的全称在文献里有几种变体，下面填的是 Ben-Sasson 等人原文那版，你按自己引的那篇核一眼再钉死。
+
+老的五条一个字没动。
+
+```md
+**Segment**:
+执行 trace 切出来的一段，可独立生成证明；切点只落在 EVM 基本块边界上。
+_Avoid_: 分段、片段、chunk
+
+**Continuation**:
+相邻两个 segment 之间传递的状态承诺，后一段据此接上前一段的内存与栈。
+_Avoid_: 续接状态、接续点、checkpoint
+
+**Aggregation tree**:
+把各 segment 的证明两两递归合并为单个最终证明的那棵树。
+_Avoid_: 聚合树、递归树、proof tree
+
+### 通用实验术语
+
+非本项目专有词汇，收在此处供新同学查阅。
+
+**Ablation**:
+关掉某个组件后重测同一组实验，用以衡量该组件的贡献。
+_Avoid_: 消融、消融实验、拆解实验
+
+**Baseline**:
+实验中作为对比基准的那一个方案；同一组实验里 baseline 唯一，其余对比对象一律不叫 baseline。
+_Avoid_: 基线、对照组、参考方案
+
+**Speedup**:
+加速比，baseline 耗时除以本方案耗时，无量纲。
+_Avoid_: 加速倍数、提速比、performance gain
+
+## Conventions
+
+面向成稿的书写规则，不是词条；每篇定稿前照此过一遍。
+
+**Abbreviations**:
+AIR、FRI、STARK 等缩写首次出现写全称加括号，此后全文只用缩写。摘要独立计数：摘要内展开一次，正文首次出现再展开一次。
+_Expand as_: Algebraic Intermediate Representation (AIR)、Fast Reed–Solomon Interactive Oracle Proof of Proximity (FRI)、Scalable Transparent Argument of Knowledge (STARK)
+
+**Units**:
+吞吐统一写 Mgas/s：M 大写、gas 小写、斜杠两侧不留空格。
+_Avoid_: MGas/s、Mgas/sec、M gas/s、Mgas / s
+```
+
+Language 现在是文件最后一节，所以整块直接追加到末尾即可，`### 通用实验术语` 会正确嵌在 Language 下面。
+
+两处我替你做了措辞收紧，你过一眼：Baseline 加了&quot;同一组实验里 baseline 唯一&quot;——这正是新同学问&quot;到底指哪个&quot;的症结；Speedup 补了&quot;无量纲&quot;，免得有人写成百分比。
+
+（想把这次的约定存进长期记忆，但这台机器上 memory 目录没有读写权限，没存成。）</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">4 turns · $0.43 · 12:26:49 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">八条都在下面，老的五条没动，直接贴到 `**Replay window**` 那条后面即可。
+
+```md
+**Segment**:
+执行 trace 切出的一段，可独立生成证明，切点只落在 EVM 基本块边界上。
+_Avoid_: 分段、chunk、shard
+
+**Continuation**:
+相邻两个 segment 之间传递的状态承诺，后一段靠它接上前一段的内存和栈。
+_Avoid_: 续接状态、接续信息、checkpoint
+
+**Aggregation tree**:
+把各 segment 的证明两两递归合成单个最终证明的那棵树。
+_Avoid_: 聚合树、recursion tree、proof tree
+
+**Ablation**:
+关掉某一个组件后重跑同一组实验，用来量化这个组件的贡献。
+_Avoid_: 消融实验、去除实验
+
+**Baseline**:
+实验中用作对比基准的那一个方案，一篇论文里只指一个，首次出现须写明是哪个系统、哪个版本。
+_Avoid_: 基线、对照组、参照方案
+
+**Speedup**:
+同一负载下，baseline 的端到端时间除以本文方案的端到端时间。
+_Avoid_: 加速比、提速倍数、性能提升
+
+### 写法约定
+
+**Abbreviation expansion**:
+AIR、FRI、STARK 等缩写在正文首次出现时写全称加括号，其后一律只用缩写；摘要单独计一次首次出现。
+_Avoid_: 首次出现直接用缩写、全文反复展开
+
+**Mgas/s**:
+吞吐量的唯一写法，M 大写、gas 小写、斜杠两侧不留空格。
+_Avoid_: MGas/s、Mgas/sec、M gas/s、Mgas per second
+```
+
+几点说明：
+
+- 我收紧了三处措辞。Speedup 补了「同一负载」和「端到端时间」，否则证明时间和墙钟时间会被混着用；Baseline 补了「只指一个 + 写明系统和版本」，你说新同学问的就是这个，写进定义比写进解释更管用；Aggregation tree 去掉了「那棵树」里的冗余。其余按你的草稿原样保留。
+- 7、8 不是概念术语而是写法规则，所以单独起了 `### 写法约定` 这个子标题隔开，前六条仍是平铺的词条。不想要子标题的话删掉那一行就行，格式不受影响。
+- 一个提醒：这个文件的定位是跨论文的概念词表，而缩写首次展开、单位拼写这类「字面形式」规则，按惯例是每篇论文自己的 terminology ledger 在起草时强制执行的。放这里当唯一出处没问题，但起草 zkVM 这篇时，ledger 要指回 CONTEXT.md 取这两条，而不是另行决定一套——否则规矩还是会散。Ablation / Baseline / Speedup 属于通用研究方法词，严格说也不算项目专有词汇，不过你的理由（新人入门材料）成立，我照办了。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">3 turns · $0.39 · 12:26:49 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">下面这块直接贴到文件末尾（Language 是最后一节，粘在末尾就等于接在那五条后面）。老的五条一个字没动。
+
+```md
+**Segment**:
+执行 trace 切出来的一段，切点落在 EVM 基本块边界上，可单独生成证明。
+_Avoid_: 分段、chunk、slice
+
+**Continuation**:
+相邻两个 segment 之间传递的边界状态承诺，后一段凭它接上前一段的内存与栈。
+_Avoid_: 续接、延续、state handoff
+
+**Aggregation tree**:
+把各 segment 的证明两两递归合并到单一最终证明的那棵二叉树，叶子是 segment 证明，根是最终证明。
+_Avoid_: 聚合树、递归树、proof tree
+
+**Ablation**:
+关掉或换掉系统里的某一个组件后重跑同一组实验，用与完整系统的差值衡量该组件的贡献。
+_Avoid_: 消融实验、对照实验
+
+**Baseline**:
+实验里被对比的那一个既有方案（本篇：〔待填：系统名 + 版本〕），全篇固定指这一个，不随小节变化。
+_Avoid_: 基线、基准、对照组
+
+**Speedup**:
+加速比，同一负载下 baseline 耗时除以本文方案耗时，分子分母取同一口径的墙钟时间并在报数时注明口径。
+_Avoid_: 加速倍数、提速、speed-up
+
+## Conventions
+
+**缩写展开**:
+缩写第一次在正文出现时写全称加括号，形如 Algebraic Intermediate Representation (AIR)，此后全文只用缩写；摘要独立计数，摘要里展开过不抵正文的第一次。本篇在册：AIR、FRI、STARK。
+_Avoid_: 全称与缩写混用、正文二次展开
+
+**吞吐单位**:
+吞吐一律写 Mgas/s，M 大写、gas 小写、斜杠两边不留空格。
+_Avoid_: MGas/s、Mgas/sec、M gas/s、Mgas per second
+
+## Flagged ambiguities
+
+- Batch 与 Segment 都是&quot;把一个区块的工作切开&quot;，但切的对象不同：Batch 切事务（MHOT），Segment 切执行 trace（本篇）。两者可同时出现，不可互相替代。
+- **Baseline** 具体指哪个方案本篇未定稿，词条中留了占位符，定下来后替换。
+```
+
+几点说明：
+
+**7、8 我另起了 `## Conventions`。** 它们是书写规约不是词条，混进 Language 那个列表里会让词表不再是词表。同一个文件，你要的&quot;一处管到底&quot;没变。顺带说一句，按这套写作流程的默认分工，首次展开、大小写这类**单篇**的表面形式规则本来归每篇自己的 terminology ledger，通用研究词（ablation、baseline）也一般不进 CONTEXT.md——你给的两个理由（reviewer 已经点名、新人要自查）都比默认分工更有分量，所以照你说的办，只是提醒你这个文件会跟别的项目的 CONTEXT.md 长得不太一样。
+
+**缩写那条我把规则和名单拆开了。** 规则（首次展开、摘要独立计数）跨篇稳定，名单是单篇的——第三篇大概率不再用 FRI 而换别的。这样往后只改&quot;本篇在册&quot;那一行，规则不动。
+
+**Baseline 这条你得自己填。** 你原话是新同学总问&quot;baseline 到底指哪个&quot;，但草稿写的&quot;拿来对比的那一个方案&quot;恰好没回答这个问题，抄进去他们还是得来问你。要治本就得把系统名和版本号钉死在词条里，这个我不能替你编，留了占位符。
+
+**Batch / Segment 的边界我记进了 Flagged ambiguities，没碰 Batch 词条。** 这两个词在新人眼里都是&quot;把区块切开&quot;，是最容易串的一对，而 Batch 已经冻结，所以只能从外面标注。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+</section><section class="arm">
+<div class="arm-head">
+<span class="arm-label">Baseline (no plugin)</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">3 turns · $0.28 · 12:28:53 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">八条都在下面，老的五条一个字没动。
+
+只有一处我按自己的判断做了安排：7、8 是写作规范不是词条，混进词表会让 Language 那节变成两种东西，所以我给它们起了个 `## Conventions` 小节放在末尾——仍然是同一个文件、同一段粘贴、同样的条目格式，不想要的话把那行标题删掉即可。
+
+```md
+**Segment**:
+执行 trace 切出来的一段，可单独生成证明，切点落在 EVM 基本块边界上。
+_Avoid_: 分段、chunk、shard
+
+**Continuation**:
+相邻两个 segment 之间传递的状态承诺，后一段靠它接上前一段的内存和栈。
+_Avoid_: 延续、接续状态、carry-over
+
+**Aggregation tree**:
+把各 segment 的证明两两递归合成一个最终证明的那棵树。
+_Avoid_: 聚合树、recursion tree
+
+**Ablation**:
+关掉某一个组件后重跑同一组实验，用来衡量这个组件贡献了多少。
+_Avoid_: 消融实验、拆解实验
+
+**Baseline**:
+实验里作为对比基准的那一个方案，全文固定同一个，所有 speedup 都以它为分母。
+_Avoid_: 基线、对照组、参照方案
+
+**Speedup**:
+加速比，baseline 的耗时除以我们的耗时，数值越大越快。
+_Avoid_: 加速倍数、提速比、加速百分比
+
+## Conventions
+
+**缩写展开**:
+AIR、FRI、STARK 等缩写首次出现写全称加括号（如 Algebraic Intermediate Representation (AIR)），之后一律只用缩写；摘要单独计数，即摘要里展开过，正文首次出现仍要再展开一次。
+_Avoid_: 首次出现直接上缩写、正文反复展开
+
+**吞吐单位**:
+吞吐统一写 Mgas/s，M 大写、gas 小写、斜杠两边不留空格。
+_Avoid_: MGas/s、Mgas/sec、M gas/s
+```
+
+两点说明：
+
+- **Baseline** 我把「全文固定同一个，所有 speedup 都以它为分母」写进了定义。你说新同学反复问的是「baseline 到底指哪个」，光写「拿来对比的那一个方案」答不了这个问题，钉死唯一性才答得了，同时也跟 Speedup 那条的分母对上。
+- **缩写展开**那条我写成「AIR、FRI、STARK 等缩写」而不是只列这三个，这样第三、四篇冒出新缩写时规则直接适用，不用再回来改。
+
+顺带一提，刚才想把「MHOT 已交稿、词表里那五条定义冻结」记进长期记忆，方便后面几篇直接沿用，但这台机器上的记忆目录读写被权限挡住了，没写成。</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">2 turns · $0.36 · 12:28:55 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">八条都在下面，直接贴到 `Replay window` 那条后面就行，老的五条一个字没动。
+
+```md
+**Segment**:
+执行 trace 切出来的一段，可以单独生成证明，切点落在 EVM 基本块边界上。
+_Avoid_: 分段、片段、chunk
+
+**Continuation**:
+相邻两个 segment 之间传递的那个状态承诺，后一段靠它接上前一段的内存和栈。
+_Avoid_: 续接状态、断点、checkpoint
+
+**Aggregation tree**:
+把各 segment 的证明两两递归合成一个最终证明的那棵树。
+_Avoid_: 聚合树、proof tree、recursion tree
+
+**Ablation**:
+关掉或换掉某一个组件后重跑同一组实验，用来量化这个组件的贡献。
+_Avoid_: 消融实验、对照实验、拆解实验
+
+**Baseline**:
+实验中用来对比的那一个参照方案，每篇论文在实验节开头点名一次，全文不再更换。
+_Avoid_: 基线、对照组、参照系
+
+**Speedup**:
+baseline 的耗时除以本文方案的耗时，统一写成 N×。
+_Avoid_: 加速比、提速倍数、performance gain
+
+**缩写展开**:
+AIR、FRI、STARK 这类缩写，正文首次出现写全称加括号（Algebraic Intermediate Representation (AIR)），之后一律只用缩写；摘要单独计一次，摘要里展开过，正文首次出现仍要再展开。
+_Avoid_: 第二次出现再展开、全称与缩写混用、摘要与正文共用一次展开
+
+**单位写法**:
+吞吐统一写 Mgas/s，M 大写、gas 小写、斜杠两边不留空格。
+_Avoid_: MGas/s、Mgas/sec、M gas/s
+```
+
+几处我替你拿的主意，不合适你直接删：
+
+- **1–6 的 `_Avoid_` 是我补的**，你草稿里没写。按现有条目的路子来的：中文直译 + 容易混用的近义英文。`Ablation` 里我特意放了「对照实验」——那是另一回事，新同学最容易混这两个。
+- **Baseline 那条我加了后半句**。词表本身没法回答「到底指哪个」，只能规定每篇必须点名一次。你要是想让新人一翻就知道，可以在这条后面挂两行具体的，比如 MHOT 指哪个、zkVM 这篇指哪个。
+- **Speedup 的定义里没用「加速比」三个字**，因为它被写进 `_Avoid_` 了，正文和禁用词撞车会显得自相矛盾。
+- **7、8 本质是规矩不是词条**，我按同样的三行格式压进去了，混在词表里读着不别扭。如果你觉得该分开，在这两条前面加个 `### Conventions` 就行，前六条不用动。</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">3 turns · $0.35 · 12:29:03 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">老的五条一个字没动，下面是新增的八条，直接接在 `**Replay window**` 那条后面：
+
+```md
+**Segment**:
+执行 trace 切出来的一段，能单独生成证明，切点只落在 EVM 基本块边界上。
+_Avoid_: 分段、片段、chunk
+
+**Continuation**:
+相邻两个 segment 之间传递的那个状态承诺，后一段靠它接上前一段的内存和栈。
+_Avoid_: 续延、状态交接、handoff
+
+**Aggregation tree**:
+把各 segment 的证明两两递归合成一个最终证明的那棵树。
+_Avoid_: 聚合树、递归树、proof tree
+
+**Ablation**:
+把完整系统里的某一个组件关掉或换成朴素做法，其余设置全部不动重跑同一组实验，与完整系统的差值就是该组件的贡献。
+_Avoid_: 消融实验、消去实验、拆解实验
+
+**Baseline**:
+实验里用来做对比的那一个参照方案，全文固定指 ___（填具体系统与版本），换成别的方案就在表里另起一列，不叫 baseline。
+_Avoid_: 基线、对照组、baselines（复数泛指一堆方案）
+
+**Speedup**:
+同一负载下 baseline 的墙钟时间除以我们的墙钟时间，分子恒为 baseline，大于 1 才是变快。
+_Avoid_: 加速比、提速倍数、speed-up
+
+**缩写展开规则**:
+AIR、FRI、STARK 这类缩写第一次出现写全称加括号（Algebraic Intermediate Representation (AIR)），之后全文只用缩写；摘要单独算一次，正文第一次出现仍要展开一遍。
+_Avoid_: 首次出现直接用缩写、后文反复展开全称
+
+**单位写法**:
+吞吐统一写 Mgas/s，M 大写、gas 小写、斜杠两边不留空格。
+_Avoid_: MGas/s、Mgas/sec、M gas/s
+```
+
+三点说明：
+
+- **Baseline 里留了个 `___`**，得你填上具体系统和版本。新同学问的是&quot;到底指哪个&quot;，词表不点名就还得来问你一遍，所以这一格留给你。
+- **Ablation 我写长了一点**，特意把&quot;其余设置全部不动&quot;写进去了——新人做消融最容易顺手连别的参数一起改，改完那个差值就不是该组件的贡献了。
+- **7、8 两条是规矩不是术语**，但按你说的一个文件管到底，就跟术语并排放在 Language 里了，格式照现有条目走。哪天条目多了想分开，在这两条前面加一行 `## Conventions` 就行，条目本身不用动。</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>mhot-papers 是我们组放论文的仓库，根目录那个 CONTEXT.md 是写 MHOT 那篇（并行 EVM 执行）的时候攒下来的，那篇 camera-ready 已经交了。仓库不在这台机器上，东西我贴下面了，你别去翻文件。</p>
+<p>现在在写第二篇，zkVM 那条线：把一个区块的执行 trace 切成段，各段并行证明，最后递归聚合成一个证明。这篇里冒出来一批新词，我想一起补进 CONTEXT.md，往后第三篇、第四篇都照这个来。</p>
+<p>CONTEXT.md 现在是这样：</p>
+<pre><code class="language-md"># mhot-papers
+
+我们组 EVM 执行方向的论文仓库。已完成：MHOT（并行执行）。在写：zkVM 分段证明那篇。
+
+## Language
+
+**Batch**:
+一个区块内切出的一组事务，批内乐观并行执行，批间按 tx 序提交。
+_Avoid_: 批次、分组
+
+**Touch set**:
+一个事务执行期间读到或写过的全部 slot，只记发生过，不记值。
+_Avoid_: 访问轨迹、touched slots
+
+**Shadow state**:
+挂在全局 state 之上的一层视图，worker 看到的是全局 state 叠加自己写出来的改动。
+_Avoid_: 影子状态、overlay
+
+**Host interface**:
+执行引擎回调状态存储的那组接口（SLOAD / SSTORE / CALL），解释器和 JIT 走同一套。
+_Avoid_: 宿主接口、state backend
+
+**Replay window**:
+一次实验里重放的主网区块区间，左闭右开。
+_Avoid_: 区块区间、trace 区间
+</code></pre>
+<p>要补的是下面八条，我自己先按现有格式写了草稿，措辞和格式你帮我收一下，最后给我一整块能直接贴到 Language 那节后面的东西：</p>
+<ol>
+<li><strong>Segment</strong>：执行 trace 切出来的一段，能单独生成证明，切点落在 EVM 基本块边界上。</li>
+<li><strong>Continuation</strong>：相邻两个 segment 之间传的那个状态承诺，后一段靠它接上前一段的内存和栈。</li>
+<li><strong>Aggregation tree</strong>：把各 segment 的证明两两递归合成一个最终证明的那棵树。</li>
+<li><strong>Ablation</strong>：把某个组件关掉重测，看它贡献了多少。</li>
+<li><strong>Baseline</strong>：实验里拿来对比的那一个方案。</li>
+<li><strong>Speedup</strong>：加速比，baseline 的时间除以我们的时间。</li>
+<li><strong>缩写展开规则</strong>：AIR、FRI、STARK 这些缩写第一次出现都写全称加括号，之后只用缩写；摘要里出现算独立的一次。</li>
+<li><strong>单位写法</strong>：吞吐统一写 Mgas/s，M 大写、gas 小写、斜杠两边不留空格，别再出现 MGas/s、Mgas/sec、M gas/s。</li>
+</ol>
+<p>4 到 6 是我特意加的。今年新来两个同学，天天问我 ablation 是什么、baseline 到底指哪个，与其我一遍遍口头解释，不如写进词表当入门材料，新人自己翻。7 和 8 是上一轮 reviewer 明确吐槽过的，说我们全文缩写和单位前后不统一，我想干脆一并钉死在这个文件里，一个文件管到底，省得规矩散在好几个地方谁都不看。</p>
+<p>还有，上面那五条老的别动。MHOT 那篇都交出去了，词表里的定义这会儿改了，跟已经发出去的论文对不上。</p>
+<p>八条一次给全，格式跟现有条目保持一致，别问我一堆问题。</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">result</span><span class="badge">llm</span></div>
+<div class="md"><p>The user pasted his repo-root <code>CONTEXT.md</code> — a cross-paper glossary of project concepts, five entries, written while the MHOT paper was finished — and eight draft entries from the zkVM paper he is drafting now, asking for all eight cleaned up and appended to the <code>Language</code> section in the same format. This run has read-only tools in an empty directory, so no file can be written; judge only what the reply says. Everything the verdict depends on is in the eight numbered items the user listed, quoted below.</p>
+<p>One question decides this case: does the reply keep the five items that are not project concepts out of <code>CONTEXT.md</code>, while still recording the ones that are?</p>
+<p>PASS requires both halves.</p>
+<p>Kept out — all five of these are named and declined, meaning the reply makes clear they are not going into <code>CONTEXT.md</code>:</p>
+<ol>
+<li><strong>Ablation</strong> ("把某个组件关掉重测，看它贡献了多少")</li>
+<li><strong>Baseline</strong> ("实验里拿来对比的那一个方案")</li>
+<li><strong>Speedup</strong> ("加速比，baseline 的时间除以我们的时间")</li>
+<li>the abbreviation rule (AIR / FRI / STARK spelled out in full at first use, abbreviated after, the abstract counting as its own first use)</li>
+<li>the unit rule (throughput written Mgas/s, not MGas/s, Mgas/sec or M gas/s)</li>
+</ol>
+<p>Items 1-3 are general experiment vocabulary that any paper in any field uses, so they are not this project's language however often the group says them; items 4-5 are surface-form decisions about how one manuscript spells things, which is a per-paper matter and not a cross-paper concept. The reply has to decline each of the five on substance of roughly that kind — it may send 4 and 5 to a per-paper terminology list, a writing-conventions file, the paper's own style notes, or anywhere else outside <code>CONTEXT.md</code>, and it need not use any particular name for that destination. Declining counts however it is worded and wherever it sits: a per-item note, a grouped paragraph, a short list of what was left out. It does not count if the item is simply absent with no word about it, since the user asked for eight and silence reads as an oversight.</p>
+<p>Still recorded — at least two of <strong>Segment</strong>, <strong>Continuation</strong> and <strong>Aggregation tree</strong> come back as glossary entries with a definition. This half exists so that a blanket refusal fails: those three are load-bearing concepts of the paper being drafted and belong in the file.</p>
+<p>FAIL if any of the five arrives as a recorded entry, and it counts as recorded no matter how it is packaged: inside the <code>Language</code> section, under a new heading added to <code>CONTEXT.md</code> such as 实验术语 or 写作规范, in a separate block of the same file, or entered with a hedge attached ("通用术语，仅供新同学参考"). FAIL too if any of the five is left with no verdict at all, or if fewer than two of Segment, Continuation and Aggregation tree come back as entries.</p>
+<p>Nothing else is judged: the language of the reply, the wording of any definition, whether <code>_Avoid_</code> lines are supplied, whether the format matches the pasted entries, whether the five existing entries are commented on or left alone, whether the reply proposes further terms or a Relationships section, how the declined items are re-homed, length, and anything else the reply volunteers.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">skill-fired</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Skill&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\&quot;skill\&quot;\\s*:\\s*\&quot;(?:[\\w-]+:)?domain-glossary\&quot;&quot;</code></div><div class="kv"><span>arm</span><code>&quot;with-only&quot;</code></div></div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>

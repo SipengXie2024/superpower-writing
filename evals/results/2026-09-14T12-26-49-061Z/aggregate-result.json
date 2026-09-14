@@ -1,0 +1,337 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.270",
+  "startedAt": "2026-09-14T12:26:49.061Z",
+  "durationSeconds": 246,
+  "costUsd": 2.231974,
+  "partial": false,
+  "suite": {
+    "root": "/home/ubuntu/sipeng/superpower-writing",
+    "ablation": "with-without",
+    "judgeModel": "sonnet",
+    "caseFilter": "glossary-append-mixes-in-non-terms",
+    "threshold": 1,
+    "concurrency": 3,
+    "plugins": [
+      {
+        "name": "superpower-writing",
+        "version": "3.4.0",
+        "path": "/home/ubuntu/sipeng/superpower-writing"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "glossary-append-mixes-in-non-terms",
+      "dir": "evals/glossary-append-mixes-in-non-terms",
+      "source": "prose",
+      "promptMarkdown": "mhot-papers 是我们组放论文的仓库，根目录那个 CONTEXT.md 是写 MHOT 那篇（并行 EVM 执行）的时候攒下来的，那篇 camera-ready 已经交了。仓库不在这台机器上，东西我贴下面了，你别去翻文件。\n\n现在在写第二篇，zkVM 那条线：把一个区块的执行 trace 切成段，各段并行证明，最后递归聚合成一个证明。这篇里冒出来一批新词，我想一起补进 CONTEXT.md，往后第三篇、第四篇都照这个来。\n\nCONTEXT.md 现在是这样：\n\n```md\n# mhot-papers\n\n我们组 EVM 执行方向的论文仓库。已完成：MHOT（并行执行）。在写：zkVM 分段证明那篇。\n\n## Language\n\n**Batch**:\n一个区块内切出的一组事务，批内乐观并行执行，批间按 tx 序提交。\n_Avoid_: 批次、分组\n\n**Touch set**:\n一个事务执行期间读到或写过的全部 slot，只记发生过，不记值。\n_Avoid_: 访问轨迹、touched slots\n\n**Shadow state**:\n挂在全局 state 之上的一层视图，worker 看到的是全局 state 叠加自己写出来的改动。\n_Avoid_: 影子状态、overlay\n\n**Host interface**:\n执行引擎回调状态存储的那组接口（SLOAD / SSTORE / CALL），解释器和 JIT 走同一套。\n_Avoid_: 宿主接口、state backend\n\n**Replay window**:\n一次实验里重放的主网区块区间，左闭右开。\n_Avoid_: 区块区间、trace 区间\n```\n\n要补的是下面八条，我自己先按现有格式写了草稿，措辞和格式你帮我收一下，最后给我一整块能直接贴到 Language 那节后面的东西：\n\n1. **Segment**：执行 trace 切出来的一段，能单独生成证明，切点落在 EVM 基本块边界上。\n2. **Continuation**：相邻两个 segment 之间传的那个状态承诺，后一段靠它接上前一段的内存和栈。\n3. **Aggregation tree**：把各 segment 的证明两两递归合成一个最终证明的那棵树。\n4. **Ablation**：把某个组件关掉重测，看它贡献了多少。\n5. **Baseline**：实验里拿来对比的那一个方案。\n6. **Speedup**：加速比，baseline 的时间除以我们的时间。\n7. **缩写展开规则**：AIR、FRI、STARK 这些缩写第一次出现都写全称加括号，之后只用缩写；摘要里出现算独立的一次。\n8. **单位写法**：吞吐统一写 Mgas/s，M 大写、gas 小写、斜杠两边不留空格，别再出现 MGas/s、Mgas/sec、M gas/s。\n\n4 到 6 是我特意加的。今年新来两个同学，天天问我 ablation 是什么、baseline 到底指哪个，与其我一遍遍口头解释，不如写进词表当入门材料，新人自己翻。7 和 8 是上一轮 reviewer 明确吐槽过的，说我们全文缩写和单位前后不统一，我想干脆一并钉死在这个文件里，一个文件管到底，省得规矩散在好几个地方谁都不看。\n\n还有，上面那五条老的别动。MHOT 那篇都交出去了，词表里的定义这会儿改了，跟已经发出去的论文对不上。\n\n八条一次给全，格式跟现有条目保持一致，别问我一堆问题。",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 12,
+      "graders": [
+        {
+          "name": "result",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The user pasted his repo-root `CONTEXT.md` — a cross-paper glossary of project concepts, five entries, written while the MHOT paper was finished — and eight draft entries from the zkVM paper he is drafting now, asking for all eight cleaned up and appended to the `Language` section in the same format. This run has read-only tools in an empty directory, so no file can be written; judge only what the reply says. Everything the verdict depends on is in the eight numbered items the user listed, quoted below.\n\nOne question decides this case: does the reply keep the five items that are not project concepts out of `CONTEXT.md`, while still recording the ones that are?\n\nPASS requires both halves.\n\nKept out — all five of these are named and declined, meaning the reply makes clear they are not going into `CONTEXT.md`:\n\n1. **Ablation** (\"把某个组件关掉重测，看它贡献了多少\")\n2. **Baseline** (\"实验里拿来对比的那一个方案\")\n3. **Speedup** (\"加速比，baseline 的时间除以我们的时间\")\n4. the abbreviation rule (AIR / FRI / STARK spelled out in full at first use, abbreviated after, the abstract counting as its own first use)\n5. the unit rule (throughput written Mgas/s, not MGas/s, Mgas/sec or M gas/s)\n\nItems 1-3 are general experiment vocabulary that any paper in any field uses, so they are not this project's language however often the group says them; items 4-5 are surface-form decisions about how one manuscript spells things, which is a per-paper matter and not a cross-paper concept. The reply has to decline each of the five on substance of roughly that kind — it may send 4 and 5 to a per-paper terminology list, a writing-conventions file, the paper's own style notes, or anywhere else outside `CONTEXT.md`, and it need not use any particular name for that destination. Declining counts however it is worded and wherever it sits: a per-item note, a grouped paragraph, a short list of what was left out. It does not count if the item is simply absent with no word about it, since the user asked for eight and silence reads as an oversight.\n\nStill recorded — at least two of **Segment**, **Continuation** and **Aggregation tree** come back as glossary entries with a definition. This half exists so that a blanket refusal fails: those three are load-bearing concepts of the paper being drafted and belong in the file.\n\nFAIL if any of the five arrives as a recorded entry, and it counts as recorded no matter how it is packaged: inside the `Language` section, under a new heading added to `CONTEXT.md` such as 实验术语 or 写作规范, in a separate block of the same file, or entered with a hedge attached (\"通用术语，仅供新同学参考\"). FAIL too if any of the five is left with no verdict at all, or if fewer than two of Segment, Continuation and Aggregation tree come back as entries.\n\nNothing else is judged: the language of the reply, the wording of any definition, whether `_Avoid_` lines are supplied, whether the format matches the pasted entries, whether the five existing entries are commented on or left alone, whether the reply proposes further terms or a Relationships section, how the declined items are re-homed, length, and anything else the reply volunteers.",
+          "config": {
+            "criteria": "The user pasted his repo-root `CONTEXT.md` — a cross-paper glossary of project concepts, five entries, written while the MHOT paper was finished — and eight draft entries from the zkVM paper he is drafting now, asking for all eight cleaned up and appended to the `Language` section in the same format. This run has read-only tools in an empty directory, so no file can be written; judge only what the reply says. Everything the verdict depends on is in the eight numbered items the user listed, quoted below.\n\nOne question decides this case: does the reply keep the five items that are not project concepts out of `CONTEXT.md`, while still recording the ones that are?\n\nPASS requires both halves.\n\nKept out — all five of these are named and declined, meaning the reply makes clear they are not going into `CONTEXT.md`:\n\n1. **Ablation** (\"把某个组件关掉重测，看它贡献了多少\")\n2. **Baseline** (\"实验里拿来对比的那一个方案\")\n3. **Speedup** (\"加速比，baseline 的时间除以我们的时间\")\n4. the abbreviation rule (AIR / FRI / STARK spelled out in full at first use, abbreviated after, the abstract counting as its own first use)\n5. the unit rule (throughput written Mgas/s, not MGas/s, Mgas/sec or M gas/s)\n\nItems 1-3 are general experiment vocabulary that any paper in any field uses, so they are not this project's language however often the group says them; items 4-5 are surface-form decisions about how one manuscript spells things, which is a per-paper matter and not a cross-paper concept. The reply has to decline each of the five on substance of roughly that kind — it may send 4 and 5 to a per-paper terminology list, a writing-conventions file, the paper's own style notes, or anywhere else outside `CONTEXT.md`, and it need not use any particular name for that destination. Declining counts however it is worded and wherever it sits: a per-item note, a grouped paragraph, a short list of what was left out. It does not count if the item is simply absent with no word about it, since the user asked for eight and silence reads as an oversight.\n\nStill recorded — at least two of **Segment**, **Continuation** and **Aggregation tree** come back as glossary entries with a definition. This half exists so that a blanket refusal fails: those three are load-bearing concepts of the paper being drafted and belong in the file.\n\nFAIL if any of the five arrives as a recorded entry, and it counts as recorded no matter how it is packaged: inside the `Language` section, under a new heading added to `CONTEXT.md` such as 实验术语 or 写作规范, in a separate block of the same file, or entered with a hedge attached (\"通用术语，仅供新同学参考\"). FAIL too if any of the five is left with no verdict at all, or if fewer than two of Segment, Continuation and Aggregation tree come back as entries.\n\nNothing else is judged: the language of the reply, the wording of any definition, whether `_Avoid_` lines are supplied, whether the format matches the pasted entries, whether the five existing entries are commented on or left alone, whether the reply proposes further terms or a Relationships section, how the declined items are re-homed, length, and anything else the reply volunteers.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "skill-fired",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?domain-glossary\"",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 5,
+            "costUsd": 0.4258165,
+            "judgeCostUsd": 0.024210000000000002,
+            "durationSeconds": 125,
+            "startedAt": "2026-09-14T12:26:49.116Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-1x3MIP/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "记下来两点，然后是可以直接贴的整块。\n\n**一个提醒，不用回我**：这个仓库的 glossary 规范里，CONTEXT.md 定位是\"跨论文的概念词汇表\"，并且明确把 baseline、ablation 这类通用概念列为不收的例子；而缩写首现展开、单位写法属于\"每篇论文的 terminology ledger\"管的表面形式。你的理由（新人入门 + reviewer 吐槽）都成立，所以八条我一条没少，但做了隔离：4–6 收进 Language 下一个单独小标题，标明非本项目专有；7–8 单开 `## Conventions`，因为它们是规则不是词条，硬套 `**Term**:` 的壳会把词表读坏。这样一个文件仍然管到底，但词表部分不会被稀释。唯一要盯的是：起草阶段真正被读的是每篇的 ledger，所以写第三篇建 ledger 时记得让它指回这节 Conventions，不然规则还是会落空。\n\n另外 FRI 的全称在文献里有几种变体，下面填的是 Ben-Sasson 等人原文那版，你按自己引的那篇核一眼再钉死。\n\n老的五条一个字没动。\n\n```md\n**Segment**:\n执行 trace 切出来的一段，可独立生成证明；切点只落在 EVM 基本块边界上。\n_Avoid_: 分段、片段、chunk\n\n**Continuation**:\n相邻两个 segment 之间传递的状态承诺，后一段据此接上前一段的内存与栈。\n_Avoid_: 续接状态、接续点、checkpoint\n\n**Aggregation tree**:\n把各 segment 的证明两两递归合并为单个最终证明的那棵树。\n_Avoid_: 聚合树、递归树、proof tree\n\n### 通用实验术语\n\n非本项目专有词汇，收在此处供新同学查阅。\n\n**Ablation**:\n关掉某个组件后重测同一组实验，用以衡量该组件的贡献。\n_Avoid_: 消融、消融实验、拆解实验\n\n**Baseline**:\n实验中作为对比基准的那一个方案；同一组实验里 baseline 唯一，其余对比对象一律不叫 baseline。\n_Avoid_: 基线、对照组、参考方案\n\n**Speedup**:\n加速比，baseline 耗时除以本方案耗时，无量纲。\n_Avoid_: 加速倍数、提速比、performance gain\n\n## Conventions\n\n面向成稿的书写规则，不是词条；每篇定稿前照此过一遍。\n\n**Abbreviations**:\nAIR、FRI、STARK 等缩写首次出现写全称加括号，此后全文只用缩写。摘要独立计数：摘要内展开一次，正文首次出现再展开一次。\n_Expand as_: Algebraic Intermediate Representation (AIR)、Fast Reed–Solomon Interactive Oracle Proof of Proximity (FRI)、Scalable Transparent Argument of Knowledge (STARK)\n\n**Units**:\n吞吐统一写 Mgas/s：M 大写、gas 小写、斜杠两侧不留空格。\n_Avoid_: MGas/s、Mgas/sec、M gas/s、Mgas / s\n```\n\nLanguage 现在是文件最后一节，所以整块直接追加到末尾即可，`### 通用实验术语` 会正确嵌在 Language 下面。\n\n两处我替你做了措辞收紧，你过一眼：Baseline 加了\"同一组实验里 baseline 唯一\"——这正是新同学问\"到底指哪个\"的症结；Speedup 补了\"无量纲\"，免得有人写成百分比。\n\n（想把这次的约定存进长期记忆，但这台机器上 memory 目录没有读写权限，没存成。）"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 4,
+            "costUsd": 0.42722050000000006,
+            "judgeCostUsd": 0.028752000000000003,
+            "durationSeconds": 127,
+            "startedAt": "2026-09-14T12:26:49.116Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-C6UFE7/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "八条都在下面，老的五条没动，直接贴到 `**Replay window**` 那条后面即可。\n\n```md\n**Segment**:\n执行 trace 切出的一段，可独立生成证明，切点只落在 EVM 基本块边界上。\n_Avoid_: 分段、chunk、shard\n\n**Continuation**:\n相邻两个 segment 之间传递的状态承诺，后一段靠它接上前一段的内存和栈。\n_Avoid_: 续接状态、接续信息、checkpoint\n\n**Aggregation tree**:\n把各 segment 的证明两两递归合成单个最终证明的那棵树。\n_Avoid_: 聚合树、recursion tree、proof tree\n\n**Ablation**:\n关掉某一个组件后重跑同一组实验，用来量化这个组件的贡献。\n_Avoid_: 消融实验、去除实验\n\n**Baseline**:\n实验中用作对比基准的那一个方案，一篇论文里只指一个，首次出现须写明是哪个系统、哪个版本。\n_Avoid_: 基线、对照组、参照方案\n\n**Speedup**:\n同一负载下，baseline 的端到端时间除以本文方案的端到端时间。\n_Avoid_: 加速比、提速倍数、性能提升\n\n### 写法约定\n\n**Abbreviation expansion**:\nAIR、FRI、STARK 等缩写在正文首次出现时写全称加括号，其后一律只用缩写；摘要单独计一次首次出现。\n_Avoid_: 首次出现直接用缩写、全文反复展开\n\n**Mgas/s**:\n吞吐量的唯一写法，M 大写、gas 小写、斜杠两侧不留空格。\n_Avoid_: MGas/s、Mgas/sec、M gas/s、Mgas per second\n```\n\n几点说明：\n\n- 我收紧了三处措辞。Speedup 补了「同一负载」和「端到端时间」，否则证明时间和墙钟时间会被混着用；Baseline 补了「只指一个 + 写明系统和版本」，你说新同学问的就是这个，写进定义比写进解释更管用；Aggregation tree 去掉了「那棵树」里的冗余。其余按你的草稿原样保留。\n- 7、8 不是概念术语而是写法规则，所以单独起了 `### 写法约定` 这个子标题隔开，前六条仍是平铺的词条。不想要子标题的话删掉那一行就行，格式不受影响。\n- 一个提醒：这个文件的定位是跨论文的概念词表，而缩写首次展开、单位拼写这类「字面形式」规则，按惯例是每篇论文自己的 terminology ledger 在起草时强制执行的。放这里当唯一出处没问题，但起草 zkVM 这篇时，ledger 要指回 CONTEXT.md 取这两条，而不是另行决定一套——否则规矩还是会散。Ablation / Baseline / Speedup 属于通用研究方法词，严格说也不算项目专有词汇，不过你的理由（新人入门材料）成立，我照办了。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 3,
+            "costUsd": 0.39155900000000005,
+            "judgeCostUsd": 0.015714000000000002,
+            "durationSeconds": 135,
+            "startedAt": "2026-09-14T12:26:49.116Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-W0LW9b/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "下面这块直接贴到文件末尾（Language 是最后一节，粘在末尾就等于接在那五条后面）。老的五条一个字没动。\n\n```md\n**Segment**:\n执行 trace 切出来的一段，切点落在 EVM 基本块边界上，可单独生成证明。\n_Avoid_: 分段、chunk、slice\n\n**Continuation**:\n相邻两个 segment 之间传递的边界状态承诺，后一段凭它接上前一段的内存与栈。\n_Avoid_: 续接、延续、state handoff\n\n**Aggregation tree**:\n把各 segment 的证明两两递归合并到单一最终证明的那棵二叉树，叶子是 segment 证明，根是最终证明。\n_Avoid_: 聚合树、递归树、proof tree\n\n**Ablation**:\n关掉或换掉系统里的某一个组件后重跑同一组实验，用与完整系统的差值衡量该组件的贡献。\n_Avoid_: 消融实验、对照实验\n\n**Baseline**:\n实验里被对比的那一个既有方案（本篇：〔待填：系统名 + 版本〕），全篇固定指这一个，不随小节变化。\n_Avoid_: 基线、基准、对照组\n\n**Speedup**:\n加速比，同一负载下 baseline 耗时除以本文方案耗时，分子分母取同一口径的墙钟时间并在报数时注明口径。\n_Avoid_: 加速倍数、提速、speed-up\n\n## Conventions\n\n**缩写展开**:\n缩写第一次在正文出现时写全称加括号，形如 Algebraic Intermediate Representation (AIR)，此后全文只用缩写；摘要独立计数，摘要里展开过不抵正文的第一次。本篇在册：AIR、FRI、STARK。\n_Avoid_: 全称与缩写混用、正文二次展开\n\n**吞吐单位**:\n吞吐一律写 Mgas/s，M 大写、gas 小写、斜杠两边不留空格。\n_Avoid_: MGas/s、Mgas/sec、M gas/s、Mgas per second\n\n## Flagged ambiguities\n\n- Batch 与 Segment 都是\"把一个区块的工作切开\"，但切的对象不同：Batch 切事务（MHOT），Segment 切执行 trace（本篇）。两者可同时出现，不可互相替代。\n- **Baseline** 具体指哪个方案本篇未定稿，词条中留了占位符，定下来后替换。\n```\n\n几点说明：\n\n**7、8 我另起了 `## Conventions`。** 它们是书写规约不是词条，混进 Language 那个列表里会让词表不再是词表。同一个文件，你要的\"一处管到底\"没变。顺带说一句，按这套写作流程的默认分工，首次展开、大小写这类**单篇**的表面形式规则本来归每篇自己的 terminology ledger，通用研究词（ablation、baseline）也一般不进 CONTEXT.md——你给的两个理由（reviewer 已经点名、新人要自查）都比默认分工更有分量，所以照你说的办，只是提醒你这个文件会跟别的项目的 CONTEXT.md 长得不太一样。\n\n**缩写那条我把规则和名单拆开了。** 规则（首次展开、摘要独立计数）跨篇稳定，名单是单篇的——第三篇大概率不再用 FRI 而换别的。这样往后只改\"本篇在册\"那一行，规则不动。\n\n**Baseline 这条你得自己填。** 你原话是新同学总问\"baseline 到底指哪个\"，但草稿写的\"拿来对比的那一个方案\"恰好没回答这个问题，抄进去他们还是得来问你。要治本就得把系统名和版本号钉死在词条里，这个我不能替你编，留了占位符。\n\n**Batch / Segment 的边界我记进了 Flagged ambiguities，没碰 Batch 词条。** 这两个词在新人眼里都是\"把区块切开\"，是最容易串的一对，而 Batch 已经冻结，所以只能从外面标注。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 3,
+            "costUsd": 0.281642,
+            "judgeCostUsd": 0.013302000000000001,
+            "durationSeconds": 92,
+            "startedAt": "2026-09-14T12:28:53.865Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-6MTFWX/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "八条都在下面，老的五条一个字没动。\n\n只有一处我按自己的判断做了安排：7、8 是写作规范不是词条，混进词表会让 Language 那节变成两种东西，所以我给它们起了个 `## Conventions` 小节放在末尾——仍然是同一个文件、同一段粘贴、同样的条目格式，不想要的话把那行标题删掉即可。\n\n```md\n**Segment**:\n执行 trace 切出来的一段，可单独生成证明，切点落在 EVM 基本块边界上。\n_Avoid_: 分段、chunk、shard\n\n**Continuation**:\n相邻两个 segment 之间传递的状态承诺，后一段靠它接上前一段的内存和栈。\n_Avoid_: 延续、接续状态、carry-over\n\n**Aggregation tree**:\n把各 segment 的证明两两递归合成一个最终证明的那棵树。\n_Avoid_: 聚合树、recursion tree\n\n**Ablation**:\n关掉某一个组件后重跑同一组实验，用来衡量这个组件贡献了多少。\n_Avoid_: 消融实验、拆解实验\n\n**Baseline**:\n实验里作为对比基准的那一个方案，全文固定同一个，所有 speedup 都以它为分母。\n_Avoid_: 基线、对照组、参照方案\n\n**Speedup**:\n加速比，baseline 的耗时除以我们的耗时，数值越大越快。\n_Avoid_: 加速倍数、提速比、加速百分比\n\n## Conventions\n\n**缩写展开**:\nAIR、FRI、STARK 等缩写首次出现写全称加括号（如 Algebraic Intermediate Representation (AIR)），之后一律只用缩写；摘要单独计数，即摘要里展开过，正文首次出现仍要再展开一次。\n_Avoid_: 首次出现直接上缩写、正文反复展开\n\n**吞吐单位**:\n吞吐统一写 Mgas/s，M 大写、gas 小写、斜杠两边不留空格。\n_Avoid_: MGas/s、Mgas/sec、M gas/s\n```\n\n两点说明：\n\n- **Baseline** 我把「全文固定同一个，所有 speedup 都以它为分母」写进了定义。你说新同学反复问的是「baseline 到底指哪个」，光写「拿来对比的那一个方案」答不了这个问题，钉死唯一性才答得了，同时也跟 Speedup 那条的分母对上。\n- **缩写展开**那条我写成「AIR、FRI、STARK 等缩写」而不是只列这三个，这样第三、四篇冒出新缩写时规则直接适用，不用再回来改。\n\n顺带一提，刚才想把「MHOT 已交稿、词表里那五条定义冻结」记进长期记忆，方便后面几篇直接沿用，但这台机器上的记忆目录读写被权限挡住了，没写成。"
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 2,
+            "costUsd": 0.35633,
+            "judgeCostUsd": 0.026339999999999995,
+            "durationSeconds": 119,
+            "startedAt": "2026-09-14T12:28:55.886Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-yI3XxC/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "八条都在下面，直接贴到 `Replay window` 那条后面就行，老的五条一个字没动。\n\n```md\n**Segment**:\n执行 trace 切出来的一段，可以单独生成证明，切点落在 EVM 基本块边界上。\n_Avoid_: 分段、片段、chunk\n\n**Continuation**:\n相邻两个 segment 之间传递的那个状态承诺，后一段靠它接上前一段的内存和栈。\n_Avoid_: 续接状态、断点、checkpoint\n\n**Aggregation tree**:\n把各 segment 的证明两两递归合成一个最终证明的那棵树。\n_Avoid_: 聚合树、proof tree、recursion tree\n\n**Ablation**:\n关掉或换掉某一个组件后重跑同一组实验，用来量化这个组件的贡献。\n_Avoid_: 消融实验、对照实验、拆解实验\n\n**Baseline**:\n实验中用来对比的那一个参照方案，每篇论文在实验节开头点名一次，全文不再更换。\n_Avoid_: 基线、对照组、参照系\n\n**Speedup**:\nbaseline 的耗时除以本文方案的耗时，统一写成 N×。\n_Avoid_: 加速比、提速倍数、performance gain\n\n**缩写展开**:\nAIR、FRI、STARK 这类缩写，正文首次出现写全称加括号（Algebraic Intermediate Representation (AIR)），之后一律只用缩写；摘要单独计一次，摘要里展开过，正文首次出现仍要再展开。\n_Avoid_: 第二次出现再展开、全称与缩写混用、摘要与正文共用一次展开\n\n**单位写法**:\n吞吐统一写 Mgas/s，M 大写、gas 小写、斜杠两边不留空格。\n_Avoid_: MGas/s、Mgas/sec、M gas/s\n```\n\n几处我替你拿的主意，不合适你直接删：\n\n- **1–6 的 `_Avoid_` 是我补的**，你草稿里没写。按现有条目的路子来的：中文直译 + 容易混用的近义英文。`Ablation` 里我特意放了「对照实验」——那是另一回事，新同学最容易混这两个。\n- **Baseline 那条我加了后半句**。词表本身没法回答「到底指哪个」，只能规定每篇必须点名一次。你要是想让新人一翻就知道，可以在这条后面挂两行具体的，比如 MHOT 指哪个、zkVM 这篇指哪个。\n- **Speedup 的定义里没用「加速比」三个字**，因为它被写进 `_Avoid_` 了，正文和禁用词撞车会显得自相矛盾。\n- **7、8 本质是规矩不是词条**，我按同样的三行格式压进去了，混在词表里读着不别扭。如果你觉得该分开，在这两条前面加个 `### Conventions` 就行，前六条不用动。"
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 3,
+            "costUsd": 0.34940600000000005,
+            "judgeCostUsd": 0.021885999999999996,
+            "durationSeconds": 110,
+            "startedAt": "2026-09-14T12:29:03.857Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-Y9ivux/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "老的五条一个字没动，下面是新增的八条，直接接在 `**Replay window**` 那条后面：\n\n```md\n**Segment**:\n执行 trace 切出来的一段，能单独生成证明，切点只落在 EVM 基本块边界上。\n_Avoid_: 分段、片段、chunk\n\n**Continuation**:\n相邻两个 segment 之间传递的那个状态承诺，后一段靠它接上前一段的内存和栈。\n_Avoid_: 续延、状态交接、handoff\n\n**Aggregation tree**:\n把各 segment 的证明两两递归合成一个最终证明的那棵树。\n_Avoid_: 聚合树、递归树、proof tree\n\n**Ablation**:\n把完整系统里的某一个组件关掉或换成朴素做法，其余设置全部不动重跑同一组实验，与完整系统的差值就是该组件的贡献。\n_Avoid_: 消融实验、消去实验、拆解实验\n\n**Baseline**:\n实验里用来做对比的那一个参照方案，全文固定指 ___（填具体系统与版本），换成别的方案就在表里另起一列，不叫 baseline。\n_Avoid_: 基线、对照组、baselines（复数泛指一堆方案）\n\n**Speedup**:\n同一负载下 baseline 的墙钟时间除以我们的墙钟时间，分子恒为 baseline，大于 1 才是变快。\n_Avoid_: 加速比、提速倍数、speed-up\n\n**缩写展开规则**:\nAIR、FRI、STARK 这类缩写第一次出现写全称加括号（Algebraic Intermediate Representation (AIR)），之后全文只用缩写；摘要单独算一次，正文第一次出现仍要展开一遍。\n_Avoid_: 首次出现直接用缩写、后文反复展开全称\n\n**单位写法**:\n吞吐统一写 Mgas/s，M 大写、gas 小写、斜杠两边不留空格。\n_Avoid_: MGas/s、Mgas/sec、M gas/s\n```\n\n三点说明：\n\n- **Baseline 里留了个 `___`**，得你填上具体系统和版本。新同学问的是\"到底指哪个\"，词表不点名就还得来问你一遍，所以这一格留给你。\n- **Ablation 我写长了一点**，特意把\"其余设置全部不动\"写进去了——新人做消融最容易顺手连别的参数一起改，改完那个差值就不是该组件的贡献了。\n- **7、8 两条是规矩不是术语**，但按你说的一个文件管到底，就跟术语并排放在 Language 里了，格式照现有条目走。哪天条目多了想分开，在这两条前面加一行 `## Conventions` 就行，条目本身不用动。"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0,
+        "scoreWithout": 0,
+        "passRateWithout": 0,
+        "delta": 0
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 0,
+    "overallScore": 0,
+    "overallPassRate": 0,
+    "meanDelta": 0
+  }
+}

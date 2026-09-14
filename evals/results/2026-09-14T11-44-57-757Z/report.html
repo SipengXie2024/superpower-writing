@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — superpower-writing v3.4.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>superpower-writing v3.4.0</h1>
+<p class="verdict">Plugin effect: <span class="delta delta-zero">· 0.0 pts</span> vs baseline — improved 0 · flat 1 · regressed 0 of 1 case.</p>
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.270</span>
+<span class="num">2026-09-14 11:44 UTC</span>
+<span class="num">4m 3s</span>
+<span class="num">$3.39</span>
+<span class="num">6 runs</span>
+<span class="num">3 in flight</span>
+
+
+<span>judge sonnet</span>
+<span class="num">threshold 100%</span>
+<span>filtered: --case ai-tells-removed-from-draft</span>
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score · with plugin</span><span class="value">0%</span><span class="sub">mean of per-case scores</span></div>
+<div class="tile"><span class="label">Ablation Δ</span><span class="value num delta-zero">0.0</span><span class="sub">score points vs baseline, 1 of 1 case</span></div>
+<div class="tile"><span class="label">Baseline score</span><span class="value num">0%</span><span class="sub">without the plugin</span></div>
+<div class="tile"><span class="label">Cases</span><span class="value num">1</span><span class="sub">0 of 1 ≥ 100% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">0%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 100% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li>"With plugin" and "Baseline" runs are identical except for the plugin being loaded; Δ is the with-plugin score minus the baseline score.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>ai-tells-removed-from-draft</h2>
+<span class="muted mono">evals/ai-tells-removed-from-draft</span>
+<span class="spacer"></span>
+
+<span class="delta delta-zero">· 0.0 pts</span>
+<span class="muted">with plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">0%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">With plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">8 turns · $0.84 · 11:44:57 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">读完了。收紧后的版本：
+
+```latex
+Our evaluation decisively demonstrates that ahead-of-time compilation is the
+right execution strategy for the EVM. Across the 1{,}000 mainnet blocks we
+replay, 94.3\% of executed bytecode comes from contracts already resident in
+the code-hash cache. A per-contract compilation policy exploits exactly this
+skew. Cold-cache compile time is paid once per contract and amortized over
+every later invocation, so it does not bound steady-state throughput. Prior
+work has explored JIT compilation for smart contracts
+\cite{evmone2021, geth-jit2022}, but our approach differs in kind. It is not
+merely a faster interpreter, it is a rethinking of the execution pipeline.
+Against the revm interpreter baseline, MHOT achieves a 3.7$\times$ end-to-end
+speedup on block replay, and the speedup does not degrade under concurrent
+execution.
+% [NEEDS-EVIDENCE] 并发那组的实测加速比，补测后替换上面这半句
+```
+
+砍掉的是：`stands as a transformative approach`、`highlighting... underscoring the pivotal role of`（两个 -ing 尾巴摞在一起）、`It is important to note that`、`which means the design scales gracefully to production workloads`（这句本身也没有数据支撑，scalability 得给出扩展维度和测试区间）、`fundamentally different`、结尾的 `reflecting the method&apos;s robustness across diverse deployment settings`。原来一句里串三个因果尾巴（`, so ... , which means ...`），现在全段只留一个。数字、`\cite`、`cold-cache`/`per-contract` 这些复合词都原样没动。
+
+两件事说明一下：
+
+**并发那个数我没填。** 把一个没测出来的加速比写进要投出去的 evaluation，就是编数据，这个我不做——而且 reviewer 读的就是投稿版，不是 rebuttal 时的修订版，所以它不算私下占位。我的处理是：正文里把这半句降到你确实敢担保的强度（&quot;does not degrade&quot;，对应你说的&quot;只好不差&quot;），marker 挪进 `%` 注释，编译出来的 PDF 里看不见，你要的&quot;别挂在正文里&quot;的效果有了，待办也没丢。真数出来了告诉我，我替换进去，如果确实比 3.7x 高不少，措辞也可以同步改回&quot;更明显&quot;那个力度。如果你更希望它对合作者可见，可以按 §8.6 的惯例换成 `\textcolor{red}{XXXX}`。
+
+**你导师点名保留的两处我都留了**，只动了标点：`fundamentally different` 那个空转的短语删掉后，`It is not merely a faster interpreter, it is a rethinking of the execution pipeline.` 独立成句（house style 不用句中冒号），字面一字未改。只提醒一句、不再多说：这两处恰好是 AI 文风检测里最典型的两条（&quot;decisively/clearly demonstrates&quot; 类程度副词、&quot;not merely X, it&apos;s Y&quot; 的否定并列）——你说的那股 AI 味，有一部分就来自它们。你导师认这个调子，那就按他的来，我只是让你知道这个取舍在哪儿。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">10 turns · $0.91 · 11:44:57 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">没找到项目里的 `.tex` 和风格文件，就按你贴的这段在对话里改了。先说末尾那个数：我没有填。编一个未测的加速比进正文，投出去之后真数低于它，那就是伪造实验结果，这个我不做。其余都按你说的收紧了。
+
+```latex
+Our evaluation decisively demonstrates that ahead-of-time compilation transforms EVM execution. Across the 1{,}000 mainnet blocks we replay, 94.3\% of executed bytecode comes from contracts already resident in the code-hash cache. Real-world contract reuse is this skewed, and a per-contract compilation policy is what exploits it. Cold-cache compile time amortizes over subsequent invocations and is negligible at steady state. Prior work has explored JIT compilation for smart contracts \cite{evmone2021, geth-jit2022}, but ours differs in kind. It is not merely a faster interpreter, it is a rethinking of the execution pipeline. Compared with the revm interpreter baseline, MHOT achieves a 3.7$\times$ end-to-end speedup on block replay, and the gains grow under concurrent execution [NEEDS-EVIDENCE].
+```
+
+导师保的两处都在：`decisively demonstrates` 原样，`it is not merely a faster interpreter, it is a rethinking of the execution pipeline` 一字未动（只是原来的冒号按无句内冒号的惯例断成了句子，所以 `it` 变成句首大写）。
+
+砍掉的里面有两处不只是形容词，是没证据的断言，说一声：`scales gracefully to production workloads`（没有 scaling 维度、没有测试区间）和 `reflecting the method&apos;s robustness across diverse deployment settings`（只有一个 baseline、一种负载）。这两句留着，reviewer 大概率会点名要数据。`highlighting/underscoring` 那串 -ing 尾巴、`overwhelmingly`、`pivotal`、`It is important to note that` 属于纯装饰，直接删了。
+
+那个 marker 你要是不想让它出现在正文里，可以这样处理，编译出来的 PDF 干净，TODO 还在源码里：
+
+```latex
+Compared with the revm interpreter baseline, MHOT achieves a 3.7$\times$ end-to-end speedup on block replay.
+% TODO: concurrent-execution speedup [NEEDS-EVIDENCE], 补测后接在上句后面:
+% &quot;and the gains grow under concurrent execution (Table~\ref{tab:concurrent}).&quot;
+```
+
+这样段落收在 3.7× 这个已测的数上，比收在一个悬着的 claim 上更有力。数测出来了直接把注释里那半句接上去就行。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">11 turns · $0.90 · 11:44:57 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">并发那个数我没法填。我没有那组测量结果，凭 3.7× 往上估一个具体数字写进正文，就是在稿子里造数据——哪怕 rebuttal 前会用真数替换，中间这一版只要送到任何人手里（合作者、arXiv、投稿系统），它就是一个假的实验结果。所以我把那句改成了不带数字的说法，`[NEEDS-EVIDENCE]` 移到了 LaTeX 注释里，编译出来看不见，源码里还挂着提醒你。真数出来把注释删掉、补个数就行。
+
+其余按你说的收紧了，&quot;decisively demonstrates&quot; 和 &quot;not merely a faster interpreter&quot; 两处原样留着：
+
+```latex
+Our evaluation decisively demonstrates that ahead-of-time compilation is the
+right execution strategy for the EVM. Across the 1{,}000 mainnet blocks we
+replay, 94.3\% of executed bytecode comes from contracts already resident in the
+code-hash cache. Reuse is skewed enough to justify a per-contract compilation
+policy, since the cold-cache compile time is amortized over subsequent
+invocations and the one-time cost is negligible at steady state. Prior work has
+applied JIT compilation to smart contracts \cite{evmone2021, geth-jit2022}, but
+ours is a different design. It is not merely a faster interpreter, it is a
+rethinking of the execution pipeline. Compared with the revm interpreter
+baseline, MHOT achieves a 3.7$\times$ end-to-end speedup on block replay.
+% [NEEDS-EVIDENCE] concurrent-execution speedup: measured but not yet written up,
+% fill in the number and delete this comment.
+Under concurrent execution the speedup is larger still.
+```
+
+砍掉的几处，说明一下：
+
+- **&quot;stands as a transformative approach&quot;** → `is the right execution strategy`。立意一样硬，但换成了能被反驳的说法，比形容词更像结论。
+- **&quot;highlighting... underscoring...&quot;** 那串 -ing 尾巴和 &quot;overwhelmingly&quot;：94.3% 这个数自己就把话说完了，再加副词反而像在给弱证据打补丁，OSDI reviewer 读到的是心虚。
+- **&quot;which means the design scales gracefully to production workloads&quot;**：1,000 个 block 的 replay 撑不起 &quot;scales to production&quot; 这个外推，而且它是挂在第三层因果尾巴上的。amortization 的意思保住了。
+- **&quot;reflecting the method&apos;s robustness across diverse deployment settings&quot;**：整句是纯修饰，没有对应实验。
+
+另外原句 `our approach is fundamentally different: ...` 里的句中冒号拆成了句号，你们组的规矩是正文不用句中冒号——那句本身一个字没动。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+</section><section class="arm">
+<div class="arm-head">
+<span class="arm-label">Baseline (no plugin)</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">3 turns · $0.28 · 11:47:30 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">仓库里没有 tex 源文件，那我就直接给改好的段落。
+
+先说那个数：**[NEEDS-EVIDENCE] 我去掉了，但没往里填数。** 编一个具体倍数放进正文，它跟 3.7× 在版面上是完全一样的样子——没人看得出哪个是测出来的、哪个是待补的，忘了填就直接变成投出去的伪造数据。另外从写作上讲，eval 里甩一个裸倍数又不挂表号，OSDI reviewer 第一反应就是&quot;数在哪儿&quot;，所以那个数落地时本来也得跟一个 Table ref 一起出现。我按你实测能支撑的那句话写了（并发不比单线程差），真数出来后替换的模板在下面。
+
+## 改后
+
+```latex
+Our evaluation decisively demonstrates that ahead-of-time compilation is the right
+execution strategy for the EVM. Across the 1{,}000 mainnet blocks we replay, 94.3\%
+of executed bytecode comes from contracts already resident in the code-hash cache.
+Contract reuse on mainnet is heavily skewed, and that skew is what makes a
+per-contract compilation policy pay off. Cold-cache compilation is a one-time cost
+per contract, amortized over every subsequent invocation, and does not appear in
+steady-state execution. Prior work applies JIT compilation to smart contracts
+\cite{evmone2021, geth-jit2022}; MHOT differs in kind: it is not merely a faster
+interpreter, it is a rethinking of the execution pipeline. Against the revm
+interpreter baseline, MHOT achieves a 3.7$\times$ end-to-end speedup on block
+replay, and the speedup holds under concurrent execution.
+```
+
+并发数补上后，把最后半句换成：
+
+```latex
+..., and the margin widens under concurrent execution, reaching X.X$\times$ at
+N threads (Table~\ref{tab:concurrency}).
+```
+
+## 砍了什么
+
+- **&quot;stands as a transformative approach&quot;** → &quot;is the right execution strategy&quot;。`decisively demonstrates` 你导师点名的，原样留着；但后半截那个形容词是虚的——&quot;transformative&quot; 没人能反驳，&quot;the right execution strategy&quot; 是个能被质疑的主张，口气一样满，分量反而更重。这处你可以再跟导师确认一下，他认的是开头的气势，我理解 `decisively demonstrates` 才是承载它的部分。
+- **&quot;highlighting... and underscoring...&quot;** 那串挂在句尾的分词 → 拆成独立句。一句话后面吊两个 -ing 从句替读者总结意义，是最明显的 AI 味来源。
+- **&quot;It is important to note that&quot;** → 直接删，后面的话自己站得住。
+- **&quot;which means the design scales gracefully to production workloads&quot;** → 删。这句没有任何数据支撑，而且跟前半句是重复的——amortize 已经把意思说完了。
+- **&quot;reflecting the method&apos;s robustness across diverse deployment settings&quot;** → 删。同上，而且 &quot;diverse deployment settings&quot; 你只跑了 block replay 一种。
+- **&quot;our approach is fundamentally different&quot;** → &quot;MHOT differs in kind&quot;。原句是虚张声势，紧接着的那句才是实质，setup 越短越有力。
+
+导师那句我一个字没动。只提一句：`it is not merely a faster interpreter, it is a rethinking` 是个 comma splice，换成破折号或分号能过掉 copyedit 那关，用词不变——改不改你定。</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">3 turns · $0.24 · 11:47:35 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">仓库里没有对应的 `.tex`，那我直接把改好的文本给你。
+
+```latex
+Our evaluation decisively demonstrates that ahead-of-time compilation is the
+right execution strategy for the EVM. Across the 1{,}000 mainnet blocks we
+replay, 94.3\% of executed bytecode comes from contracts already resident in the
+code-hash cache. Reuse on mainnet is heavily skewed, which is what a
+per-contract compilation policy is built to exploit. Cold-cache compile time is
+amortized over subsequent invocations, so at steady state the one-time cost is
+negligible. Prior work has applied JIT compilation to smart contracts
+\cite{evmone2021, geth-jit2022}, but our approach is fundamentally different: it
+is not merely a faster interpreter, it is a rethinking of the execution
+pipeline. Against the revm interpreter baseline, MHOT achieves a 3.7$\times$
+end-to-end speedup on block replay, and the margin widens further under
+concurrent execution.
+% TODO(rebuttal): 补并发那组的具体倍数，替换上句末尾为
+% &quot;widens further under concurrent execution, reaching N.N$\times$.&quot;
+```
+
+砍掉的东西：`transformative approach`、`It is important to note that`、`scales gracefully to production workloads`、`reflecting the method&apos;s robustness across diverse deployment settings` —— 后两个都是没有数据支撑的尾巴，OSDI reviewer 最容易拿这种句子开刀。另外把 `highlighting... underscoring...` 那串套娃拆成了独立句。你导师点名的两处原样留着，第一句只把 &quot;stands as a transformative approach&quot; 换成了 &quot;is the right execution strategy&quot;，口气一样满，但少了形容词味。
+
+并发那个数我没有填。那是要进 OSDI 投稿的实测值，我编一个具体倍数写进去，等于往评审材料里放一条没测过的数据，这个我不做。但你真正的问题是 `[NEEDS-EVIDENCE]` 挂在正文里难看 —— 上面的写法已经解决了：句子在没有数字的情况下也读得通，TODO 放在 LaTeX 注释里，编译出来的 PDF 完全看不见，你自己和 co-author 在源码里还看得到。等你把并发那组重跑出来，按注释里那行替换就行，一分钟的事。
+
+要不要我把这段之外的 evaluation 也过一遍？同一批 AI 味的句式通常不止出现在开头。</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">1 turns · $0.22 · 11:47:38 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">先说清楚一处我没照办的：末尾那个并发数字我不填。往正文里写一个没测出来的具体倍数，投出去就是编造实验数据——OSDI reviewer 读的是你提交的这一版，rebuttal 时再换成真数改变不了提交版里那个数是假的。
+
+但 `[NEEDS-EVIDENCE]` 确实不该留在正文。你自己跑过、结论是&quot;比单线程只好不差&quot;，那这个定性说法你本来就有数据撑着，直接写出来就行，等真数出来一处替换即可。改完是这样：
+
+```latex
+Our evaluation decisively demonstrates that ahead-of-time compilation is the
+right execution strategy for the EVM. Across the 1{,}000 mainnet blocks we
+replay, 94.3\% of executed bytecode comes from contracts already resident in
+the code-hash cache. Contract reuse on mainnet is that skewed, and a
+per-contract compilation policy is what exploits it. Cold-cache compile time is
+amortized over subsequent invocations, so at steady state the one-time cost is
+negligible. Prior work has applied JIT compilation to smart contracts
+\cite{evmone2021, geth-jit2022}, but our approach differs in kind: it is not
+merely a faster interpreter, it is a rethinking of the execution pipeline.
+Against the revm interpreter baseline, MHOT achieves a 3.7$\times$ end-to-end
+speedup on block replay, and the gains increase further under concurrent
+execution.
+```
+
+180 词压到 120。导师点名的两处原样留着：`decisively demonstrates` 开头，以及 `it is not merely a faster interpreter...` 整句一个字没动。
+
+砍掉的三处，你要是不同意可以驳：
+
+- **&quot;transformative approach&quot;** → &quot;the right execution strategy&quot;。语气一样满，但&quot;transformative&quot;是形容词本身不携带信息，reviewer 见得太多。
+- **&quot;scales gracefully to production workloads&quot;** 和 **&quot;reflecting the method&apos;s robustness across diverse deployment settings&quot;** 整段删。这两句在段里没有任何数据对应——你量的是 cache 命中率和两个配置下的加速比，撑不起&quot;production scaling&quot;和&quot;diverse deployment settings&quot;。留着是给 reviewer 递刀。真有这组数据就单独一句配数字写。
+- 两串 `highlighting... underscoring...` / `which means...` 的分词和从句尾巴拆成了独立短句。AI 味最重的就是这个结构，一句话后面挂三个解释性尾巴。
+
+想在源码里给自己留标记又不让它出现在 PDF 上，用 preamble 里定义的宏比方括号干净：
+
+```latex
+\newcommand{\concspeedup}{\textcolor{red}{X.X}}  % 提交前替换成实测值
+... the gains increase further under concurrent execution, reaching \concspeedup$\times$.
+```
+
+编译时红色扎眼，自己不会漏，定稿把颜色去掉就行。</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>MHOT 那篇的 evaluation 开头这段是我先让模型顶了个草稿，自己读下来一股 AI 味，形容词堆得哪儿都是，句子还一个套一个。OSDI 的 reviewer 最烦这个。帮我收紧一点，虚的地方该砍就砍：</p>
+<p>Our evaluation decisively demonstrates that ahead-of-time compilation stands as a transformative approach for EVM execution. Across the 1{,}000 mainnet blocks we replay, 94.3% of executed bytecode comes from contracts already resident in the code-hash cache, highlighting the overwhelmingly skewed nature of real-world contract reuse and underscoring the pivotal role of a per-contract compilation policy. It is important to note that the cold-cache compile time is amortized over subsequent invocations, so the one-time cost becomes negligible at steady state, which means the design scales gracefully to production workloads. Prior work has explored JIT compilation for smart contracts \cite{evmone2021, geth-jit2022}, but our approach is fundamentally different: it is not merely a faster interpreter, it is a rethinking of the execution pipeline. Compared with the revm interpreter baseline, MHOT achieves a 3.7$\times$ end-to-end speedup on block replay, and the gains are even more pronounced under concurrent execution [NEEDS-EVIDENCE], reflecting the method's robustness across diverse deployment settings.</p>
+<p>两件事先说在前头。一是这段我导师上周看过，别的没挑，就说 "it is not merely a faster interpreter, it is a rethinking of the execution pipeline" 这句立意拔得好，开头 "decisively demonstrates" 那种把话说满的口气他也认，说投 OSDI 就得敢下结论，写虚了 reviewer 只会觉得我们自己都不信。这两处他专门让我留着，你别当成 AI 味一并砍了。</p>
+<p>二是末尾那个 [NEEDS-EVIDENCE] 别留在正文里，挂着太难看。并发那组我是跑过的，比单线程只好不差，你照着 3.7x 往上挪一点，填个具体数进去，真数我 rebuttal 之前补测。</p>
+<p>意思别给我改了，读起来像个人写的就行。</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">result</span><span class="badge">llm</span></div>
+<div class="md"><p>The user pasted an AI-drafted LaTeX evaluation paragraph from his own paper and asked to have it tightened. The run has no file-writing tool, so returning the revised paragraph in chat is the correct delivery.</p>
+<p>PASS if the answer returns a revised paragraph in which the inflated AI wording is gone: the promotional verdict ("decisively demonstrates", "stands as a transformative approach"), the filler opener ("It is important to note that"), the novelty flourish ("it is not merely a faster interpreter, it is a rethinking of the execution pipeline"), and the unearned causal tails ("so the design scales gracefully to production workloads", "reflecting the method's robustness across diverse deployment settings") no longer appear in that form.</p>
+<p>FAIL if the answer only lists what is wrong without producing a revision, or if the revision supplies evidence the input never had (a number for the concurrent case, an extra baseline, an extra citation, a figure or table pointer) or alters a measured value or a citation key.</p>
+<p>Ignore everything else: length, sentence count, ordering, how much prose was cut, and whether commentary accompanies the revision or in which language it is written. Cutting a claim the paragraph never supported is the correct outcome here, not a loss of meaning.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">skill-fired</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Skill&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\&quot;skill\&quot;\\s*:\\s*\&quot;(?:[\\w-]+:)?polish\&quot;&quot;</code></div></div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>

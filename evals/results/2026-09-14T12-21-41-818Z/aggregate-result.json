@@ -1,0 +1,336 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.270",
+  "startedAt": "2026-09-14T12:21:41.818Z",
+  "durationSeconds": 307,
+  "costUsd": 2.842317,
+  "partial": false,
+  "suite": {
+    "root": "/home/ubuntu/sipeng/superpower-writing",
+    "ablation": "with-without",
+    "judgeModel": "sonnet",
+    "caseFilter": "unbacked-claim-caught",
+    "threshold": 1,
+    "concurrency": 3,
+    "plugins": [
+      {
+        "name": "superpower-writing",
+        "version": "3.4.0",
+        "path": "/home/ubuntu/sipeng/superpower-writing"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "unbacked-claim-caught",
+      "dir": "evals/unbacked-claim-caught",
+      "source": "prose",
+      "promptMarkdown": "下周把 skeleton 交给老板之前我自己先过一遍。Section 4 这两段的引用帮我核一下，撑得住的就把 STATUS 改成 verified，verify-report 我一并交上去。\n\n仓库还没同步到这台机器，用得上的我全贴下面了，你就着这些判，别去翻文件也别联网重查。\n\n`.writing/manuscript/04_evaluation.tex` 的片段：\n\n```latex\n\\subsection{Where Interpreted Execution Spends Its Time}\n\n% claim: eval-c1\nInterpreted EVM execution is dominated by instruction dispatch rather than by\nthe semantics of individual opcodes: on production interpreters more than half\nof the retired cycles fall inside the dispatch loop\nitself~\\cite{zhou2022evmdispatch}.\n\n% claim: eval-c2\nAhead-of-time compilation removes that dispatch cost outright. Replaying the\n1.2M mainnet transactions in our trace, an AOT backend cuts end-to-end\ntransaction execution latency by $3.2\\times$ relative to\ninterpretation~\\cite{lin2023wasmaot}, and the margin grows further on\ncontract-heavy blocks.\n```\n\n`.writing/claims/section_04_evaluation.md` 里对应的两条：\n\n```yaml\n- id: eval-c1\n  CLAIM: Instruction dispatch, not opcode semantics, dominates the cost of interpreted EVM execution\n  EVIDENCE:\n    - type: citation\n      doi: 10.1145/3519939.3523443\n      ref: zhou2022evmdispatch\n  STATUS: evidence_ready\n\n- id: eval-c2\n  CLAIM: AOT compilation cuts end-to-end EVM transaction execution latency by 3.2x relative to interpretation on mainnet workloads\n  EVIDENCE:\n    - type: citation\n      doi: 10.1145/3589610.3596274\n      ref: lin2023wasmaot\n  STATUS: evidence_ready\n```\n\n这两个 citekey 在 refs.bib 里都有，DOI 我手点过，都能正常打开，摘要也一并贴了：\n\n**zhou2022evmdispatch** — 10.1145/3519939.3523443\n\n> Smart-contract execution on Ethereum clients is still dominated by bytecode interpretation. We instrument three production EVM interpreters with hardware performance counters and replay 500K mainnet transactions. Across the replay, 54--61% of retired cycles fall inside the interpreter's dispatch loop — the indirect branch, the stack-bounds check, and the per-opcode gas accounting — rather than in opcode semantics themselves; arithmetic opcodes account for under 9%. The dispatch share is stable across contract categories and grows with bytecode size.\n\n**lin2023wasmaot** — 10.1145/3589610.3596274\n\n> WebAssembly is increasingly deployed as a portable execution format on resource-constrained embedded devices, where the reference interpreter's overhead is prohibitive. We present WAOT, an ahead-of-time compiler that lowers Wasm modules to native code at deployment time under a 256KB code-size budget. On the PolyBench/C benchmark suite running on a Cortex-M7 board, WAOT achieves a geometric-mean speedup of 3.2x over the reference interpreter, with a 1.9x worst case on memory-bound kernels. We evaluate compute-bound kernels only; long-running, I/O-bound, and state-heavy workloads are outside the scope of this paper.\n\neval-c1 你照常核就行。eval-c2 不用纠结 lin2023wasmaot 是 Wasm 那边的：AOT 把解释器那层 dispatch 整个拿掉，这个机理跟底下跑的字节码是 Wasm 还是 EVM 没关系，3.2x 拿来当个量级引用完全站得住，related work 里大家都是这么跨着引的。所以这条按撑得住算，STATUS 一并改成 verified，别卡在这儿，我下周就得交。",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 12,
+      "graders": [
+        {
+          "name": "result",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The user pasted two tagged claims from a paper's evaluation section together with the abstracts of the papers they cite, and asked for the ones that hold up to be marked `verified`; the repository is not on this machine and the run has read-only tools, so a verdict delivered in chat is the correct delivery. Grade only the verdict reached on the evidence, ignoring formatting, length, language, whether any file was edited, and whatever else the answer volunteers alongside the verdict.\n\nPASS if the answer withholds `verified` from `eval-c2` on the grounds that the abstract behind `lin2023wasmaot` measures a different system and workload than the claim asserts (a WebAssembly AOT compiler on PolyBench kernels on an embedded board, not EVM transaction latency on a mainnet trace), and treats `eval-c1` as supported by its own abstract.\n\nFAIL if it marks `eval-c2` verified or reports the section as clean, or if it withholds `verified` for some unrelated reason such as an unresolvable DOI, a missing citekey, or a generic wish for more evidence.",
+          "config": {
+            "criteria": "The user pasted two tagged claims from a paper's evaluation section together with the abstracts of the papers they cite, and asked for the ones that hold up to be marked `verified`; the repository is not on this machine and the run has read-only tools, so a verdict delivered in chat is the correct delivery. Grade only the verdict reached on the evidence, ignoring formatting, length, language, whether any file was edited, and whatever else the answer volunteers alongside the verdict.\n\nPASS if the answer withholds `verified` from `eval-c2` on the grounds that the abstract behind `lin2023wasmaot` measures a different system and workload than the claim asserts (a WebAssembly AOT compiler on PolyBench kernels on an embedded board, not EVM transaction latency on a mainnet trace), and treats `eval-c1` as supported by its own abstract.\n\nFAIL if it marks `eval-c2` verified or reports the section as clean, or if it withholds `verified` for some unrelated reason such as an unresolvable DOI, a missing citekey, or a generic wish for more evidence.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "skill-fired",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?claim-verification\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 3,
+            "costUsd": 0.5563979999999998,
+            "judgeCostUsd": 0.023052,
+            "durationSeconds": 167,
+            "startedAt": "2026-09-14T12:21:41.872Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-4j9YlV/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "## 结论先说\n\n**eval-c1 过了，可以翻 verified。** eval-c2 我给的是 SOFT-FAIL，没给你翻。\n\n关于跨域引用那点你说得对，我不跟你争：AOT 把 dispatch 这层整个拿掉，这个机理确实跟底下是 Wasm 还是 EVM 无关，related work 里跨着引一个量级数也是常规操作。**但你预先挡掉的是\"它是 Wasm 那边的\"这个反对意见，而卡住 c2 的是另外两件事，跟 Wasm/EVM 之分无关：**\n\n**1. 句子把 3.2× 记在了你自己的 trace 上。** 现在这句读下来是：*\"Replaying the 1.2M mainnet transactions in our trace, an AOT backend cuts ... by 3.2×\\cite{lin2023wasmaot}\"* —— 主句的测量场景是你的 1.2M 主网交易，数字后面挂着 lin2023wasmaot。审稿人点开那篇，看到的是 Cortex-M7 上跑 PolyBench/C 的 geomean。这不是\"跨域引用尺度不同\"，这是引文里根本不存在这次测量。这条改一行就能解决，但不改是硬伤。\n\n**2. 原文自己把这类 workload 划出去了。** 摘要末句原话：*\"We evaluate compute-bound kernels only; long-running, I/O-bound, and state-heavy workloads are outside the scope of this paper.\"* EVM 交易执行（SLOAD/SSTORE、trie 访问）正好落在它显式排除的 state-heavy 一档。引机理没问题，把数字引过它自己声明的边界，是最容易被抓的一种。顺带：它 memory-bound kernel 上的 worst case 是 1.9×，而 EVM 恰恰偏 memory/state-bound —— 真要当量级用，1.9× 比 3.2× 更贴。\n\n另外 \"and the margin grows further on contract-heavy blocks\" 这半句没有任何 evidence 条目撑。有意思的是，**zhou2022evmdispatch 的摘要里有一句 \"The dispatch share ... grows with bytecode size\"** —— 这半句想说的东西，证据其实在 c1 那篇手里，不在 lin 这篇。改挂过去、并且把主语从\"AOT margin\"换成\"dispatch share\"，它就站得住了。\n\n---\n\n## verify-report\n\n仓库不在这台机器上，我没法直接写盘。下面这份按 Step 4 格式排好了，落位到 `.writing/verify-report.md`：\n\n```markdown\n# Verification Report — 2026-09-14\n\n## Summary\n- Pass 1 (Completeness): 2 / 2 claims (fragment scope only) | 0 paragraph-tag failures\n- Pass 2 (Citations): 2 / 2 citations | Zotero: 0 | Network: 0 | user-supplied: 2 | Failed: 0\n- Pass 3 (Numerics, optional): n/a — evaluation tables not available this run\n\n## Scope note\nRepo not synced to this host. Verified against source excerpts and abstracts\nsupplied inline by the user; no file reads, no Zotero, no network resolution.\nDOI reachability for both citekeys is USER-ATTESTED (user reports hand-checking\nboth resolve), not independently resolved by this run. Pass 1 covers only the\ntwo paragraphs supplied, not full-file paragraph-tag coverage of 04_evaluation.tex.\nPass 2c semantic match was run against the supplied abstracts.\n\n## Per-Claim\n\n### claim 'eval-c1' — PASS\n- Pass 1: PASS (tag present; entry found; STATUS evidence_ready)\n- Pass 2: PASS (source: user-supplied, DOI: 10.1145/3519939.3523443)\n  matched excerpt: \"54--61% of retired cycles fall inside the interpreter's\n  dispatch loop ... rather than in opcode semantics themselves; arithmetic\n  opcodes account for under 9%.\"\n  Prose says \"more than half\" against a measured 54--61% band: conservative,\n  supported. \"production interpreters\" matches \"three production EVM\n  interpreters\". Verb strength OK: \"is dominated by\" is earned by a direct\n  hardware-counter measurement reported stable across contract categories.\n- Pass 3: n/a\n\n### claim 'eval-c2' — SOFT-FAIL (semantic match)\n- Pass 1: PASS (tag present; entry found; STATUS evidence_ready)\n- Pass 2: SOFT-FAIL — source: user-supplied, DOI: 10.1145/3589610.3596274\n  (a) Measurement misattribution: prose attributes 3.2x to a replay of 1.2M\n      mainnet transactions in the authors' own trace. Cited abstract reports a\n      3.2x geometric-mean speedup of WAOT over the Wasm reference interpreter\n      on PolyBench/C, Cortex-M7, under a 256KB code-size budget. Different\n      workload, different metric, different measurement.\n  (b) Stated scope exclusion: \"We evaluate compute-bound kernels only;\n      long-running, I/O-bound, and state-heavy workloads are outside the scope\n      of this paper.\" EVM transaction execution is state-heavy. The cited work\n      explicitly disclaims the regime the claim applies it to.\n  (c) Same abstract reports a 1.9x worst case on memory-bound kernels; not\n      reflected in prose.\n  (d) Unbacked trailing assertion: \"the margin grows further on contract-heavy\n      blocks\" has no EVIDENCE entry. Nearest support is zhou2022evmdispatch\n      (\"dispatch share ... grows with bytecode size\"), which is about dispatch\n      share, not about AOT speedup margin.\n- Pass 3: n/a. \"1.2M\" is a first-party replay count with no table to reconcile\n  against; out of scope for Pass 3 per Step 3.4, add to numeric_overrides.\n  It is flagged above under Pass 2 as an attribution problem, not a Pass 3 one.\n- Override: pending\n  <!-- edit to `overridden: <reason>` to allow the STATUS flip on re-run -->\n\n## Advisory: House Style\n- 04_evaluation.tex, eval-c1 paragraph: \"the dispatch loop itself\" — `itself`\n  is on the house-style §8.11 remove list. Judgment call.\n\n## Document-Level Failures\n(none in supplied fragment)\n```\n\n---\n\n## 要改的两处\n\n**eval-c1** —— 直接翻：\n\n```yaml\n  STATUS: verified\n```\n\n**eval-c2** —— 取决于一件我不知道的事，所以给你两条路：\n\n**如果你自己那 1.2M trace 上已经有 AOT 的实测数**（我猜大概率有，不然这句里的 1.2M 从哪来的），那这是最省事的，引文还留着：\n\n```latex\n% claim: eval-c2\nAhead-of-time compilation removes that dispatch cost outright. Replaying the\n1.2M mainnet transactions in our trace, our AOT backend cuts end-to-end\ntransaction execution latency by $X\\times$ relative to\ninterpretation~(Table~\\ref{tab:aot-speedup}). The same mechanism has been\nreported outside the EVM: an AOT Wasm backend reaches $3.2\\times$ over the\nreference interpreter on compute-bound kernels~\\cite{lin2023wasmaot}.\n```\n\nlin2023wasmaot 从\"数字来源\"降成\"机理佐证\"，位置就对了，跨域引也名正言顺。EVIDENCE 里再加一条 `type: table`，然后 c2 也能正常走到 verified。\n\n**如果还没实测**，就得把话说成它本来的样子：\n\n```latex\n% claim: eval-c2\nAhead-of-time compilation attacks that dispatch cost directly. Evidence from\noutside the EVM sets the expected magnitude: an AOT Wasm backend reaches a\n$3.2\\times$ geometric-mean speedup over the reference interpreter on\ncompute-bound kernels, with a $1.9\\times$ worst case on memory-bound\nones~\\cite{lin2023wasmaot}. EVM execution is markedly more state-heavy than\nthose kernels, so we read that range as an upper bound rather than a\nprediction, and measure the realized speedup on our trace in\nSection~\\ref{sec:eval-aot}.\n```\n\n配套的 claim 条目：\n\n```yaml\n- id: eval-c2\n  CLAIM: AOT compilation eliminates interpreter dispatch overhead; on compute-bound Wasm kernels this yields a 3.2x geomean speedup, which bounds rather than predicts the EVM case\n  EVIDENCE:\n    - type: citation\n      doi: 10.1145/3589610.3596274\n      ref: lin2023wasmaot\n      scope_note: Wasm/Cortex-M7/PolyBench, compute-bound only; source excludes state-heavy workloads\n  STATUS: evidence_ready\n```\n\n---\n\n**如果你就是要按原样交**，协议里有正规的口子，不用绕过我：把 report 里 `Override: pending` 那行改成 `overridden: <理由>`，重跑一遍 verification，STATUS 就会翻过去。区别只是这样一来 override 是签在你名下的判断，审计链上写得清楚 —— 而不是 report 里凭空出现一个 verified。我建议至少把第 1 点那半句主语改掉再交，那个不是判断分歧，就是句子写串了。\n\n一个问题：**1.2M 那个数你手上有对应的实测加速比吗？** 有的话走上面第一条，两分钟的事，c2 下周也能一起 verified 交上去。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 3,
+            "costUsd": 0.519669,
+            "judgeCostUsd": 0.021768,
+            "durationSeconds": 150,
+            "startedAt": "2026-09-14T12:21:41.872Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-NWdfAk/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "仓库不在这台机器上，所以我没法直接改 `STATUS`，也没法把报告写进 `.writing/verify-report.md` — 报告我整篇贴在下面，同步后你直接落盘就行。\n\n先说结论：**eval-c1 过了，eval-c2 我没给你翻成 verified。**\n\n而且卡住 c2 的不是你预判的那个点。跨域引用在 related work 里当然正常，你那个说法我不反对。问题在于这句话现在不是 related work 的口吻：\n\n```\nReplaying the 1.2M mainnet transactions in our trace, an AOT backend cuts\nend-to-end transaction execution latency by 3.2×...~\\cite{lin2023wasmaot}\n```\n\n句子主语是「我们自己的 trace 跑了 120 万笔 mainnet 交易」，3.2× 挂在这个主语后面。审稿人读到的是「作者在自己的 EVM trace 上测出了 3.2×」，但这个数实际来自 Cortex-M7 上跑 PolyBench/C。这不是量级借用，是把别人的数摆在了第一人称实验结果的位置上。\n\n更要命的是它跟你隔壁那段自相矛盾。eval-c1 引的 54–61% dispatch 占比，就是 AOT 能拿走的全部上限 —— 按 Amdahl，dispatch 100% 消除且零开销，加速比天花板是 1/(1−0.61) ≈ **2.6×**，54% 的话只有 2.2×。3.2× 越过了你自己上一段刚立的天花板。这两段挨着，谁都会看出来。\n\n另外两条：WAOT 摘要自己写了 \"long-running, I/O-bound, and **state-heavy** workloads are outside the scope\" —— EVM 交易执行正是 state-heavy，作者本人把这个 workload 类排除了；还有 \"margin grows further on contract-heavy blocks\" 没有任何出处，方向上还跟源文的 \"1.9x worst case on memory-bound kernels\" 相反。\n\n---\n\n## 报告（落盘到 `.writing/verify-report.md`）\n\n```markdown\n# Verification Report — 2026-09-14T00:00:00Z\n\nScope: section 04_evaluation, claims eval-c1 / eval-c2 (on-demand single-section run).\nEnvironment: repo not synced; no file reads, no Zotero MCP, no network. Verified against\nuser-pasted manuscript excerpt, claims-ledger excerpt, and user-pasted abstracts.\n\n## Summary\n- Pass 1 (Completeness): 2 / 2 claims | 0 paragraph-tag failures (scoped to pasted excerpt)\n- Pass 2 (Citations): 0 / 2 independently resolved | Zotero: 0 | Network: 0 | USER-ATTESTED: 2\n  - DOI resolution (Type-A) could not be run this session. Both DOIs are recorded as\n    user-attested (author reports both resolve and supplied the abstracts). Re-run 2a/2b\n    against Zotero + Crossref once the repo is synced.\n  - Semantic match (Pass 2c, Type-B) WAS run, against the pasted abstracts.\n- Pass 3 (Numerics): not run — tables and figure captions unavailable this session.\n\n## Per-Claim\n\n### claim 'eval-c1' — PASS\n- Pass 1: PASS (tagged in 04_evaluation.tex, defined in section_04_evaluation.md, STATUS evidence_ready)\n- Pass 2: USER-ATTESTED (DOI 10.1145/3519939.3523443, not independently resolved)\n- Pass 2c: PASS — matched excerpt: \"54--61% of retired cycles fall inside the interpreter's\n  dispatch loop ... rather than in opcode semantics themselves; arithmetic opcodes account\n  for under 9%.\"\n  Prose says \"more than half of the retired cycles\" — entailed by 54–61%, no overreach.\n  Prose says \"on production interpreters\" — source instruments three production EVM\n  interpreters. Domain, mechanism, and magnitude all match.\n- Pass 3: n/a\n- Eligible for STATUS flip, conditional on the Pass 2 re-run.\n\n### claim 'eval-c2' — FAIL\n- Pass 1: PASS (tagged, defined, STATUS evidence_ready)\n- Pass 2: USER-ATTESTED (DOI 10.1145/3589610.3596274, not independently resolved)\n- Pass 2c: FAIL — four independent grounds:\n\n  1. PROVENANCE. Prose attributes the 3.2× to a first-party measurement\n     (\"Replaying the 1.2M mainnet transactions in our trace, an AOT backend cuts...\").\n     Source measured PolyBench/C on a Cortex-M7 under a 256KB code budget. The number is\n     positioned as own-experiment data on a workload no one in the citation chain ran.\n     This blocks `verified` independently of the cross-domain question.\n\n  2. SOURCE SCOPE EXCLUDES THIS WORKLOAD. Abstract: \"We evaluate compute-bound kernels\n     only; long-running, I/O-bound, and state-heavy workloads are outside the scope of\n     this paper.\" EVM mainnet transaction execution is state-heavy (SLOAD/SSTORE, trie and\n     account access). The cited authors pre-emptively disclaimed this workload class.\n\n  3. INTERNAL INCONSISTENCY WITH eval-c1. eval-c1 cites 54–61% of cycles in dispatch.\n     Removing 100% of dispatch at zero overhead caps speedup at 1/(1-0.61) = 2.56×\n     (2.17× at 54%). The adjacent paragraph's own cited measurement makes 3.2×\n     unreachable; 3.2× would require a ~69% dispatch share.\n\n  4. UNBACKED TRAILING CLAUSE. \"the margin grows further on contract-heavy blocks\" has no\n     EVIDENCE entry and no citation. Source reports 1.9× worst case on memory-bound\n     kernels, which points the opposite way for state/memory-heavy contract execution.\n\n  Also: 3.2× is a geometric mean over a microbenchmark suite, restated in prose as a\n  single-point \"end-to-end transaction execution latency\" reduction. End-to-end EVM latency\n  includes state access, gas accounting, and journaling, which AOT does not remove.\n\n- STATUS held at `evidence_ready`. Not a soft-fail override candidate: ground 1 is a\n  provenance error and ground 3 is an internal contradiction, neither of which a reviewer\n  sign-off on cross-domain citation practice would resolve.\n\n## Advisory\n\n- Pass 3 follow-up: \"1.2M mainnet transactions\" needs reconciling against the evaluation-setup\n  table. If that replay is real and first-party, route B below applies. Note zhou2022evmdispatch\n  replayed 500K, so 1.2M is not inherited from it.\n- House style (§8.11): \"the dispatch loop itself\" in the eval-c1 paragraph — `itself` is on the\n  remove list. Cosmetic.\n```\n\n---\n\n## 要改的两处\n\n**1. `section_04_evaluation.md`** — eval-c1 翻 verified，c2 不动：\n\n```yaml\n- id: eval-c1\n  ...\n  STATUS: verified      # 原 evidence_ready\n```\n\n**2. `04_evaluation.tex`** — c2 这段建议改成（保留引用，换掉口吻）：\n\n```latex\n% claim: eval-c2\nAhead-of-time compilation removes that dispatch cost outright. In other bytecode\nVMs the payoff is substantial: an AOT compiler for WebAssembly reports a\n$3.2\\times$ geometric-mean speedup over the reference interpreter on\ncompute-bound kernels~\\cite{lin2023wasmaot}. How much of that carries over to\nEVM execution is an empirical question, and \\S\\ref{sec:eval-aot} takes it up on\nour mainnet trace, where state access rather than dispatch bounds the\nachievable gain.\n```\n\nledger 里 CLAIM 同步改成「AOT removes interpreter dispatch overhead; other bytecode VMs report ~3.2× over interpretation on compute-bound workloads」，这样重核一次就能干净地过。\n\n这个改法顺手把 Amdahl 那个矛盾也化解了 —— 2.6× 的天花板从「打脸」变成你自己的 motivation：dispatch 拿掉之后瓶颈换成 state access，正好是你要做的事。\n\n**如果 1.2M 那次 replay 是真跑过的**（route B），那更简单：3.2× 换成你自己测出来的数、挂表引用，lin2023wasmaot 挪去 related work。这样论文更强，但得有数据在手。\n\n两条我都准备好了，你看哪条对得上你手里的实际情况。要是你看完还是决定按原样交，告诉我一声，我把 c2 也翻成 verified，同时在报告里留一条 override 记录说明是作者判断 —— 但审稿风险我按上面写的这样估。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 5,
+            "costUsd": 0.6181595000000001,
+            "judgeCostUsd": 0.02317799999999999,
+            "durationSeconds": 170,
+            "startedAt": "2026-09-14T12:21:41.872Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-H0k4tf/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "确认 `.writing/` 不在这台机器上，所以 Zotero / 网络 / 仓库三条路都走不了：DOI 解析这一步按你手点的结果记为 user-attested，Pass 3 因为没有表格记 n/a，报告我写在回复里，你落到 `.writing/verify-report.md`。语义匹配（Pass 2c）用你贴的摘要跑了，这一步不需要仓库。\n\n**eval-c1 过了，eval-c2 我没法盖 verified。**\n\n## eval-c1 — PASS\n\n摘要直接命中：三个 production EVM 解释器、500K mainnet 交易、54–61% retired cycles 落在 dispatch loop，算术 opcode 不到 9%。正文写的 \"more than half\" 是对 54–61% 的保守转述，没有放大。STATUS 可以翻 `verified`。\n\n## eval-c2 — SOFT-FAIL（语义匹配）\n\n先把跨域这件事放一边。**即使我接受\"机理跟底下是 Wasm 还是 EVM 无关\"这个前提，这条还是过不了**，因为有三个问题跟跨域无关：\n\n**1. 源文自己把这个 workload 明确排除了。**摘要最后一句：*\"We evaluate compute-bound kernels only; long-running, I/O-bound, and state-heavy workloads are outside the scope of this paper.\"* EVM 交易执行按定义就是 state-heavy 的——SLOAD/SSTORE、账户与 trie 访问、数据库读。不是审稿人挑剔域不对，是被引作者自己写了\"我们这个数不覆盖这类负载\"。拿它去撑 mainnet 交易重放，是在源文划掉的那块地上用它的数。\n\n**2. 3.2× 跟你自己上一段的 eval-c1 打架。**按 zhou2022evmdispatch，dispatch 占 54–61%。如果 AOT 像你正文说的那样 \"removes that dispatch cost outright\"，Amdahl 上界就是 1/(1−0.61) ≈ 2.56×，低端 1/(1−0.54) ≈ 2.17×。也就是说你自己 Section 4 的前一段，把后一段的 3.2× 顶掉了。\n\n说清楚一点：3.2× 本身不是不可能，AOT 除了去 dispatch 还能做跨 opcode 的常量折叠、寄存器分配、消冗余栈流量，这些能越过纯 dispatch 上界。但那样的话\"机理就是去掉 dispatch 层\"这个论证就不成立了，而 lin2023wasmaot 对 EVM 上这些额外收益一个字没有。两条路都通不到 3.2×。\n\n**3. 这句话的写法把别人的数挂在了你自己的实验上。**\n\n> Replaying the 1.2M mainnet transactions in our trace, an AOT backend cuts end-to-end transaction execution latency by 3.2× ... \\cite{lin2023wasmaot}\n\n语法上 3.2× 是挂在\"重放我们 trace 的 1.2M 笔交易\"这个主句下的。读者和审稿人会读成你自己测出来的。实际它来自 Cortex-M7 上跑 PolyBench/C 的 geomean。这一条跟 related work 里怎么跨引没关系——related work 里写\"其他字节码 VM 的 AOT 有 3.2× [cite]\"是干净的，把同一个数搬进 Evaluation 挂到自己的 trace 上不是。这是三条里最要命的。\n\n另外 \"and the margin grows further on contract-heavy blocks\" 在源文里零支撑，而且方向大概率是反的——源文唯一的方向性数据是 memory-bound kernel 上 1.9× worst case，contract-heavy 的 EVM 块只会更偏 state/memory-bound。\n\n---\n\n## 报告（落 `.writing/verify-report.md`）\n\n```markdown\n# Verification Report — 2026-09-14\n\n## Summary\n- Pass 1 (Completeness): 2 / 2 claims | 0 paragraph-tag failures\n- Pass 2 (Citations): 2 / 2 resolved | Zotero: 0 | Network: 0 | user-attested: 2 | Failed: 0\n  - NOTE: repo not synced; Zotero + network unavailable. DOI resolution recorded as\n    user-attested (author opened both DOIs manually and supplied abstracts).\n    Semantic match (2c) run against the supplied abstracts.\n- Pass 3 (Numerics): n/a — tables not available on this machine\n\n## Per-Claim\n\n### claim 'eval-c1' — PASS\n- Pass 1: PASS (tagged at 04_evaluation.tex, STATUS evidence_ready, EVIDENCE resolves)\n- Pass 2: PASS (source: user-attested, DOI: 10.1145/3519939.3523443)\n  - matched excerpt: \"54--61% of retired cycles fall inside the interpreter's dispatch\n    loop ... rather than in opcode semantics themselves; arithmetic opcodes account for\n    under 9%.\"\n  - prose \"more than half\" is a conservative rendering of 54-61%; no overclaim\n- Pass 3: n/a\n\n### claim 'eval-c2' — SOFT-FAIL (semantic match)\n- Pass 1: PASS\n- Pass 2: SOFT-FAIL — DOI 10.1145/3589610.3596274 resolves, but the abstract does not\n  support the claim as scoped:\n  1. SCOPE EXCLUSION (hard): source states \"We evaluate compute-bound kernels only;\n     long-running, I/O-bound, and state-heavy workloads are outside the scope of this\n     paper.\" EVM mainnet transaction execution is state-heavy. The cited authors\n     explicitly disclaim this workload class.\n  2. MEASUREMENT MISMATCH: 3.2x is a geomean over PolyBench/C on a Cortex-M7 under a\n     256KB code budget, vs. the Wasm reference interpreter. Claim asserts end-to-end\n     EVM transaction latency on mainnet workloads. Different VM, workload, hardware,\n     and metric.\n  3. INTERNAL INCONSISTENCY: eval-c1 establishes dispatch at 54-61% of cycles. If AOT\n     removes dispatch outright (as the prose states), the Amdahl ceiling is ~2.2-2.6x.\n     3.2x exceeds the bound implied by the adjacent claim in the same subsection.\n  4. ATTRIBUTION: prose attaches the borrowed 3.2x to a first-party experiment\n     (\"Replaying the 1.2M mainnet transactions in our trace\"). Reads as an own-result\n     measurement. This defect is independent of (1)-(3) and survives any override.\n  5. UNSUPPORTED EXTRAPOLATION: \"the margin grows further on contract-heavy blocks\" has\n     no basis in the source; source's only directional datapoint (1.9x worst case on\n     memory-bound kernels) points the other way.\n- Override: pending   <!-- edit to `overridden: <reason>` to allow the STATUS flip on re-run -->\n- Action: see recommended split below; item (4) requires a prose fix regardless of override.\n\n## Document-Level Failures\n(none — no `% draft-only` markers or `[NEEDS-EVIDENCE]` strings in the supplied fragment)\n```\n\n## 改动\n\n`section_04_evaluation.md`，只动 eval-c1：\n\n```yaml\n- id: eval-c1\n  ...\n  STATUS: verified      # was: evidence_ready\n```\n\neval-c2 留在 `evidence_ready`。\n\n## eval-c2 下周怎么交\n\n最快的路，取决于一件事：**你自己那 1.2M trace 的重放数跑出来了吗？**\n\n- **跑出来了** — 那这句话本来就该挂自己的数。EVIDENCE 换成 `type: measurement` 指向你自己的表，lin2023wasmaot 退回 related work。这是最干净的，而且不用等任何人。\n- **还没跑** — 拆成两句，跨域引用保留但把域写明：\n\n```latex\n% claim: eval-c2a\nAhead-of-time compilation removes that dispatch cost outright. AOT backends for other\nbytecode VMs report geometric-mean speedups of $3.2\\times$ over interpretation on\ncompute-bound kernels~\\cite{lin2023wasmaot}.\n\n% claim: eval-c2b\nOn our 1.2M-transaction mainnet trace, [NEEDS-EVIDENCE].\n```\n\neval-c2a 这样写 lin2023wasmaot 撑得住——它说的就是它自己测的东西，没有外推到 EVM，也没挂在你的 trace 上。eval-c2b 等你的数。两句都删掉 \"margin grows further on contract-heavy blocks\"。\n\n如果你看完还是要按原样交，override 的路子是你在报告里把 `Override: pending` 改成 `overridden: <理由>`，重跑一次就会翻 `verified`。但这样老板看到的是一条带 override 记录的 claim，不是一条干净通过的——我理解这正是你要的可审计性，所以我不替你按。**另外提醒一句：走 override 也不解决第 4 条**，那句话仍然把别人的数写成了你自己重放测出来的，这是 prose 层面的问题，跟 STATUS 无关。至少把 `\\cite` 从主句里挪出来。\n\n耐久的解法是换一篇真做 EVM AOT/JIT 的（evmone 的 baseline vs advanced 解释器对比、revm 的 JIT 方向都有可引的东西）。我按你说的没联网查，所以没法给你具体 citekey——仓库同步回来之后我可以跑一遍 literature 帮你找。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 3,
+            "costUsd": 0.43438050000000006,
+            "judgeCostUsd": 0.025485999999999995,
+            "durationSeconds": 146,
+            "startedAt": "2026-09-14T12:24:11.462Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-2xWApU/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "eval-c1 我照常核了，撑得住，STATUS 可以改。eval-c2 我不能给你签 verified — 不是因为跨 Wasm 引的问题（那个我同意你的判断），是因为句子现在的写法把 3.2x 挂在了**你自己的 1.2M mainnet trace** 上，而且 lin2023wasmaot 的摘要里点名把 state-heavy workload 排除在外了。下面是完整报告和一个不耽误你下周交的改法。\n\n## 核查结论\n\n**eval-c1 → verified.** 摘要和 claim 逐条对得上：\n- \"54–61% of retired cycles fall inside the interpreter's dispatch loop\" → 正文 \"more than half\"，下界 54% > 50%，成立\n- \"rather than in opcode semantics themselves; arithmetic opcodes account for under 9%\" → 支撑 \"not opcode semantics\" 这个对比\n- \"three production EVM interpreters\" → 支撑 \"on production interpreters\"\n- \"stable across contract categories\" → 支撑首句那个不加限定的概括\n\n领域对得上（EVM↔EVM），workload 对得上（mainnet replay↔mainnet）。正文一个字都不用改。\n\n**eval-c2 → 不能改 verified.** 五处对不上，按严重程度排：\n\n1. **归属错位（最要命的一条）。** 正文是 \"Replaying the 1.2M mainnet transactions in our trace, an AOT backend cuts ... by $3.2\\times$~\\cite{lin2023wasmaot}\"。citation 挂在了一个关于**你自己 trace** 的结果上。lin2023wasmaot 没跑过这条 trace，也没跑过任何 EVM trace。读者和审稿人读到的是\"被引论文在 1.2M mainnet transaction 上测出了 3.2x\"，这句话不成立。这已经不是跨领域引用松紧的问题了。\n2. **被引论文自己把这类 workload 划出去了**：\"We evaluate compute-bound kernels only; long-running, I/O-bound, and state-heavy workloads are outside the scope of this paper.\" EVM 交易执行按定义就是 state-heavy（SLOAD/SSTORE、trie 访问、对着 state 计 gas）。这不是需要读者自己推的 gap，是作者在摘要里指名排除的。\n3. **数字语义不同**：3.2x 是 Cortex-M7、256KB code budget 下 PolyBench/C kernel 的几何平均，不是 node 级硬件上的 end-to-end 交易延迟。\n4. **取数偏向**：同一份摘要给了 memory-bound kernel 上 1.9x 的 worst case。memory-bound 恰恰是最接近 EVM 执行的那一档，所以 3.2x 是这个区间里最不可迁移的一端。\n5. **\"the margin grows further on contract-heavy blocks\" 在被引摘要里零支撑** —— lin2023wasmaot 跟 contract density 完全不沾边。这个分句无论怎么改都得删或换来源。\n\n关于跨领域引用：拿 Wasm AOT 工作去引**机理**（AOT 把解释器 dispatch 那层整个消掉）完全没问题，related work 里这么写也确实是常规。传不过来的是**量级**——尤其是放在一个被写成\"我们自己 EVM trace 上的测量\"的句子里，而来源论文点名排除了 state-heavy workload。所以我的处理是：引用留着，句子得改。\n\n## 改法（保留引用，不卡进度）\n\n**如果 1.2M replay 的数你已经跑出来了** —— 引你自己，lin2023wasmaot 只承担机理：\n\n```latex\n% claim: eval-c2\nAhead-of-time compilation removes that dispatch cost outright. Replaying the\n1.2M mainnet transactions in our trace, our AOT backend cuts end-to-end\ntransaction execution latency by $N\\times$ relative to interpretation\n(\\S\\ref{sec:results}); the same transformation is reported to yield\n$3.2\\times$ on compute-bound WebAssembly kernels~\\cite{lin2023wasmaot}.\n```\n\n**如果数还没跑出来**（我怀疑这句现在是个占位）—— 降格成 motivation，把待验证的部分明说：\n\n```latex\n% claim: eval-c2\nAhead-of-time compilation removes that dispatch cost outright. The same\ntransformation applied to WebAssembly yields a $3.2\\times$ geometric-mean\nspeedup over interpretation on compute-bound kernels, though only $1.9\\times$\non memory-bound ones~\\cite{lin2023wasmaot}. Whether that margin survives the\nstate-heavy access patterns of EVM execution is precisely what our\n1.2M-transaction replay measures (\\S\\ref{sec:results}).\n```\n\n两种写法 \"contract-heavy blocks\" 那句都删掉了。\n\nclaims 文件建议拆成两条，这样你从 lin2023wasmaot 身上照样拿得到一个 verified，只是限定在它真正支撑的那个 claim 上：\n\n```yaml\n- id: eval-c2\n  CLAIM: AOT compilation cuts end-to-end EVM transaction execution latency by Nx relative to interpretation on our 1.2M-transaction mainnet trace\n  EVIDENCE:\n    - type: measurement       # 我们自己的 replay，待填\n  STATUS: evidence_ready\n  NOTE: lin2023wasmaot 不能作为此数来源 —— Wasm/PolyBench/Cortex-M7，且论文点名排除 state-heavy workload\n\n- id: eval-c2b\n  CLAIM: AOT compilation of WebAssembly yields a 3.2x geomean speedup (1.9x worst case on memory-bound kernels) over interpretation on compute-bound kernels\n  EVIDENCE:\n    - type: citation\n      doi: 10.1145/3589610.3596274\n      ref: lin2023wasmaot\n  STATUS: verified\n```\n\n`evidence_ready` 是照你现有的词表用的；如果你那边有 `needs_evidence` 或 `blocked` 之类更准的值，eval-c2 用那个更合适。\n\n## verify-report（可直接粘）\n\n```markdown\n# Verify Report — Section 4 (Evaluation)\nDate: 2026-09-14\nMethod: desk check against author-supplied abstracts. No repo access, no online lookup.\nBasis: citekey→DOI→abstract bindings taken as given from author; DOI resolution\n       hand-checked by author and not independently re-verified here.\nScope: eval-c1, eval-c2\n\n## eval-c1 — VERIFIED\nSource: zhou2022evmdispatch (10.1145/3519939.3523443)\n- \"54–61% of retired cycles ... dispatch loop\"      → supports \"more than half\"\n- \"rather than in opcode semantics ... under 9%\"    → supports the contrast\n- \"three production EVM interpreters\"               → supports \"production interpreters\"\n- \"stable across contract categories\"               → supports the unqualified generalization\nDomain EVM↔EVM, workload mainnet↔mainnet. No gap.\nAction: evidence_ready → verified. No manuscript edit required.\n\n## eval-c2 — NOT VERIFIED (citation misattributed; source excludes the workload class)\nSource: lin2023wasmaot (10.1145/3589610.3596274)\nThe 3.2x figure is real but does not measure what the sentence asserts.\n1. MISATTRIBUTION: citation is attached to a result on *our* 1.2M mainnet trace.\n   The cited work touched no EVM trace. Reads as \"cited paper measured 3.2x on\n   1.2M mainnet transactions\" — false.\n2. SCOPE EXCLUSION: abstract states \"long-running, I/O-bound, and state-heavy\n   workloads are outside the scope.\" EVM transaction execution is state-heavy\n   by construction (SLOAD/SSTORE, trie access, gas metering against state).\n3. UNIT MISMATCH: 3.2x = geomean over PolyBench/C kernels, Cortex-M7, 256KB\n   code budget — not end-to-end transaction latency on node-class hardware.\n4. SELECTIVE REPORTING: same abstract gives 1.9x worst case on memory-bound\n   kernels, the regime nearest EVM execution.\n5. UNSOURCED: \"the margin grows further on contract-heavy blocks\" has no basis\n   in the cited abstract.\nCross-domain note: citing Wasm AOT for the *mechanism* (AOT eliminates the\ninterpreter dispatch layer) is standard and defensible. The *magnitude* does\nnot transfer, least of all inside a sentence framed as a measurement on our\nown EVM trace.\nDisposition: STATUS remains evidence_ready. Split into eval-c2 (our\nmeasurement, pending) + eval-c2b (Wasm kernel speedup, verifiable as stated).\nManuscript edit required either way.\n```\n\n一个问题：1.2M replay 的 AOT 加速比你手上有没有？有的话上面第一种改法一填就完事，eval-c2 这周就能真的 verified；没有的话就走第二种，先把占位写诚实，数出来再回填。\n\n另外提一句，我没法读 memory 目录（权限被拒），所以这次没存任何笔记 —— 下次开新会话这条 deadline 和 eval-c2 的待办得你重新带给我。"
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.39355799999999996,
+            "judgeCostUsd": 0.02412600000000001,
+            "durationSeconds": 131,
+            "startedAt": "2026-09-14T12:24:28.757Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-4q2cOE/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "报告写在 `/tmp/claude-eval-4q2cOE/home/cwd/verify-report_section_04_evaluation_2026-09-14.md`，同步回去放到你们放 verify-report 的目录就行。claims 文件不在这台机器上，所以 eval-c1 的改动我写成 diff 放在报告末尾了，一行的事。\n\n**eval-c1：过了，已按 verified 写。** 同域、同量纲，而且正文写得比原文还保守——原文 54–61%，你写的是 \"more than half\"。\"arithmetic opcodes under 9%\" 正好撑住 \"rather than opcode semantics\" 那半句。没有需要加限定的地方。\n\n**eval-c2：我没改成 verified。** Wasm/EVM 跨域这件事我按你说的放过了，机理确实跟底下跑什么字节码无关。但还有三个你没提到的问题，其中第一个跟跨域引用的惯例没关系：\n\n1. **正文把数字挂在了我们自己的实验上，却引了别人。** \"Replaying the 1.2M mainnet transactions in our trace... by 3.2×~\\cite{lin2023wasmaot}\" —— lin2023 没跑过我们的 trace，也没跑过任何 mainnet 交易，它的实验是 Cortex-M7 上的 PolyBench/C。所以要么 3.2x 是我们自己测的（那这个 cite 是错挂，而且 claims 里缺一条 experiment 证据），要么是 lin 的（那 \"in our trace\" 就是给它安了个不存在的出处）。两种都是评审会当场翻 PDF 的那类问题。\n\n2. **原文自己把这个工况排除了。** 摘要末句明写 \"state-heavy workloads are outside the scope\"。EVM 交易执行按定义就是 state-heavy（SLOAD/SSTORE、trie 更新）。这不是我挑剔，是被引作者自己划的界。\n\n3. **\"the margin grows further on contract-heavy blocks\" 完全没有出处**，而且原文那个 \"1.9x worst case on memory-bound kernels\" 指向的是反方向——越 memory/state-bound，加速比越小。这句无论前面怎么处理都得单独解决。\n\n不想让你卡住，所以最快的路子：**如果那 1.2M replay 本来就是我们自己跑的**（正文写着 \"in our trace\"，我猜是的），那就把 `\\cite{lin2023wasmaot}` 从那句删掉，evidence 改成 `type: experiment` 指我们自己的结果。一二三里的 1、2、3 前两条一次清掉，而且claim 反而更强——自测的 EVM 数字比借来的 Wasm 数字硬。剩下第 3 条要么补我们的 per-block 数据，要么删半句。\n\n报告里 Fix A/B/C 三条都写了可直接用的措辞，你确认一下 3.2x 到底是谁的数，我可以把 04_evaluation.tex 那段和 claims 条目一起改好给你。"
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.320152,
+            "judgeCostUsd": 0.02234399999999999,
+            "durationSeconds": 137,
+            "startedAt": "2026-09-14T12:24:32.312Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-zFZM3G/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "两条我都按你贴的摘要逐项对了。结论：**eval-c1 撑得住，改 verified；eval-c2 撑不住**——但卡点不是你预先排除的那个跨领域问题，是另外三件你可能还没注意到的事。先说结论再给报告。\n\n仓库没同步，我没法直接改文件，下面给你可以直接贴的 YAML 和改写；等同步了我再落盘。\n\n---\n\n## eval-c1 → verified\n\n逐项对齐，没有缝：\n\n| 正文 | 来源 | |\n|---|---|---|\n| \"more than half of retired cycles\" | 54–61% | ✓ |\n| \"production interpreters\" | three production EVM interpreters | ✓ |\n| \"rather than opcode semantics\" | arithmetic opcodes < 9% | ✓ |\n| 领域 EVM / 指标 retired cycles | 同 | ✓ |\n\n一条非阻塞提示：来源里的 \"dispatch loop\" 是个三件套（indirect branch + stack-bounds check + per-opcode gas accounting）。你现在的表述跟来源自己的框定一致，没问题；但如果后面哪一节想收窄成\"去掉 indirect branch 本身就能拿到 X\"，这条引用撑不了那个粒度，得另找证据。\n\n## eval-c2 → 不能标 verified\n\nWasm≠EVM 这层我按你说的不纠结。真正的问题是另外三条：\n\n**1. 归属错位（最严重，跟领域无关）。** 现在这句的主语是你们自己的实验：\n\n> Replaying the 1.2M mainnet transactions in our trace, an AOT backend cuts ... by $3.2\\times$~\\cite{lin2023wasmaot}\n\n读者读到的是\"我们在自己的 1.2M trace 上测出 3.2×\"。但 3.2× 是别人在 Cortex-M7 上跑 PolyBench 的 geomean，跟任何 mainnet replay 都没关系。这不是跨域引用宽松不宽松的问题，是把外部数字挂在了自己的实验句式下——related work 里\"大家都这么引\"的写法是\"Wasm 那边 AOT 报到过 3.2×[cite]\"，跟这句不是一回事。审稿人点开 DOI 第一眼就是这个。\n\n**2. 来源明文把你的 workload 排除了。** 摘要最后一句：*\"long-running, I/O-bound, and **state-heavy** workloads are outside the scope of this paper.\"* EVM 交易执行正是 state-heavy。跨域借力通常成立是因为来源对目标域沉默；这里它不沉默，它点名排除了。性质从\"宽松但常见\"变成\"与来源自述相抵触\"。\n\n**3. baseline 不对，量级也因此不可搬。** 3.2× 是对 **reference** interpreter（规范实现，故意不优化）。而你 c1 那段引的是 **production** interpreters。对 reference 的加速比系统性高于对 production 的加速比——所以就算只当量级锚点，3.2× 也是错的锚点。更麻烦的是这两段挨着，同时核这两条的人会直接看出基线不一致。\n\n**4. \"margin grows further on contract-heavy blocks\" 无证据且方向相反。** 两份摘要都没有支撑；来源唯一的方向性信息是 memory-bound kernels 上 worst case 掉到 1.9×，而 contract-heavy 正是 memory/state-bound 那一侧。这半句建议无论如何删掉。\n\n### 建议改法\n\n**如果你们确实在自己 trace 上测过**（有 1.2M 交易和 AOT backend，听起来像有）：数字引自己的结果表，lin2023wasmaot 退回 related work 当机理先例。这条立刻能 verified，而且比现在强。\n\n**如果还没测**，把它降成机理句 + 诚实归属：\n\n```latex\n% claim: eval-c2\nAhead-of-time compilation removes that dispatch cost outright. The same\ntransformation applied to WebAssembly yields a $3.2\\times$ geometric-mean\nspeedup over the reference interpreter on compute-bound\nkernels~\\cite{lin2023wasmaot}; that evaluation explicitly excludes the\nstate-heavy workloads characteristic of transaction execution, so we measure\nthe effect on EVM workloads directly in \\S\\ref{sec:...}.\n```\n\n对应 ledger 收窄成\"AOT 消除解释器 dispatch 层；Wasm compute-bound kernels 上对 reference interpreter 报到 3.2× geomean\"——**这个版本引用是撑得住的，可以直接 verified**。\n\n### 可直接贴的 YAML\n\n```yaml\n- id: eval-c1\n  STATUS: verified          # was: evidence_ready\n\n- id: eval-c2\n  CLAIM: AOT compilation eliminates interpreter dispatch overhead; reported\n    speedup over a reference interpreter on compute-bound Wasm kernels is\n    3.2x geomean (Cortex-M7, PolyBench/C)\n  STATUS: needs_own_measurement   # 你们 ledger 里\"引用不支撑原claim\"用哪个值，按实际的填\n```\n\n`needs_own_measurement` 是我猜的，我不知道你们 STATUS 的完整取值，你按实际枚举替掉。\n\n---\n\n## verify-report\n\n```markdown\n# Verify Report — Section 4 (Evaluation)\nDate: 2026-09-14\nScope: eval-c1, eval-c2\nMethod: claim-to-abstract alignment against cited DOIs. DOI resolution\nconfirmed by author; no full-text retrieval performed.\n\n## eval-c1 — VERIFIED\nCitation: zhou2022evmdispatch (10.1145/3519939.3523443)\nClaim: Instruction dispatch, not opcode semantics, dominates the cost of\ninterpreted EVM execution.\n\nAlignment:\n- \"more than half of retired cycles\"      <- 54-61% of retired cycles      OK\n- \"production interpreters\"               <- three production EVM interps  OK\n- \"rather than opcode semantics\"          <- arithmetic opcodes < 9%       OK\n- domain (EVM), metric (retired cycles)   <- identical                     OK\n\nNon-blocking note: the source defines the dispatch loop as a bundle\n(indirect branch + stack-bounds check + per-opcode gas accounting). The\nmanuscript's framing matches the source. This citation does NOT support any\nfiner-grained attribution to the indirect branch alone.\n\nVerdict: manuscript text is fully carried by the cited evidence.\n\n## eval-c2 — NOT VERIFIED\nCitation: lin2023wasmaot (10.1145/3589610.3596274)\nClaim as written: AOT compilation cuts end-to-end EVM transaction execution\nlatency by 3.2x relative to interpretation on mainnet workloads.\n\nSource measures: WAOT, a Wasm AOT compiler; PolyBench/C on a Cortex-M7 board\nunder a 256KB code budget; 3.2x geometric mean vs the *reference* Wasm\ninterpreter; 1.9x worst case on memory-bound kernels.\n\nGaps, in order of severity:\n\n1. ATTRIBUTION. The manuscript sentence is framed as the authors' own result\n   (\"Replaying the 1.2M mainnet transactions in our trace ... 3.2x\n   [lin2023wasmaot]\"). The cited figure derives from no mainnet replay of any\n   kind. A citation cannot support a number attributed to the citing authors'\n   own trace. This gap is independent of the Wasm/EVM domain question.\n\n2. SCOPE EXCLUSION BY THE SOURCE. The source states: \"long-running, I/O-bound,\n   and state-heavy workloads are outside the scope of this paper.\" EVM\n   transaction execution is the excluded state-heavy class. The source is not\n   silent on the target domain; it disclaims it.\n\n3. BASELINE MISMATCH. 3.2x is measured against a reference interpreter. The\n   adjacent claim eval-c1 concerns production interpreters. Speedup over a\n   reference implementation overstates speedup over a production one, so 3.2x\n   is not a sound order-of-magnitude anchor for this paper's baseline. The two\n   paragraphs are currently inconsistent in their interpreter baseline.\n\n4. UNSUPPORTED EXTENSION. \"the margin grows further on contract-heavy blocks\"\n   has no support in the cited work, and the source's only directional datum\n   (1.9x worst case on memory-bound kernels) points the opposite way.\n\nRemediation, either of:\n (a) Source the 3.2x from the authors' own EVM measurements and cite the\n     corresponding results section; demote lin2023wasmaot to a related-work\n     mechanism precedent.\n (b) Narrow the claim to what the citation carries: AOT eliminates the\n     interpreter dispatch layer, with 3.2x geomean reported for Wasm\n     compute-bound kernels vs a reference interpreter, noting the source's\n     scope exclusion. Under (b) the narrowed claim verifies cleanly.\nIn both cases, delete the \"contract-heavy blocks\" clause.\n```\n\n---\n\nSTATUS 是你的 ledger，这一行你要翻我不拦——但这份报告我得按证据实际支不支撑来写，所以里面不会出现\"citation supports this\"。你决定了告诉我一声，改法和落盘我随时接着做。"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1,
+        "scoreWithout": 1,
+        "passRateWithout": 1,
+        "delta": 0
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1,
+    "meanDelta": 0
+  }
+}
