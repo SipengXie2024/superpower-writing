@@ -50,19 +50,6 @@ Rebuttal artifacts live under `.writing/reviews/` (the `reviews/` subdir is crea
 
 Run `bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-writing-state.sh` first. If it prints `missing`, there is no paper to ground against; ask the user to point at the manuscript or run outlining/drafting. Do not modify `check-writing-state.sh` or any script.
 
-## Checklist (each must pass before the response is final)
-
-- [ ] `.writing/` exists; manuscript files located for cross-referencing.
-- [ ] Every reviewer comment preserved verbatim in `REVIEWS_RAW.md`.
-- [ ] Every comment atomized into `ISSUE_BOARD.md` with id, severity, stance, action.
-- [ ] Every action label drawn from the fixed vocabulary (see below). No freeform labels.
-- [ ] Draft written in R-A-C form; every change cites a real `manuscript/*.tex` location.
-- [ ] Provenance gate passes: every factual sentence has a source.
-- [ ] Commitment gate passes: every promise maps to a commitment state and a `REVISION_PLAN.md` line.
-- [ ] Coverage gate passes: every comment ends answered, deferred, or needs-input. Nothing disappears.
-- [ ] Venue limit checked (character/word count) if the venue imposes one.
-- [ ] User confirmed before any `STATUS: final` flip.
-
 ## Fixed Action Vocabulary
 
 Every comment maps to exactly one of these eight labels. This set merges the r2 response modes with the r5 action labels into one fixed vocabulary. Do not invent new labels; if a comment seems to need one, it usually decomposes into two comments.
@@ -169,31 +156,11 @@ Heuristics that survive meta-review:
 
 - Evidence over assertion. A derivation or a number beats an adjective.
 - Name the closest prior work and the exact delta for novelty disputes.
-- Concede narrowly when the reviewer is right, then state what still holds (see `structural_distinction` in `references/tone-and-stance.md`).
+- Concede narrowly when the reviewer is right, then state what still holds; pair every concession with the preserved theorem, mechanism, result, or scope condition (see `structural_distinction` in `references/tone-and-stance.md`).
 - For theory critiques, separate core assumptions from technical ones.
 - If no strong evidence exists, say less, not more.
 
-**Disagreement is a contrast, not a reflex.** A good `DISAGREE` acknowledges the concern, states the narrow point of disagreement, gives manuscript or scope evidence, and offers a small clarification. A bad one asserts and stops.
-
-```markdown
-GOOD
-> Reviewer: use Method X instead of Method Y.
-
-**Author response.** We appreciate the suggestion. We chose Method Y because its
-assumptions hold on our streaming workload, whereas Method X assumes a static
-graph (Section 3.1). To test sensitivity, we added a Method X robustness check in
-Appendix B; results are consistent with the main finding.
-
-**Changes made.** Added Appendix B (Method X robustness check) and a one-line
-justification in Section 3.1.
-
-BAD
-> Reviewer: use Method X instead of Method Y.
-
-**Author response.** We disagree. Method Y is appropriate.
-```
-
-The bad version evades. It states no reason, cites no location, and gives the reviewer nothing to evaluate. The good version disagrees on a stated technical ground and still adds a check, so the reviewer can see the position is reasoned rather than defensive.
+**Disagreement is a contrast, not a reflex.** A good `DISAGREE` acknowledges the concern, states the narrow point of disagreement, gives manuscript or scope evidence, and offers a small clarification or robustness check. A bad one asserts and stops.
 
 Hard rules while drafting:
 
@@ -245,22 +212,6 @@ When a new reviewer comment arrives after the first response:
 4. Update `REVISION_PLAN.md` in place: add new lines, tick completed ones.
 5. Rerun the three gates on the delta.
 6. Escalate technically, not rhetorically. Concede if the reviewer is now right. Stop arguing if the reviewer is immovable and no new evidence exists; answer once and move on.
-
-## Key Principles
-
-**Provenance is the claim-first discipline for rebuttals.** The manuscript discipline forbids an untagged paragraph at write time. The Provenance gate blocks an unsourced response sentence at finalize time. The discipline is identical: a factual statement earns its place by pointing at a source. Treat a blocked sentence as a signal to find the source or soften the claim, not an obstacle to route around.
-
-**AUTHOR_INPUT_NEEDED mirrors [NEEDS-EVIDENCE].** Both are visible, on-disk placeholders for a gap the author must fill. Both block finalization. Neither is ever fabricated away. When you do not have the fact, mark it and surface it; do not invent a plausible-looking number.
-
-**Coverage means nothing disappears.** Every reviewer comment is tracked from raw text to a disposition. A reviewer who sees their concern ignored downgrades the paper. The Coverage gate is the structural guarantee that each comment reaches answered, deferred, or needs-input.
-
-**Concede narrowly, never surrender the claim.** When the reviewer is partly right, accept the local point explicitly, then state what remains true and why it still supports the contribution. Pair every concession with the preserved theorem, mechanism, result, or scope condition. The `structural_distinction` move in tone-and-stance is the canonical form.
-
-**Never fabricate.** No invented experiments, numbers, derivations, citations, DOIs, arXiv IDs, or links. A reviewer who catches one fabricated number distrusts the whole response. When evidence is missing, say less; mark `[UNVERIFIED]` and route to author input.
-
-**Verdicts are advisory.** The gates surface blockers and stop the finalize flip. They never auto-reject a comment, mutate manuscript state, or paste the response anywhere. The user owns the decision to send.
-
-**Route appeals out.** An appeal challenges a rejection; it is not a revision response. When the user wants to contest a decision rather than revise, identify the disputed points and hand the appeal off as a separate task with venue-specific rules (see `references/difficult-cases.md`).
 
 ## References
 

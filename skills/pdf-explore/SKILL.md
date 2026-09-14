@@ -11,6 +11,19 @@ metadata:
 
 A 50-page PDF read whole is ~200K tokens, and pages opened as images with `Read(pages="…")` drop out of context after one turn, so multi-section work loops on re-reading them. And when the answer is "every page" (list all the datasets / baselines / citations mentioned anywhere), reading page by page is the expensive way to get it. This skill parses the PDF once with a local, no-LLM script, so you load only what matters, or sweep every page via a subagent fan-out without ever putting the pages in your own context.
 
+## If the tools are missing
+
+Check once, up front: can Bash run `python3 -c "import pypdf"`? That one check covers every script
+path below (outline, text, search, fan-out input); a missing `Agent` tool only collapses the fan-out
+into reading the text yourself, a slowdown, not a blocker. Do not attempt a recipe, fail, attempt
+another, and narrate each failure: one sentence naming what is missing is the entire budget.
+
+Reading the PDF is the work, so no reply substitutes for it. If Bash or `pypdf` is unavailable and
+the Read tool's PDF-image path (`Read(file_path=…, pages=…)`) is closed too, say in one sentence
+that this PDF cannot be opened here and what the user would run (`pip install pypdf`, or the same
+command where Bash is allowed), then stop. Do not summarize from the filename or from memory, and
+do not half-run the sweep.
+
 ## Which tool for which read
 
 | need | use | returns |

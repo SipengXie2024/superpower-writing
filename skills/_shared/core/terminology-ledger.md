@@ -1,5 +1,14 @@
 # Terminology Ledger
 
+## Contents
+
+- What this is and is not
+- 1. Build the ledger on first contact
+- 2. Present the ledger to the user
+- 3. Lock and enforce the canonical forms
+- 4. Renames are cross-file events
+- Pairing with the enforcement halves
+
 A paper must use one name for one thing. The same system, model, dataset,
 algorithm, module, metric, or concept must not drift across shifting names,
 spellings, or capitalizations. Reviewers read inconsistent terminology as

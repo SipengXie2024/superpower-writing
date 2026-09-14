@@ -10,7 +10,7 @@ description: Use whenever a writing task will span more than 5 tool calls, multi
 ## Directory convention
 
 ```
-.writing/                     # gitignored, ephemeral working state
+.writing/                     # tracked in git; only caches, stashes, and LaTeX build output are ignored
 ├── metadata.yaml             # authors, venue, availability, writing_profile
 ├── outline.md                # IMRAD structure + key claims (from outlining)
 ├── ideation.md               # candidate directions + verdicts (from idea, optional)
@@ -25,6 +25,12 @@ description: Use whenever a writing task will span more than 5 tool calls, multi
 ```
 
 The outline is the paper's design spec; there is no separate design/plan document. `agents/` is not created at init, each subagent makes its own subdir when dispatched.
+
+## If the tools are missing
+
+This skill needs Bash (to run `init-writing-dir.sh`) plus Write, Edit, and Read (to seed, update, and re-read `progress.md`, `findings.md`, `outline.md`). Check once, up front. If they are unavailable, one sentence naming what is missing is the entire budget, do not attempt a tool, fail, attempt another, and narrate each attempt.
+
+Then carry the state in the reply instead of on disk: emit the Task Status Dashboard and the findings entries as fenced blocks, in the shape those files would have had, and add one line telling the user to save them at `.writing/progress.md` and `.writing/findings.md` since you could not write them yourself. Re-emit the updated blocks wherever a discipline below says to save; a directory you cannot create is not a reason to stop the task.
 
 ## Quick start
 
@@ -46,7 +52,7 @@ Before any complex writing task:
 ## Core disciplines
 
 ### 1. Create `.writing/` first
-Never start a complex writing task without it. All paper documents live here; execution status lives in `progress.md`'s Task Status Dashboard.
+Never start a complex writing task without it. All paper documents live here; execution status lives in `progress.md`'s Task Status Dashboard. Never use TaskCreate/TaskUpdate as cross-session memory, the Task API is session-scoped only.
 
 ### 2. The 2-action dispatch rule
 After every ~2 read/search/explore operations, save to the right file by content type, discoveries and decisions to `findings.md`, status and actions and errors to `progress.md`. This keeps both knowledge and progress from being lost to a context reset.
@@ -79,13 +85,3 @@ At the plugin root, invoked as `bash "${CLAUDE_PLUGIN_ROOT}/scripts/<name>"`:
 - `snapshot-save.sh`, copy active files to a target dir (used by archiving)
 - `aggregate-agent-findings.sh`, merge subagent findings into the top-level files
 - `detect-base-branch.sh`, `detect-test-command.sh`, `unique-filename.sh`, project detection helpers
-
-## Anti-patterns
-
-| Don't | Do instead |
-|-------|------------|
-| Use TaskCreate/TaskUpdate as cross-session memory | Use `progress.md`'s Task Status Dashboard; the Task API is session-scoped only |
-| State goals once and forget | Re-read the outline before decisions |
-| Hide errors and retry silently | Log to `progress.md`, escalate on repeat |
-| Stuff everything in context | Store large content in `.writing/` files |
-| Let subagent findings disappear | Aggregate into the top-level `findings.md` |

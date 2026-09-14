@@ -25,7 +25,7 @@
 #      first `% use:` for the same id.
 #
 # Sections whose stem matches `abstract`, `references`, or
-# `acknowledgments` are fully exempt — abstracts reference terms
+# `acknowledgments` are fully exempt, because abstracts reference terms
 # defined later in the body.
 #
 # Example (delete and replace with real entries):

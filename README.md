@@ -15,12 +15,12 @@
 
 ## Status
 
-- **Version**: `v2.0.0`
+- **Version**: `v3.4.0`
 - **Scope**: single-author IMRAD research manuscripts (CS / systems / ML / HCI)
 - **Dependencies**: Zotero via the `zotero-mcp` MCP server (optional, gated by `zotero.enabled` in a paper's metadata).
 - **Repo**: https://github.com/SipengXie2024/superpower-writing
 
-## What changed in v2.0.0
+## What changed in v2.0.0 (the last breaking change)
 
 This is a breaking slim-down from 35 skills to 20. Borrowed generic process
 skills (task decomposition, parallel drafting subagents, two review pipelines,
@@ -162,9 +162,9 @@ Each command is what the **agent** invokes on the user's behalf.
 
 | User intent                            | Slash command             | What happens                                                                                                                    |
 |----------------------------------------|---------------------------|---------------------------------------------------------------------------------------------------------------------------------|
-| "Let's start a new paper on X"         | `/writing:outline X`      | Runs `outlining`. Initializes `.writing/` if missing, iterates literature retrieval, seeds the IMRAD outline and `claims/` stubs, fills `metadata.yaml`. |
-| "Draft the methods section" / "draft the paper" | `/writing:draft methods` | Runs `drafting`. Resolves each claim's evidence (Zotero first, network fallback), advances `STATUS` to `evidence_ready`, then writes `% claim: id`-tagged LaTeX prose section by section, in outline order. |
-| "Archive the current state"            | `/writing:archive`        | Runs `archiving`. Snapshots `.writing/` into `.writing/archive/<date>/` and consolidates findings before a reset.               |
+| "Let's start a new paper on X"         | `/superpower-writing:outline X`      | Runs `outlining`. Initializes `.writing/` if missing, iterates literature retrieval, seeds the IMRAD outline and `claims/` stubs, fills `metadata.yaml`. |
+| "Draft the methods section" / "draft the paper" | `/superpower-writing:draft methods` | Runs `drafting`. Resolves each claim's evidence (Zotero first, network fallback), advances `STATUS` to `evidence_ready`, then writes `% claim: id`-tagged LaTeX prose section by section, in outline order. |
+| "Archive the current state"            | `/superpower-writing:archive`        | Runs `archiving`. Snapshots `.writing/` into `.writing/archive/<date>/` and consolidates findings before a reset.               |
 
 Other skills (`idea`, `literature`, `citations`, `pdf-explore`,
 `claim-verification`, `polish`, `rebuttal`, the figure and proof

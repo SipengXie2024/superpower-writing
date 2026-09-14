@@ -27,6 +27,18 @@ Pick the job from what the user asked. Do not run the full systematic-review
 pipeline for a one-paper lookup, and do not answer "find related work for my
 paper" with a bare list.
 
+## When the search tools are missing
+
+Check once, up front: Bash for `parallel-cli`, the `zotero` MCP server, and
+network for arXiv, DBLP, Semantic Scholar, CrossRef, Perplexity. Name what is
+missing in one sentence; never attempt each backend in turn and report the
+failures, since that discovery is not the deliverable.
+
+Deliver anyway: put the search plan and findings in the reply, shaped like the
+`sources/` file they would have filled (queries, then per paper title, venue,
+year, DOI or URL, one line of relevance), from your own knowledge, labeled
+un-searched, unverifiable fields marked, plus the path you could not write.
+
 ## Search backends (authoritative routing)
 
 One routing table for all three jobs. Pick a backend silently and search;
@@ -145,8 +157,7 @@ the user has already settled or explicitly waived.
    first-sentence test, comparison over summary, prose over a bulleted
    bibliography, confidence calibrated to evidence.
 6. **Verify citations** (see the verification section below).
-7. **Produce the document.** For a full review, start from
-   `assets/review_template.md`. Format references in one style throughout;
+7. **Produce the document.** Format references in one style throughout;
    see `references/citation-styles.md` for APA, ACM, IEEE, and Chicago.
 
 ## Job C: enrich or screen a manuscript's citations
@@ -325,4 +336,3 @@ gate.
 - `references/synthesis-writing.md`: turning a search into a synthesis that
   argues rather than lists.
 - `references/citation-styles.md`: APA, ACM, IEEE, and Chicago formatting.
-- `assets/review_template.md`: full systematic-review document template.

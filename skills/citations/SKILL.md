@@ -12,6 +12,12 @@ Turn a paper into a correct BibTeX entry, and prove an existing entry is real an
 
 Metadata comes from the Zotero library over the MCP connection (configured in `.mcp.json`), which pulls from CrossRef and arXiv. Web search is the fallback. The old skill's hand-scraping of Google Scholar, CrossRef, arXiv, and DBLP web pages is gone; do not reconstruct it.
 
+## When the metadata tools are missing
+
+Check availability once, up front: the `zotero` MCP tools (`zotero_add_by_doi`, `zotero_search_items`, `zotero_get_item_metadata`), `Bash` for `scripts/extract_metadata.py` and `scripts/validate_citations.py`, and `WebSearch`. One sentence naming what is missing is the entire budget for this. Never attempt a tool, fail, attempt the next, fail, and transcribe the errors into the reply.
+
+The BibTeX is the deliverable; the lookup is only how it gets verified. With no source reachable, still write the entries into the reply in the exact shape the `.bib` file would have, mark every unconfirmed field `% UNVERIFIED`, and add one line saying you could not verify them in this session and which file to paste them into. For a `.bib` audit, give the checks you can make by reading the file and name the ones that needed the validator.
+
 ## Output discipline (read first)
 
 1. **Always ship the best available entry.** If Zotero is not reachable, the network is down, or it is a one-off conversion, do not defer to "run this later." Produce the BibTeX from the metadata you already have, then say which fields still need confirming.
@@ -33,7 +39,7 @@ Work down this ladder. Stop at the first rung that yields the entry.
 
 When Zotero is not reachable, fall back in order:
 
-1. **Offline, with a DOI or arXiv id.** `python scripts/extract_metadata.py --doi 10.1145/3065386` (or `--arxiv 1706.03762`) hits CrossRef and arXiv directly and prints BibTeX. Batch a file with `--input ids.txt --output refs.bib`.
+1. **Offline, with a DOI or arXiv id.** `python3 scripts/extract_metadata.py --doi 10.1145/3065386` (or `--arxiv 1706.03762`) hits CrossRef and arXiv directly and prints BibTeX. Batch a file with `--input ids.txt --output refs.bib`.
 2. **No identifier yet.** Find it with web search (the `literature` skill, or `WebSearch` directly), then return to the Zotero or offline path. Do not hand-assemble an entry from a search-result snippet if a DOI is one lookup away.
 
 Never scrape Google Scholar, CrossRef, or DBLP result pages by hand. Discovery and seminal-paper hunting belong to the `literature` skill; this skill takes an identifier or a library item and produces a verified entry.
@@ -92,9 +98,9 @@ For the harder "does this work actually exist and say what the sentence claims" 
 Run the validator over the file for the deterministic checks a reader skims past across 150 entries:
 
 ```bash
-python scripts/validate_citations.py references.bib                 # required fields, duplicates, syntax
-python scripts/validate_citations.py references.bib --check-dois    # also resolve DOIs and compare CrossRef metadata
-python scripts/validate_citations.py references.bib --report v.json --verbose
+python3 scripts/validate_citations.py references.bib                 # required fields, duplicates, syntax
+python3 scripts/validate_citations.py references.bib --check-dois    # also resolve DOIs and compare CrossRef metadata
+python3 scripts/validate_citations.py references.bib --report v.json --verbose
 ```
 
 It flags: required fields missing for the entry type; DOIs that do not resolve or whose CrossRef metadata disagrees with the entry; duplicate DOIs and near-duplicate titles; unbalanced braces, missing commas, invalid or non-unique keys; page ranges with a single hyphen. It only reports, it does not touch the file. Fix errors first (missing fields, broken DOIs, duplicates, syntax), then warnings (missing recommended fields, formatting). The safe mechanical fixes (page ranges, author separators, field order) are applied by `format_bibtex.py` below, which cannot add missing information or choose which duplicate to keep, so review its diff.
@@ -104,8 +110,8 @@ It flags: required fields missing for the entry type; DOIs that do not resolve o
 ## Cleaning and formatting a .bib
 
 ```bash
-python scripts/format_bibtex.py references.bib --output clean.bib                 # fix page ranges, separators, field order (on by default)
-python scripts/format_bibtex.py references.bib --deduplicate --sort year --descending --output clean.bib
+python3 scripts/format_bibtex.py references.bib --output clean.bib                 # fix page ranges, separators, field order (on by default)
+python3 scripts/format_bibtex.py references.bib --deduplicate --sort year --descending --output clean.bib
 ```
 
 It fixes common issues by default; add `--no-fix` to only reformat. Without `--output` it overwrites the input in place, so always pass `--output`. Per output-discipline rule 5, dedup and any rewrite go to a new file and are confirmed first.

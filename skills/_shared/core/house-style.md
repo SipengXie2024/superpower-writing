@@ -4,6 +4,20 @@ The plugin's default style guide for every piece of prose a reviewer will read: 
 
 This guide is project-agnostic and migrates between papers. Rules are stated generically; the quoted sentences are illustrations drawn from real papers, not bindings on your project's wording. Keep the examples when you apply a rule, they are what makes it applicable.
 
+## Contents
+
+- Precedence, and which skills load this file
+- Core principles (quick reference)
+- §1 Punctuation (no em-dashes, no in-sentence colons)
+- §2 Reviewer-facing self-containment
+- §3 Argument form
+- §4 Section responsibility (generic IMRAD)
+- §5 Term economy and section register
+- §6 Prose preferences
+- §7 Editing-pass defaults
+- §8 Senior co-author editing conventions
+- §9 The paper's figure pattern
+
 ## Precedence
 
 1. **A project style file wins.** When the paper repo carries `.claude/CLAUDE.md`, `AGENTS.md`, or an equivalent project rulebook with prose rules, those are hard constraints that override everything here. Surface any house-style rule the project file contradicts rather than silently applying both.

@@ -2,14 +2,21 @@
 # Populated during outlining. Verified at claim-verification (presence check only;
 # user owns truthfulness of each field).
 
+# Selects the section standards and evidence contract the drafting skill applies.
+# `systems` turns on the structured analysis/artifact evidence contract and the
+# Results-versus-Discussion boundary; leave it unset for a general CS paper.
+writing_profile: systems
+
 authors: []
 # - name: Sipeng Xie
 #   affil: Institution name
 #   orcid: 0000-0000-0000-0000
 #   coi: none
 
+# Only when the target venue asks for it. CS, systems, and ML venues generally
+# do not; leave registry as none for those.
 preregistration:
-  registry: TODO   # OSF | ClinicalTrials.gov | null
+  registry: none   # OSF, or a venue-mandated registry for cross-disciplinary work
   url: TODO
   deviations: []
   # - {date: YYYY-MM-DD, description: "...", rationale: "..."}
@@ -22,7 +29,10 @@ code_availability:
   url: TODO
   license: TODO    # MIT | Apache-2.0 | GPL-3.0 | none
 
-reporting_guideline: TODO  # CONSORT | STROBE | PRISMA | ARRIVE | none
+# Venue-mandated reporting checklist. CS, systems, and ML venues generally have
+# none; the biomedical ones (CONSORT, STROBE, PRISMA, ARRIVE) apply only to
+# cross-disciplinary submissions that require them.
+reporting_guideline: none
 
 # Zotero integration (optional). When enabled, claim-verification queries
 # your Zotero library first (authoritative) and falls back to online

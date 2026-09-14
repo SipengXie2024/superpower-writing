@@ -2,10 +2,10 @@
 
 ## Task Status Dashboard
 <!-- Quick-scan execution status for each manuscript section / figure / table. -->
-<!-- For dynamic-workflow drafting with the two-stage review pipeline: Spec Review, Manuscript Review, and Plan Align must show PASS before Status flips to complete. Manual-batch and on-demand work leave review columns as "-" when no gate applies. Plan Align is checked per-section by the spec reviewer (against plan.md) and per-group/final by the Plan Alignment Gate. -->
-| Section / Figure | Status | Spec Review | Manuscript Review | Plan Align | Claim Verification | Key Outcome |
-|------------------|--------|-------------|-------------------|------------|--------------------|-------------|
-|                  |        |             |                   |            |                    |             |
+<!-- Status moves stub -> drafted -> complete. Claim Verification records the result of the claim-verification skill's passes for that section, and stays "-" until it has run. -->
+| Section / Figure | Status | Claim Verification | Key Outcome |
+|------------------|--------|--------------------|-------------|
+|                  |        |                    |             |
 
 ## Session: [YYYY-MM-DD]
 

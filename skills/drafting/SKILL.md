@@ -7,7 +7,7 @@ description: Use when turning an approved outline and its claim stubs into LaTeX
 
 Turn claims into sentences. You draft each section yourself, in outline order, no mode selection, no parallel subagents, no review pipeline. The hard rule is **claim-first**: no prose may cite a claim whose `STATUS` is still `stub`. Resolve evidence, then write.
 
-**Announce at start:** "I'm using the drafting skill to write manuscript prose."
+**Say what you are doing, in the user's terms, not the skill's name:** "Writing the manuscript prose, section by section, resolving each claim's evidence first."
 
 ## Preconditions
 
@@ -21,7 +21,7 @@ Skip this skill to copy-edit existing prose (use `polish`) or to verify a finish
 
 ## The protocol
 
-Read [`references/claim-first.md`](references/claim-first.md) and follow it for every section. It is the load-bearing doorway to the rest of the writing references, so read it before your first section. In short, per section:
+Read [`references/claim-first.md`](references/claim-first.md) and follow it for every section. It is the load-bearing doorway to the rest of the writing references, so read it before your first section. Read [`../_shared/core/claim-first-protocol.md`](../_shared/core/claim-first-protocol.md) alongside it. That file fixes the paragraph tag syntax, the exempt sections, and citation placement, and `claim-verification` and `rebuttal` check against the same rules. In short, per section:
 
 1. **Resolve evidence first (Step A).** For each `STATUS: stub` claim, resolve its source Zotero-first, then via `superpower-writing:literature` / `superpower-writing:citations` as fallback. Advance to `evidence_ready`. No prose until every claim in the section is resolved.
 2. **Write LaTeX prose (Step B).** Tag each load-bearing paragraph `% claim: id` (or `% draft-only`) at column 0. Never invent citekeys.

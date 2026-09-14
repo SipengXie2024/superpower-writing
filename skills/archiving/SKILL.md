@@ -1,6 +1,6 @@
 ---
 name: archiving
-description: Use after completing a plan or when .writing/ has accumulated stale data and needs a clean reset for the next task.
+description: Snapshots a finished paper's .writing/ directory (outline, claims, findings, progress) into a dated archive, consolidates project memory, and resets .writing/ for the next paper. Use when a paper is submitted or abandoned, when starting a new paper in the same repo, or when .writing/ holds stale state from a previous project, including "归档这篇", "这篇投完了", "开始写新的".
 ---
 
 # Archiving Completed Plans
@@ -11,11 +11,17 @@ Archive the active project in `.writing/` into a structured archive directory, c
 
 **Core principle:** The target is the active project (design, plan, findings, progress), not "the session."
 
-**Announce at start:** "I'm using the archiving skill to archive this project and consolidate memory."
+**Say what you are doing, in the user's terms, not the skill's name:** "Filing this paper away and resetting the working directory for the next one."
 
 **Prerequisite:** `.writing/progress.md` and `.writing/findings.md` must exist with content beyond the empty template.
 
 ## The Process
+
+### Before Step 1: Tool Check
+
+Check once, up front, whether Bash and Write/Edit are available. Bash runs `check-writing-state.sh`, `unique-filename.sh`, `snapshot-save.sh`, `writing-reset.sh`, and `git diff --stat`; Write/Edit saves `summary.md` and applies the Step 4e memory changes. Without `AskUserQuestion`, ask the same question as plain text and carry on. One sentence naming what is missing is the entire budget for this. Never attempt a tool, fail, attempt another, and narrate each attempt.
+
+If Bash or Write/Edit is missing, the archive is still content, so deliver it in the reply rather than on disk. Give the full `summary.md` body and the memory edits as the exact text to add or replace, name the archive directory to create and the `.writing/` files to copy into it, and say in one line that you could not write them yourself. Skip Step 5, because clearing `.writing/` before the user has saved that content would destroy it.
 
 ### Step 1: Determine Archive Name
 

@@ -61,17 +61,9 @@ metadata:
 **审稿人会用这张图判断作者的领域素养和认真程度。**
 **box+arrow only 的平庸图 = desk reject。**
 
-### 创造空间 — 复杂档可调用的词汇（不强制，但**应该考虑**）
+### 创造空间 — 复杂档可调用的词汇
 
-| 维度 | 选项 |
-|---|---|
-| **嵌入可视化** | attention heatmap / loss curve / 真实图像色块 / signal waveform / 数学曲线 / N×N matrix / mel spectrogram / 散点分类 |
-| **信息 panel** | hyperparameters 框 / metrics 表 (FID/BLEU/Acc) / color legend / glossary 注释 / 数学符号速查 |
-| **数学公式嵌入** | `FFN(x) = max(0, xW₁+b₁)W₂+b₂` 直接写进 box 内部，**不是只贴标签** |
-| **配色** | ≥5 种 zone tone + accent color；浅色 zone 背景 + 中饱和度 box + dark accent |
-| **层级** | hero ≥ 2× 辅助 box；"N=6 layers" 灰色透明栈背景 |
-| **Cross-zone** | dashed rail + 跨段标签 (如 "K, V") |
-| **学术 polish** | dataset 标注 ("CIFAR-10") / 性能数字 ("FID=3.17") / 引用作者年份 |
+复杂档可调用的设计词汇（嵌入可视化 / 信息 panel / 数学公式嵌入 / 配色 / 层级 / cross-zone / 学术 polish）见 `references/step1-instructions.md` 末尾的同名小节。不强制，但设计阶段**应该考虑**——它是对抗上面那份"统计中心平庸默认"的正面清单。
 
 ### 视觉直觉法则（meta，在 ④.5 Step 0 应用）
 
@@ -87,25 +79,13 @@ metadata:
 
 **Batch 17 fig153 教训**：Philosophy 文本指南让 sub-agent **知道要嵌入 viz / panel / 公式**，但**写出来的视觉重量、留白、配色协调仍然失败**——因为这些是 visual perception 而非 textual 任务。
 
-**解决方案**：`references/tikz-snippets/` 提供 **21 个手工精雕的 TikZ 片段 + 21 个 PNG 预览 + 1 个组合规则文档**——sub-agent **看 PNG 选 + 复制粘贴 + 替换参数 + 按组合规则拼装**即可达到 examples 标杆。
-
-**5 大类零件**（详见 `references/tikz-snippets/README.md` inline gallery）：
-
-| 类别 | 数量 | 文件 |
-|---|---|---|
-| **1. 嵌入数据可视化** | 6 | attention-heatmap / confusion-matrix / mini-spectrogram / image-strip / scatter-plot / embedded-graph |
-| **2. 信息 panel / 图表** | 5 | bar-chart / line-chart / radar-chart / hyperparams-table / metrics-card |
-| **3. 数学 / 几何** | 3 | gaussian-curve / vector-arrows / formula-box |
-| **4. 结构 / 流程** | 4 | stage-container / pipeline-stages / layer-stack / feedback-loop |
-| **5. 整图骨架元素** | 3 | multi-zone-palette / color-legend / summary-bar |
-
-**组合规则**（**必读**）：`COMPOSITION-RULES.md` — snippet 间留白 / 对齐 / Z-order / 整图骨架（双栏对称 / 5 stage 横向 / 中央 hero + 4 panels）
+**解决方案**：`references/tikz-snippets/` 提供 21 个手工精雕的 TikZ 片段 + 21 个 PNG 预览 + 组合规则文档。**分类清单与 PNG 预览只在 `references/tikz-snippets/README.md` 的 inline gallery 维护一份**（5 大类：嵌入数据可视化 / 信息 panel / 数学几何 / 结构流程 / 整图骨架元素），不要在本文件重复。
 
 **复杂档强制流程**：
 1. **先读 `references/tikz-snippets/README.md`** —— inline gallery 含每个 snippet 的 PNG 预览
 2. **首选**：复制完整 `example-skeleton-B-horizontal.tex`（pipeline 类）或 `example-skeleton-C-centralhero.tex`（hero+panels 类）作 figure.tex，改 content 不动 layout
 3. **次选**（特殊布局需求）：看 PNG 选 ≥ 3 snippet 自己拼装
-4. **必读 `COMPOSITION-RULES.md`** —— 解决"snippets 都塞进去但仍乱"问题
+4. **必读 `references/tikz-snippets/COMPOSITION-RULES.md`** —— snippet 间留白 / 对齐 / Z-order / 整图骨架，解决"snippets 都塞进去但仍乱"
 5. **底部必有** color-legend OR summary-bar
 6. **绝对不能"简化"snippet 核心结构** —— 简化 = 信息稀疏 = 平庸
 
@@ -327,61 +307,7 @@ skill 现在支持 **4 种生成路径**——画图前必须先确定走哪条�
   3. 按 ③.A→③.D 子流程：先 hero → 加主流 → 加 panels → 整体审查
   4. 复杂连线（≥8 条交叉风险）：可选 `python3 references/tikz-path-router.py spec.json` A* 避障
 
-**🎯 箭头/连线必用 canonical pattern**（深度调研 2026-05-18，5 batches 教训）：
-`tikz-template.tex` 中 6 个预定义 styles 是经过 PGF 官方文档 + PlotNeuralNet 业界实践 + arrows.meta + bending library 综合调研的最佳实践：
-
-| style | 用途 | 何时用（铁律） | 关键差异 |
-|---|---|---|---|
-| `arrow` / `arrow thick` / `arrow thin` | 长连线 | **⚠️ 仅 ≥ 1.5cm — 短于此必须改用 `arrow short`** | tip 6.5pt, `shorten >=2pt, shorten <=1pt` |
-| **`arrow short`** | 短箭头（相邻 box 间） | **⚠️ < 1.5cm 必用此 style** | tip 3pt, `shorten >=1pt, shorten <=0pt` — 防止 tip 吃光 stem |
-| `residual` | dashed skip / 反馈 | residual / feedback | 紫色虚线 + rounded corners |
-| `leader` | annotation 引线 | 引线 / 标注 leader | 灰色 dotted |
-| **`fan_stub`** / `fan_stub thin` / `fan_stub thick` | fan-out 树状分叉的 stub（spine → target） | **fan-out / fan-in 的 stub 段必用此** | **`shorten <=0pt`**——起点紧贴 spine 无 gap |
-
-**禁止**自己手写 `-{Stealth[scale=X]}`——4 轮 Batch 教训证明手调 scale 治标不治本。只调 `line width`（0.6/1.0/1.6pt 三档），tip 通过 `length=⟨dim⟩ ⟨line_width_factor⟩` 语法自动跟随。`\usetikzlibrary{bending}` **必加载**，否则弯折路径上 tip 必然 mis-align。
-
-**短箭头铁律**（Batch 10 用户反馈：fig91-95 大量"只有头的箭头"）：**任何 < 1.5cm 的连接箭头必须用 `arrow short`**，不要默认 `arrow` 或 `arrow thick`。原因：默认 `arrow` 的 tip = 5pt + 1.5×line_width = 6.5pt，加上 `shorten` 3pt，一条 15pt（0.5cm）的短箭头剩下 stem 只 5.5pt——视觉上"只剩个头"。`arrow short` 用 3pt tip + 1pt shorten，stem 保留充足。
-
-**fan-out 树状分叉**（1 source → N targets）：spine 用普通 `\draw[line width=1.0pt]`（无 shorten），**stub 用 `fan_stub` 不用 `arrow`**——后者的 `shorten <=1pt` 会在 stub 起点和 spine 间留 1pt 视觉 gap（fig86 Batch 9 教训：MPD/MSD spine 全断裂）。
-
-**`rounded corners` 使用规则**（Batch 10 用户反馈：fig92 出现"莫名其妙曲线"，[PGF 官方手册原话](https://tikz.dev/tikz-paths)："very short line segments → rounding causes inadvertent effects"）：
-
-```
-✅ 只在显式 ≥2 段折线用 rounded corners：
-   \draw[arrow, rounded corners=5pt] (A) -- (corner) -- (B);
-   \draw[arrow, rounded corners=5pt] (A) |- (B);             % | 和 - 是隐式 corner
-
-❌ 直线禁加 rounded corners：
-   \draw[arrow, rounded corners=5pt] (A) -- (B);   ❌ TikZ 在端点附近产生鬼影弧
-```
-
-**`|-` / `-|` L-bend 安全条款**（Batch 10 用户反馈：fig97 Pedersen Commitment hero 出现"箭头穿过框体"——`(msg.south) |- (ped_hero.west)` 中 msg.x 落在 hero 的 x 范围内，TikZ 把横线**画在 hero 内部**）：
-
-```
-✅ (A.south) |- (B.west) 仅当 A 不在 B 的水平投影内（A.x < B.x0 OR A.x > B.x1）：
-   A
-   |
-   +----→ B          ← A 在 B 左上方，横线在 B 外部 OK
-
-❌ (A.south) |- (B.west) 当 A.x ∈ [B.x0, B.x1]：
-   A
-   |
-   |  ↓
-   +→ B         ← 横线穿过 B 的内部 = pierce bug
-
-✅ 修复 1：用 named coordinate 显式 waypoint 绕开 B：
-   \coordinate (wp) at (B.x0 - 0.5cm, B.center.y);
-   \draw[arrow] (A.south) |- (wp) -- (B.west);
-
-✅ 修复 2：换 anchor 让箭头从 B 的上方接入：
-   \draw[arrow] (A.south) -- (B.north);   % 直线，A 在 B 上方
-```
-
-PGF 不做 obstacle-aware routing（[官方手册确认](https://tikz.dev/base-nodes)），所以必须自己保证 `|-` / `-|` 的中段不撞 obstacle。`pdf-overlap-checker.py --json` 的 line-through-node 检测会抓到这种 bug。
-
-**编译前两个 checker（pre-flight，所有路径通用）**：
-- `python3 references/tikz-validator.py <file.tex>` — 几何/语法 gate：微斜线 / 溢出 / 碰撞 / 方向反转。**ERROR 必修**
-- `python3 references/tikz-design-linter.py <file.tex> [--type rich|sequence|simple]` — **advisory** 设计指标。**默认 WARN 不阻挡**——简单论文图可以简单，linter 只汇报指标供 Claude+用户判断是否匹配论文复杂度。仅当 ≥8 节点且尺寸比 < 1.5（严重视觉层次缺失）才 ERROR。
+**🎯 箭头/连线必用 canonical pattern**：`tikz-template.tex` 的 6 个预定义 style（`arrow` / `arrow short` / `residual` / `leader` / `fan_stub`）各有硬性选用条件。最常踩的四条：< 1.5cm 的短箭头必须用 `arrow short`（否则 tip 吃光 stem，视觉上"只剩个头"）；fan-out 的 stub 段必须用 `fan_stub`（否则 spine 断裂）；直线禁加 `rounded corners`（端点产生鬼影弧）；`|-` / `-|` 的中段会穿框，PGF 不做 obstacle-aware routing。禁止手写 `-{Stealth[scale=X]}`，只调 `line width`。完整铁律、反例与修复写法见 `references/arrow-patterns.md`——**写任何连线前必读**，编译前必跑的两个 checker 也在该文件末尾。
 
 ### ④ 编译验证
 ```bash
@@ -412,8 +338,8 @@ python3 references/pdf-overlap-checker.py file.pdf --json > "$(dirname file.pdf)
 ```
 0. Read 渲染出的 out-1.png + 视觉直觉先行（应用 3 大法则，见下）
 1. Read overlap.json（路径 = .tex 同目录的 overlap.json，步骤 ④ 跑出来的结构化几何检测）
-2. 加载 references/visual-review-checklist.md（18 项强制审查清单）
-3. 逐项回答 46 个 Y/N：S1-S10（空间）/ T1-T7（文字）/ M1-M10（语义）/ E1-E14（连线精度）/ A1-A5（美学）
+2. 加载 references/visual-review-checklist.md（强制审查清单）
+3. 逐项回答该文件列出的每一项 Y/N
    每项必须有一句证据（"我在 PNG 中看到…" 或 "overlap.json 中 N 处 line-through-node 我标为 …"），不允许凭印象
 4. 任一项 N → 列入 blocker → 输出 patch → Edit → 回 ④ 重编译 → 回 0
 5. Step 0 + 全部 18 项 Y → **把图给用户看**（用户终审，AI 视觉有盲区）
@@ -454,13 +380,6 @@ python3 references/pdf-overlap-checker.py file.pdf --json > "$(dirname file.pdf)
 3. **Triage 增量化** — round N 时只对 round N-1 之后**新出现**的 candidate 写 reasoning；之前 triage 过的复用结论（"同 round 1 第 3 处，仍 ignore"）
 4. **ERROR 优先于 candidate** — 先把 `text-overlap` / `text-overflow` / `text-line` / `off-center` 这 4 类 ERROR 修完（这些大概率是真 bug），再回头 triage candidate。避免一边修 ERROR 一边重新 triage 同一批 candidate
 
-**效率规则（避免 2-3x 时间膨胀）**：
-
-1. **Reference docs 只在 round 1 Read 一次** —— `SKILL.md` / `baselines.md` / `lessons.md` / `visual-patterns.md` / `step1-instructions.md` / `visual-review-checklist.md` 在 round 1 加载到 context 后，后续 round **不要再 Read**——已经在 context 里。**仅 PNG / overlap.json / figure.tex 每轮 Read（这些会变）**。
-2. **Empty candidate 跳过 triage** —— 如 overlap.json 的 `line-through-node` 数组为空，S8 / E12 直接答 "Y, 0 候选无需 triage" 即过；非空才逐条分析。
-3. **Triage 缓存** —— round N 的 overlap.json triage 结论保留到 round N+1；只对**新出现**的 candidate（坐标或类型变了）写新 reasoning，已 triage 过的同坐标 candidate 直接复用 "round N 已判 ignore"。
-4. **Triage 延后** —— 优先修 text-overlap / text-overflow / off-center / text-line 这 4 类 ERROR（**真 bug**），全清后再开始 triage line-through-node / node-overlap candidates。避免每轮都重新分析 candidate。
-
 这 4 条联合预计节省 30-50% 时间，质量不损失。
 
 **高漏检盲区**：checklist 里带 ⭐ 标记的项（S8/S9/M8/E3/E9/E12）是 R3-100 实测高漏检 — 审查时优先盯。
@@ -479,51 +398,20 @@ python3 references/pdf-overlap-checker.py file.pdf --json > "$(dirname file.pdf)
 
 **单点最小修改原则**：每轮 patch 只改一类问题（如"全部标签重叠"或"全部轴标题没下移"），不要一轮里大改——大改会引入新 bug。一轮一类 blocker。优先用 `yshift/xshift` 微调位置，避免改坐标主框架。
 
-#### mode C 强制独立多镜头审查 gate（2026-05-29 mode C 测试坐实，不可跳过）
+#### mode C 强制独立多镜头审查 gate（不可跳过）
 
-**为什么强制**：mode C 测试（同心圆 / Sankey / RLHF 闭环，3 张从零图）实测 **3/3 都崩，且每次崩在不同轴上**，但有统一规律——**图里最"新"、最无 skeleton 先例的那个结构元素，就是崩点**：
-- 同心圆 → 现编的多面板**数字叙事自相矛盾**（核心层在威胁锥里没削弱却号称拦 99%）
-- Sankey → 数字反而对了，但**新的变宽汇聚几何崩**（合并节点渲染成空心白框、sink 失比例）
-- RLHF 闭环 → 语义对，但**新的环形闭合几何崩**（不成环、3/4 弧 + 横弦、空角）
-
-**而 generator 自审对这个核心缺陷系统性失明**：三张分别跑了 4 / 3 / 1 轮自审，全部自评"发表级 / closes cleanly"，**全部漏掉了最核心的那个缺陷**。**自审轮数多少都救不了——失明是结构性的**（generator 看不见"我想画的"↔"实际渲染的"差距）。**每一次，只有独立对抗式多镜头审查抓到了核心缺陷。**
-
-**所以 mode C 的 ④.5 不允许只靠 generator 自审**。Step 0 + 18 项照走，但**完成后必须再过这道 gate**：由 orchestrator **独立 spawn 4 个全新审查 agent**（各自空白上下文），各 Read 渲染出的 PNG，**对抗式**找问题（默认"图里有 bug，去找"），各自返回 blocker（含 severity + 位置 + **具体视觉证据**，证明它真看了图）：
-
-> 🔴 **"独立"严格指：另起的全新 agent / 空白上下文——不是 generator 自己在同一上下文里"审 4 遍"。** 同上下文自审与 generator 共享同一套盲区，等于没审。**实测（fig4 复杂图）：generator 按本 gate 跑、却跑成"同模型 self-pass 4 遍"，照样漏掉 Sankey 断裂+失比例的重崩；是独立 spawn 的 agent 才抓到。self-pass ≠ gate。**
->
-> ⚙️ **谁来跑这道 gate**：是**顶层 orchestrator（带 Agent/workflow 工具的主循环）**的职责，**不是 generator 的**。generator / implementer 子 agent 通常 **spawn 不出独立子 agent**（环境常只暴露重量级 team 工具、无轻量 spawner），把 gate 交给它只会退化成 self-pass（实测 fig4 + fig5 两次都如此）。正确流程：generator 做完自己的 ④.5 自审并交付 → **控制权回到 orchestrator → 由 orchestrator 独立 spawn 4 个审查 agent 跑 gate**。
-
-| 镜头 | 专盯 | mode C 高发崩点 |
-|---|---|---|
-| **geometry** | 新布局几何是否真画对（同心是否真同心、环是否闭合、Sankey band 宽是否 ∝ 量、节点是否被填充非空心、穿框/裁切/大空白） | **最高发——新结构的几何** |
-| **semantic** | 信息流 / 顺序 / 方向是否对；**独立重算图里所有数字/公式**，查跨面板一致性 | 现编数据自相矛盾 |
-| **text** | 中文全水平、missing char、stale 标签、小字可读性 | 较低（自审多能覆盖） |
-| **aesthetic** | NeurIPS 级 vs AI slop、配色层级、留白、**"5 秒第一印象"是否真成立** | hero idea 名义存在但视觉不成立 |
-
-**gate 之后仍不能直接交付**：
-1. **你（orchestrator）必须亲自 Read PNG**——多镜头 agent 也有盲区。实测：orchestrator 自己修完一张图后亲眼自审，仍漏掉了自己引入的"公式出框"回归，是再跑一轮独立审查才抓到。**本节"用户的视觉是最后闸门 / 单视角自评不可靠"对你（orchestrator）同样成立。**
-2. triage checker 误报（见本节上方"overlap.json 处理"规则 + 步骤 ④ 的 `pdf-overlap-checker`：数学 glyph text-overlap、heatmap/matrix line-through-node、Sankey 汇聚、锥穿环边界——均为已知 FP）。
-3. 综合 = 你的眼 + 4 镜头 + checker triage → 真 blocker 列表 → 回 ④ 修 → **改完再跑一轮 gate**（改动常引入新 bug）。
-4. gate + 你 + checker 全 0 真 blocker 后，**仍把图先给用户看**（用户是最后闸门）。
-
-**机制**：用 Agent 工具 / workflow **真正并行 spawn 出 4 个独立子 agent**（每镜头喂 PNG 路径 + 该图"应有模型"让 semantic 独立重算）。**关键是"另起 agent + 空白上下文 + 对抗 + 多视角"——这是 mode C 唯一奏效的兜底；同上下文自审多遍不算数（实测会连同 generator 一起漏）。**
+mode C（从零画、无 skeleton 先例）实测 3/3 崩在"图里最新、最无先例的那个结构元素"上，而 generator 自审对它系统性失明——三张图跑了 4/3/1 轮自审全部自评通过，全部漏掉核心缺陷。所以 mode C 的 ④.5 走完 Step 0 + 18 项后，**必须由顶层 orchestrator 另起 4 个空白上下文的独立 agent 做对抗审查**（geometry / semantic / text / aesthetic 四镜头）。同上下文自审多遍不算数。完整流程、四镜头分工、gate 之后的交付条件见 `references/mode-c-review-gate.md`。
 
 ### ⑤ 用户终审 + 交付
 1. **把 PNG 给用户看**（不是询问"我做完了吗"，是直接展示结果）
 2. 有参考图时同时跑 `python3 references/figure-diff.py <ref.png> <out.png>` 得 SSIM；< 0.85 的 3×3 区域和用户一起重点看
 3. 用户指出问题 → 回 ④.5，把问题作为新一轮 blocker；用户没问题 → 交付
 
-**步骤⑤ 不再独立做"自审三遍法"**——所有自审已经在 ④.5 的 30 项穷举里做过。把同一组审查做两次只是认知疲劳的来源，不是质量提升。
+**步骤⑤ 不再独立做"自审三遍法"**——所有自审已经在 ④.5 的清单穷举里做过。把同一组审查做两次只是认知疲劳的来源，不是质量提升。
 
 ### ⑥ 迭代到完美（无上限）
 
-**没有轮数表，没有"3 轮够了"**。规则极简：
-- **还有 blocker → 继续修**（不管这是第 2 轮还是第 8 轮）
-- **同一 blocker 连续 2 轮没修好 → 修复方向错了，换思路**
-- **第 3 轮还有 ≥5 blocker → 局部修补救不了，回步骤① 重新设计画图指令**
-
-用户的目标重述："中间迭代多少轮无关紧要，只要图最后是完美的就行"。**绝不允许"凑合交付"**——"改了 3 轮差不多了吧"是认知疲劳的产物，不是质量信号。
+轮次规则与升级机制见 ④.5 的「没有轮数上限」「升级机制」两段。
 
 ### ⑦ 经验沉淀
 - 2 次以上才解决的问题 → 追加到 `references/lessons.md`（通用）或 `references/lessons-by-type.md`（图型专属）；逐批次复审归 `references/lessons-archive.md`，默认不加载
@@ -532,108 +420,9 @@ python3 references/pdf-overlap-checker.py file.pdf --json > "$(dirname file.pdf)
 
 ## Φ 沉淀通道（D 模式 — 用户已有 .tex 入库为新 skeleton）
 
-**触发**：⓪.5 用户选 D 路径。
+用户已有一份编译通过的 `.tex`、想把它的布局固化成可复用 skeleton 时走本通道（⓪.5 选 D 路径）：不画新图，产出入库后的 skeleton 文件 + 更新的 gallery。完整流程见 `references/skeleton-intake.md`，要点：编译验证 → 简化版 vision-audit → 与现有 6 个 skeleton 比对相似度的三档入库判定 → 命名与字母分配 → 自动生成 USAGE header → 写库并更新 README gallery → 提醒补 CONSTRAINTS。
 
-**前置条件**：
-- 用户提供已编译通过的 `.tex` 文件路径
-- 文件能 xelatex 编译成功
-- 渲染后视觉无明显 bug
-
-**流程**：
-
-```
-Φ.1 — 接收 + 编译验证
-   - 读取用户提供的 .tex 文件
-   - 跑 xelatex -interaction=nonstopmode + pdftoppm -r 150 渲染 PNG
-   - 编译失败 → 报告错误，停止入库
-
-Φ.2 — Vision-audit 把关（简化版 ④.5）
-   - Read 渲染出的 PNG
-   - 走 Step 0（3 大法则）+ 18 项中的关键 6 项（S1 整图对齐 / S5 元素间距 /
-     T1 文字渲染 / M3 信息流方向 / E5 箭头清晰 / V1 整体审美）
-   - 任何 blocker → 报告给用户，要求修复后再入库
-
-Φ.3 — 分析 layout pattern + 决策入库方式（**关键 gate**）
-   - 扫描 .tex 提取结构指纹：zone 数量 / zone 坐标范围 / hero 子结构 /
-     嵌入 viz 类型 / 配色（line/fill 色对集合）/ 箭头模式
-   - **若 .tex 头部注释明示 "Adapted from Skeleton X"** → 直接判定为 X 变体，
-     跳过结构相似度计算
-   - 否则与现有 6 skeleton 比对相似度，按 zone 数 + 关键结构（hero 位置/
-     side panel/底部图表对）匹配，**三档判定**：
-     * **>90% 匹配（结构等同，仅内容/主题不同）** → 默认 skip 入库，
-       提示用户"这就是 skeleton X 的 <主题> 应用，直接用 X 即可"。
-       若用户坚持入库 → Φ.3 verdict = "变体入库"，记录 parent letter
-     * **50-90% 匹配（明显借鉴 X 但有结构修改）** → 询问用户
-       (a) 合并到 X 作内部变体注释  (b) 作 hybrid 新 skeleton 入库
-       后者 → Φ.3 verdict = "结构创新"
-     * **<50% 匹配（结构创新）** → Φ.3 verdict = "结构创新"
-   - **输出**：verdict + parent letter（若变体）/ 主题 keyword
-
-Φ.4 — 命名 + 字母分配（**按 Φ.3 verdict 分支**）
-   - **若 verdict = "变体入库"**：
-     - 文件名 = `example-skeleton-{parent}-variant-{domain}.tex`
-       例：D 的 MoE 变体 → `example-skeleton-D-variant-moe.tex`
-     - **不占用新字母槽**，留给真正的结构创新
-   - **若 verdict = "结构创新"**：
-     - `ls references/tikz-snippets/example-skeleton-*.tex` 取下一个可用字母
-       （当前 B-G 已用，下一个 = H）
-     - 询问用户 kebab-case 主题（如 "sankey-flow" / "matrix-grid" / "timeline"）
-     - 文件名 = `example-skeleton-{letter}-{topic}.tex`
-
-Φ.5 — 自动生成 USAGE header（**含具体生成算法**）
-   - 顶部模板字段及生成方法：
-     * **标题行**：
-       - 创新："Skeleton {letter} — <layout 一句话描述>"
-       - 变体："Skeleton {parent}-variant — {domain} ({parent}-layout domain variant)"
-     * **USAGE**：固定模板 "Sub-agent: copy ENTIRE file as figure.tex,
-       change ONLY content (text/labels/numbers). DO NOT touch layout."
-     * **LAYOUT MODEL** ASCII 生成步骤：
-       a) 扫所有 `\fill[...] rectangle (x0,y0) (x1,y1)` 和 `\draw[...] rectangle`
-          提 zone bounding box
-       b) 按 y 范围归 row（top/mid/bottom），x 范围归 col（left/center/right）
-       c) 画 ASCII box：每个 zone 一个 □，按相对位置布局
-       d) **若是变体，直接继承 parent 的 LAYOUT MODEL，加注 "(same as Skeleton X)"**
-     * **WHEN TO USE**：从用户提供主题 + 域关键词推断
-       （如 "MoE" → "Mixture-of-Experts papers, sparse gating/routing"）
-       若变体：加一行 "For non-{domain} structurally similar cases, prefer skeleton X directly"
-     * **CONTAINS**：自动列清单
-       a) 数 `\node[*_node]` count by color (e.g., "4 blue_node + 3 purple_node")
-       b) 扫嵌入 viz：heatmap (`\fill` matrix) / bar (`\fill` rect series) /
-          curve (`\draw ... smooth`) / radar (`\draw` polar) / formula box (`$...$` in node)
-       c) 列 bullet
-     * **CONSTRAINTS — DO NOT VIOLATE**：留空 + TODO 注释
-       - 若变体：加 "see example-skeleton-{parent}.tex CONSTRAINTS for inherited rules"
-       - 加 4-5 个领域专属的 TODO 起跑提示
-
-Φ.6 — 写入库 + 更新索引（**含明确路径与格式**）
-   - 写文件：`references/tikz-snippets/example-skeleton-{X}.tex`（X = 完整文件名前缀）
-   - 渲染：`xelatex -interaction=nonstopmode` + `pdftoppm -r 100 -png`
-     **PNG 输出到 `references/tikz-snippets/previews/example-skeleton-{X}.png`**
-     （注意是 `previews/` 子目录，不是 `tikz-snippets/` 根，与现有 6 个一致）
-   - 更新 `references/tikz-snippets/README.md` inline gallery：
-     a) 定位 gallery 表（anchor 行：含 `example-skeleton-B-horizontal.tex` 的 markdown 表格）
-     b) 插入位置：
-        - 创新：最后一行 example-skeleton-G 之后
-        - 变体：parent skeleton 行下面，行最后加 "({parent} 领域变体)" 标注
-     c) 行格式：
-        ```
-        | `example-skeleton-X.tex` | **X: <一句话布局描述>** | <主要应用场景> | ![example-X](previews/example-skeleton-X.png) |
-        ```
-
-Φ.7 — 提醒用户后续补 CONSTRAINTS（关键防回归提示）
-   - "⚠️ 新 skeleton 已入库，但 CONSTRAINTS 段当前是 TODO 占位。
-      如果你在画这张图时踩过坑（标签长度上限 / 锚点选择 / 路径形状 /
-      box 宽度依赖等），请手动补充到这一段。
-      这是防止未来 sub-agent 复用时重新引入 bug 的关键——参考
-      D/E/F/G 的 CONSTRAINTS section 写法。"
-```
-
-**Φ 与 ⑦ 经验沉淀 的区别**：
-- ⑦ 沉淀**抽象 lessons 与基线参数**（分别写入 `references/lessons.md` 与 `references/baselines.md`）
-- Φ 沉淀**完整可复用的 figure 模板**（写入 `tikz-snippets/example-skeleton-X-*.tex`）
-- 两者独立工作，可在同一会话各做各的
-
-**Φ 的杠杆价值**：每入一个 skeleton，未来 N 个 user/session 都能复用。**库是 self-growing 的**——这是本 skill 长期复利的核心机制。
+**与 ⑦ 的区别**：⑦ 沉淀抽象 lessons 与基线参数，Φ 沉淀完整可复用的 figure 模板。库是 self-growing 的，这是本 skill 长期复利的核心机制。
 
 ## Ψ 审查通道（AUDIT 模式：审查用户已有的成品图）
 
@@ -678,12 +467,15 @@ python3 references/pdf-overlap-checker.py file.pdf --json > "$(dirname file.pdf)
 | 一张 figure 内含多个子图，需规划面板并对拼合后的整图整体审查（compose 多面板图） | `references/figure-rhetoric.md` §6 |
 | 进入步骤① | `references/step1-instructions.md` |
 | AUDIT 模式（Ψ 审查通道） | `references/figure-audit.md` + `references/visual-review-checklist.md`（18 项） |
+| D 模式（Φ 沉淀通道：已有 .tex 入库为 skeleton） | `references/skeleton-intake.md` |
 | 步骤②（任何 TikZ 图，**必加载**） | `references/baselines.md` + `references/lessons.md` + `references/visual-patterns.md` |
 | 步骤③ 决策门 | `references/figure-spec.schema.md`（B 路 spec） |
 | 步骤③ 走 B 路 → 跑 `dot-to-tikz.py` | （脚本，不需 Read） |
 | 步骤③ 走模板/从零 → 用 TikZ | `references/tikz-global-rules.md` + `references/tikz-template.tex` |
+| **步骤③ 写任何连线前（必读）** | **`references/arrow-patterns.md`**（6 个 canonical style + 短箭头/fan_stub/rounded corners/L-bend 铁律 + 编译前 checker） |
 | **步骤③ 复杂档需嵌入 viz / panel / 公式** | **`references/tikz-snippets/` ⭐ 优先用 snippet 拼装而不是从零写**（含 6 个手工精雕模板：attention-heatmap / bar-chart / hyperparams-table / multi-zone-palette / pipeline-stages / formula-box） |
 | 步骤④.5 视觉反馈每一轮 | `references/visual-review-checklist.md`（18 项强制清单） |
+| 步骤④.5 且为 mode C（从零画、无 skeleton 先例） | `references/mode-c-review-gate.md`（orchestrator 独立 spawn 四镜头对抗审查） |
 | 配色需求 | `references/tikz-colors.md` |
 | 分层架构图 | `references/layered-architecture.md` |
 | 时序交互图 | `references/sequence-diagram.md` |

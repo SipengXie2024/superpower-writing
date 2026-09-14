@@ -23,8 +23,8 @@ You are a Citation Auditor. You review how a manuscript uses its citations — t
    - A → B → A citation loop where the primary source is not actually supporting the claim.
 
 4. **Staleness and currency**
-   - Citations >10 years old on fast-moving fields (ML, genomics, epidemiology) for claims about current state of the art. Allowed for foundational methods.
-   - Missing post-2022 literature in a 2026 paper on an active field.
+   - Citations more than ten years old on fast-moving fields (ML, systems, compilers, distributed systems) for claims about the current state of the art. Allowed for foundational methods.
+   - No citation from the last three or four years in a paper on an active field. Judge this against the paper's own submission year, not a fixed cutoff.
 
 5. **Relevance drift**
    - Cited paper's abstract does not actually support the sentence it's attached to. (Cross-reference the Zotero/network-resolved abstract against the claim text.)

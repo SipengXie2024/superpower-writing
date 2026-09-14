@@ -1,6 +1,6 @@
 ---
 name: claim-verification
-description: Evidence-reliability check. Walks every % claim tag in LaTeX manuscript/*.tex, confirms \cite{} citekeys resolve against .writing/refs.bib (exported from Zotero), runs semantic match against network-fetched abstracts to catch hallucinated or mismatched citations, optionally checks numeric/table consistency, flags any [NEEDS-EVIDENCE] or draft-only markers. Run on demand or when the skeleton is ready for the human author.
+description: Evidence-reliability check. Walks every % claim tag in LaTeX manuscript/*.tex, confirms \cite{} citekeys resolve against .writing/refs.bib (exported from Zotero), runs semantic match against network-fetched abstracts to catch hallucinated or mismatched citations, optionally checks numeric/table consistency, flags any [NEEDS-EVIDENCE] or draft-only markers. Use when a draft is ready to hand to the human author, before submission, after a round of manual revisions, or on demand for a single section, including "检查一下引用", "核对claim", "verify citations", "查查有没有编造的引用".
 ---
 
 # Claim Verification
@@ -10,8 +10,6 @@ description: Evidence-reliability check. Walks every % claim tag in LaTeX manusc
 Evidence-reliability check that walks every tagged claim in `.writing/manuscript/*.tex` and proves it supportable. Two core passes — completeness and citation resolution (dual source of truth via Zotero + network, with semantic match against the cited abstract) — plus an optional numeric/table consistency pass. Outputs `.writing/verify-report.md` per-claim PASS/FAIL and caches resolved DOIs in `.writing/verify-cache.json`.
 
 The most valuable check for an AI-drafted skeleton is Pass 2: it catches hallucinated DOIs and citations whose abstract does not actually support the claim — exactly the reliability the human author leans on when refining.
-
-**Core principle:** Evidence before claims, always. Violating the letter of this rule is violating the spirit.
 
 **Iron law:** No `STATUS: verified` flip without fresh pass evidence recorded in the report.
 
@@ -46,13 +44,19 @@ Enforceability classes: `[inspection]` the agent confirms it from its own output
 
 ## Process
 
+### Tool availability (check once, before Step 0)
+
+Tools this skill uses: Read/Grep/Glob over `.writing/`; Write/Edit for `verify-report.md`, `verify-cache.json`, claim `STATUS`, and `progress.md`; Bash for `scripts/check-zotero.sh`; the `zotero_*` MCP tools; the Skill tool plus network for `citations` / `literature` DOI resolution. Establish what is present once, up front, and name anything missing in one sentence. Do not attempt a tool, fail, attempt the next, fail, and transcribe each attempt: a list of tool errors is not a verification report.
+
+The report is the deliverable, so produce it from whatever survives. Pass 1 and Pass 3 need only file reads. Without Zotero and without network, Pass 2 cannot resolve a DOI: record those citations as UNVERIFIED with the reason, never FAIL and never PASS, skip 2a/2b/2e, and leave every `STATUS` at `evidence_ready`. Without write access, put the whole report in the reply in the Step 4 format, say it belongs at `.writing/verify-report.md`, and say you could not write it there yourself. Only if `.writing/` is unreadable is there nothing to verify: say so in one sentence and stop.
+
 ### Step 0: Preconditions
 
 Before running any pass:
 
 1. Confirm `.writing/` exists. If not, abort with instruction to run outlining/drafting first.
 2. Read `.writing/metadata.yaml`. Fail if any top-level key is `TODO` (except the v1 YAGNI list: multi-author fields). Fail fast — verification is pointless against incomplete metadata.
-3. Read `.writing/verify-cache.json` if present; treat as read-through cache keyed by DOI. Cache entries expire never within a session; user must manually delete to force re-resolution.
+3. Read `.writing/verify-cache.json` if present; treat as read-through cache keyed by DOI. Cache entries expire never within a session; user must manually delete to force re-resolution. The cache file is gitignored.
 4. List all `.writing/manuscript/*.tex` files and their paired `.writing/claims/section_*.md` files.
 
 ### Step 1: Pass 1: Claim Completeness
@@ -77,7 +81,7 @@ For each `.writing/manuscript/*.tex`:
 
 ### Step 2: Pass 2: Citation Resolution (dual source of truth)
 
-This is the most consequential pass. Implements design.md §14.3 exactly.
+This is the most consequential pass. It is what catches a hallucinated DOI or a citation whose abstract does not support the claim it is attached to.
 
 For each claim that passed Pass 1 with `type: citation` EVIDENCE entries:
 
@@ -86,7 +90,7 @@ For each claim that passed Pass 1 with `type: citation` EVIDENCE entries:
 1. Read `metadata.yaml`. If `zotero.enabled: true`:
    - Run `${CLAUDE_PLUGIN_ROOT}/scripts/check-zotero.sh` once per session to confirm credentials and the `zotero-mcp` binary. Cache result in `.writing/findings.md` as `zotero_verified_at: <ts>`.
    - For each citation DOI, call the `zotero_search_items` MCP tool (from the `zotero` server in `.mcp.json`) with `query=<DOI>`, `qmode="everything"`. If `zotero.collection_key` is set, filter results to items whose `data.collections` array contains that key; otherwise keep all hits.
-   - **Zotero hit** (exactly one filtered match): call `zotero_get_item_metadata(item_key=<key>)` to retrieve the stored abstract. Record `source: zotero`, `zotero_item_key: <key>` in the claim EVIDENCE entry. Proceed to 2c (semantic match).
+   - **Zotero hit** (exactly one filtered match): call `zotero_get_item_metadata(item_key=<key>)` to retrieve the stored abstract. Record `source: zotero`, `zotero_item_key: <key>` in the claim EVIDENCE entry. Proceed to 2c (semantic match). A DOI present in Zotero but unresolvable on the network is a retracted or moved paper: surface as a warning, do not auto-fail (the user's vetted copy is authoritative).
    - **Ambiguous** (multiple filtered matches for one DOI): log to `.writing/findings.md` under "Issues" and treat as a miss.
    - **Zotero DOI miss, semantic fallback:** before giving up on Zotero, call `zotero_semantic_search(query=<CLAIM text>, limit=5)`. When the library has been indexed with fulltext (has_fulltext=True chunks), this matches claim content against paper paragraphs, not just titles/abstracts — catching cases where the DOI in your bibliography is slightly off (preprint vs publisher, pre-print server vs final version) but the paper is actually in the library. For each hit whose `similarity_score >= 0.45`, call `zotero_get_item_metadata(item_key=<key>)` and verify by DOI / title match. Exactly one high-confidence match → treat as Zotero hit with `source: zotero-semantic`, `zotero_item_key: <key>`, `match_score: <float>`. Otherwise proceed to 2b.
    - **Zotero miss (DOI + semantic):** proceed to 2b.
@@ -108,7 +112,7 @@ Once an abstract is in hand (from Zotero or network):
 1. Compute abstract hash and store in `.writing/verify-cache.json` keyed by DOI: `{source, resolved_at, abstract_hash, abstract_excerpt}`.
 2. Perform an LLM-based semantic match: does the abstract plausibly support the CLAIM text? Use a strict rubric: the claim must not contradict the abstract; the abstract's findings/methods must overlap with the claim's substantive content.
 3. **Match PASS:** record PASS in report with excerpt of supporting abstract sentence.
-4. **Match FAIL:** record FAIL with reason (e.g., "abstract describes CIFAR-10 results; claim is about ImageNet"). This is a soft failure — surface to user for manual review rather than auto-rejecting (semantic match has known FP/FN issues). User confirms or overrides in report before the claim is marked verified.
+4. **Match FAIL:** record FAIL with reason (e.g., "abstract describes CIFAR-10 results; claim is about ImageNet"). This is a soft failure — surface to user for manual review rather than auto-rejecting (semantic match has known FP/FN issues, design.md §11). User confirms or overrides in report before the claim is marked verified.
 5. **Abstract ambiguous, body lookup:** if the abstract neither clearly supports nor contradicts the claim AND `source: zotero*`, call `zotero_semantic_search(query=<CLAIM text>, filters={"parent_item_key": <key>}, limit=3)` to surface the three most-relevant chunks from the paper body. Re-run the semantic match against those chunks' `matched_text`. Only escalate to fetching full body via `zotero_get_item_fulltext(item_key=<key>)` if the chunk-level check remains ambiguous — fulltext returns the whole paper (often 70K+ chars) and must be read with narrow grep / offset-limit windows, not loaded wholesale into context.
 
 #### 2d. Non-citation EVIDENCE
@@ -187,6 +191,8 @@ Write `.writing/verify-report.md` with exact structure:
 - <file>:<line>: `% draft-only` still present
 ```
 
+Keep one report per round; when a new round starts, archive old reports under `.writing/archive/reports/`.
+
 ### Step 5: Update Claim STATUS
 
 **Confirmation gate (mutating step).** Steps 5 and the `auto_push_new_citations` write-back in 2b are the only two actions that mutate state outside the report — `STATUS: evidence_ready → verified` and pushing a network-resolved citation into the user's Zotero collection. Before performing either, present the full list of eligible claims to flip and citations to push, then get explicit user confirmation. This mirrors the soft-fail override requirement: no green-lit mutation lands silently. If the user declines or wants to inspect first, leave STATUS at `evidence_ready` and the report on disk — verification is re-runnable and the audit trail is already written. Exception: when the user opened this run with an explicit "verify and flip" / "verify and push" instruction, that standing instruction is the confirmation — do not re-prompt.
@@ -207,41 +213,13 @@ If `.writing/` exists, append a row to the Verification Evidence table in `.writ
 
 ## Key Principles
 
-### Evidence before claims, always
-
-This skill exists because of failure mode #1: a paper ships with a citation that does not say what the prose claims. Every `STATUS: verified` flip is an assertion that Pass 2's abstract plausibly supports the claim text. Never flip STATUS without the pass evidence in the report.
-
-### Dual source of truth is not redundancy — it's correctness
-
-Zotero stores what the user has vetted. The network stores what the world publishes. A DOI resolvable only on the network but not in Zotero is a citation the user has not personally confirmed — the `auto_push_new_citations: true` flow closes this gap by writing network hits back to Zotero for future vetting. A DOI present in Zotero but unresolvable on the network is a retracted or moved paper — surface as a warning, do not auto-fail (the user's vetted copy is authoritative).
-
-### Cache aggressively, re-fetch cautiously
-
-DOI resolution is expensive and rate-limited. `.writing/verify-cache.json` keyed by DOI with `{source, resolved_at, abstract_hash}` lets re-runs complete in seconds. Re-fetch only when: cache absent, abstract_hash mismatch on re-read, or user explicitly forces (e.g., deletes the cache file). Cache file is gitignored (see project `.gitignore`).
-
-### Semantic match is advisory, not gatekeeping
-
-LLM-based semantic match has FP/FN rates that make hard auto-rejection brittle (design.md §11). Treat Pass 2c failures as soft failures: surface in the report, require explicit user override before claim STATUS flips to `verified`. Do not hide these — a silent false negative is worse than a false positive the user sees.
-
 ### Verb strength tracks EVIDENCE type
 
 A claim's verb must match the strength of its EVIDENCE entries (see outlining for the `type` field). Strong evidence (a direct measurement, a reproduced result, a settled citation) earns `demonstrate`, `show`, `establish`. Moderate evidence earns `indicate`, `suggest`, `support`. Limited or associative evidence earns `are consistent with`, `may reflect`, `raise the possibility`. The binding rule: a claim whose EVIDENCE is `type: analysis` on one workload must not say "establishes". One workload supports "is consistent with" or "suggests", not a general establishment claim. When Pass 1 or the optional integrity gate surfaces a verb that outruns its evidence tier, flag it as advisory for the human author; this skill never rewrites prose.
 
 ### Type-A vs Type-B
 
-Could a script with no taste answer this gate? Yes, Type-A: the model may self-judge (e.g. a claim tag is present, a DOI resolves, an abstract is citation-free, prose numbers match a table). No, it needs taste, Type-B: route to an independent or cross-model reviewer thread and never reply in place. A loop may DRIVE its own iteration but may not ACQUIT its own Type-B verdict. Pass 1 completeness, Pass 2 DOI resolution, and Pass 3 number matching are Type-A. Pass 2c semantic match and the taste-bearing integrity heuristics are Type-B; route them per `planning-foundation/references/review-loop-protocol.md` rather than self-clearing.
-
-### Fail-loud on missing metadata
-
-Verification depends on `metadata.yaml` being complete. If claim-verification encounters `TODO` fields, abort immediately rather than running downstream passes. Verification against incomplete metadata produces a green report the user cannot trust.
-
-### Never auto-edit the manuscript
-
-This skill reads `.writing/manuscript/*.tex` and writes `.writing/claims/*.md` STATUS fields and the report. It does not touch manuscript prose. Manuscript changes go through drafting (or the human author's manual edits), which follow the claim-first drafting discipline.
-
-### Report is the audit trail
-
-The verify-report.md is the document-of-record for this verification round. It is the evidence that backs the skeleton ("all claims passed citation verification on <date>"). Keep one report per round; when a new round starts, archive old reports under `.writing/archive/reports/`.
+Could a script with no taste answer this gate? Yes, Type-A: the model may self-judge (e.g. a claim tag is present, a DOI resolves, an abstract is citation-free, prose numbers match a table). No, it needs taste, Type-B: route to an independent or cross-model reviewer thread and never reply in place. A loop may DRIVE its own iteration but may not ACQUIT its own Type-B verdict. Pass 1 completeness, Pass 2 DOI resolution, and Pass 3 number matching are Type-A. Pass 2c semantic match and the taste-bearing integrity heuristics are Type-B; route them to a fresh-context reviewer rather than self-clearing. Reviewer independence has two halves. Allow: give the reviewer file paths and line numbers and let it read the artifact itself. Deny: do not hand it the drafter's own change summary as the basis for review, do not ask leading questions such as "is this publishable?", and never let the producer grade its own Type-B gate.
 
 ## Upstream Skill Contracts
 
