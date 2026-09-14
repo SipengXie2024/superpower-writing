@@ -64,6 +64,11 @@ EM_DASH = "—"
 # costs more than the rule it was enforcing.
 EM_DASH_SEVERITY = None
 
+# A description has to say WHEN to reach for the skill, not only what it does.
+# Several phrasings state the same thing: "Use on any bug", "Use after a plan is
+# done", "Use whenever a task spans sessions". Match the stem, not one wording.
+TRIGGER_CLAUSE = re.compile(r"\buse (?:when(?:ever)?|on|after|before|for|during|if)\b", re.IGNORECASE)
+
 DESC_MIN_WORDS = 40
 DESC_MAX_WORDS = 80
 BODY_WARN_LINES = 500
@@ -273,7 +278,7 @@ def check_description(path: str, fm: str) -> list[Finding]:
                 "error",
             )
         )
-    if "use when" not in flat.lower():
+    if not TRIGGER_CLAUSE.search(flat):
         out.append(
             Finding(
                 path,
