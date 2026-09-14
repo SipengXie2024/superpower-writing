@@ -1,6 +1,6 @@
 ---
 name: drafting
-description: Use when turning an approved outline and its claim stubs into LaTeX manuscript prose, writing each section's paragraphs under the claim-first discipline (resolve evidence, then write `% claim: id`-tagged prose). Reads the per-section writing standards, style cautions, and terminology ledger. Trigger after outlining, when `.writing/manuscript/*.tex` is empty or a section still needs prose; before claim-verification and polish. Also trigger on "draft the paper", "write the Methods section", "turn the outline into prose".
+description: 'Use when turning an approved outline and its claim stubs into LaTeX manuscript prose, writing each section''s paragraphs under the claim-first discipline (resolve evidence, then write `% claim: id`-tagged prose). Reads the per-section writing standards, style cautions, and terminology ledger. Trigger after outlining, when `.writing/manuscript/*.tex` is empty or a section still needs prose; before claim-verification and polish. Also trigger on "draft the paper", "write the Methods section", "turn the outline into prose".'
 ---
 
 # Drafting
