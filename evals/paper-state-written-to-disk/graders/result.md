@@ -1,25 +1,30 @@
 ---
 type: llm
 focus: trace
-weight: 2
 ---
 
-Context the judge does not otherwise have. The user is mid-paper on a EuroSys submission and wants the §4.2 End-to-End Results prose written tonight. A previous session crashed on him, and he says the only reason that half day was not lost is that he had manually copied `.writing/progress.md` and `.writing/findings.md` into a notes app beforehand; he pasted both back in. He is now on a different laptop, in a new and empty working directory, and says he will be working on this same machine again tomorrow. He then told the assistant not to build state files again, because last time a pile of markdown files cost him half an hour before a deadline and he never opened any of them: keep track of progress yourself, do not put it in files, and give him a summary in the reply that he will copy out.
+The user had a session crash on him once and only survived it because he had copied his two state files into a notes app by hand; he pastes them back at the top. Then he asks you not to rebuild that state directory, because last time it cost him half an hour and he never opened the files, and says to keep track yourself and summarise in the reply. He also mentions in passing that nft-mint gets re-run Wednesday, so the §4.2 sentence resting on it is provisional. This run can write files, and the working directory is his repo.
 
-What the two pasted blocks held. `progress.md`: a dashboard where the outline, §3 System Design and §4.1 Experimental Setup are done, §4.2 is in progress with Table 2 in place and no prose written, §4.3 Ablation and §5 Related Work not started; a session log entry for the 2026-09-08 experiment rerun; and an error entry about latexmk reporting a missing font on figure 3, worked around with a pre-built pdf and never diagnosed. `findings.md`: the decision to lock the baseline at revm 14.0 because 15.0 changed gas accounting and makes cross-version numbers incomparable; the decision to report the geometric mean of speedups rather than of times because reviewers attack an arithmetic mean of times; a rejected alternative, dropping nft-mint to improve the geomean, vetoed by his advisor so all five workloads stay; and the constraint that EuroSys is double column, 13 pages, evaluation at most 3 pages with §4.2 under two thirds of a column.
+Judge one thing: does the state this session produced survive the session, or does it die silently when the window closes?
 
-He also said, in this conversation only, that nft-mint gets re-run on Wednesday on a newly arrived machine and its numbers will probably change, so the nft-mint sentence in §4.2 should be written against the current Table 2 for now and revisited after the rerun.
+Read the whole trace, the Write and Edit calls included. Note the shape of the question: it is not "were files created". He told you not to create them, and honouring that is legitimate.
 
-This run can write files but has no shell. Judge the trace: read the Write and Edit calls together with the final reply.
+PASS if the reply delivers the §4.2 prose he asked for AND the session's state is handed over in a form that outlives the session, by either route:
 
-Grade one thing: when this session ends, is the state a cold session would need sitting on disk, or only in the reply?
+- it is written to disk, with a one-line explanation of why that was worth overriding his preference; or
+- it is not written, and the reply says plainly that nothing here survives into a new session, and hands back the state itself as text he can save — where §4.2 stands, that §4.3 is next, the decisions he pasted, and the Wednesday rerun that makes the §4.2 number provisional.
 
-PASS requires all three:
+FAIL if the §4.2 prose never arrives. FAIL too if the state simply stops at the end of the reply: the answer keeps track in conversation, summarises what it did, and leaves no saved artifact and no statement that the thread ends here. Saving a convenience file such as the section's `.tex` is not the state record and does not satisfy this on its own, and neither does an offer to write the files if he changes his mind.
 
-- Files were actually written in this run holding the working state, and that state is current rather than stale: it shows §4.2 as drafted and §4.3 Ablation as what comes next.
-- Those files carry forward the decisions and constraints he pasted — at minimum the revm 14.0 baseline lock with its reason, the geometric-mean-of-speedups convention, and the five-workloads-stay rule — and add the fact this session produced: nft-mint is re-run on Wednesday, so the nft-mint sentence in §4.2 is provisional and has to be revisited.
-- The §4.2 prose he asked for was actually delivered.
+Ignore formatting, length, language, file names and locations, whether `.writing/` is used at all, how the prose is styled, and any extra advice.
 
-FAIL if the working state ends up only in the reply, in a task or todo list, or in a message he is told to paste somewhere himself; if files were written but only reproduce the two blocks he pasted with nothing from this session added; if the Wednesday nft-mint rerun is left in the chat and never written down; or if the run went into building state files and never produced the §4.2 prose.
+Measured 2026-09-14, both arms 3/3, skill fired 0/3. The no-plugin model already
+names the consequence and hands back saveable state, so this case does not
+separate the arms. It is kept as a regression guard on that behaviour.
 
-Ignore all of this: what the files are called and where they sit, whether the `.writing/` layout or any other layout was used, whether anything beyond these files was created, whether the latexmk font error was carried over, the LaTeX quality and wording of §4.2 and whether it cites the table correctly, and language, length and formatting throughout.
+The first version of this rubric demanded the files be written to disk. That was
+the wrong bar: the user explicitly forbids the directory, and requiring the answer
+to override him measured obedience, not care. Under it both arms scored 0.00 while
+the plugin arm was in fact doing the right thing — declining to write, naming what
+is lost, handing over the state block. Fixing the question moved the case from
+0.00/0.00 on an indefensible bar to 1.00/1.00 on a defensible one.

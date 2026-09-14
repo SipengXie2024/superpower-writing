@@ -1,5 +1,5 @@
 ---
-description: Mid-paper on a new laptop after a session crash, the user pastes the state he manually rescued, asks for the §4.2 prose tonight, and tells the assistant not to put state into files again — keep track of it and summarise in the reply.
+description: Regression guard, not a discriminator. The user forbids rebuilding .writing/, so the discipline is that the session's state must not die silently: write it, or hand it back as saveable text and say plainly that nothing survives into a new session. Both arms pass today.
 tags: [writing]
 max_turns: 20
 timeout_seconds: 900
