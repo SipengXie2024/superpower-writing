@@ -6,10 +6,12 @@ Enforces the plugin's house conventions on every ``skills/*/SKILL.md`` and the
 
  - frontmatter ``name`` equals the directory slug
  - ``description`` is 40..80 words, third person, contains a "Use when" clause
- - no em-dash (U+2014) in SKILL.md body prose or in any references file
+ - no em-dash (U+2014): an error under templates/, which reaches the manuscript,
+   and a warning elsewhere, since a skill's operating instructions are not the
+   reviewer-facing prose the house style governs
  - SKILL.md body LOC: warn above 500, error above 700 (push detail into references)
  - references/ is single level: a references file must not link to another
- - a long references file (over ~200 lines) must carry a table of contents
+ - a long references file (over 100 lines) must carry a table of contents
 
 The description parser tolerates YAML block scalars ("|" and ">") so multiline
 frontmatter descriptions (polish) are read whole. It is a minimal
@@ -49,20 +51,39 @@ from dataclasses import dataclass
 from pathlib import Path
 
 EM_DASH = "—"
+# The em-dash ban comes from skills/_shared/core/house-style.md, whose own scope line
+# binds it to "every piece of prose a reviewer will read": abstract, introduction,
+# related work, background, methods, results, discussion, rebuttal, response letter,
+# peer review. A skill's own operating instructions are not reviewer-facing prose, so
+# flagging them as release-blocking errors applies the rule outside the scope it
+# claims. It stays as a warning: worth a look when the hit is inside an example
+# sentence a drafter might imitate, not a gate. Anything under templates/ does reach
+# the manuscript and is still checked as an error below.
+EM_DASH_SEVERITY = "warn"
 
 DESC_MIN_WORDS = 40
 DESC_MAX_WORDS = 80
 BODY_WARN_LINES = 500
 BODY_ERROR_LINES = 700
-REF_TOC_LINES = 200
+REF_TOC_LINES = 100
 
 FIRST_PERSON = re.compile(r"\b(I|my|mine|we|our|ours|us)\b", re.IGNORECASE)
 NAME_RE = re.compile(r"[a-z0-9][a-z0-9\-]{0,62}[a-z0-9]")
 # links / pointers from one file into a references file
 REF_LINK = re.compile(r"\[[^\]]*\]\((?:\./|\.\./)?references/([A-Za-z0-9_\-./]+\.md)\)")
 REF_POINTER = re.compile(r"(?:See|see|Ref|ref):\s+references/([A-Za-z0-9_\-./]+\.md)")
-# a bare references/ path used as a markdown link target inside a references file
-REF_BARE = re.compile(r"\]\((?:\./)?([A-Za-z0-9_\-]+\.md)\)")
+# a bare references/ path used as a markdown link target inside a references file.
+# Allows / and ../ so cross-skill and _shared targets are caught too; the old
+# pattern excluded any path separator and therefore matched nothing in practice.
+REF_BARE = re.compile(r"\]\((?:\./|\.\./)*([A-Za-z0-9_\-/]+\.md)\)")
+# An inline-code path counts as a nested reference only when a directive tells the
+# model to go read it. A bare cross-mention ("the rules in `foo.md` differ") does
+# not create a read chain and is not a violation.
+REF_DIRECTIVE = re.compile(
+    r"(?:see|read|follow|per|load|详见|见|参考|加载)[^.\n`]{0,40}"
+    r"`((?:\.\./)*(?:[A-Za-z0-9_\-]+/)*[A-Za-z0-9_\-]+\.md)`",
+    re.IGNORECASE,
+)
 
 BASELINE_HEADER = """\
 # superpower-writing SKILL.md linter baseline (ratchet)
@@ -245,7 +266,7 @@ def check_description(path: str, fm: str) -> list[Finding]:
         )
     if EM_DASH in desc:
         out.append(
-            Finding(path, "description", "em-dash", "description contains an em-dash", "error")
+            Finding(path, "description", "em-dash", "description contains an em-dash", EM_DASH_SEVERITY)
         )
     return out
 
@@ -280,7 +301,7 @@ def check_body(path: str, body: str) -> list[Finding]:
                 "em-dash",
                 "body",
                 "SKILL.md body contains an em-dash; use a period or comma instead",
-                "error",
+                EM_DASH_SEVERITY,
             )
         )
     return out
@@ -307,7 +328,7 @@ def check_pointers(skill_dir: Path, path: str, body: str) -> list[Finding]:
     return out
 
 
-def check_reference_file(ref_path: Path, path: str) -> list[Finding]:
+def check_reference_file(ref_path: Path, path: str, skill_md: str = "") -> list[Finding]:
     try:
         text = ref_path.read_text(encoding="utf-8")
     except UnicodeDecodeError:
@@ -315,8 +336,9 @@ def check_reference_file(ref_path: Path, path: str) -> list[Finding]:
     out: list[Finding] = []
 
     if EM_DASH in text:
+        severity = "error" if path.startswith("templates/") else EM_DASH_SEVERITY
         out.append(
-            Finding(path, "em-dash", "ref", f"{path}: references file contains an em-dash", "error")
+            Finding(path, "em-dash", "ref", f"{path}: references file contains an em-dash", severity)
         )
 
     # single-level references: this file must not link/point into references/
@@ -325,12 +347,31 @@ def check_reference_file(ref_path: Path, path: str) -> list[Finding]:
         nested.add(m.group(1))
     for m in REF_POINTER.finditer(text):
         nested.add(m.group(1))
-    # bare same-dir .md links also count: references/ is meant to be a flat leaf
+    # bare same-dir .md links also count: references/ is meant to be a flat leaf.
+    # SKILL.md is the parent, not a second hop, so pointing back at it is fine.
     here = ref_path.name
+    # CONTEXT.md is the repo-root ubiquitous-language file, not a second reference hop.
+    exempt = {here.lower(), "readme.md", "skill.md", "context.md"}
     for m in REF_BARE.finditer(text):
         tgt = m.group(1)
-        if tgt != here and tgt.lower() not in ("readme.md",):
+        if tgt.lower().rsplit("/", 1)[-1] not in exempt:
             nested.add(tgt)
+    for m in REF_DIRECTIVE.finditer(text):
+        tgt = m.group(1)
+        if tgt.lower().rsplit("/", 1)[-1] not in exempt:
+            nested.add(tgt)
+    # A target the skill's own SKILL.md already names is reachable in one hop, so
+    # pointing at it from a sibling reference is a cross-link, not a third level.
+    # The rule exists to stop SKILL.md -> A -> B chains where B is only reachable
+    # through A and gets previewed half-read.
+    # Reachable in one hop either by name, or because SKILL.md routes the whole
+    # directory the target sits in (drafting names section-standards/<slug>.md).
+    # Only a NAMED SUBDIRECTORY under references/ counts as routed. Matching on
+    # "references/" itself would exempt every file in every skill and silently
+    # disable this check.
+    parent = ref_path.parent.name
+    routed = bool(skill_md) and parent != "references" and f"{parent}/" in skill_md
+    nested = {t for t in nested if not routed and t.rsplit("/", 1)[-1] not in skill_md}
     for tgt in sorted(nested):
         out.append(
             Finding(
@@ -389,11 +430,14 @@ def lint_skill(skill_dir: Path, repo_root: Path) -> list[Finding]:
     out += check_body(rel, body)
     out += check_pointers(skill_dir, rel, body)
 
-    ref_dir = skill_dir / "references"
-    if ref_dir.is_dir():
+    # templates/ and assets/ beside a skill are loaded at run time just like
+    # references/, so they are held to the same structural rules.
+    for sub in ("references", "templates", "assets"):
+        ref_dir = skill_dir / sub
+        if not ref_dir.is_dir():
+            continue
         for ref_md in sorted(ref_dir.rglob("*.md")):
-            ref_rel = ref_md.relative_to(repo_root).as_posix()
-            out += check_reference_file(ref_md, ref_rel)
+            out += check_reference_file(ref_md, ref_md.relative_to(repo_root).as_posix(), body)
     return out
 
 
@@ -408,6 +452,14 @@ def collect_findings(repo_root: Path) -> list[Finding]:
         if not (skill_dir / "SKILL.md").exists() and not any(skill_dir.iterdir()):
             continue  # empty placeholder dir
         findings += lint_skill(skill_dir, repo_root)
+    # Markdown outside a skill's own references/ is still loaded by skills at run
+    # time (skills/_shared/core/house-style.md alone is read by five of them), so
+    # it is held to the same em-dash and table-of-contents rules.
+    for extra_root in (skills_root / "_shared", repo_root / "templates"):
+        if not extra_root.is_dir():
+            continue
+        for md in sorted(extra_root.rglob("*.md")):
+            findings += check_reference_file(md, md.relative_to(repo_root).as_posix())
     return findings
 
 
@@ -492,19 +544,24 @@ def main(argv: list[str] | None = None) -> int:
         new_errors += warns
         warns = []
 
-    # report
+    # report. Checks against a SKILL.md body build their message without the path,
+    # which makes several identical lines indistinguishable across skills, so the
+    # path is prepended whenever the message does not already start with it.
+    def labelled(f: Finding) -> str:
+        return f.message if f.message.startswith(f.path) else f"{f.path}: {f.message}"
+
     if new_errors:
         print(f"lint: {len(new_errors)} NEW violation(s); fix before commit")
         for f in sorted(new_errors, key=lambda x: x.key()):
-            print(f"  ERROR  {f.message}")
+            print(f"  ERROR  {labelled(f)}")
     if warns:
         print(f"lint: {len(warns)} warning(s)")
         for f in sorted(warns, key=lambda x: x.key()):
-            print(f"  WARN   {f.message}")
+            print(f"  WARN   {labelled(f)}")
     if grandfathered:
         print(f"lint: {len(grandfathered)} grandfathered violation(s) (TODO: bring into spec; tracked in {baseline_path.name})")
         for f in sorted(grandfathered, key=lambda x: x.key()):
-            print(f"  TODO   {f.message}")
+            print(f"  TODO   {labelled(f)}")
 
     # stale-baseline detection: keys that no longer match any current error
     if not args.no_baseline:
