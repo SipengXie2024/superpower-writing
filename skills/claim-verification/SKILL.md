@@ -134,7 +134,7 @@ Purpose: catch copy-paste drift between prose and tables. Skip during early skel
    Capture `n=`, percentages, p-values, confidence intervals, plain counts.
 2. Build a ground-truth number pool from all tables (LaTeX `tabular` rows — cells separated by `&`, rows terminated by `\\`) across manuscript/*.tex and all figure captions (`\caption{...}` inside `figure` environments).
 3. For each prose number, confirm it appears verbatim in the ground-truth pool. FAIL otherwise.
-4. Support `.writing/verify-config.yaml` `numeric_overrides: [<number>, ...]` for narrative numbers that are not table-backed (e.g., round references like "a 2018 benchmark"). Numbers in this list skip the check.
+4. Support `.writing/verify-config.yaml` `numeric_overrides: [<number>, ...]` for narrative numbers that are not table-backed (e.g., round references like "a 2018 benchmark"). Numbers in this list skip the check. With no config file, decide the same question yourself instead of deferring it: a hardware model, a version string, a replay count, a date window has nothing in any table to be reconciled against, so it is out of scope for this pass, not unresolved. Close those out in one line and suggest the override list; never hand them back as numbers the user still has to check, because a report whose "could not verify" column is longer than its mismatch list sends him chasing work that does not exist.
 5. Per-claim attribution: a FAIL on number `1,247` inside a paragraph tagged `% claim: meth-c1` attaches to claim `meth-c1` in the report.
 
 ### Optional research-integrity gate (experiment-bearing papers)
