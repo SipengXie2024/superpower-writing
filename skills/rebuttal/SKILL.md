@@ -1,6 +1,6 @@
 ---
 name: rebuttal
-description: Builds a grounded, venue-compliant response to reviewers for a CS/systems/ML paper. Atomizes every reviewer comment into an issue board with a fixed action vocabulary, enforces three finalize-blocking gates (provenance, commitment, coverage), drafts in strict R-A-C format with page cross-references, and wires every claimed change to a real manuscript location. Use when the user says "rebuttal", "reply to reviewers", "respond to reviews", "OpenReview response", or "ICML/NeurIPS rebuttal".
+description: Builds a grounded, venue-compliant response to reviewers for a CS/systems/ML paper. Atomizes every reviewer comment into an issue board with a fixed action vocabulary, enforces three finalize-blocking gates (provenance, commitment, coverage), drafts in strict R-A-C format with page cross-references, and wires every claimed change to a real manuscript location. Use when the user says "rebuttal", "reply to reviewers", "respond to reviews", "OpenReview response", "ICML/NeurIPS rebuttal", "写 rebuttal", "回复审稿意见", or "审稿人意见怎么回".
 ---
 
 # Rebuttal: Response to Reviewers
