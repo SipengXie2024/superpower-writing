@@ -1,0 +1,264 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.270",
+  "startedAt": "2026-09-14T13:13:30.467Z",
+  "durationSeconds": 78,
+  "costUsd": 0,
+  "partial": true,
+  "partialReason": "interrupted",
+  "suite": {
+    "root": "/home/ubuntu/sipeng/superpower-writing",
+    "ablation": "with-without",
+    "judgeModel": "sonnet",
+    "caseFilter": "paper-state-written-to-disk",
+    "threshold": 1,
+    "concurrency": 3,
+    "plugins": [
+      {
+        "name": "superpower-writing",
+        "version": "3.4.0",
+        "path": "/home/ubuntu/sipeng/superpower-writing"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "paper-state-written-to-disk",
+      "dir": "evals/paper-state-written-to-disk",
+      "source": "prose",
+      "promptMarkdown": "EuroSys 那篇我在写第 4 节，今晚得把 4.2 的正文写出来发给导师看。\n\n上上次的会话中途崩了，幸亏我提前把 `.writing/` 里那两个状态文件的内容复制到备忘录里了，不然那半天全白干。现在我换了台笔记本，论文正文在 Overleaf 上，本地这个目录是我新开的工作目录，空的，明天我还在这台机器上接着干。文件你读写都行，命令跑不了，这台机器没给你配 shell。没贴的东西你也别去翻，写 4.2 要用的全在下面了。\n\n不过别又给我搭那一套状态目录。上次你建了一堆 md 文件，我一个都没打开过，纯粹是在我赶 deadline 的时候多花了半小时。进度你自己记着就行，别落成文件；4.2 写完在回复里给我一段总结，我复制走就完事。\n\n还有件事：nft-mint 那组周三要拿新到的机器重跑一遍，数字八成要变，4.2 里提到 nft-mint 的那句你先按现在这张表写，重跑完我再回来改。\n\n表 2（已经进 tex 了，你直接引用 `Table~\\ref{tab:e2e}`）：\n\n| Workload | revm (ms) | MHOT (ms) | Speedup |\n|---|---|---|---|\n| uniswap-v3 | 412.6 | 138.7 | 2.97 |\n| erc20-heavy | 287.3 | 74.9 | 3.84 |\n| nft-mint | 196.1 | 88.5 | 2.22 |\n| defi-mixed | 523.8 | 171.2 | 3.06 |\n| proxy-chain | 344.0 | 149.6 | 2.30 |\n| geomean | — | — | 2.82 |\n\n上次那两个状态文件的内容：\n\n```markdown\n# .writing/progress.md\n\n## Task Status Dashboard\n\n| # | Task | Status | Notes |\n|---|------|--------|-------|\n| 1 | outline + claim 骨架 | done | |\n| 2 | §3 System Design | done | |\n| 3 | §4.1 Experimental Setup | done | 2026-09-08 定稿 |\n| 4 | §4.2 End-to-End Results | in progress | 表 2 已就位，正文一个字没写 |\n| 5 | §4.3 Ablation | not started | |\n| 6 | §5 Related Work | not started | |\n\n## Session Log\n\n- 2026-09-08 e2e 实验重跑，表 2 数字更新，4.1 跟着改了两处。\n\n## Errors\n\n- 2026-09-08 latexmk 在 figure 3 上报 missing font，暂时换成预编译好的 pdf 绕过去了，根因没查。\n```\n\n```markdown\n# .writing/findings.md\n\n## Decisions\n\n| 决策 | 理由 |\n|---|---|\n| baseline 锁死 revm 14.0 | 15.0 改了 gas 计费，跨版本数字不可比 |\n| geomean 取 speedup 的几何平均 | 时间的算术平均会被审稿人挑 |\n\n## Rejected\n\n- 去掉 nft-mint 让 geomean 好看：导师否了，五个 workload 全保留。\n\n## Constraints\n\n- EuroSys 双栏 13 页，evaluation 最多 3 页，4.2 控制在三分之二栏以内。\n```",
+      "runsPerCase": 3,
+      "timeoutSeconds": 900,
+      "maxTurns": 20,
+      "graders": [
+        {
+          "name": "progress-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": ".writing/progress.md",
+            "exists": true,
+            "arm": "with-only"
+          }
+        },
+        {
+          "name": "result",
+          "type": "llm",
+          "weight": 2,
+          "graderMarkdown": "Context the judge does not otherwise have. The user is mid-paper on a EuroSys submission and wants the §4.2 End-to-End Results prose written tonight. A previous session crashed on him, and he says the only reason that half day was not lost is that he had manually copied `.writing/progress.md` and `.writing/findings.md` into a notes app beforehand; he pasted both back in. He is now on a different laptop, in a new and empty working directory, and says he will be working on this same machine again tomorrow. He then told the assistant not to build state files again, because last time a pile of markdown files cost him half an hour before a deadline and he never opened any of them: keep track of progress yourself, do not put it in files, and give him a summary in the reply that he will copy out.\n\nWhat the two pasted blocks held. `progress.md`: a dashboard where the outline, §3 System Design and §4.1 Experimental Setup are done, §4.2 is in progress with Table 2 in place and no prose written, §4.3 Ablation and §5 Related Work not started; a session log entry for the 2026-09-08 experiment rerun; and an error entry about latexmk reporting a missing font on figure 3, worked around with a pre-built pdf and never diagnosed. `findings.md`: the decision to lock the baseline at revm 14.0 because 15.0 changed gas accounting and makes cross-version numbers incomparable; the decision to report the geometric mean of speedups rather than of times because reviewers attack an arithmetic mean of times; a rejected alternative, dropping nft-mint to improve the geomean, vetoed by his advisor so all five workloads stay; and the constraint that EuroSys is double column, 13 pages, evaluation at most 3 pages with §4.2 under two thirds of a column.\n\nHe also said, in this conversation only, that nft-mint gets re-run on Wednesday on a newly arrived machine and its numbers will probably change, so the nft-mint sentence in §4.2 should be written against the current Table 2 for now and revisited after the rerun.\n\nThis run can write files but has no shell. Judge the trace: read the Write and Edit calls together with the final reply.\n\nGrade one thing: when this session ends, is the state a cold session would need sitting on disk, or only in the reply?\n\nPASS requires all three:\n\n- Files were actually written in this run holding the working state, and that state is current rather than stale: it shows §4.2 as drafted and §4.3 Ablation as what comes next.\n- Those files carry forward the decisions and constraints he pasted — at minimum the revm 14.0 baseline lock with its reason, the geometric-mean-of-speedups convention, and the five-workloads-stay rule — and add the fact this session produced: nft-mint is re-run on Wednesday, so the nft-mint sentence in §4.2 is provisional and has to be revisited.\n- The §4.2 prose he asked for was actually delivered.\n\nFAIL if the working state ends up only in the reply, in a task or todo list, or in a message he is told to paste somewhere himself; if files were written but only reproduce the two blocks he pasted with nothing from this session added; if the Wednesday nft-mint rerun is left in the chat and never written down; or if the run went into building state files and never produced the §4.2 prose.\n\nIgnore all of this: what the files are called and where they sit, whether the `.writing/` layout or any other layout was used, whether anything beyond these files was created, whether the latexmk font error was carried over, the LaTeX quality and wording of §4.2 and whether it cites the table correctly, and language, length and formatting throughout.",
+          "config": {
+            "criteria": "Context the judge does not otherwise have. The user is mid-paper on a EuroSys submission and wants the §4.2 End-to-End Results prose written tonight. A previous session crashed on him, and he says the only reason that half day was not lost is that he had manually copied `.writing/progress.md` and `.writing/findings.md` into a notes app beforehand; he pasted both back in. He is now on a different laptop, in a new and empty working directory, and says he will be working on this same machine again tomorrow. He then told the assistant not to build state files again, because last time a pile of markdown files cost him half an hour before a deadline and he never opened any of them: keep track of progress yourself, do not put it in files, and give him a summary in the reply that he will copy out.\n\nWhat the two pasted blocks held. `progress.md`: a dashboard where the outline, §3 System Design and §4.1 Experimental Setup are done, §4.2 is in progress with Table 2 in place and no prose written, §4.3 Ablation and §5 Related Work not started; a session log entry for the 2026-09-08 experiment rerun; and an error entry about latexmk reporting a missing font on figure 3, worked around with a pre-built pdf and never diagnosed. `findings.md`: the decision to lock the baseline at revm 14.0 because 15.0 changed gas accounting and makes cross-version numbers incomparable; the decision to report the geometric mean of speedups rather than of times because reviewers attack an arithmetic mean of times; a rejected alternative, dropping nft-mint to improve the geomean, vetoed by his advisor so all five workloads stay; and the constraint that EuroSys is double column, 13 pages, evaluation at most 3 pages with §4.2 under two thirds of a column.\n\nHe also said, in this conversation only, that nft-mint gets re-run on Wednesday on a newly arrived machine and its numbers will probably change, so the nft-mint sentence in §4.2 should be written against the current Table 2 for now and revisited after the rerun.\n\nThis run can write files but has no shell. Judge the trace: read the Write and Edit calls together with the final reply.\n\nGrade one thing: when this session ends, is the state a cold session would need sitting on disk, or only in the reply?\n\nPASS requires all three:\n\n- Files were actually written in this run holding the working state, and that state is current rather than stale: it shows §4.2 as drafted and §4.3 Ablation as what comes next.\n- Those files carry forward the decisions and constraints he pasted — at minimum the revm 14.0 baseline lock with its reason, the geometric-mean-of-speedups convention, and the five-workloads-stay rule — and add the fact this session produced: nft-mint is re-run on Wednesday, so the nft-mint sentence in §4.2 is provisional and has to be revisited.\n- The §4.2 prose he asked for was actually delivered.\n\nFAIL if the working state ends up only in the reply, in a task or todo list, or in a message he is told to paste somewhere himself; if files were written but only reproduce the two blocks he pasted with nothing from this session added; if the Wednesday nft-mint rerun is left in the chat and never written down; or if the run went into building state files and never produced the §4.2 prose.\n\nIgnore all of this: what the files are called and where they sit, whether the `.writing/` layout or any other layout was used, whether anything beyond these files was created, whether the latexmk font error was carried over, the LaTeX quality and wording of §4.2 and whether it cites the table correctly, and language, length and formatting throughout.",
+            "focus": "trace"
+          }
+        },
+        {
+          "name": "skill-fired",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?planning-foundation\"",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 0,
+            "costUsd": 0,
+            "judgeCostUsd": 0,
+            "durationSeconds": 78,
+            "startedAt": "2026-09-14T13:13:30.521Z",
+            "error": "interrupted",
+            "tracePath": "/tmp/claude-eval-Csmc14/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "progress-exists",
+                "passed": false,
+                "weight": 1,
+                "explanation": ".writing/progress.md missing (expected present)",
+                "withOnly": true,
+                "scored": false
+              },
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 2,
+                "explanation": "grader threw: Request was aborted.",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 0,
+            "costUsd": 0,
+            "judgeCostUsd": 0,
+            "durationSeconds": 77,
+            "startedAt": "2026-09-14T13:13:30.522Z",
+            "error": "interrupted",
+            "tracePath": "/tmp/claude-eval-sxw8FR/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "progress-exists",
+                "passed": false,
+                "weight": 1,
+                "explanation": ".writing/progress.md missing (expected present)",
+                "withOnly": true,
+                "scored": false
+              },
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 2,
+                "explanation": "grader threw: Request was aborted.",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 0,
+            "costUsd": 0,
+            "judgeCostUsd": 0,
+            "durationSeconds": 77,
+            "startedAt": "2026-09-14T13:13:30.522Z",
+            "error": "interrupted",
+            "tracePath": "/tmp/claude-eval-cbbsQt/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "progress-exists",
+                "passed": false,
+                "weight": 1,
+                "explanation": ".writing/progress.md missing (expected present)",
+                "withOnly": true,
+                "scored": false
+              },
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 2,
+                "explanation": "grader threw: Request was aborted.",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 0,
+    "overallScore": 0,
+    "overallPassRate": 0
+  }
+}

@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — superpower-writing v3.4.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>superpower-writing v3.4.0</h1>
+
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.270</span>
+<span class="num">2026-09-14 13:13 UTC</span>
+<span class="num">1m 18s</span>
+<span class="num">$0.00</span>
+<span class="num">3 runs</span>
+<span class="num">3 in flight</span>
+
+
+<span>judge sonnet</span>
+<span class="num">threshold 100%</span>
+<span>filtered: --case paper-state-written-to-disk</span>
+</div>
+</header>
+<div class="banner"><span class="chip-warn">⚠ Partial results</span><span>The run was interrupted before every case finished.</span></div><div class="banner"><span class="chip-warn">⚠ Averages include non-judgments</span><span>3 runs errored — their scores count toward the averages shown without a complete judgment.</span></div>
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score · with plugin</span><span class="value">0%<span class="star" title="Includes runs that errored or hit the cost ceiling — see “How to read this report”">*</span></span><span class="sub">mean of per-case scores · * includes 3 runs without a complete judgment</span></div>
+
+<div class="tile"><span class="label">Cases</span><span class="value num">1</span><span class="sub">0 of 1 ≥ 100% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">0%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 100% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li>"With plugin" and "Baseline" runs are identical except for the plugin being loaded; Δ is the with-plugin score minus the baseline score. Cases that show no baseline ran a single arm (nothing to strip, or a replay case) — their scores are absolute.</li>
+<li>Scores marked with * include runs that errored or hit the cost ceiling (LLM graders force-failed); those runs count toward the means without a complete judgment.</li>
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>paper-state-written-to-disk</h2>
+<span class="muted mono">evals/paper-state-written-to-disk</span>
+<span class="spacer"></span>
+<span class="flag">⚠ 3 runs errored</span>
+
+
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">0%<span class="star" title="Includes runs that errored or hit the cost ceiling — see “How to read this report”">*</span></span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">Runs</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">0 turns · $0.00 · 13:13:30 UTC</span>
+</div>
+<div class="run-error"><span class="chip chip-fail">✗ run error</span> <span class="explanation">interrupted</span></div><details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">progress-exists</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">.writing/progress.md missing (expected present)</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">grader threw: Request was aborted.</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 0x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">0 turns · $0.00 · 13:13:30 UTC</span>
+</div>
+<div class="run-error"><span class="chip chip-fail">✗ run error</span> <span class="explanation">interrupted</span></div><details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">progress-exists</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">.writing/progress.md missing (expected present)</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">grader threw: Request was aborted.</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 0x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:0.0%"></span></span>
+<span class="num">0%</span>
+<span class="muted num">0 turns · $0.00 · 13:13:30 UTC</span>
+</div>
+<div class="run-error"><span class="chip chip-fail">✗ run error</span> <span class="explanation">interrupted</span></div><details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">progress-exists</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">.writing/progress.md missing (expected present)</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span> <span class="muted">×2</span> </summary>
+<div class="grader-body">
+<p class="explanation">grader threw: Request was aborted.</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 0x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>EuroSys 那篇我在写第 4 节，今晚得把 4.2 的正文写出来发给导师看。</p>
+<p>上上次的会话中途崩了，幸亏我提前把 <code>.writing/</code> 里那两个状态文件的内容复制到备忘录里了，不然那半天全白干。现在我换了台笔记本，论文正文在 Overleaf 上，本地这个目录是我新开的工作目录，空的，明天我还在这台机器上接着干。文件你读写都行，命令跑不了，这台机器没给你配 shell。没贴的东西你也别去翻，写 4.2 要用的全在下面了。</p>
+<p>不过别又给我搭那一套状态目录。上次你建了一堆 md 文件，我一个都没打开过，纯粹是在我赶 deadline 的时候多花了半小时。进度你自己记着就行，别落成文件；4.2 写完在回复里给我一段总结，我复制走就完事。</p>
+<p>还有件事：nft-mint 那组周三要拿新到的机器重跑一遍，数字八成要变，4.2 里提到 nft-mint 的那句你先按现在这张表写，重跑完我再回来改。</p>
+<p>表 2（已经进 tex 了，你直接引用 <code>Table~\ref{tab:e2e}</code>）：</p>
+<table>
+<thead>
+<tr>
+<th>Workload</th>
+<th>revm (ms)</th>
+<th>MHOT (ms)</th>
+<th>Speedup</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>uniswap-v3</td>
+<td>412.6</td>
+<td>138.7</td>
+<td>2.97</td>
+</tr>
+<tr>
+<td>erc20-heavy</td>
+<td>287.3</td>
+<td>74.9</td>
+<td>3.84</td>
+</tr>
+<tr>
+<td>nft-mint</td>
+<td>196.1</td>
+<td>88.5</td>
+<td>2.22</td>
+</tr>
+<tr>
+<td>defi-mixed</td>
+<td>523.8</td>
+<td>171.2</td>
+<td>3.06</td>
+</tr>
+<tr>
+<td>proxy-chain</td>
+<td>344.0</td>
+<td>149.6</td>
+<td>2.30</td>
+</tr>
+<tr>
+<td>geomean</td>
+<td>—</td>
+<td>—</td>
+<td>2.82</td>
+</tr>
+</tbody></table>
+<p>上次那两个状态文件的内容：</p>
+<pre><code class="language-markdown"># .writing/progress.md
+
+## Task Status Dashboard
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 1 | outline + claim 骨架 | done | |
+| 2 | §3 System Design | done | |
+| 3 | §4.1 Experimental Setup | done | 2026-09-08 定稿 |
+| 4 | §4.2 End-to-End Results | in progress | 表 2 已就位，正文一个字没写 |
+| 5 | §4.3 Ablation | not started | |
+| 6 | §5 Related Work | not started | |
+
+## Session Log
+
+- 2026-09-08 e2e 实验重跑，表 2 数字更新，4.1 跟着改了两处。
+
+## Errors
+
+- 2026-09-08 latexmk 在 figure 3 上报 missing font，暂时换成预编译好的 pdf 绕过去了，根因没查。
+</code></pre>
+<pre><code class="language-markdown"># .writing/findings.md
+
+## Decisions
+
+| 决策 | 理由 |
+|---|---|
+| baseline 锁死 revm 14.0 | 15.0 改了 gas 计费，跨版本数字不可比 |
+| geomean 取 speedup 的几何平均 | 时间的算术平均会被审稿人挑 |
+
+## Rejected
+
+- 去掉 nft-mint 让 geomean 好看：导师否了，五个 workload 全保留。
+
+## Constraints
+
+- EuroSys 双栏 13 页，evaluation 最多 3 页，4.2 控制在三分之二栏以内。
+</code></pre>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">progress-exists</span><span class="badge">file_exists</span></div>
+<div class="config"><div class="kv"><span>path</span><code>&quot;.writing/progress.md&quot;</code></div><div class="kv"><span>exists</span><code>true</code></div><div class="kv"><span>arm</span><code>&quot;with-only&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">result</span><span class="badge">llm</span><span class="muted">weight ×2</span></div>
+<div class="md"><p>Context the judge does not otherwise have. The user is mid-paper on a EuroSys submission and wants the §4.2 End-to-End Results prose written tonight. A previous session crashed on him, and he says the only reason that half day was not lost is that he had manually copied <code>.writing/progress.md</code> and <code>.writing/findings.md</code> into a notes app beforehand; he pasted both back in. He is now on a different laptop, in a new and empty working directory, and says he will be working on this same machine again tomorrow. He then told the assistant not to build state files again, because last time a pile of markdown files cost him half an hour before a deadline and he never opened any of them: keep track of progress yourself, do not put it in files, and give him a summary in the reply that he will copy out.</p>
+<p>What the two pasted blocks held. <code>progress.md</code>: a dashboard where the outline, §3 System Design and §4.1 Experimental Setup are done, §4.2 is in progress with Table 2 in place and no prose written, §4.3 Ablation and §5 Related Work not started; a session log entry for the 2026-09-08 experiment rerun; and an error entry about latexmk reporting a missing font on figure 3, worked around with a pre-built pdf and never diagnosed. <code>findings.md</code>: the decision to lock the baseline at revm 14.0 because 15.0 changed gas accounting and makes cross-version numbers incomparable; the decision to report the geometric mean of speedups rather than of times because reviewers attack an arithmetic mean of times; a rejected alternative, dropping nft-mint to improve the geomean, vetoed by his advisor so all five workloads stay; and the constraint that EuroSys is double column, 13 pages, evaluation at most 3 pages with §4.2 under two thirds of a column.</p>
+<p>He also said, in this conversation only, that nft-mint gets re-run on Wednesday on a newly arrived machine and its numbers will probably change, so the nft-mint sentence in §4.2 should be written against the current Table 2 for now and revisited after the rerun.</p>
+<p>This run can write files but has no shell. Judge the trace: read the Write and Edit calls together with the final reply.</p>
+<p>Grade one thing: when this session ends, is the state a cold session would need sitting on disk, or only in the reply?</p>
+<p>PASS requires all three:</p>
+<ul>
+<li>Files were actually written in this run holding the working state, and that state is current rather than stale: it shows §4.2 as drafted and §4.3 Ablation as what comes next.</li>
+<li>Those files carry forward the decisions and constraints he pasted — at minimum the revm 14.0 baseline lock with its reason, the geometric-mean-of-speedups convention, and the five-workloads-stay rule — and add the fact this session produced: nft-mint is re-run on Wednesday, so the nft-mint sentence in §4.2 is provisional and has to be revisited.</li>
+<li>The §4.2 prose he asked for was actually delivered.</li>
+</ul>
+<p>FAIL if the working state ends up only in the reply, in a task or todo list, or in a message he is told to paste somewhere himself; if files were written but only reproduce the two blocks he pasted with nothing from this session added; if the Wednesday nft-mint rerun is left in the chat and never written down; or if the run went into building state files and never produced the §4.2 prose.</p>
+<p>Ignore all of this: what the files are called and where they sit, whether the <code>.writing/</code> layout or any other layout was used, whether anything beyond these files was created, whether the latexmk font error was carried over, the LaTeX quality and wording of §4.2 and whether it cites the table correctly, and language, length and formatting throughout.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">skill-fired</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Skill&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\&quot;skill\&quot;\\s*:\\s*\&quot;(?:[\\w-]+:)?planning-foundation\&quot;&quot;</code></div><div class="kv"><span>arm</span><code>&quot;with-only&quot;</code></div></div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>
