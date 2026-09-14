@@ -1,0 +1,336 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.270",
+  "startedAt": "2026-09-14T08:51:50.620Z",
+  "durationSeconds": 527,
+  "costUsd": 3.5317494999999997,
+  "partial": false,
+  "suite": {
+    "root": "/home/ubuntu/sipeng/superpower-writing",
+    "ablation": "with-without",
+    "judgeModel": "sonnet",
+    "caseFilter": "reference-cuts-under-page-budget",
+    "threshold": 1,
+    "concurrency": 3,
+    "plugins": [
+      {
+        "name": "superpower-writing",
+        "version": "3.4.0",
+        "path": "/home/ubuntu/sipeng/superpower-writing"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "reference-cuts-under-page-budget",
+      "dir": "evals/reference-cuts-under-page-budget",
+      "source": "prose",
+      "promptMarkdown": "MHOT 那篇 minor revision 过了，camera-ready 下周三交，现在排版超了 0.8 页。一条参考文献在这个模板里占 5 到 6 行，砍 6 条正好压回去，正文一个字都不用动。你帮我定砍哪 6 条。\n\n跟引用有关的部分我全贴下面了。\n\n**Intro 第二段，动机那句**\n\n> Contract invocation on Ethereum mainnet is heavily skewed: measured over one month of mainnet traffic, the top 100 contracts by invocation count account for 62% of all gas consumed [12]. A tiering policy that promotes only this head therefore pays compilation cost on a vanishing fraction of deployed code.\n\n**Section 2 Related Work，全文**\n\n> *EVM execution engines.* The EVM is a stack machine specified in [1]. Production clients execute bytecode with a switch-dispatch interpreter (go-ethereum [13], revm [5]); evmone [3] adds a second, statically selected mode that pre-computes basic-block gas and stack bounds, and revmc [11] compiles a deployed contract to native code ahead of time. Sphinx [19] is the closest point to our design, speculatively compiling basic blocks under type feedback. None of these engines revisits its choice of tier once execution has started. Comparable staging questions arise in WebAssembly contract runtimes [10, 20].\n>\n> *Gas analysis and contract optimization.* A large body of work analyzes or reduces the gas cost of deployed contracts [2, 4, 9, 14, 18, 21]. Chen et al. [2] first established that gas waste is pervasive in deployed code. All of these techniques operate on a contract before deployment and are orthogonal to execution-side tiering.\n>\n> *Tiered compilation in language VMs.* Promoting hot code to an optimizing tier at runtime is standard practice in production language VMs [15, 17]; the same staging now appears in JavaScript engines, where a fast baseline compiler sits between the interpreter and the optimizer [16]. Our promotion policy follows the invocation-counter design of the HotSpot client compiler [17], with the counter keyed on contract address rather than on method identity.\n>\n> *Surveys and adjacent chains.* Smart-contract platform surveys [8, 20] and script-level analyses of other chains [22] give background but do not address execution strategy.\n\n**Section 4.2 第一句，实现**\n\n> Our native tier emits LLVM IR and reuses the ORC JIT stack [6].\n\n**Section 6.1 第一句，正确性**\n\n> Theorem 1 states that a promoted native tier is observationally equivalent to the interpreter tier with respect to the small-step EVM semantics of [7]; the proof is in Appendix B.\n\n**Table 2（第 5 页，跟 related work 一起讨论的那张）**\n\n| System | Execution strategy | Uses runtime profile | Recompilation unit | Speedup vs. geth interpreter |\n|---|---|---|---|---|\n| go-ethereum [13] | interpreter | no | — | 1.00x |\n| revm [5] | interpreter | no | — | 1.9x |\n| evmone (advanced) [3] | static two-mode | no | whole contract | 2.4x |\n| revmc [11] | AOT native | no | whole contract | 3.1x |\n| Sphinx [19] | speculative JIT | partial (type feedback) | basic block | 2.8x |\n| MHOT (ours) | tiered, profile-guided | yes | hot region | 4.6x |\n\n**参考文献，22 条**（引用数是我从 Scholar 上顺手扫的，约数）\n\n1. G. Wood. Ethereum: A Secure Decentralised Generalised Transaction Ledger. Yellow Paper, 2014. (~7000)\n2. T. Chen et al. Under-Optimized Smart Contracts Devour Your Money. SANER 2017. (~420)\n3. Ethereum Foundation. evmone: Fast Ethereum Virtual Machine implementation. github.com/ethereum/evmone, accessed 2025.\n4. E. Albert et al. GASTAP: A Gas Analyzer for Smart Contracts. TACAS 2019. (~150)\n5. bluealloy. revm: Rust implementation of the EVM. github.com/bluealloy/revm, accessed 2025.\n6. C. Lattner, V. Adve. LLVM: A Compilation Framework for Lifelong Program Analysis and Transformation. CGO 2004. (~11000)\n7. E. Hildenbrandt et al. KEVM: A Complete Formal Semantics of the Ethereum Virtual Machine. CSF 2018. (~390)\n8. Z. Zheng et al. An Overview on Smart Contracts: Challenges, Advances and Platforms. FGCS 2020. (~900)\n9. L. Signer. Gas Cost Analysis for Ethereum Smart Contracts. MSc thesis, ETH Zurich, 2018. (~40)\n10. W. Wang et al. WebAssembly Smart Contract Runtimes: A Systematic Comparison. IEEE Access 2022. (~30)\n11. paradigmxyz. revmc: JIT and AOT compiler for the EVM. github.com/paradigmxyz/revmc, accessed 2025.\n12. P. Zhou, M. Li. A Measurement Study of Gas Consumption Skew in Ethereum Mainnet Traffic. WTSC workshop @ FC 2019. (11)\n13. go-ethereum authors. go-ethereum. github.com/ethereum/go-ethereum, accessed 2025.\n14. T. Chen et al. GasChecker: Scalable Analysis for Discovering Gas-Inefficient Smart Contracts. IEEE TETC 2020. (~120)\n15. U. Hölzle, C. Chambers, D. Ungar. Optimizing Dynamically-Typed Object-Oriented Languages with Polymorphic Inline Caches. ECOOP 1991. (~1300)\n16. V8 team. Sparkplug: a non-optimizing JavaScript compiler. v8.dev blog, 2021.\n17. T. Kotzmann et al. Design of the Java HotSpot Client Compiler for Java 6. ACM TACO 2008. (~260)\n18. Y. Liu et al. Gas-Efficient Smart Contract Rewriting. ASE 2021. (~60)\n19. A. Novak et al. Sphinx: A Speculative JIT for the Ethereum Virtual Machine. arXiv preprint, 2024. (8)\n20. X. Li et al. A Survey on Blockchain Virtual Machines. ACM Computing Surveys 2023. (~70)\n21. M. Marescotti et al. Computing Exact Worst-Case Gas Consumption for Smart Contracts. ISoLA 2018. (~60)\n22. A. Miller et al. An Empirical Analysis of Bitcoin Script Usage. FC 2016. (~200)\n\n我自己先挑了三条，都是 venue 最软的：[12] 是个 workshop 才 11 引用，[19] 是 arXiv 预印本连正式发表都没有，[7] 那篇形式语义是 2018 年的、跟我们的实现也不沾边。剩下三条你补齐，顺便说一下我挑的这三条有没有问题。",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 12,
+      "graders": [
+        {
+          "name": "result",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The user is trimming six references from a 22-entry camera-ready reference list in an EVM-compiler paper, has pasted the related-work section, the reference list, Table 2 and three sentences from elsewhere, and says six cuts close the 0.8-page overflow with no prose edit at all. He picked [12], [19] and [7] himself because their venues look weakest, asked for three more, and asked whether his three are safe. Ground truth, all of it readable in the pasted text: thirteen entries are either a row of Table 2 or the only key at their citation site. [12] carries the 62% gas-skew figure, [19] is a Table 2 row and the nearest competitor, [7] is the semantics Theorem 1 is stated against, [3] [5] [11] [13] are the other Table 2 rows, and [1] [2] [6] [16] [17] [22] each sit alone on a sentence or clause — [2] on \"Chen et al. [2] first established that gas waste is pervasive\", which is separate from the six-key gas group it also appears in; [6] on the ORC JIT sentence in 4.2; [16] on the JavaScript baseline-compiler clause; [17] on the invocation-counter sentence; [22] on \"script-level analyses of other chains\". Cutting any of those thirteen breaks a claim or forces the prose deletion the user ruled out. Nine entries are free: [4] [9] [14] [18] [21] (the gas group keeps [2]), [15] (co-cited with [17]), and [8] [10] [20], where each survey clause must keep a key, so [20] can go only if [8] and [10] both stay. This run has read-only tools in an empty directory and no network, so no file can be written and nothing can be looked up. Grade substance only; ignore formatting, length and language.\n\nOne question decides this case: does every entry the reply tells the user to cut come out without leaving a sentence or a Table 2 row unsupported?\n\nPASS if all three hold. The reply names at least six specific entries to cut, and every one of them is [4], [8], [9], [10], [14], [15], [18], [20] or [21], with [20] among them only when [8] and [10] are not. No entry outside those nine is called cuttable anywhere in the reply, including as a reserve held back for a later squeeze. And the reply says [7], [12] and [19] have to stay.\n\nFAIL if any entry outside the nine — [1] [2] [3] [5] [6] [7] [11] [12] [13] [16] [17] [19] [22] — is named as a cut or as a reserve cut, even when the reply offers a prose edit to compensate, or if [20] is cut together with [8] or [10]. Also FAIL if the reply names fewer than six cuts, or lets the user's three stand without objection.",
+          "config": {
+            "criteria": "The user is trimming six references from a 22-entry camera-ready reference list in an EVM-compiler paper, has pasted the related-work section, the reference list, Table 2 and three sentences from elsewhere, and says six cuts close the 0.8-page overflow with no prose edit at all. He picked [12], [19] and [7] himself because their venues look weakest, asked for three more, and asked whether his three are safe. Ground truth, all of it readable in the pasted text: thirteen entries are either a row of Table 2 or the only key at their citation site. [12] carries the 62% gas-skew figure, [19] is a Table 2 row and the nearest competitor, [7] is the semantics Theorem 1 is stated against, [3] [5] [11] [13] are the other Table 2 rows, and [1] [2] [6] [16] [17] [22] each sit alone on a sentence or clause — [2] on \"Chen et al. [2] first established that gas waste is pervasive\", which is separate from the six-key gas group it also appears in; [6] on the ORC JIT sentence in 4.2; [16] on the JavaScript baseline-compiler clause; [17] on the invocation-counter sentence; [22] on \"script-level analyses of other chains\". Cutting any of those thirteen breaks a claim or forces the prose deletion the user ruled out. Nine entries are free: [4] [9] [14] [18] [21] (the gas group keeps [2]), [15] (co-cited with [17]), and [8] [10] [20], where each survey clause must keep a key, so [20] can go only if [8] and [10] both stay. This run has read-only tools in an empty directory and no network, so no file can be written and nothing can be looked up. Grade substance only; ignore formatting, length and language.\n\nOne question decides this case: does every entry the reply tells the user to cut come out without leaving a sentence or a Table 2 row unsupported?\n\nPASS if all three hold. The reply names at least six specific entries to cut, and every one of them is [4], [8], [9], [10], [14], [15], [18], [20] or [21], with [20] among them only when [8] and [10] are not. No entry outside those nine is called cuttable anywhere in the reply, including as a reserve held back for a later squeeze. And the reply says [7], [12] and [19] have to stay.\n\nFAIL if any entry outside the nine — [1] [2] [3] [5] [6] [7] [11] [12] [13] [16] [17] [19] [22] — is named as a cut or as a reserve cut, even when the reply offers a prose edit to compensate, or if [20] is cut together with [8] or [10]. Also FAIL if the reply names fewer than six cuts, or lets the user's three stand without objection.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "skill-fired",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?literature\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 5,
+            "costUsd": 0.9134824999999999,
+            "judgeCostUsd": 0.017723999999999997,
+            "durationSeconds": 306,
+            "startedAt": "2026-09-14T08:51:50.665Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-np2NSe/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "没有 memory 目录访问权限，也没有搜索后端（Bash / Zotero MCP / 网络都不可用），所以下面的 venue 和引用数我没去核——但这个判断几乎只依赖你贴的正文里的引用承重关系，你手上的材料就能自查。\n\n## 结论\n\n你挑的三条一条都不能砍，而且三条都得动正文——跟你\"正文一个字不动\"的前提直接冲突。下面重新给一套六条，全部是零正文改动的。\n\n砍引用要看**承重**不看名气。不能碰的是：某个事实/数字的唯一出处、正文点名的、对比表里占一行的、定理真正用到的形式基础。能白砍的只有一种：一个从句上挂着多条 key 的组引用，去掉一条后句子照样成立、渲染出来一个字不变。你的过滤器（venue 软 + 引用数低）恰好反选了——冷门、近期、形式化的那几条正是干活的，名气大的综述才是填充。\n\n## 你挑的三条\n\n**[12] 不能砍。** Intro 那句 62% 的唯一出处。砍了要么删掉这个数字（动正文，而且删的是全文动机），要么在 camera-ready 里留一个没出处的数字。11 次引用不相干，它是数据来源不是装饰。真要担心，该担心的是 2019 年一个月的测量对 2026 年的稿子是否过期——那是补脚注或重测，不是删。\n\n**[19] 最不能砍。** 你自己的句子写着 \"the closest point to our design\"，Table 2 里还有一行（2.8x，你 4.6x 之外最强的对照）。砍它要删一句正文 + 一整行表；而且是在 minor revision 之后砍，审稿人看过带它的版本。把最近的竞争对手从对比表里拿掉，观感很差。arXiv 预印本不改变它是 prior art，2024 年做同一个问题的预印本恰恰是审稿人会去查的。\n\n**[7] 不能砍。** Theorem 1 是\"相对于 [7] 的 small-step EVM 语义\"陈述的，砍了定理失去指称对象，Appendix B 的证明大概率直接建在 KEVM 的规则上。\"跟实现不沾边\"正是它的作用：它不是实现基线，是正确性断言量化的那个语义对象。[1] Yellow Paper 顶替不了，除非证明本来就写在它上面——换 cite 不换证明就是误引。\n\n## 建议砍的六条（按安全度排，全部零正文改动）\n\n1. **[9] Signer, MSc thesis** — 组引用 `[2,4,9,14,18,21]` → `[2,4,18]`。未正式发表的硕士论文，组里最弱，内容被 [4]、[21] 覆盖。\n2. **[21] Marescotti, ISoLA 2018** — 同一处组引用。worst-case gas 上界，跟 [4] GASTAP 同一子话题，留一条够。\n3. **[15] Hölzle PIC** — `[15, 17]` → `[17]`。PIC 讲的是多态内联缓存和分发，不是运行时分层提升，本来就撑不住那句；[17] HotSpot 才是正主。顺带修了个引用错配。\n4. **[8] Zheng, FGCS 2020** — `[8, 20]` → `[20]`。两条综述功能重复，[20] 更新（CSUR 2023）且是 VM 综述，更贴执行引擎。\n5. **[14] GasChecker** — 同组引用。跟已被正文点名的 [2] 同一组作者、同一条线，[2] 已经代表了。\n6. **[10] Wang, WASM runtimes** — `[10, 20]` → `[20]`。六条里最松的一条：砍完 WASM 那句只剩一条通用 VM 综述支撑（[20] 确实覆盖 WASM VM，但特指性变弱）。如果最后只需砍五条，第一个恢复它。\n\n砍完 gas 那句变成 `[2, 4, 18]`：seminal + 分析（GASTAP）+ 重写优化（Liu），\"analyzes or reduces\" 两个动词各有出处，三条撑 \"a large body of work\" 不寒碜。\n\n## 三个执行提醒\n\n1. **先翻 review。** 如果哪个审稿人在 minor revision 里点名要你引某篇，那篇一票否决。我只看得到你贴的正文，这一条会直接推翻上面的排序，最可能中招的是 [14] 和 [10]。要保 [14] 就跟 [18] 对调。\n2. **Table 2 第一列的编号。** 那些 [13][5][3][11][19] 如果是手打数字而不是 `\\cite`，砍掉 6 条后整表编号会静默错位。camera-ready 最容易翻车的地方。\n3. **算术自己量一下。** 6 × 5–6 行 ≈ 33 行，对应约 41 行/页，单栏版式说得通；如果正文是双栏（~55 行/栏），33 行只值 0.3 页，六条远远不够。编译出来量一下最后一页的实际溢出再动手。\n\n零改动的候选到这六条就用尽了，没有第七条——[22]、[16] 以及整段 \"Surveys and adjacent chains\" 都要删从句或删段，越过你划的线了。所以如果量下来六条不够，缺口得从参考文献以外找。\n\n上面唯一一条外部判断是 [15] 的主题（内联缓存 ≠ 分层编译），值得你自己确认一眼。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 3,
+            "costUsd": 0.6841245000000001,
+            "judgeCostUsd": 0.017016,
+            "durationSeconds": 230,
+            "startedAt": "2026-09-14T08:51:50.665Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-8goQ6O/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "没搜检索库——这是纯结构筛查，判据全在你贴的这些文字里。\n\n## 你挑的三条，一条都不能砍\n\n三条正好命中\"绝对不能砍\"的三类。\n\n**[12] Zhou & Li** — Intro 那个 62% 是全文动机的唯一支撑，而且是个硬数字。砍了只有两条路：删整句（正文改动，动机没了），或者留一个没出处的实测统计（审稿人必问）。workshop + 11 引用不说明问题——2019 年的小众实测论文本来就不涨引用，这跟数字对不对是两回事。\n\n**[19] Sphinx** — 三条里最不能砍的。它是你自己写的 \"the closest point to our design\"，还在 Table 2 里占一行带 2.8x，是表里除你之外最高的数。砍它得连表一起改（浮动体，第 5 页要重新看排版），而且效果是把最强的对手从对比表里拿掉、把更弱的几个留着。预印本不是理由：它存在、它最近、它最像你，你引它，或者你看起来在藏它。\n\n**[7] KEVM** — Theorem 1 是 \"with respect to the small-step EVM semantics of [7]\" 陈述的。砍掉它，定理就没有形式化指称对象，变成不可证伪的句子。\"跟实现不沾边\"用错了判据——它不是实现参考，是你正确性 claim 的定义基础。\n\n共同问题在判据：你按 venue 软不软、引用数高不高挑，但决定一条能不能砍的是**它在文中承担多少载荷**。只出现在多引用方括号里、抽掉编号后句子和 claim 都照样成立的，才是零成本的。\n\n## 该砍的 6 条\n\n| 砍 | 出现位置 | 改成 | 理由 |\n|---|---|---|---|\n| [9] Signer 硕士论文 | pile `[2,4,9,14,18,21]` | 去掉编号 | 未发表硕士论文，pile 里最弱的一项，也最容易被审稿人问\"这条为什么在这\" |\n| [21] Marescotti ISoLA'18 | 同 pile | 去掉编号 | 软会、60 引用、正文无任何点名 |\n| [14] GasChecker TETC'20 | 同 pile | 去掉编号 | 与 [2] 同一个 Chen et al. 组、同一子方向（部署代码的 gas 低效），而 [2] 已在 prose 里点名，[14] 纯冗余 |\n| [15] Hölzle PIC ECOOP'91 | `[15, 17]` | `[17]` | claim 完全由 [17] 承担；而且 PIC 讲的是多态内联缓存/动态分派，根本不是分层编译，拿来支撑 \"promoting hot code to an optimizing tier is standard practice\" 是错配，砍掉反而更准 |\n| [8] Zheng FGCS'20 | `[8, 20]` | `[20]` | 通用智能合约综述，纯背景，[20]（CSUR'23 blockchain VM 综述）更新、更对口 |\n| [10] Wang IEEE Access'22 | `[10, 20]` | `[20]` | IEEE Access、30 引用、wasm 运行时比较，[20] 覆盖同一片地 |\n\n砍完 pile 剩 `[2, 4, 18]`：SANER 实测、TACAS 静态分析、ASE 重写，三个子方向各一条，venue 也都撑得住。\"A large body of work\" 配 3 条例证完全够，读起来比原来 6 条堆着还清爽。\n\n唯一的残留瑕疵：`Smart-contract platform surveys [20]` 复数配一条引用。[20] 标题本身就是 \"A Survey on...\"，读者会把 surveys 读成类别，我建议不管它——要处理就是 surveys→survey 一个词，改不改你定。\n\n## 执行时注意\n\n- **重编号**：22→16，[9] 之后全部前移。BibTeX + `\\cite` 是自动的；如果是手编号，Table 2 单元格里的 [13]→[10]、[11]→[8]、[19]→[14] 也得跟着改，容易漏。\n- **别只按行数算**：6 条 × 5–6 行 = 30–36 行，按你说的 0.8 页反推这模板一页 40 多行，单栏的话对得上。但重编号会让引用密集的段落重新折行（`[2,4,9,14,18,21]` 变 `[2,4,18]` 那行尤其），可能多退一行也可能少退一行。编译完在 PDF 上实测。\n- **砍掉的条目留在 .bib 里**，只是不 `\\cite`。未引用条目零成本，万一还有余量可以换回来。\n\n**后备只有一条**：从 pile 里再抽 [18]（或 [4]），句子照样成立，正文不动。再往下就没有了——[16] Sparkplug 和 [22] Miller 各自是所在从句的唯一引用，砍了必须删从句；[20] 现在独自撑两处，动不了。不满足\"不动正文\"的选项我就不列了。\n\n以上只基于你贴的内容判断，各条目本身（作者、年份、venue）我没有重新核。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 3,
+            "costUsd": 0.7203584999999999,
+            "judgeCostUsd": 0.018600000000000002,
+            "durationSeconds": 246,
+            "startedAt": "2026-09-14T08:51:50.665Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-S8ORYj/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_superpower-writing_zotero",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:superpower-writing:zotero\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "你挑的三条我先说结论：**一条都不能砍，而且这三条恰好是全文最砍不得的三条。**\n\n你用的筛选标准（venue 软、引用少、年份旧）跟\"能不能砍\"基本没关系。真正的标准是这条引用在文里**承担什么载荷**。而载荷重的引用往往正好长你说的那副样子——因为具体的东西（一个具体数字、一个最近的对手、一套形式语义）天然来自小众出处，而能砍的是那些堆在一起的泛泛之引。\n\n## 你那三条的问题\n\n**[12] Zhou & Li（62% 那个数）** —— 它是正文里一个具体数字的唯一出处。砍掉之后 Intro 第二段就变成\"top 100 合约占 62% gas\"而没有任何来源，这是全文动机句。而且它直接违反你自己的前提：正文必须动，你得把那句话改写成不带数字的定性说法，而那等于把整篇论文的 motivation 抽掉一层。11 次引用不说明它弱，只说明 WTSC 2019 的东西没人引——但你要的那个数只有它有。\n\n**[19] Sphinx** —— 三条里最危险的。它同时是：Related Work 里\"the closest point to our design\"、Table 2 的一行、以及那行里 2.8x 这个数。砍它要删表格一行 + 删两句正文，\"一个字不动\"直接破产。更要命的是性质问题：**在 camera-ready 阶段，把最接近的竞争者从对比表里拿掉，而这个竞争者的数字（2.8x）是仅次于你的 4.6x 的第二名**。即使你完全没这个意思，留在记录上就是\"录用之后最强的 baseline 消失了\"。如果有审稿人当初问过 Sphinx，这会直接出事。arXiv 预印本、8 次引用，是 2024 年新工作的正常状态，不是可砍的理由。\n\n**[7] KEVM** —— \"跟我们的实现不沾边\"正是它该在的理由。Theorem 1 的表述是\"相对于 [7] 的 small-step EVM 语义观察等价\"，砍掉之后这个定理没有指称对象，等价于什么就说不清了，附录 B 的证明也悬空。顺便：不能拿 [1] Yellow Paper 顶替——黄皮书不是可以直接做观察等价证明的小步操作语义，换了要重写附录 B。这是你论文形式化贡献的地基。\n\n## 我建议砍的 6 条\n\n全部是括号内删数字，**一个词都不改**：\n\n| 砍 | 出处 | 理由 | 改动后 |\n|---|---|---|---|\n| [9] | Signer, MSc thesis | 全书目里最弱的出处类型（未发表硕士论文），且在 6 条堆引里 | \\[2, 4, 18\\] |\n| [21] | Marescotti et al., ISoLA 2018 | 最坏情况 gas 计算，是堆引里跟\"analyzes or reduces\"最不贴的 | 同上 |\n| [14] | Chen et al., GasChecker | 跟 [2] 同一组、同一主题，而 [2] 被下一句单独点名，纯冗余共引 | 同上 |\n| [8] | Zheng et al., FGCS 2020 | 与 [20] 共引；[20] 更新（2023）且更对题（blockchain VM 而非泛 smart contract） | \\[20\\] |\n| [10] | Wang et al., IEEE Access 2022 | 与 [20] 共引，[20] 覆盖 WASM VM | \\[20\\] |\n| [15] | Hölzle et al., PIC, ECOOP 1991 | 与 [17] 共引；PIC 讲的是 inline caching 不是分层编译，对那句话本来就略微错配，删掉反而更准 | \\[17\\] |\n\n堆引从 [2,4,9,14,18,21] 剩 [2,4,18]，语义覆盖是完整的：[2] 奠基性发现 / [4] GASTAP 静态分析（对应 \"analyzes\"）/ [18] 重写优化（对应 \"reduces\"）。下一句 \"Chen et al. [2] first established...\" 和 \"All of these techniques operate on a contract before deployment\" 都还成立。\n\n## 两件要核的事\n\n**行数对不上的风险。** 你按\"每条 5–6 行 × 6 条\"算的，但这 6 条不等长：[9] 是单作者硕士论文，大概只有 3 行；[15] 三作者，4–5 行。实际回收可能是 28–32 行而不是 30–36。**先数一下 .bbl 里这 6 条的真实行数**，短了就再加 **[4] GASTAP**（堆引剩 [2, 18]，仍然覆盖 analyze/reduce 两头，四作者条目行数也长）。这是唯一一条还能加的——再往下所有剩余引用要么承载具体断言，要么得删句子，而删句子你已经排除了，所以预备队就这一条，没有第二条。\n\n**翻一下 revision response letter。** 如果审稿人当初点名要求补的引用在我这 6 条里，别砍。有些会场的 AE 会拿 camera-ready 对照修改承诺。\n\n两个附带的小事，都可选：[8] 砍掉后 \"Smart-contract platform surveys [20]\" 复数配单引，介意的话删个 s；另外 [20] 现在单独扛 WASM 那句了，花半分钟确认它确实讨论了 WASM 运行时。\n\n最后一个不属于这次任务但值得知道的：[12] 是 2019 年一个月的主网数据，用在 2026 年的论文里撑 motivation，中间隔着 EIP-1559、合并和 L2 迁移，62% 今天大概率不成立。这个问题不是删引用能解决的（删了更糟，数字变成无源），要修的话是在那句话里插\"in 2019\"两个词。这次赶 deadline 可以先放着，但心里有数。"
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.38453400000000004,
+            "judgeCostUsd": 0.017118000000000008,
+            "durationSeconds": 168,
+            "startedAt": "2026-09-14T08:55:40.466Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-ca0wON/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "先说结论：你挑的三条一条都不能砍——它们恰好是全篇**最不能砍**的三条。下面我直接给你 6 条完整替换方案。\n\n## 判断标准\n\n能不能砍跟引用数、venue 没关系，只跟**这条引用在论证里占的位置**有关。你这篇里，凡是单独撑起一个事实性断言的（一个数字、一个定理的语义基准、一个被点名的最接近工作），砍掉就必须改正文；凡是躺在方括号列表里、旁边还有别的引用扛着同一句话的，砍掉只改 `\\cite{}` 里的 key，正文一个字不动。你的三条全是前者，我下面这六条全是后者。\n\n## 建议砍的 6 条\n\n| 砍 | 出处 | 砍后那句变成 | 理由 |\n|---|---|---|---|\n| [9] Signer 硕士论文 | `[2,4,9,14,18,21]` | `[2,4,18]` | 未正式发表的 MSc thesis，~40 引，这一串里最弱的一条 |\n| [14] GasChecker | 同上 | 同上 | 与 [2] 同一批作者（Chen et al.）、同一主题（发现 gas 浪费），内容上被 [2] 覆盖 |\n| [21] Marescotti | 同上 | 同上 | worst-case gas 上界，离\"analyzes or reduces gas cost\"这句最远 |\n| [15] Hölzle PIC | `[15,17]` | `[17]` | [17] 留着，而且 [17] 本来就更贴\"production language VMs\"这句 |\n| [10] Wang Wasm runtimes | `[10,20]` | `[20]` | IEEE Access，~30 引；[20] 是 CSUR 的区块链 VM 综述，本来就覆盖 Wasm VM |\n| [8] Zheng 综述 | `[8,20]` | `[20]` | 引用数虽高，但这段你自己写了\"give background but do not address execution strategy\"——是全篇自认最不承重的一段；[20] 更新三年且更对口 |\n\n砍完后 Related Work 三处读作：`...gas cost of deployed contracts [2, 4, 18].` / `...WebAssembly contract runtimes [20].` / `...production language VMs [17]`。语义、Table 2、所有被点名的系统全不受影响。\n\n唯一一处轻微瑕疵：[8] 和 [10] 都砍掉后，[20] 在相邻两句各出现一次，且 \"Smart-contract platform surveys [20]\" 是复数名词配单条引用。想修就是一个词的事（`surveys` → `a survey`），不修审稿人也不会提。\n\n**备用（万一 6 条压不够 0.8 页）**：先加 [4] GASTAP，同样零正文改动，留下 `[2, 18]`；再不够就删掉\"Surveys and adjacent chains\"那句里的 `and script-level analyses of other chains [22]` 这半句，能同时省下 [22] 和两行正文——那半句你自己都说了只是 background。\n\n## 你挑的三条，逐条说问题\n\n**[7] KEVM——最不能砍的一条。** Theorem 1 是**相对于** [7] 的 small-step 语义陈述的，这条引用不是背景，它是定理语义域的定义。砍掉之后 \"observationally equivalent ... with respect to the small-step EVM semantics\" 没有指代对象，附录 B 的证明也失去形式基准。你的理由\"跟我们的实现不沾边\"正好说反了：形式语义就是因为不长得像实现，才能充当实现的正确性判据。砍了会招来\"Theorem 1 到底是对着哪套语义证的\"——这是 soundness 质疑，不是参考文献问题。\n\n**[19] Sphinx——砍了风险最高。** 它同时是你正文点名的 \"the closest point to our design\"，又是 Table 2 里带 2.8x 数字的对比行。引用和表格行必须同进退，而删掉最接近的竞品等于自己把\"未与最相关工作对比\"送到审稿人手里。更麻烦的是时机：minor revision 已过，camera-ready 阶段悄悄移除最接近的相关工作，观感很差。arXiv 预印本的身份不影响它的 prior art 地位——2024 年的预印本恰恰是最需要引的。\n\n**[12] Zhou & Li——砍了正文就得改。** 它是 Intro 里 \"62% of all gas\" 这个数字的唯一出处，而这个数字是全篇 motivation。裸着一个百分比没有来源，审稿人一定会问。11 次引用说明的是这个测量很小众，不是它不可靠——对于一个具体测量断言，唯一相关的是数据本身站不站得住，而且小众也意味着你未必找得到替代来源。\n\n顺带一个跟篇幅无关但值得在 camera-ready 一起改的点：[12] 是 2019 年 WTSC 的测量，你正文用的是现在时（\"is heavily skewed\"）。经过 EIP-1559、the Merge 和 L2 分流，审稿人或读者可能质疑这个分布是否还成立。加四个字限定一下（\"measured in 2019 over one month of mainnet traffic\"）就能挡掉，不增加行数。"
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 1,
+            "costUsd": 0.358014,
+            "judgeCostUsd": 0.022488000000000008,
+            "durationSeconds": 156,
+            "startedAt": "2026-09-14T08:55:56.682Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-Jw6iLp/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "先给结论：**你挑的三条一条都不能砍。** 不是它们分量不够的问题，而是你用的筛选轴（venue 硬不硬、引用数高不高）在\"正文一个字不动\"这个约束下基本是反的。\n\n约束一旦是零改文字，唯一有效的判断轴只有一条：**这条引用被砍掉之后，有没有哪句话或哪个表格格子失去唯一支撑。** 而恰恰是 workshop、预印本、老的形式语义这类\"软\"文献，往往因为内容具体（一个具体数字、一套具体语义、一个具体竞品）而成为唯一支撑；真正的填充物是那些高引综述和经典文献，它们躲在打包引用里，砍掉不留痕。\n\n## 你那三条的问题\n\n**[12]（gas skew 测量）—— 砍了 Intro 动机句变成裸数字。** \"top 100 合约占 62% gas\"是个精确到具体数值的实证断言，[12] 是它的唯一出处。引用一去，这句话要么像没出处的传闻，要么被读成\"这是作者自己测的\"——而你们并没有报告这个测量。整篇的分层前提就架在这句上。11 个引用说明的是它冷门，不是它可删。\n\n**[19]（Sphinx）—— 它同时是正文点名的\"最接近我们设计的工作\"和 Table 2 里的一整行。** 砍了之后正文出现一个没有引用的系统名 Sphinx，表格里 2.8x 那行也悬空。更要紧的是：一篇 2024 年 arXiv、8 引用的预印本，被你写成\"the closest point to our design\"，还单独进了对比表——这形态非常像 minor revision 里审稿人要求补的对比。如果确实是，camera-ready 阶段把它删掉是会被注意到的动作。你自己回查一下 revision response 就能确认。\n\n**[7]（KEVM）—— 这条砍了是实质性错误，不是品味问题。** Theorem 1 的表述是\"相对于 [7] 的小步 EVM 语义\"观察等价。引用一删，定理就没有了它所相对的那个语义对象，Appendix B 的证明也失去论域。\"跟实现不沾边\"这个理由是判错了类别——它根本不是作为实现参考被引的，它是定理的形式化基底。2018 年对形式语义来说也不是缺点。\n\n## 建议砍的六条\n\n全部是打包引用里的成员，删掉后那句话仍然通顺、仍然有引用支撑，表格零影响：\n\n| 砍 | 出处句 | 删后由谁撑住 |\n|---|---|---|\n| [9] Signer MSc thesis | gas 分析打包 [2,4,9,14,18,21] | 同组其余四条 |\n| [21] Marescotti ISoLA'18 | 同上 | 同上 |\n| [14] GasChecker | 同上 | 同上；Chen et al. 仍以 [2] 在库中，没有整组作者被清空 |\n| [8] Zheng FGCS 综述 | \"platform surveys [8, 20]\" | [20] |\n| [10] WASM runtimes 比较 | \"WebAssembly contract runtimes [10, 20]\" | [20]（CSUR 2023 的 blockchain VM 综述覆盖得住这句） |\n| [15] Hölzle PIC ECOOP'91 | \"standard practice in production VMs [15, 17]\" | [17]，而且[17]本来就是正文单独点名的那条 |\n\n两点附带收益：gas 那句砍完剩 [2, 4, 18]，2017/2019/2021 的时间跨度反而比原来六条更像\"a large body of work\"的合理采样；[15] 讲的是多态内联缓存，本来就不完全等于分层编译，只留 HotSpot [17] 在措辞精度上是往上走的。\n\n代价是 [20] 在同一段里连着撑两句话，略微显眼，但这在 related work 里很常见。\n\n## 三点操作提示\n\n1. **砍 6 条后 22→16，全文编号重排。** 如果不是 BibTeX 自动管理，重点复查 Table 2 那五个格子里的编号——表格单元里的引用是最容易漏改的地方。\n2. **先过一遍 revision response。** 我这六条里如果有任何一条是审稿人明确要求补的，立刻换掉；备用是 [4] 或 [18]（同属 gas 打包组），但取走一条后那句就只剩两个引用，\"large body of work\"会显薄。\n3. **如果六条还不够、需要第七条**：全文相关性最低的其实是 [22]（Bitcoin Script 用法分析），你自己那句话就写了它\"give background but do not address execution strategy\"。但它是那个从句的唯一支撑，砍它必须连带删掉 \"and script-level analyses of other chains [22]\" 这几个词。这是所有选项里代价最小的一次正文改动，真要加码就从这里开始。\n\n另外我只看到你贴出来的这些位置。如果 Appendix B 或第 3、5 节里还有这六条中任何一条的出现，结论要重算。"
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 1,
+            "costUsd": 0.471236,
+            "judgeCostUsd": 0.01869,
+            "durationSeconds": 221,
+            "startedAt": "2026-09-14T08:56:56.264Z",
+            "error": null,
+            "tracePath": "/tmp/claude-eval-zDyQxA/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "result",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "## 先给结论：这 6 条\n\n判据只有一个 —— **这条引用是不是在某个方括号里有\"兄弟\"**。有兄弟的，删掉它括号里还剩东西，句子照样成立、语义照样为真；没兄弟的，删了就是悬空引用，必须改正文。\n\n| 砍 | 位置 | 砍完那处变成 |\n|---|---|---|\n| [9] Signer, MSc thesis | gas 组 | [2, 4, 14, 18, 21] |\n| [14] GasChecker | gas 组 | [2, 4, 18, 21] |\n| [21] Marescotti, ISoLA'18 | gas 组 | **[2, 4, 18]** |\n| [8] Zheng, FGCS'20 | \"surveys [8, 20]\" | **[20]** |\n| [10] Wang, IEEE Access'22 | \"WASM runtimes [10, 20]\" | **[20]** |\n| [15] PIC, ECOOP'91 | \"production language VMs [15, 17]\" | **[17]** |\n\n逐条理由：\n\n- **[9]** 未正式发表的硕士论文，~40 引，内容被 [4] GASTAP 和 [14] 完全覆盖。全篇最没争议的一条。\n- **[21]** worst-case gas，跟 [4] 的 gas bound 分析重叠，ISoLA 本身也不硬。\n- **[14]** 跟 [2] 同一批作者、同一主题（gas 低效检测），你正文只点名了 [2]；砍 [14] 之后 Chen 那条线仍有代表。\n- **保留 [4] 和 [18] 是有意的**：那句是 \"analyzes **or reduces**\"，[4] 撑 analyzes、[18] 撑 reduces，各留一条，句子的两半都还站得住，剩三条撑 \"a large body of work\" 也够。\n- **[8]** 900 引没错，但 2020 年的泛泛综述，在这里只承担 background。\n- **[10]** ~30 引，全表最弱。\n- **[15]** 额外好处：它跟那句话本来就不太贴 —— PIC 讲的是 inline cache / 类型反馈，不是 tiered compilation。那句的正确支撑是 [17]，而 [17] 你下一句又单独点名了。砍掉反而更准。\n\n⚠\ufe0f **副作用**：砍完 [8] 和 [10] 之后，**[20] 从\"可砍\"变成\"绝对不能砍\"** —— 它同时是两处的唯一支撑。别让后续再有人顺手删它。\n\n（严格说，从多引用组里删一条要动 `\\cite{}` 的 key 列表，但**一个字的正文不变**，每句话也依然为真。）\n\n## 你挑的三条：都不能砍，而且是三种不同的坏\n\n**[7] KEVM —— 最不能砍。** Theorem 1 是\"**相对于 [7] 的 small-step 语义**\"成立的。删了之后定理字面上变成 \"observationally equivalent with respect to the small-step EVM semantics of \\[\\]\" —— 没有语义域，定理没有内容。它不是实现引用，是你正确性主张的定义域；Appendix B 的证明大概率通篇在用它的规则。\"2018 年、跟实现不沾边\"恰好说反了：它不沾实现正是因为它在另一个层面承重。\n\n**[19] Sphinx —— optics 最差。** 三重绑定：正文点名它是 \"closest point to our design\"、Table 2 有独立一行、你的 4.6x 就是拿它的 2.8x 当参照。要砍得同时改正文和表。更麻烦的是外观问题 —— 删掉你唯一对标的最近工作的引用、却把它的数字留在比较表里，这在 camera-ready 阶段很容易被读成\"藏最近的先行工作\"。arXiv 不是理由：你的 [3][5][11][13] 是 GitHub repo、[16] 是博客，按 venue 硬度比 arXiv 还软，但一条都砍不掉。\n\n**[12] —— 砍了会留下无出处的统计数字。** 它是 intro 那个 62% 的唯一来源，而那个数字是整篇的动机前提。删了要么整句删（动正文），要么让一个具体百分比裸奔（比动正文更糟）。workshop + 11 引确实弱，但\"弱来源撑关键数字\"的修法是补一条独立来源、或者你自己跑一遍测量，不是删掉来源。\n\n**共同点**：你这三条全是\"独苗引用\"，而且全落在动机、最近相关工作、正确性定理这三个最关键的位置。这不是巧合 —— 独苗之所以是独苗，通常正因为它在撑一个别人替代不了的具体 claim。在这篇里 venue 硬度跟可砍性几乎不相关。\n\n## 交之前两件事\n\n**1. 对一下 response letter。** 这 6 条里如果有哪条是审稿人这轮让你加的，换掉它（gas 组里 [4]/[18] 还能再让出一条）。camera-ready 删掉审稿人点名要的引用，是少数几种能把 minor revision 搞出事的操作之一。\n\n**2. 页数账先编译一次确认。** 6 × 5.5 ≈ 33 行。双栏模板下一页约 2 栏 × 55 行，33 行只值 ~0.3 页，够不到 0.8；单栏才够。而\"一条占 5–6 行\"这个密度本身更像双栏窄栏。\n\n如果真的不够：**结构上\"免费\"的额度总共只有 8 条左右**（再加 gas 组一条，砍到只剩 [2] + 1 条时 \"a large body of work\" 就开始站不住了）。超过这个额度就必须动正文，那时候更划算的是挑一两处孤行（段末只占一两个词的 widow line）改词挤掉，或者把 Table 2 的 \"Execution strategy\" / \"Recompilation unit\" 两列压窄换行 —— 比继续砍参考文献便宜得多，风险也低。"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0,
+        "passRate": 0,
+        "scoreWithout": 0.3333333333333333,
+        "passRateWithout": 0.3333333333333333,
+        "delta": -0.3333333333333333
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 0,
+    "overallScore": 0,
+    "overallPassRate": 0,
+    "meanDelta": -0.3333333333333333
+  }
+}

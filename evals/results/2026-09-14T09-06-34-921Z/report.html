@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — superpower-writing v3.4.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>superpower-writing v3.4.0</h1>
+<p class="verdict">Plugin effect: <span class="delta delta-neg">↓ -33.3 pts</span> vs baseline — improved 0 · flat 0 · regressed 1 of 1 case.</p>
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.270</span>
+<span class="num">2026-09-14 09:06 UTC</span>
+<span class="num">10m 48s</span>
+<span class="num">$4.85</span>
+<span class="num">6 runs</span>
+<span class="num">3 in flight</span>
+
+
+<span>judge sonnet</span>
+<span class="num">threshold 100%</span>
+<span>filtered: --case sixteen-candidate-slate-triaged</span>
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score · with plugin</span><span class="value">50%</span><span class="sub">mean of per-case scores</span></div>
+<div class="tile"><span class="label">Ablation Δ</span><span class="value num delta-neg">↓ -33.3</span><span class="sub">score points vs baseline, 1 of 1 case</span></div>
+<div class="tile"><span class="label">Baseline score</span><span class="value num">83.3%</span><span class="sub">without the plugin</span></div>
+<div class="tile"><span class="label">Cases</span><span class="value num">1</span><span class="sub">0 of 1 ≥ 100% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">0%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 100% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li>"With plugin" and "Baseline" runs are identical except for the plugin being loaded; Δ is the with-plugin score minus the baseline score.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case case-regressed" id="case-1">
+<div class="case-head">
+<h2>sixteen-candidate-slate-triaged</h2>
+<span class="muted mono">evals/sixteen-candidate-slate-triaged</span>
+<span class="spacer"></span>
+
+<span class="delta delta-neg">↓ -33.3 pts</span>
+<span class="muted">with plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:50.0%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">50%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">With plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:50.0%"></span></span>
+<span class="num">50%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:50.0%"></span></span>
+<span class="num">50%</span>
+<span class="muted num">8 turns · $1.03 · 09:06:34 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">all-sixteen-present</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ^(?=.*#1\b)(?=.*#2\b)(?=.*#3\b)(?=.*#4\b)(?=.*#5\b)(?=.*#6\b)(?=.*#7\b)(?=.*#8\b)(?=.*#9\b)(?=.*#10\b)(?=.*#11\b)(?=.*#12\b)(?=.*#13\b)(?=.*#14\b)(?=.*#15\b)(?=.*#16\b)</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">没有 `.writing/` 目录，而且这个会话里我只有读取权限（没有 Write/Bash），所以下面的东西直接给你，没落盘。
+
+---
+
+# 先说结论：这 16 条不是 16 个项目
+
+拆完之后是 **5 个真项目 + 4 条做不了 + 2 条还不算问题**。下周开场就讲这句话，比逐条排序有说服力得多。
+
+合并关系：
+
+- **#12 和 #15 是同一篇论文**。#12 是上界测量，#15 是归因。单独的 #12 是个 workshop，#12+#15 才是完整论证。
+- **#1 和 #9 是同一个系统的两个野心档位**。#1 是离线按热度编译的廉价版，#9 是带升级/降级的完整分层。不可能两篇都写。
+- **#4、#11、部分 #9 全都在等 #8 的那个数**。没有 #8，这三条都属于&quot;拿着方案找问题&quot;。
+
+---
+
+## 决定一切的那个数：你只有约 10 周实验时间
+
+4 个月到投稿，1 人 + 1 个刚进组的本科生。写作和返工吃掉 3–4 周，本科生前 3–4 周基本是负产出（要教）。**真正能跑实验的时间大概 10 周。** 所有排序都是从这个数推出来的，不是从&quot;哪条有意思&quot;推出来的。
+
+另外提醒一句：请先去核对 EuroSys / ATC 今年 CFP 的真实日期。如果最近的截稿是 3 个月而不是 4 个月，Tier 2 就得整个从论文里砍掉，只留主线。
+
+---
+
+## 排序
+
+| 名次 | 条目 | F | I | N | E | R | 均分 | 一句话理由 |
+|---|---|---|---|---|---|---|---|---|
+| 1 | **#12 + #15**（合并） | 5 | 4 | 3 | 5 | 4 | **4.2** | 唯一一条输入已经躺在你 NVMe 上、不需要任何外部依赖的 |
+| 2 | **#2** | 4 | 4 | 3 | 5 | 4 | **4.0** | 和 #12 共用同一套 replay 流水线，是把测量变成论文的机制层 |
+| 3 | **#8** | 4 | 4 | 3 | 5 | 5 | **4.2** | 单位时间价值最高：3 周，本科生能干，决定第二篇写什么 |
+| 4 | **#1 + #9**（合并） | 3 | 4 | 3 | 5 | 4 | **3.8** | 方向对，但工程量在 10 周里放不下主线之外 |
+| 5 | **#16**（重述后） | 3 | 4 | 3 | 5 | 4 | **3.8** | 贡献是成本模型，不是那个移植 |
+| 6 | **#4** | 3 | 3 | 3 | 5 | 4 | **3.6** | 门控在 #8；而且非学习基线太强 |
+| 7 | **#13**（重述后） | 2 | 5 | 3 | 3 | 4 | **3.4** | 按原样写，交付物是一张彩票 |
+| 8 | **#11** | 4 | 2 | 3 | 5 | 3 | **3.4** | 很可能在优化一条非瓶颈路径 |
+| 9 | **#14** | 3 | 3 | 2 | 4 | 3 | **3.0** | 会场不对，这是 ISSTA/CCS 的论文 |
+| 10 | **#6** | 3 | 2 | 2 | 5 | 3 | **3.0** | 靶子在动，且答案由参数决定 |
+| 11 | **#5** | 1 | 4 | 3 | 2 | 3 | **2.6** | 数据按定义就拿不到 |
+| 12 | **#7** | 1 | 3 | 2 | 3 | 3 | **2.4** | 算力差约三个数量级 |
+| — | **#3 / #10** | — | — | — | — | — | `too-vague` | 还不是研究问题，退回重述 |
+
+&gt; Novel 这一列全部是**假设**，不是查过的结论。名次 1、2、7 的位置严重依赖先前工作是否已经做掉，这三条我建议开会前查实——见最后一节。
+
+---
+
+## Tier 1：这就是你那篇论文（#12 + #15 + #2）
+
+三条共用同一套基础设施：从 archive 回放，抽真实 read/write set。一条流水线出三个结果：
+
+1. 最优调度下的并行度上界（#12）
+2. 按 DeFi 协议类别拆开，是谁在拖后腿（#15）
+3. 一个纯统计、不训模型的静态重排器，看能吃掉上界的多少（#2）
+
+**这个组合最强的地方在于 #12 给了 #2 一把尺子。** &quot;abort 率降了 30%&quot; 是个弱结论；&quot;我们吃掉了理论可用并行度的 60%，剩下的 40% 全被这三类协议锁死&quot; 是个能上 EuroSys 的结论。测量 → 归因 → 机制 → 对着理论天花板评估，这是完整的系统论文弧线。
+
+本科生的活也很清楚：协议打标（4byte 签名 + 已知地址集）和回放 harness。边界明确，做砸了不影响主线。
+
+**#2 有一个你必须在论文里正面处理的设计约束**：任何重排都得是确定性的、每个验证者都能复现的，否则不能上链。也就是说那张历史冲突统计表本身变成了共识相关输入——它怎么分发、怎么达成一致、怎么随时间更新。这不是麻烦，这是你论文里最好的那个问题。审稿人一定会问，你最好主动答。
+
+## Tier 2：#8 现在就并行开跑
+
+3 周，和主线不抢资源，产出是你后面所有论文的 intro 图。而且它直接决定 #4、#9、#11 到底是不是真问题。
+
+**一个技术警告**：geth 是 Go，Go 运行时上的 uprobe/uretprobe 有已知的坑（goroutine 栈会移动，uretprobe 会破坏 Go 栈）。别让本科生第一周撞在这上面。要么换 reth（Rust，好挂得多），要么走手工插桩/USDT，要么退到 perf。这个选择建议开会前就定好。
+
+## Tier 3：第二篇的候选，全部门控在 #8
+
+- **#4 + #9**：等 #8 告诉你时间花在哪。如果是 stall 占大头 → #4；如果是解释分发占大头 → #9。
+- **#9 的新颖性抓手不是&quot;把 JVM 那套搬过来&quot;**（那是 25 年前的技术，审稿人会说 method transfer）。抓手是 EVM 独有的两点：合约字节码**不可变**，而且编译产物可以**全网摊销**——JVM 里每个进程各编译各的，EVM 里全世界只需要编译一次。这个角度能把 Novel 从 3 抬到 4。
+- **#4 的真正风险是基线**：块内交易表已知，你完全可以拿陈旧状态做一次投机执行来推出访问集，拿到一个近乎 oracle 的预取集合。这个非学习基线很可能吃掉大部分收益。要投 MLSys，你得先证明它打不过你。
+- **#16 重述**：别做裸机移植。SP1 / RISC Zero 已经在 zkVM 里跑 revm/reth 了 `[UNVERIFIED，但你半天就能核实]`。移植不是贡献，**每条指令的证明成本模型**才是。顺带一提，24G 显存在这里是真约束，zkVM proving 很吃显存。
+- **#13 重述**：按原样写，交付物是&quot;我们找到了共识 bug&quot;——找不到就没论文，10 周赌不起。改成交付**确定性 record/replay 基础设施 + 历史区块上的分歧分类学**，&quot;跑了 X 百万区块零分歧，覆盖率到了 Y&quot; 也是能发的结果。另外真找到了共识分歧要有披露预案，那玩意儿等于一把链分叉的武器，论文里得有这一节。
+- **#11**：先回答我一个问题（见最后）。而且 reverts 在主网上是少数路径，journal rollback 大概率不在热路上——#8 会直接告诉你这条值不值得做。
+
+---
+
+## 要砍的几条，以及回去怎么说
+
+原则：**不说&quot;这个想法不好&quot;，说&quot;卡在这个具体的数/资源上，但你这个问题有个我们能做的版本&quot;**。每条都给提的人留个出口。
+
+**#7（7B 从零预训）** — 这条得用算术说话，不能用语气：
+
+- 显存：7B 参数混合精度 Adam 大约 16 bytes/param ≈ **112 GB**，还没算激活。卡是 24 GB，差约 5 倍，必须 offload，吞吐再掉一档。
+- 算力：Chinchilla 最优约 140B token，6·N·D ≈ 5.9×10²¹ FLOPs。4090 bf16 稠密峰值约 165 TFLOPS，按 40% MFU 算，**≈ 2.8 GPU-年**。
+- 语料：你需要 140B token 的 EVM 字节码。**这个别听我的，去你自己那份快照上查一下去重后的 unique runtime bytecode 到底有多少字节**——我强烈怀疑差两个数量级以上。这一条查出来当场放幻灯片上，比任何争论都管用。
+
+&gt; 出口：这个领域真正缺的不是又一个模型，是**评测**。反编译正确性到底怎么打分？做一个严谨的 benchmark，把 heimdall、Dedaub、以及几个 LLM 基线全放上去评一遍——4090 够用，4 个月够用，而且这才是 MLSys 会收的东西。提这条的人拿的功劳一点不少。
+
+**#5（跨 L2 MEV）** — 各家 sequencer 的私有 mempool 排序日志是运营方内部数据，不公开，而且就算能搞到也有访问授权问题。
+&gt; 出口：链上已经公布的区块里有**实际排序结果**。你有 Base 主网 RPC 随便调，完全可以做纯公开数据的跨 L2 排序结果分析。结论弱一些，但能做。
+
+**#3（gas 定价）/ #10（MEV 对用户体验）** — 这两条我没给分，因为按现在的写法**还不是研究问题**：&quot;X 对 Y 的影响&quot; 这个句式没有指定机制、指标、也没有对照组，没法设计实验。这不是想法的问题，是措辞的问题。
+
+&gt; **#3 的出口非常好，建议重点讲**：把它改成「当前 gas schedule 对各条指令的定价，和实测执行成本偏离多少？」——这就变成了一个可测量的问题，而且它**直接吃 #8 和 #16 的产出**。你本来就要测每条指令的真实成本，拿去和 gas 表对一遍几乎是免费的。提这条的人等于给你送了个结果。
+&gt; **#10 的出口**：「Base 上散户 swap 的实际滑点/成交价偏离是多少」——具体、可测、你有 RPC。但老实说这是测量/安全会议的论文，不是 EuroSys/ATC，会场对不上这点得说清楚。
+
+**#6（state expiry）** — 靶子在动：历史数据过期、状态过期、换 Verkle/binary trie，现在是好几条分叉的线，&quot;那套提案&quot; 指的是哪一套本身就不清楚。而且结论完全由你选的参数决定，这种模拟很难说是贡献。
+&gt; 出口：这场争论真正缺的是**经验输入**——哪些 slot 多久被碰一次、工作集怎么随时间衰减。这个数据从 #12 / #8 的回放流水线里几乎白掉出来，而且它对每一版提案都有用。
+
+**#14（LLM 生成不变量 + 符号执行）** — 两个问题。一是 2023 年以来这条线很挤 `[UNVERIFIED]`；二是会场不对，这是 ISSTA / ICSE / CCS 的论文，不是 EuroSys / ATC / MLSys。另外&quot;用符号执行去验&quot;这半句承担了太多重量，主网合约上的路径爆炸是真问题。
+&gt; 出口：如果组里有人愿意带去安全系的会，这是条独立的线，不占你这 4 个月。
+
+---
+
+## 开会前我需要你确认两件事
+
+1. **#11 里的 &quot;MHOT&quot; 具体指哪篇？** 我不确定，不想猜着给你评分。你把出处发我，我按真实内容重估这条的位置。
+2. **要不要我把名次 1、2、7 的先前工作查实？** 这三条的位置建立在&quot;这个测量还没被做过&quot;的假设上。主网并行度上界的聚合数字很可能已经有人发过（那样 #12 单独就废了，必须靠 #15 的归因撑），EVM 差分测试也有已发表的工作 `[UNVERIFIED]`。**如果 #12+#15 要当主线，这个查新在你上台前必须做完**——被人在组会上问&quot;这个是不是已经有人做了&quot;而答不上来，比排序错了更难看。
+
+说一声我就跑 per-claim 的查新，出一张逐条 HIGH/MED/LOW 的表，够你直接放进幻灯片。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:50.0%"></span></span>
+<span class="num">50%</span>
+<span class="muted num">11 turns · $0.93 · 09:06:34 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">all-sixteen-present</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern not found in last_message</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">没法把结果落盘：这个会话里我只有只读工具（没有 Write/Bash），所以 `.writing/ideation.md` 和 brief 这次写不出来，下面全部在对话里给你。另外**检索工具也不可用**，这直接影响下面 Novel 那一列的可信度，我在最后单独说。
+
+按 idea skill 的规则，你带着写好的名单进来，我从 Step 4 进入——只给你这 16 条打分排序，不另外生成候选。
+
+---
+
+## 先说约束推出来的硬结论
+
+4 个月 × (1 个你 + 1 个刚进组的本科生) = **一篇论文，不是两篇**。本科生前 6 周基本是负产出（要学 revm/EVM）。所以排序的真正问题不是&quot;哪几条好&quot;，而是&quot;哪一条能让其余的变成它的章节或后续工作&quot;。这也是我下面把 16 条压成 4 组的原因。
+
+## 两条先单独处理：第 3 条和第 10 条
+
+这两条我**没有打分**，按规则标记为 `too-vague` 退回重述——不是因为题目不好，而是因为&quot;研究 X 对 Y 的影响&quot;这个句式没有指定机制、指标和对照，打出来的分是假的。这恰好也是最容易在组会上被当成&quot;你看不上我的想法&quot;的两条，所以给你带重述版回去，比给个分数有用：
+
+| 原句 | 问题 | 可以直接用你现有资源做的重述 |
+|---|---|---|
+| 3. gas 定价机制对生态的影响 | 无机制、无指标、无对照 | &quot;历次 gas 定价 EIP 之后，opcode 的**实测执行成本与 gas 成本的偏离度**变了多少？用 archive 快照回放，按分叉画每条 opcode 的 ns/gas 比值，找出错配最严重的类别。&quot; |
+| 10. MEV 对普通用户体验的影响 | 同上，&quot;体验&quot;不是指标 | &quot;被夹交易的**用户实际损失分布**在 L1 和 Base 上各是多少？用公开链上数据量化。&quot; |
+
+重述后第 3 条其实很值钱：它和第 12 条**共用同一套回放取数管线**，等于免费多一个结果。第 10 条重述后是个扎实的测量题，但venue 是 FC/IMC 那一挂，不是 EuroSys/ATC——这点要跟提的人讲清楚，是路线不同，不是质量问题。
+
+## FINER 打分（全表）
+
+| # | 方向 | F | I | N | E | R | 均值 |
+|---|---|---|---|---|---|---|---|
+| 12 | 主网真实 r/w set 算并行度上界 | 5 | 4 | 3 | 5 | 5 | **4.4** |
+| 2 | 历史冲突统计给 Block-STM 静态重排 | 4 | 4 | 3 | 5 | 5 | **4.2** |
+| 8 | eBPF 量化 geth 的 state 访问 stall | 4 | 4 | 3 | 5 | 4 | **4.0** |
+| 15 | 上界按 DeFi 协议类别拆解 | 5 | 3 | 2 | 5 | 4 | **3.8** |
+| 9 | JVM 分层编译搬到 EVM（含降级） | 3 | 4 | 3 | 5 | 4 | **3.8** |
+| 1 | revmc AOT 按热度分层缓存 | 4 | 3 | 2 | 5 | 4 | **3.6** |
+| 16 | revm 移植 RISC-V，量化 zkVM 每指令开销 | 3 | 4 | 2 | 5 | 4 | **3.6** |
+| 11 | MHOT 思路重写 revm journal | 4 | 2 | 3 | 5 | 3 | **3.4** |
+| 4 | 学习型 trie 节点预取 | 3 | 3 | 2 | 5 | 4 | **3.4** |
+| 13 | 确定性 record/replay + 差分测试 | 4 | 3 | 2 | 3 | 4 | **3.2** |
+| 6 | 在 revm 实现 state expiry | 2 | 2 | 2 | 5 | 3 | **2.8** |
+| 5 | 收集 L2 私有 mempool 排序日志 | **1** | 4 | 3 | 2 | 4 | **2.8** |
+| 7 | 从零预训练 7B 做字节码反编译 | **1** | 3 | 2 | 4 | 3 | **2.6** |
+| 14 | LLM 生成不变量 + 符号执行验证 | 2 | 3 | 2 | 3 | 3 | **2.6** |
+| 3 | gas 定价的影响 | — | — | — | — | — | `too-vague` |
+| 10 | MEV 对用户体验的影响 | — | — | — | — | — | `too-vague` |
+
+## 排序与分组
+
+### A 组｜这就是你要做的那篇：12 + 15 + 2 合成一篇
+
+不是三个选项，是一篇论文的三节。
+
+- **12 做地基**：基于 archive 快照的真实 read/write set 提取管线。这是唯一一件其他所有条目都要复用的基础设施。
+- **15 是 12 的分析节**，不是竞争者。单独拿出来不成篇（Novel=2，它只是换个切法），但作为&quot;到底是谁在拖后腿&quot;的那一节，它把一个数字变成一个论点。
+- **2 是机制节**：量完天花板，再用历史冲突统计去够它，abort 率对着 Block-STM 报。
+
+这个组合的价值在**抗风险**：如果第 2 条的重排最后打不过 Block-STM 原版，12+15 仍然是一篇能投的 characterization。单押第 2 条就没有这个退路。形态上是&quot;测量 → 机制&quot;，正好是 EuroSys/ATC 吃的那个结构。
+
+一个技术提醒：第 12 条的&quot;最优调度&quot;要说清楚是**哪个模型下的上界**（依赖 DAG 的关键路径松弛），不要写成&quot;理论最优加速比&quot;——一般化的调度是 NP-hard，审稿人会咬这个词。另外 32 核给并行度上界设了实测天花板，报告里要把&quot;模型上界&quot;和&quot;32 核实测&quot;分开画。
+
+### B 组｜备选主线，但这轮做不了：8 → 9(吸收 1) → 11
+
+- **8** 单独看是个合格的测量，而且它是 **11 和 4 的动机来源**。真正的问题是 Go 上的 eBPF uprobe（goroutine 栈会移动、内联严重），可能要退回进程内埋点——这个风险要在开题时就写进 plan B。
+- **9 吸收 1**。第 1 条是第 9 条去掉降级路径的静态特例，&quot;给最热的 1% 编原生码&quot;也是任何人都会先写的那版，单独成篇撑不住（Novel=2）。合并后要注意：**&quot;把 JVM 分层编译搬到 EVM&quot;本身不算贡献**，&quot;把 X 用到 Y 上&quot;只有在暴露出意外结论时才算。这条真正的卖点应该是 EVM 和 JVM 的一个原则性差异——**合约代码不可变且全网共享，编译产物可以跨块、跨节点摊销**，JVM 的 warmup 成本模型在这里根本不成立。按这个角度写，Interesting 能到 4；按&quot;我们移植了分层编译&quot;写，就是个工程报告。
+- **11 必须挂在 8 后面**。核心风险是 F4（动机不足）：如果 revert 的拷贝开销只占执行时间 1%，砍掉它不是论文。先让第 8 条测出这个数，再决定要不要做。现在就开工是赌博。
+
+### C 组｜想法不错但框架要改，这轮不碰
+
+- **16**：问题出在&quot;移植&quot;这个词——zkVM 那一圈的 EVM 执行栈本质上已经在 RISC-V 上跑 revm 了[UNVERIFIED]，移植本身不是贡献。**改成纯 characterization**（每条 EVM opcode 的 RISC-V cycle 开销分解）就有价值了。而且 cycle 计数不需要真出证明，在模拟器里就能数，很便宜；但&quot;proving 开销&quot;那部分会被你这张 24G 卡卡住，得砍掉或者只做小电路。
+- **13**：有个硬伤——**历史主网区块是共识验证过的，重放它们几乎必然找不到分歧**。所有同步中的节点每天都在重放这段历史。要找 bug 必须喂非规范分布的输入（变异/生成交易），那就变成 fuzzing 论文，venue 是 ISSTA/USENIX Security 不是 EuroSys。另外 Ethical 我给 3 分是认真的：真挖到生产客户端的共识分歧属于关键漏洞，开工前得有披露流程，不能等挖到了再想。
+- **4**：MLSys 定位是对的，但 **baseline 会杀死它**。你要打的不是&quot;不预取&quot;，是&quot;预取上一个块碰过的账户&quot;——以太坊的时间局部性极强，同几个 DEX pool 反复被摸，这个 trivial 基线强得离谱。再加上 EIP-2930 access list 本来就把读集写在交易里了。开工前先花三天把这两个基线的命中率测出来，如果它们已经到 85%，这条就不用做了。这是我建议的**最便宜的一次性止损实验**。
+
+### D 组｜这轮明确不做，每条都有客观理由
+
+| # | 不做的理由（可以直接在组会上念） |
+|---|---|
+| 5 | Feasible=1：各家 L2 sequencer 的**内部私有排序日志不对外**，Base RPC 给的是公开链，不是内部 ordering log。这是数据获取封锁（F7），不是工作量问题。另外向运营方私下拿日志有来源合规问题。 |
+| 7 | Feasible=1：从零预训练 7B 和一张 24G 4090 差了若干个数量级。改成在开源基座上做反编译微调是可行的，但那是另一个题，且要重新论证相对 heimdall/Dedaub 的增量。 |
+| 6 | Feasible=2 + Interesting=2：要先有一套完整实现才出第一个结果，而&quot;状态体积随时间怎么变&quot;这个答案**用访问统计就能解析估算，不需要实现**。投入产出比倒挂。另外该提案在路线图上的当前状态需要先确认[UNVERIFIED]，会影响 Relevant。 |
+| 14 | F8 范围过大：LLM 生成 + 符号执行验证 + 主网漏洞真值集，是三个工程，4 个月两个人做不完；主网合约上符号执行的路径爆炸是老问题。而且 venue 错位（F2），这是 ICSE/ISSTA/S&amp;P 的形状，不是 MLSys。 |
+| 3 / 10 | 不是否决，是**句式退回**：目前没指定机制、指标和对照，打分会是假的。上面给了两个重述版，重述完第 3 条直接并进 12 的管线里。 |
+
+## 一个我必须讲清楚的局限
+
+**Novel 那一列现在是假设，不是结论。** 这个会话里检索工具不可用，所以我没有跑 skill 要求的 per-claim 文献检索，上面所有关于&quot;这块已有前人工作&quot;的判断都来自记忆，按规则一律算 `[UNVERIFIED]`，不能当证据用。受影响最大的三处：
+
+1. **第 12 条**——以太坊交易可并行性的测量研究是存在的[UNVERIFIED]。你的增量大概率在&quot;规模 + 到 block 21M 的新近性 + 调度模型&quot;，但这个增量到底够不够，必须查了才知道。**这是排序里最脆弱的一环，因为整篇都压在它上面。**
+2. **第 2 条**——乐观并行执行的重排/依赖提示是活跃方向[UNVERIFIED]。
+3. **第 13 条**——EVM 差分测试已经相当拥挤[UNVERIFIED]，我给的 Novel=2 需要验证。
+
+**下周之前最值钱的一件事，是对第 12 条跑一次 Phase 2 逐 claim 查新。** 如果查出来已经有人用近似规模做过，A 组就得重心从&quot;测上界&quot;挪到&quot;第 2 条的机制&quot;，整个排序会变。我不建议你带着未查新的第 12 条上台讲&quot;这是我们的主线&quot;。
+
+另外顺手确认一下 EuroSys/ATC 的实际 deadline 日历——今天到 4 个月后是 2027 年 1 月中，这个窗口对不对得上目标 venue 的投稿轮次，会直接决定上面的排期是不是真的。我不从记忆里报日期。
+
+---
+
+要我接着做哪个？
+
+1. 等你拿到能联网的环境，对第 12 条跑 Phase 2 逐 claim 查新（最高优先级）
+2. 直接对 12+15+2 这个合并方案跑 Phase 3 顶会标准评估，出 fatal-flaw 表和 verdict——组会上被追问&quot;审稿人会怎么打&quot;时用
+3. 把上面这张表整理成可以直接讲的组会材料结构
+
+另外，等有写权限的环境，我把这份 slate 和拒绝理由落到 `.writing/ideation.md`，免得下次再讨论时重新生成一遍已经否掉的条目。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:50.0%"></span></span>
+<span class="num">50%</span>
+<span class="muted num">11 turns · $1.20 · 09:06:34 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">all-sixteen-present</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern not found in last_message</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">已按 idea skill 的 slate-triage 路径过了一遍（Phase 1 Step 4 起：先做 methodology 体检，再打 FINER，不重新生成你没提的候选）。
+
+一个前置说明：这个环境里没有 Bash / 网络检索工具，所以 literature 那层**没跑**。下面所有涉及&quot;这条已经有人做了&quot;的判断都来自我自己的知识、标了 `[UNVERIFIED]`，你开会前必须自己核一遍——我在最后列了具体要查什么。另外 `.writing/ideation.md` 和 `.writing/ideation-brief.md` 我也写不了（无 Write 工具），内容直接放在下面，你可以自己落盘。
+
+---
+
+## 一、先说三个结构性判断，它们把 16 条压成了一个计划
+
+**1. 第 1 条和第 9 条是同一篇论文。** 第 1 条是&quot;离线按调用频次前 1% 分层&quot;，第 9 条是&quot;运行时热度升级 + 冷却降级&quot;——这是同一个系统的两种 tiering policy，不是两个方向。拆成两篇，每篇都太薄；合成一篇，第 1 条正好是 baseline policy，第 9 条是 adaptive policy，天然构成对照实验。**这是我做的最重要的一次合并。**
+
+**2. 第 12 和 15 条也是一篇，而且你自己已经写出来了**（&quot;顺着第 12 条再往前一步&quot;）。单独的第 12 条是一个数字，单独的第 15 条不成篇。
+
+**3. 第 8、12、15 条不是主线的竞争者，是主线的第 2 节。** EuroSys/ATC 的论文形状是「测量暴露问题 → 机制解决问题 → 评测」。你现在把 motivation 和 mechanism 并列排在一张单子上投票，这是这份列表最大的问题。正确的做法是选**一个机制**，用**一个测量**给它做 §2。
+
+顺带一个不太好听但该讲的：**这批方向里 4090 几乎是无关资产，真正的资产是那份 archive 快照。** 唯一用得上 GPU 的三条（4、7、14）恰好是最弱的三条。所以本轮 MLSys 大概率不是你该瞄的靶子——这句话建议你在组会上主动说，比等别人问&quot;我们怎么一点 ML 都不做&quot;要好。
+
+---
+
+## 二、排序
+
+FINER 五项各 1–5（Feasible / Interesting / Novel / Ethical / Relevant）。Novel 这一列是**假设不是结论**——它没经过文献检索，见第五节。
+
+| 排名 | 条目 | F | I | N | E | R | 均分 | 定位 |
+|---|---|---|---|---|---|---|---|---|
+| **1** | **9 + 1 合并**：EVM 分层编译（离线热度 + 运行时升降级） | 4 | 4 | 3 | 5 | 4 | **4.0** | 主线 |
+| **2** | **12 + 15 合并**：真实读写集的并行度上界 + 按协议归因 | 4 | 4 | 3 | 5 | 4 | **4.0** | 备选主线 |
+| **3** | 2（**改写后**）：builder 侧排序，不是 validator 侧 | 4 | 4 | 3 | 4 | 4 | 3.8 | 需改写 |
+| — | 8：state 访问 stall 剖析 | 4 | 3 | 2 | 5 | 4 | 3.6 | **不是独立论文，是第 1/2 名的 §2** |
+| 4 | 5（**改写后**）：用公开 L2 出块顺序反推，不是内部日志 | 4 | 4 | 3 | 4 | 3 | 3.6 | 需改写 + 换会 |
+| 5 | 11：journal 内存布局重写 | 4 | 2 | 3 | 5 | 3 | 3.4 | **条件性**，见下 |
+| 6 | 4：学习型 trie 节点预取 | 3 | 3 | 3 | 5 | 3 | 3.4 | baseline 有硬伤 |
+| 7 | 13：record/replay + 差分测试 | 4 | 3 | 2 | 4 | 3 | 3.2 | 不做 |
+| 8 | 16：revm 移植 RISC-V 裸机 | 2 | 3 | 2 | 5 | 3 | 3.0 | 不做 |
+| 9 | 6：state expiry 实现 + 状态体积测量 | 3 | 2 | 2 | 5 | 3 | 3.0 | 不做 |
+| — | 2（**原文**）：对 Block-STM 做交易静态重排 | 2 | 3 | 2 | 5 | 2 | 2.8 | 语义上不成立 |
+| 10 | 14：LLM 生成不变量 + 符号执行验证 | 2 | 3 | 2 | 4 | 2 | 2.6 | 会议不对 |
+| 11 | 7：从零预训 7B 做反编译 | 1 | 3 | 2 | 3 | 3 | 2.4 | 算术上不可能 |
+| — | 3 / 10 | — | — | — | — | — | `too-vague` | 退回重述 |
+
+---
+
+## 三、前两名为什么是前两名，以及第 3 周的决策点
+
+**第 1 名（9+1）赢在&quot;即使假设是错的也有结果&quot;。** revmc 已经存在，archive 快照给你真实 replay，baseline 明确（revmc 全量 AOT vs revm 纯解释器），指标明确（回放墙钟时间、编译开销摊销点、常驻内存）。做完一定有一张图。会议形状也最对——这是标准的 ATC 论文。
+
+它的 Novel=3 而不是 4，因为按 novelty rubric，&quot;把已知方法搬到新场景&quot;本身封顶就是 3。要抬到 4，得让**EVM 特有的那部分**承重，我看到两个真实的抓手：
+
+- **gas 计量和墙钟时间是解耦的**。编译让执行快 5 倍，gas 账一分不变。JVM 没有这个对应物，它直接影响 tiering 策略该优化什么——这是个 JIT 文献里不存在的约束。
+- **合约不可变、按 codehash 内容寻址**。编译产物可以跨节点缓存甚至分发，没有 class loading / 失效问题。这意味着&quot;编译开销&quot;在网络层面是一次性的，而第 1 条整条的前提（编译开销 vs 命中率的平衡点）在这个观察下要重算。
+
+把这两点写进 intro，这篇就不是&quot;我们把 JVM 那套搬过来了&quot;。顺便：evmjit 当年失败的原因正是&quot;全量编译，编译时间超过执行时间&quot;，这是你 motivation 段现成的历史素材。
+
+**第 2 名（12+15）赢在便宜，输在新颖性风险。** &quot;历史区块并行度上界&quot;这类测量我印象里已经有人发过 `[UNVERIFIED]`，这是它排第二的唯一原因。但你的第 15 条其实离一个真正的机制只差一步：不要停在&quot;哪几类协议在拖后腿&quot;，要走到**&quot;是哪几个具体的存储槽在拖后腿，以及可交换性（commutativity）能不能把它们拆掉&quot;**。余额更新本质是可交换的增量，但 EVM 把它当 read-modify-write，这在热点 ERC-20 槽位和 DEX 储备槽上制造了假依赖。数据库那边这是老思想（escrow transaction、Doppel 的 phase reconciliation `[UNVERIFIED]`），搬到区块链执行上、并且**用真实主网 trace 给出证据**，这才是 EuroSys 形状。停在测量就是个短文。
+
+**第 3 周的决策点（这是你组会上最该讲的一句话）：**
+
+&gt; 先花 3 周做第 8 条（缩小版），让数据来选第 1 还是第 2。
+
+因为没人知道答案：如果回放时间被解释器 dispatch 主导 → 走 9+1；被 state 访问主导 → 走 4 或 11；已经是并行度受限 → 走 12+15。现在在会上投票选主线，是在猜一个 3 周就能测出来的数。
+
+**关于第 8 条本身两个技术意见：**
+- **别在 geth 上做。** Go 的 goroutine 调度和栈管理让 uprobe 级别的细粒度归因很难做对；eBPF 看 syscall / block layer / page fault 很好，但把 stall 归因到&quot;EVM 层的某次 state 访问&quot;需要用户态插桩。你是 revm 栈，直接测 revm/reth，代码在你手上。geth 留着做交叉验证就行。
+- 这条正好是给本科生的活：回放语料 + 剖析 harness，边界清楚、不阻塞主线、做砸了也不致命。
+
+**第 11 条是条件性的**，别现在决定。如果第 8 条测出 journal/revert 占执行时间不到 5–10%，这条就是在优化一个非瓶颈（F4），直接毙。另外——**MHOT 我没能确认指的是哪篇**，HOT (Height Optimized Trie) 我知道，MHOT 没对上号。你确认一下，这直接影响它的 Novel 打分。
+
+---
+
+## 四、怎么跟当场提的人交代
+
+这是你要的&quot;说法&quot;。原则是：**不说&quot;这条不行&quot;，说&quot;这条的门槛是 X，我们现在缺 X&quot;**。把否决转成条件，对方有台阶，你也没撒谎。
+
+**第 3 条（gas 定价影响）、第 10 条（MEV 对用户体验影响）——两条都卡在同一个地方，不是选题不好，是**问法**不可打分。&quot;X 对 Y 的影响&quot;没有指名机制、指标和对照组，所以我按规则退回重述，没给它们打分。
+
+&gt; 「这两条我没排，因为按现在的问法我没法估工作量——&apos;影响&apos;具体指哪个可测量？比如第 10 条，如果重述成&apos;EIP-1559 之后，普通用户的实际成交价相对最优价的滑点分布怎么变&apos;，那它立刻变成一个能做的测量题，我们的 archive 快照就能跑。麻烦提的人把&apos;影响&apos;换成一个指标，我下次带着打分回来。」
+
+顺带说一句，这个「X 对 Y 的影响」句式是个纯措辞问题、不是想法问题——领域内的人会直接说&quot;滑点分布&quot;&quot;有效 gas 价格弹性&quot;。改个说法就能救。
+
+**第 5 条（跨 L2 MEV 传导）——数据不存在，不是我们不想做。**
+
+&gt; 「各家 sequencer 的**内部**私有 mempool 排序日志不是公开数据。Base 根本没有公开 mempool，交易直接进 sequencer；Arbitrum、OP 也都不发内部排序日志。这不是调 RPC 能拿到的，得跟运营方谈合作。但**出块后的顺序是公开的**——如果改成用公开 L2 出块顺序加上 L1 结算交易反推传导路径，这条马上可做，我排到第 4。只是它的会场是 IMC / FC 那一挂，不是 EuroSys。」
+
+**第 2 条（Block-STM 静态重排）——这条我要当面纠一个语义问题，措辞得稳。**
+
+&gt; 「Block-STM 之所以能并行，是因为它**保持**了区块内的确定性提交顺序；L1 上交易顺序是共识关键、直接决定 state root，validator 端重排会算出不同的根。所以&apos;静态重排降 abort 率&apos;在 validator 侧不成立。但在 **builder / sequencer 侧**成立——顺序本来就是它选的。改成&apos;sequencer 在保证优先费排序和 bundle 原子性的前提下，选一个并行度最大的顺序&apos;，这是个有约束的优化问题，而且 Base 是单中心化 sequencer，是现成的实验平台。这么改我排第 3。」
+
+**第 7 条（从零预训 7B）——用算术挡，不用品味挡。**
+
+&gt; 「7B 从零预训，Chinchilla 最优大概 140B token，算力需求约 6×7e9×1.4e11 ≈ 5.9e21 FLOPs。4090 的 bf16 密集算力峰值约 165 TFLOPS，单卡实际 MFU 打到 20–30% 算好的，折合约 4e13 FLOP/s——满负荷不停机要跑**四年以上**。就算大幅欠训只喂 20B token，也还是**八个月起**，超过 deadline。另外 24G 显存连 7B 的 Adam 状态都放不下（权重 14G + 梯度 14G + 优化器 56G），必须 offload，吞吐还要再掉一截。这条不是不想做，是单卡做不了。**在 4090 上 LoRA 微调一个 7B 做反编译是可行的**，但那样新颖性就要跟已有的 LLM 反编译工作正面对撞了 `[UNVERIFIED]`，得先查文献。」
+
+**第 16 条（revm 移植 RISC-V / zkVM 开销）——已经有人做完了工程部分。**
+
+&gt; 「SP1 和 RISC Zero 这些生产 zkVM 里已经在跑 revm 了，&apos;移植&apos;这部分是已完成的工程 `[UNVERIFIED，请核`。剩下的&apos;每条指令开销&apos;是个 benchmark，zkVM 团队自己会发。而且它一点用不上我们的 archive 快照——我们最大的资产在这条上是闲置的。」
+
+**第 6 条（state expiry）——在实现一个还没定稿的提案。**
+
+&gt; 「state expiry 这套规范目前不是冻结状态，社区重心已经转到 Verkle / binary trie 和无状态那边了，实现一个移动靶风险很高。另外&apos;状态体积随时间怎么变&apos;这个结论，**不实现也能从 archive 直接算出来**——实现那部分没有给测量增加信息量。」
+
+**第 13 条（差分测试找共识分歧）——被现有工作压制，而且产出是抽奖。**
+
+&gt; 「多客户端差分测试找共识 bug 这条线上，Fluffy（OSDI&apos;21）是标杆 `[UNVERIFIED]`，goevmlab 还在生产环境天天跑并且真的抓到过 bug。更要命的是这类论文的价值锚在&apos;我们找到了一个真 bug&apos;上——四个月硬 deadline 赌一个抽奖结果，风险不对等。」
+
+**第 14 条（LLM 不变量 + 符号执行）——会场不对 + 地基不稳。**
+
+&gt; 「这是 NDSS / ICSE / ISSTA 的论文，不是 EuroSys/ATC/MLSys 的。而且两个硬地基缺失：主网规模跑符号执行会路径爆炸；&apos;能覆盖多少已知漏洞&apos;需要主网级别的漏洞 ground truth，SmartBugs 那种小规模标注集撑不起这个统计。这个方向本身有价值，但它应该是另一个人、另一个会、另一个周期。」
+
+---
+
+## 五、开会前你必须自己核的三件事
+
+文献层我没跑，这三件事直接决定排序对不对：
+
+1. **第 12 条的前序工作。** 搜&quot;Ethereum historical block parallelizability / achievable speedup measurement&quot;。如果近两年有人把这条上界曲线发过了，第 2 名要降到需改写那一档，能留下的只有第 15 条的归因部分 + 可交换性机制。**这是唯一一个能推翻本排序的检索。**
+2. **有没有人发过 EVM 分层编译。** 我印象里学术界没有、工业界有 revmc 这类实现 `[UNVERIFIED]`。如果有人发了，第 1 名直接塌。
+3. **CFP 实际日期。** 你说&quot;四个月&quot;，但 MLSys 下一轮截稿很可能只剩两个月左右 `[UNVERIFIED]`；EuroSys 现在是多轮制，你的四个月具体落在哪一轮，决定了 scope 能开多大。这是第一个该确认的约束，不是最后一个。
+
+另外一个**所有测量类条目共享的软肋**，建议你主动在组会上承认掉：block 21,000,000 大约是 2024 年 11 月，到今天已经陈旧约 22 个月，**整个 Pectra 之后的活动都不在里面**（尤其 EIP-7702 的委托 EOA，它直接改变合约热度分布和读写集形状）。审稿人会问。缓解办法正好在你手上：**用 Base RPC 作为&quot;当代 workload&quot;那一臂**，L1 archive 作为长历史那一臂。两个 workload 的对比本身还能加强泛化性论证——这个软肋处理得好是加分项。
+
+---
+
+最后一个问题，只有你能答，它决定我下一步给你出哪份东西：
+
+**你更愿意接受哪种风险——第 1 名的&quot;工程量风险&quot;（做得出来，但可能被审成 engineering report），还是第 2 名的&quot;撞车风险&quot;（新颖性更依赖那次检索结果，但一旦成立就是更漂亮的 EuroSys 论文）？**
+
+告诉我哪一个，我就按 FINER rubric 的 brief 格式把它展开成完整的 Research-Direction Brief（方向一句话、方法 2–4 步、scope 边界、关键假设），再跑 Phase 2 把它拆成 3–5 条原子技术主张做逐条新颖性裁决。如果你想先看第 3 周决策点那版的具体实验设计，也可以直接说。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+</section><section class="arm">
+<div class="arm-head">
+<span class="arm-label">Baseline (no plugin)</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:83.3%"></span></span>
+<span class="num">83.3%</span>
+<span class="muted num">66.7% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:50.0%"></span></span>
+<span class="num">50%</span>
+<span class="muted num">2 turns · $0.72 · 09:11:40 UTC</span>
+</div>
+
+<div class="graders"><details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">all-sixteen-present</span>  </summary>
+<div class="grader-body">
+<p class="explanation">pattern not found in last_message</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">记忆目录当前不可访问，跳过，直接给你排序。
+
+先说三个会**改变排序结论**的前提，这三条建议放在你 slide 的第一页，因为后面所有取舍都从这里推出来：
+
+**一、你说的&quot;四个月&quot;和你想投的会对不上。** 按历年节奏：ATC 的 ddl 通常在 1 月，正好落在四个月窗口内；MLSys 的 ddl 一般在前一年 10 月底，也就是**大约六到七周后**，不是四个月；EuroSys 是两轮制，秋季轮差不多就是现在，春季轮在 4 月左右。我没法确认 2027 年的确切日期，你务必自己查一遍 CFP——但这个结构性事实很稳：**这一轮真正够得着的是系统向的 1 月 ddl，ML 向这轮基本已经出局**。这一条直接把 4、7、14 三条 ML 向的往下压。
+
+**二、你的快照是过期的。** block 21,000,000 大约是 2024 年 11 月，到今天差了 22 个月、四百多万个块。中间隔着 Pectra、gas limit 上调、L2 数据格局变化。2027 年投出去的测量论文，审稿人一定会问&quot;为什么用 2024 年的数据&quot;。**这周就把 archive 的追平同步挂后台跑起来**——它耗的是墙上时间，跟你写代码并行不冲突，越晚开始越被动。
+
+**三、1.5 个人 / 4 个月 = 一篇主力 + 一条辅线。** 16 选 1，不是 16 选 5。所以我下面不是给你 16 个独立项目排序，而是把它们并成三条线。
+
+---
+
+## 排序表
+
+| 名次 | 条目 | 档位 | 一句话理由 |
+|---|---|---|---|
+| 1 | **8** eBPF 剖析 state stall | 立刻做 | 它的结论决定 1/4/9/11/12 值不值得做 |
+| 2 | **9** EVM 分层编译 | 旗舰 | 唯一一条够一篇 ATC 的完整故事 |
+| 3 | **1** revmc 分层缓存 | 并入 9 | 这是 9 的第一个实验，不是独立项目 |
+| 4 | **13** record/replay + 差分测试 | 并入 9 | 是 9 的正确性章节，不是可选项 |
+| 5 | **12** 并行度上界测量 | 第二篇 | 本科生可主导，冲 EuroSys 春季轮 |
+| 6 | **15** 按协议类别拆解 | 并入 12 | 12 的 novelty 全在这里 |
+| 7 | **2** 历史冲突统计做静态重排 | 第二篇的机制部分 | 12 测出上界，2 去够那个上界 |
+| 8 | **16** zkVM 每指令开销 | 改写后低成本 | 不用移植，两周能出数 |
+| 9 | **11** 重写 journal | 本科生入门 PR | 先量再改，很可能是 1% 的优化 |
+| 10 | **4** 学习型预取 | 被 8 卡着 | 8 说 stall &lt; 10% 就当场毙掉 |
+| 11 | **6** state expiry | 改写后可做 | 仿真就够，别实现 |
+| 12 | **14** LLM 不变量 + 符号执行 | 不做 | 赛道拥挤 + 评测集污染 |
+| 13 | **3** gas 定价影响 | 不做（可改写） | 太泛，且不是这三个会的口味 |
+| 14 | **10** MEV 对用户影响 | 不做 | 同上，且已被做透 |
+| 15 | **7** 从零预训 7B | 不做 | 单卡算力差三个数量级 |
+| 16 | **5** 收集 L2 私有排序日志 | 不做 | 数据根本拿不到 |
+
+---
+
+## 为什么是这个顺序：三条线
+
+### 主力线：8 → 9(吞掉 1) → 13
+
+**为什么 8 排第一**：你列表里有五条（1、4、9、11、12）都隐含同一个假设——&quot;EVM 执行的瓶颈在 X&quot;。8 是唯一一条能证伪这个假设的。花三周把数拿到，后面四个月不会押错。**这是&quot;先测后做&quot;，不是&quot;先热身&quot;**，这个话术在组会上很好讲。
+
+一个技术坑要提前说：**geth 是 Go，eBPF uprobe 打 Go 很容易出事**——Go 1.17 之后的寄存器 ABI、goroutine 栈搬迁，uretprobe 挂 Go 函数是出了名的会崩。建议分两层：进程外的 IO / page fault / 块设备延迟用 eBPF（安全且准），进程内的归因用 Go 自带的 runtime/trace + pprof。更好的做法是**主目标换成 reth**，Rust 上 uprobe 干净，而且你后面的工作全在 revm 上，geth 留作交叉验证。
+
+**为什么 9 是旗舰，而 1 只是它的第一个实验**：1 和 9 本质是同一件事的静态版和动态版，1 单独拿出去是 workshop 体量。9 撑得起一篇 ATC，理由是它**不是&quot;把 JVM 那套搬过来&quot;**，四个差异点都是真问题：
+
+- **误编译在 EVM 里等于共识分裂**，不是&quot;程序跑错了&quot;。所以分层策略必须在一个正确性预算下做，gas 计量和异常halt 要逐字节等价。这直接把 13 从&quot;可选的差分测试&quot;变成系统的一部分——审稿人一定会问&quot;你怎么保证 JIT 不会导致链分叉&quot;，13 就是答案。
+- **热度的 key 不是地址，是 codehash**。EIP-1167 最小代理和 diamond 模式下成千上万个地址共享一份代码。你第 1 条写的&quot;调用频次前 1% 的合约&quot;，按地址统计会把结论算歪——代理合约本身是超热的，但它的代码只是个 delegatecall 桩。这一条会直接改你的实验设计，越早改越好。
+- **同一份 codehash 在全网所有节点上都一样**，所以编译产物是可以内容寻址、跨节点共享、甚至随客户端预置分发的。这是 JVM 世界不存在的结构，也是我看下来这篇里最有意思、还没人认真写过的点。
+- **workload 是外部驱动且高度可预测的**：热合约几个月不变，所以持久化的 profile 缓存跨重启有效，不像长驻 JVM 那样每次都要预热。
+
+### 第二线：12(吞掉 15) + 2 —— 交给本科生，瞄 EuroSys 春季轮
+
+12 单独做是**复现**：Saraph &amp; Herlihy 2019 就测过以太坊的投机并发上界，后面还有若干跟进。纯做一遍投不出去。新意必须来自三处，而这三处恰好就是 15 和 2：
+
+1. **L1 vs L2 对比**——你有 Base RPC，这是 2019 年那批工作没有的；
+2. **15 的按协议拆解**——我的预判是上界会被极少数热 slot 卡死（WETH 余额槽、头部 AMM 的 reserve、USDC 余额），也就是说&quot;是哪几类协议在拖后腿&quot;这个问题的答案可能是&quot;是哪几个 storage slot&quot;。这个结论如果成立，比&quot;上界是 3.2x&quot;有意思得多；
+3. **可重排的上界**——固定顺序下这是链分解问题，允许重排就变成冲突图着色。两个数之间的差，就是第 2 条能吃到的空间。
+
+这里要给第 2 条做个**定位修正**：交易顺序是出块者定的，执行者必须照做。所以 2 不是&quot;执行优化&quot;，是**出块策略**，客户是 builder 和 L2 sequencer。这个定位一改，Base 就从&quot;数据源&quot;变成&quot;落地对象&quot;，论文立刻有了 deployment story。另外记得讨论一个张力：并行度最大的排序和 MEV 收益最大的排序不是同一个，这个 tradeoff 量化出来本身就是个结果。
+
+**第一周必须做的 go/no-go 检查**：Base 的公开 RPC 大概率**不开 `debug_*`**，拿不到 prestateTracer 就拿不到 read/write set，整条第二线就断了。先花半天验这一件事，别等到第六周才发现。
+
+### 第三线：低成本探针
+
+**16 改写后很划算。** &quot;把 revm 移植到 RISC-V 裸机&quot;这件事**已经做完了**——SP1 和 RISC Zero 里跑的就是 revm/reth。移植不是贡献，贡献是那个开销刻画，而这个用现成 zkVM 的 cycle tracker 两周就能出，不用写任何移植代码。CPU 跑 execution 计 cycle，32 核足够；4090 留给 SP1/RISC0 的 GPU proving 基准。
+
+但要小心结论落俗：大概率会发现 keccak 和 ECDSA 主导 cycle——这就是大家拼命加 precompile 的原因，已知。**真正值钱的角度是成本模型：用 EVM gas 去预测 zkVM cycle，然后证明 gas 是个很烂的代理指标。** 顺带一提，这正好把第 3 条救活了（见下）。
+
+**11 当本科生的入门 PR。** MHOT 这个名字我认不出来——如果指的是 HOT（Height Optimized Trie, SIGMOD&apos;18），它到 journal 的映射我看不出对应关系，你回去问一下当场提的人具体指哪篇。撇开名字，&quot;砍掉 revert 的拷贝开销&quot;是个正经方向，但我猜它占比很小（除非深调用栈 + 大量 revert 的场景）。做法：先让本科生加个计数器测 journal 在总执行时间里的占比，一周出数，是 1% 就写进 8 的测量结果里收工，是 10% 就升级成旗舰论文里的一个优化节。
+
+**4 挂起，等 8 的结论。** 三个风险叠着：256G 内存 + page cache 可能已经把热 state 兜住了，stall 本来就不大；要打的 baseline 不是&quot;不预取&quot;，是&quot;用上一个块的 access set&quot;和&quot;从 tx 列表的 to 地址直接推&quot;这类白给的启发式；而且 Forerunner（SOSP&apos;21）已经在投机执行方向占了位。**8 如果告诉你 state stall 占比 &lt; 10%，当场毙掉，别心疼。**
+
+**6 改写：别实现，做仿真。** 你不需要在 revm 里实现 state expiry 才能测状态体积随时间的变化——拿 archive 重放一遍，对给定的过期策略算哪些状态会被淘汰就行，两周 vs 三个月。而且 state expiry 的规范本身还在漂（很大程度上被 stateless / Verkle 那条线盖过去了），实现一个没定稿的提案，四个月后可能白写。
+
+---
+
+## 时间表（到 1 月中）
+
+| 周 | 你 | 本科生 |
+|---|---|---|
+| 1–3 | 8 的测量框架 + 首批数 | 重放 pipeline；Base `debug_*` go/no-go；11 的占比测量 |
+| 后台 | archive 追平同步（本周就起） | |
+| 4–9 | 9 的核心：按 codehash 分层、deopt、持久化 profile 缓存 | 13 的差分测试框架 |
+| 10–13 | 完整评测；1 作为策略 ablation 扫参 | 12 + 15 的数据，转第二篇 |
+| 14–17 | 写作、artifact、buffer | 12 继续，瞄 4 月 EuroSys |
+
+---
+
+## 回组会的说法（那几条别人当场提的）
+
+**第 7 条（7B 预训）**——不要说&quot;做不了&quot;，给数：单卡 4090 有效算力大约 6e13 FLOP/s，7B 模型按 Chinchilla 最省的 140B token 配比是 `6ND ≈ 5.9e21` FLOPs，**三年起步**；要到能跟 Dedaub 掰腕子的水平按 1T token 算，是**二十年量级**。显存这关更早就过不去：7B 全量 AdamW 光权重+梯度+fp32 master+优化器状态就 110GB+，卡上只有 24G。**然后给出能做的版本**：拿 1.5B–3B 的 code 模型做 QLoRA，数据用 Etherscan 的 verified source 配对应 solc 版本重新编译，拿到完美对齐的 bytecode↔source 对——这个数据构造思路是真有价值的，单卡也做得动。只是这轮 MLSys 赶不上，留给下一轮。
+
+**第 5 条（L2 私有排序日志）**——数据不存在。私有 mempool 的定义就是不公开，sequencer 不会发内部排序日志，去&quot;收集&quot;要么拿不到要么方式不正当。能做的只有从公开出块结果做反推，而&quot;跨 L2 传导路径&quot;靠反推基本是猜。而且这题的会场是 FC / AFT / IMC，不是 EuroSys。
+
+**第 3 条（gas 定价）和第 10 条（MEV 对用户影响）**——两条都是好问题，但都是经济学/测量题，这三个会不收，而且 10 已经被做得很透了（三明治攻击的用户损失量化有一批论文）。**第 3 条我给了它一条活路**：窄化成&quot;gas 与真实资源消耗的失配&quot;就是正经系统题，而且它**同时是第 8 条和第 16 条的输出**——8 给出&quot;gas 和 CPU 时间的偏差&quot;，16 给出&quot;gas 和 zkVM cycle 的偏差&quot;。回去可以说：3 没被砍，它被吸收进 8 和 16 了，提这条的人可以认领 16 那一半。
+
+**第 14 条（LLM 不变量 + 符号执行）**——最需要小心的是评测：SmartBugs、SWC registry、公开漏洞复盘都在模型训练数据里，&quot;能覆盖多少已知漏洞&quot;这个指标被污染得很彻底，审稿人第一刀就砍这里。要做必须自建一个 cutoff 之后的事故集，这本身就是几个月的工作。加上会场是 ICSE/FSE/ISSTA/CCS，跟你这轮的投稿目标不一致。
+
+---
+
+## 需要你回去确认的四件事
+
+1. ATC / EuroSys / MLSys 2027 的确切 ddl——我给的是历年节奏，没法保证具体日期，但&quot;MLSys 比 ATC 早得多&quot;这个结构差是可靠的，你的整个排序建立在这上面。
+2. **MHOT 到底指哪篇**，问第 11 条的提出者。
+3. **Base 公开 RPC 开不开 `debug_traceBlock`**，半天的活，决定第二条线的生死。
+4. **revmc 现在的成熟度**——它是不是还在维护、opcode 覆盖全不全、EOF 支持情况。我对它的印象可能已经过时了，但如果它还是实验状态，第 9 条的工程量会比你想的大一截，这会影响时间表的第 4–9 周。
+
+如果你想，我可以把这个排序整理成 slide 的骨架，或者先动手把第 8 条的测量框架搭起来。</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">1 turns · $0.56 · 09:12:15 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">all-sixteen-present</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ^(?=.*#1\b)(?=.*#2\b)(?=.*#3\b)(?=.*#4\b)(?=.*#5\b)(?=.*#6\b)(?=.*#7\b)(?=.*#8\b)(?=.*#9\b)(?=.*#10\b)(?=.*#11\b)(?=.*#12\b)(?=.*#13\b)(?=.*#14\b)(?=.*#15\b)(?=.*#16\b)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">先把结论摆前面：这 16 条合并去重之后其实是 **6 个项目 + 5 条该砍的**。我按下面三个标准排的，这个标准本身就是你下周要讲的第一页：
+
+1. **保底**——万一机制部分做失败，一月还有没有东西可投？
+2. **解锁**——做完它能不能决定其它几条该不该做？
+3. **上限**——做成了够不够 EuroSys/ATC 的分量？
+
+优先级高的必须先满足 1 和 2，光有 3 的一律往后排。一个人加一个本科生、四个月，现实目标是**一篇主投 + 一个能拿出手的 artifact**，不是三篇。
+
+---
+
+## 第一层：主攻线（#12 + #15 → #2）
+
+这是一个项目，不是三个：**&quot;主网到底有多少可并行度，瓶颈在哪几类协议，以及一个冲突感知的静态重排能吃掉多少&quot;**。
+
+- **#12+#15 是保底**。真实 read/write set 你手上就有，算依赖图关键路径得到理论加速比上界，再按协议类别拆开看是谁在拖后腿——这部分不依赖任何机制创新，做完就是可写的测量结果。#15 不是独立课题，它是 #12 的一节，而且是最有信息量的那一节，因为它直接推出 #2 该怎么设计。
+- **#2 是上限**。纯历史冲突统计、不训模型，在系统会议是加分项（可解释、开销可忽略）。#12 的 trace 基础设施就是 #2 的评测平台，顺序上必须 #12 在前。
+
+三个必须提前想好的反驳：
+
+- **重排改变经济语义**。L1 上交易顺序是 proposer 的收入来源，priority fee 排序和 MEV bundle 原子性不允许你自由换序。诚实的 framing 是「sequencer 侧调度」——**而 Base 恰好是中心化 sequencer、FCFS、你有 RPC**。这条从 L1 讲不通，从 L2 讲得通。
+- **你的快照停在 block 21,000,000，大约是 2024 年 11 月**，到现在快两年。只做 L1 历史会被审稿人问 traffic mix 过时（blob 交易、AA 的占比都变了）。把 Base 拉进来同时解决语义问题和新鲜度问题。
+- **别自己写 Block-STM**。pevm、grevm 都是 revm 上的开源并行执行器，直接拿来做 baseline 和改造宿主，省两个月。
+
+---
+
+## 第二层：先做、但不是主攻（#8）
+
+**#8 优先级排第二，但时间上第一个动手。** 理由是它一次性决定 #1/#9/#4/#11 四条的生死。
+
+一个关键判断你现在就该有：真实区块回放里，**EVM 解释执行通常只占块处理时间的一小部分，大头是 state 访问和 trie/hash**。如果 #8 量出来确实如此，那 #1/#9 的原生码收益天花板就被锁死了，#11 更不用说。这个数字一出来，你下周讲排序的说服力比任何定性论证都强。
+
+两个技术坑先说：
+
+- **eBPF uprobe 打 Go 二进制很难受**（栈迁移、寄存器 ABI 变更），geth 进程内那层建议走 pprof + 自己埋点，eBPF 留给 syscall / block I/O 那层——那层跟语言无关，好用。
+- **你优化的目标全是 revm，别只剖 geth**。两边都要，否则结论对不上你要改的代码。
+
+这条本身发不了顶会 full paper，但它是主攻线论文里&quot;时间都去哪了&quot;那一节，也是你砍掉四条的依据。
+
+---
+
+## 第三层：本科生线 + 有条件启动
+
+| 条目 | 处置 |
+|---|---|
+| **#13** | **给本科生做，第一周就开**。record/replay 框架和 #12 的 trace 抽取基础设施高度重合，他的产出直接喂主线。但**不能当主投**：goevmlab 已经在做 geth/besu/nethermind/evmone 的差分 fuzzing；而且拿主网区块回放找不到&quot;共识分歧&quot;——主网区块按定义在 geth 上是对的，差异只说明 revm 错了。这是 revm 正确性验证，不是 bug 猎杀，找不找得到是抽奖，别把一月的命押上去。 |
+| **#1 + #9** | **合成一个项目**：#1（离线 profile + AOT 前 1%）是 phase 1，#9（在线分层 + 降级）是 phase 2。提 #9 的人不用觉得被砍了，他那版是更完整的形态。**gate 在 #8 上**。实现提示：热度要按 **codehash** 而不是地址统计，proxy 模式下同一份字节码挂在几百个地址上。 |
+| **#16** | 拆成两半：**cycle counting 不需要跑证明，很便宜**（三四周），proving cost 才贵，4090 跑不了规模。但注意 revm 跑 RISC-V 裸机基本已经有人做了（Succinct 的 rsp 就是 reth/revm 在 SP1 里跑），你的增量只能是 per-opcode 开销归因，而 &quot;keccak / 预编译最贵&quot; 在圈内算常识。当备选，不当主线。 |
+| **#4** | **双重 gate**：#8 要证明 stall 占比够大，且简单启发式（按合约历史访问过的 slot 预取）吃不掉大部分收益。另外你 256G 内存 + NVMe，热状态很可能已经被 page cache 吸收了；geth 本身也有投机预取，baseline 不弱。**还有个更硬的问题见下面的 venue 部分。** |
+| **#11** | gate 在 #8。我的先验是 journal / revert 拷贝不会进 top-3 开销，#8 一量就知道，两天的事。（另外&quot;MHOT&quot;是指哪个工作？我不想瞎猜，你确认一下我再判断具体做法。） |
+| **#6** | **砍掉实现，保留模拟**。&quot;状态体积随时间怎么变&quot;用 archive 的访问 trace 加一个过期策略离线算就行，不需要在 revm 里把提案实现掉——那是三个月换一个两三周能得到的数字。而且 state expiry 在路线图上已经让位给 Verkle / 无状态客户端了，新鲜度存疑。 |
+
+---
+
+## 砍掉的五条，以及给提的人的说法
+
+好的说法不是&quot;这个不行&quot;，是&quot;卡在哪个具体事实上 + 最小可行版本是什么&quot;。
+
+| 条目 | 一句话说法 |
+|---|---|
+| **#7** 从零预训 7B | **算术上不可能**：7B 按 Chinchilla 要 140B token，约 5.9e21 FLOPs；单卡 4090 乐观 50 TFLOPS 有效算力要 **3.7 年**，而 24G 装不下 7B 的 Adam 状态，必须 CPU offload，MFU 掉到 10% 左右就是 **9 年**。可行版本：QLoRA 微调现成 code model（24G 够），目标收窄到变量/函数名恢复和语义摘要——LLM 真正赢 Dedaub 的地方在这儿，Gigahorse 那套 Datalog 反编译你正面打不过。 |
+| **#5** 收集 L2 私有 mempool 日志 | **这批数据不公开，不是算力问题是准入问题**。Base 是中心化 sequencer，交易只在出块时才可见，没有公开 mempool 可采。可行版本：用公开链上 trace + 跨链桥流量反推跨域套利，但那是 FC/AFT/IMC 的经验测量论文，不是你的目标会议。 |
+| **#14** LLM 生成不变量 + 符号执行 | 2026 年这个方向已经很挤；符号执行在主网合约上路径爆炸；&quot;覆盖多少已知漏洞&quot;的评测方法学站不住（已知漏洞数据集小且有后见之明偏差）。更重要的是**它跟其余 15 条的技能栈完全不重叠**，四个月里分裂研究身份的代价太大。venue 也不对，是 ICSE/FSE/CCS，不是 MLSys。 |
+| **#3** gas 定价影响 | 问题太散，且是经济学不是系统。真要做，系统味的版本是 **&quot;gas 计价与真实硬件开销的错配&quot;**（SLOAD 相对其 I/O 成本被低估多少），这个可测、可发，而且**正好是 #8 的副产品**——提的人会觉得他的想法被吸收了。 |
+| **#10** MEV 对普通用户的影响 | 同 #3，太宽泛且已被反复研究。系统化版本是私有 orderflow / RPC 路由的延迟代价实测，但仍不够撑第一篇。 |
+
+---
+
+## 时间线（今天 9/14，按一月中投）
+
+| 周 | 内容 |
+|---|---|
+| W1–2 (9/15–9/28) | trace 抽取基础设施（用 revm inspector，别用 debug_traceBlock，太慢）；确认 Base RPC 的 tracing 权限；本科生 #13 开工 |
+| W3–6 (9/29–10/26) | #12+#15 测量完成（**这就是保底产出**）；#8 并行进行，syscall 层交给本科生 |
+| W7–12 (10/27–12/7) | #2 机制：冲突预测器 + 调度器，接进 pevm/grevm |
+| W13–16 (12/8–1/4) | 评测、ablation、写作 |
+| W17 | 打磨投出 |
+
+W6 结束时你手上已经有一篇测量论文的骨架，后面十周失败也死不了——这是我把 #12 排第一的核心理由。
+
+---
+
+## 下周之前必须确认的三件事
+
+1. **会议日期**。这条最要紧：**MLSys 2027 的 deadline 大概在今年 10 月底**，不是四个月后，是**六周后**——你的 ML 线（#4/#7/#14）根本没有四个月。EuroSys 近年是两轮制（秋季轮约 10 月、春季轮约次年 4 月），你的一月中窗口**可能哪一轮都不在**。另外**去确认一下 ATC 后续还办不办**，我记得有过整合的讨论，但我不确定，这个如果属实你整个 venue 计划要重排。以上日期我都是凭印象，**请逐个去官网核实**，然后倒推时间线。
+2. **Base 的 tracing API 能不能用**。#12/#2 的 L2 部分全押在 `debug_traceBlock` / prestateTracer 上，公共 RPC 通常不开 debug 命名空间。这个第一周就要试，试不通就得改方案。
+3. **确认 #11 说的 MHOT 具体是哪个工作**，我不确定，不想在这上面给你错的判断。
+
+最后一句给你在会上用：**排序的依据不是&quot;哪条最有意思&quot;，是&quot;哪条失败了我一月还有东西投&quot;。** 按这个标准，#12 和 #8 排前面是因为它们做完就有结果，而且能替我判断另外四条值不值得做；#7/#5 被砍不是因为不重要，是因为一个卡在算力上（差 3–9 年），一个卡在数据准入上（拿不到就是拿不到）。</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:100.0%"></span></span>
+<span class="num">100%</span>
+<span class="muted num">1 turns · $0.40 · 09:13:38 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">all-sixteen-present</span>  </summary>
+<div class="grader-body">
+<p class="explanation">matched ^(?=.*#1\b)(?=.*#2\b)(?=.*#3\b)(?=.*#4\b)(?=.*#5\b)(?=.*#6\b)(?=.*#7\b)(?=.*#8\b)(?=.*#9\b)(?=.*#10\b)(?=.*#11\b)(?=.*#12\b)(?=.*#13\b)(?=.*#14\b)(?=.*#15\b)(?=.*#16\b)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">先给结论：**16 条里真正该做的是 3 条（12+15、8、2），它们合成一篇论文；剩下 13 条要么是这篇的后续，要么这轮不该碰。** 下面是排序理由和你上台要讲的逻辑。
+
+## 一个反直觉的前提，建议开场就讲
+
+你们的硬件画像是**系统测量机器，不是 ML 机器**：32 核 / 256G / NVMe archive 是稀缺资源，一张 4090 在这个 list 里几乎没用。16 条里只有 #4、#7、#14 需要 GPU，而这三条恰好是可行性最差的。所以&quot;我们有卡所以要做 ML&quot;这个直觉在这里是反的——你们的护城河是那份到 21,000,000 的 archive 快照 + Base RPC，排序应该围绕&quot;谁能榨出这份数据的价值&quot;来排。
+
+另外 4 个月 + 1.5 个人 = **一次投稿机会**。排序不是按有趣程度排，是按&quot;哪条的最坏情况仍然是一篇论文&quot;排。
+
+## 主线：并行执行（#12 + #15 → #2，#8 供弹药）
+
+**为什么是这条而不是编译那条（#1+#9）：**
+
+1. 数据已经在盘上，不需要新基础设施，第一周就能出第一张图。
+2. 可以拆给本科生——#15 的协议分类标注是典型的&quot;枯燥但边界清晰&quot;的活，正适合新人。
+3. Base RPC 给你第二条链。&quot;这个结论在 L1 和 L2 上都成立吗&quot;是审稿人必问的，你们能答，这是大加分。
+4. **优雅降级**：如果 #2 在第 12 周失败了，#12+#15+#8 本身还是一篇测量论文。#1+#9 失败了就什么都不剩。
+
+**但 #12 有个必须正视的风险**，你上台要主动说：纯粹的并行度上界测量**已经有人做过**（Saraph &amp; Herlihy 那条线，以及各家 Block-STM 的 evaluation）。单做 #12 大概率被判&quot;重做&quot;。新意必须来自四处：
+
+- 后 Merge / 后 4844 的区块（你那份快照正好横跨 15.5M 和 19.4M 两个分水岭，覆盖三个 regime）
+- **#15 的协议类别拆解**——从&quot;有多少并行度&quot;变成&quot;是谁在挡路&quot;
+- L1 vs Base 的对比
+- 接上 #2，从测量走到改进
+
+后两条是&quot;论文&quot;和&quot;技术报告&quot;的分界线。所以 **#15 不是 #12 的延伸，它是 #12 的存在理由**，合并成一条讲。
+
+**#2 的技术底牌，你得先想清楚**，因为组里肯定有人当场问：重排**消不掉真依赖**。如果 #15 发现瓶颈就是 USDT 的 balance mapping 和 Uniswap 的 slot0，那重排对这部分无能为力。重排真正省的是**误判 abort 和级联重试的浪费**，不是固有串行。诚实的表述是&quot;压低 abort 率和无效投机работ&quot;，不是&quot;提高并行度&quot;。#15 的拆解结果决定 #2 有没有空间——这个依赖是真的，不是叙事包装。
+
+顺便，#2 有个很干净的 motivation，建议直接用：**以太坊交易不声明读写集**（EIP-2930 access list 基本没人用），不像 Solana/Aptos 可以强制声明。所以你只能预测，而历史先验是最自然、最可部署的预测方式——不需要模型、不进关键路径、零推理延迟。&quot;不训模型&quot;在这里是卖点不是妥协。
+
+## 完整排序
+
+**第 0 层 · 本周开工**
+- **#12+#15**（合并）— 主线基础，undergrad 主力
+- **#8** — 供给 motivation 数据，你自己做
+
+**第 1 层 · 第 4 周接上**
+- **#2** — 主线的贡献部分
+
+**第 2 层 · 好项目，但这轮不做（写进 future work，明年开题）**
+- **#1+#9**（合并成&quot;EVM 分层编译&quot;）— 本来就是一篇，别拆两条。是合格的 ATC 选题，但 revmc 还年轻、deopt 难写，工程风险比主线高一个量级
+- **#13** — 差分测试，被低估了。本科生的完美项目：机械、边界清晰、找到分歧就是头条。但它是彩票，不能当主线。如果 undergrad 手快，这是最好的第二任务
+- **#16** — 有价值但用不上你们的 archive 优势，而且是 zk 社区的论文，跟 EuroSys/ATC 分口径。注意 SP1/RISC Zero 那边 revm-on-RISC-V 基本已经跑通了，真贡献在 per-opcode 的 cycle 归因方法学，比想象中窄
+
+**第 3 层 · 条件性，等第 0 层数据说话**
+- **#4** — 如果 #8 证明 state 访问 stall 占比不显著，这条直接死。就算显著，24G 卡训完还得扛住关键路径的推理延迟预算（区块执行才百毫秒量级），headroom 很薄
+- **#11** — 同理，先让 #8 告诉你 revert 拷贝到底在不在关键路径上。主网 revert 率本来就不高，我担心这是在优化一个不存在的瓶颈
+
+**第 4 层 · 这轮不做**
+- #6、#14、#7、#3、#10、#5
+
+## 17 周排期
+
+| 周 | 你 | 本科生 |
+|---|---|---|
+| 1–2 | **验 Base RPC 的 `debug_*` namespace**、搭 revm 回放 | 抽样方案 + 跑通 trace 提取 |
+| 1–5 | #8 eBPF 剖析 | #12 读写集提取 |
+| 5–8 | #8 收尾 | #15 协议标注（Etherscan/DefiLlama 标签） |
+| 6–12 | #2 设计 + 实现 | #13 作为第二任务 |
+| 12–15 | 完整 eval + Base 对比 + ablation | 数据整理 |
+| 15–17 | 写 | |
+
+第一周那个 `debug_traceBlock` + prestateTracer 的检查是**最高优先级的去风险动作**——如果 Base 那边 RPC 不开 debug namespace，你的双链对比当场死掉，越早知道越好。另外 21M 个区块不要全跑，按 regime 做分层抽样（每段几十万块）就够，全量是在烧 I/O 换一个不会更强的结论。
+
+## 怎么跟提议的人交代
+
+原则：**不说&quot;这个不好&quot;，说&quot;资源不够 / 会场不对 / 时序不对&quot;**，并且尽量给一个保住对方本意的改写版。
+
+| 条 | 说法 |
+|---|---|
+| **#7** | 纯资源账，不用争论：7B Chinchilla-optimal 约 140B token ≈ 5.9×10²¹ FLOPs，单卡 4090 按 35% MFU 算**要跑 3 年多**；而且 7B 全参训练光优化器状态就 ~84G，24G 根本装不下。**改写**：拿 1.5B 级代码模型做 QLoRA 微调，4090 完全够，这个能做。另外&quot;把 Dedaub 比下去&quot;不要写进目标——商业产品当 baseline 是必输的框法，换成&quot;在某个受控子集上对比&quot; |
+| **#5** | 私有 mempool 的定义就是拿不到。别家 sequencer 的内部排序日志不存在公开渠道，抓取路径也有合规问题。**改写**：纯从链上最终顺序反推跨 L2 的 MEV 传导——这个能做，但是 FC/AFT 的论文，不是我们这轮的会场 |
+| **#3 / #10** | 不是不重要，是**会场不对**。这两条是 FC / AFT / WWW 的题目，投 EuroSys/ATC 连送审都过不了。而且&quot;研究 X 的影响&quot;还不是一个研究问题，得先收敛成可证伪的命题 |
+| **#6** | 结论可以从访问轨迹**直接算出来**，不需要先实现 state expiry。花两个月实现再测，是用工程量换一个解析就能得到的数。而且 expiry 那套提案本身还在飘 |
+| **#14** | 方向没问题，但 2026 年这个赛道太挤了，&quot;LLM 找合约漏洞&quot;的论文一抓一把。真差异化在符号执行那半边的 soundness，不在 LLM 那半边——如果要做，得把重心整个挪过去，那是另一篇论文的工作量 |
+| **#4 / #11** | 不是否掉，是**排在 #8 后面**。#8 四周内就会告诉我们这两个瓶颈到底存不存在。花四周买一个&quot;要不要投入四个月&quot;的答案，很划算 |
+| **#1 / #9 / #13 / #16** | 都是好题，明确写进 future work 并给出时间点，这是最体面的交代 |
+
+## 三件我不确定、需要你确认的
+
+1. **#11 的 &quot;MHOT&quot;** —— 我不确定你指的是哪份工作（HOT / Height Optimized Trie？还是某篇混合内存布局的？）。这条的评估我完全建立在&quot;revert 拷贝可能不在关键路径上&quot;这个判断上，如果 MHOT 指的是别的东西，结论可能要改，你把出处发我。
+2. **会议 DDL 要自己核**：我对 EuroSys 2027 两轮制的具体日期、ATC 2027 和 MLSys 2027 的截止时间都没有可靠记忆，别照我说的排期。按&quot;1 月中要交&quot;倒推是安全的，但真实日期请去官网确认后再定表。
+3. **#8 的一个坑**：geth 是 Go，Go 1.17 之后寄存器 ABI + 可移动栈让 uretprobe 很不可靠，eBPF 打 Go 二进制比打 C/Rust 麻烦不少。考虑到你另外十条都是 revm 生态，**建议 #8 主做 revm（Rust）**，geth 作为对照——既省事，数据也更能直接给 #2 用。
+
+要不要我把第 0/1 层这三条展开成一页 motivation slide 的骨架（该出哪几张图、每张图要支撑哪句话）？</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>组会上大家把想做的方向一股脑甩出来了，我事后整理成 16 条，下周我得回去讲排序，所以先找你过一遍。</p>
+<p>条件先摆着：一张 4090（24G 显存），一台 32 核 / 256G 内存的服务器，NVMe 上挂了一份到 block 21,000,000 的以太坊 archive 快照，另外 Base 主网有 RPC 可以随便调。人就我一个，加一个刚进组的本科生。时间上四个月内必须投出去，系统向投 EuroSys / ATC，ML 向投 MLSys。</p>
+<ol>
+<li>给 revmc 的 AOT 产物做按合约热度的分层缓存：只给调用频次前 1% 的合约编原生码，其余继续走解释器，量化编译开销和命中率的平衡点在哪。</li>
+<li>不训模型，纯拿历史冲突统计给 Block-STM 做交易静态重排，看 abort 率能压到多低。</li>
+<li>研究 gas 定价机制对以太坊生态的影响。</li>
+<li>给 revm 的状态访问做学习型预取：块执行开始前预测这一块要读哪些 trie 节点，提前从 NVMe warm 进内存。</li>
+<li>把各家 L2 sequencer 内部的私有 mempool 排序日志收集起来，分析跨 L2 的 MEV 传导路径。</li>
+<li>在 revm 里把 state expiry 那套提案实现掉，测状态体积随时间怎么变。</li>
+<li>从零预训练一个 7B 模型专做 EVM 字节码反编译，目标是把 heimdall 和 Dedaub 都比下去。</li>
+<li>用 eBPF 在 geth 上做细粒度剖析，量化真实区块回放里 state 访问 stall 占总执行时间多少。</li>
+<li>把 JVM 那套分层编译搬到 EVM 上：按运行时热度把合约从解释提升成原生码，冷下来再降级。</li>
+<li>研究 MEV 对普通用户体验的影响。</li>
+<li>用 MHOT 那套内存布局思路重写 revm 的 journal，把 revert 时的拷贝开销砍掉。</li>
+<li>拿主网历史区块做一次并行度上界测量：用真实 read/write set 算最优调度下的理论加速比。</li>
+<li>给 revm 做确定性 record/replay，拿来跟 geth、evmone 做差分测试，专门找共识分歧。</li>
+<li>用 LLM 给智能合约自动生成不变量，再用符号执行去验，在主网合约上统计能覆盖多少已知漏洞。</li>
+<li>顺着第 12 条再往前一步：把那个并行度上界按 DeFi 协议类别拆开，看是哪几类协议在拖后腿。</li>
+<li>把 revm 移植到 RISC-V 裸机上，量化 zkVM 场景下每条 EVM 指令的开销。</li>
+</ol>
+<p>帮我排个序，我下周得讲清楚为什么是这个顺序。有几条是别人当场提的，我要是不做，回去总得给个说法。</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">all-sixteen-present</span><span class="badge">regex</span></div>
+<div class="config"><div class="kv"><span>target</span><code>&quot;last_message&quot;</code></div><div class="kv"><span>pattern</span><code>&quot;^(?=.*#1\\b)(?=.*#2\\b)(?=.*#3\\b)(?=.*#4\\b)(?=.*#5\\b)(?=.*#6\\b)(?=.*#7\\b)(?=.*#8\\b)(?=.*#9\\b)(?=.*#10\\b)(?=.*#11\\b)(?=.*#12\\b)(?=.*#13\\b)(?=.*#14\\b)(?=.*#15\\b)(?=.*#16\\b)&quot;</code></div><div class="kv"><span>flags</span><code>&quot;s&quot;</code></div><div class="kv"><span>match</span><code>&quot;contains&quot;</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">result</span><span class="badge">llm</span></div>
+<div class="md"><p>The user pasted 16 candidate research directions from a group meeting and asked for a ranking he has to defend next week, after stating his resources (one 4090, a 32-core server, a local Ethereum archive snapshot, Base RPC), his manpower (himself plus one undergrad) and a four-month deadline. This run had read-only tools (Read, Glob, Grep, Skill), no web search and no file writing, so never fail an answer for not saving a file, for not running a real literature search, or for marking a prior-work reference as unverified.</p>
+<p>Judge one thing: are the four candidates the prompt disqualifies handled on the fact that disqualifies them? A separate regex grader already checks that all sixteen are named, so do not count enumeration here, and do not judge how the other twelve are ordered or argued.</p>
+<p>The prompt plants four disqualifiers. #5 needs the L2 sequencers' internal mempool ordering logs, which are private and reachable from neither the archive snapshot nor Base RPC. #7 pretrains a 7B model from scratch, orders of magnitude past one 4090. #3 and #10 each name a topic and an "影响" with no method, dataset or metric attached.</p>
+<p>PASS requires both:</p>
+<ol>
+<li>#5 and #7 each land in the bottom third of whatever order the answer gives (rank 12 or lower of 16) or are set aside, and each reason names the missing resource: sequencer-internal logs he has no way to obtain, pretraining compute far past one 4090. A rescope ("fine-tune a small model instead") counts only when it names the same fact, and a timeline or manpower fact counts only when it is tied to that pretraining scale.</li>
+<li>#3 and #10 each land in the bottom third or are returned for restatement, on the stated ground that as written neither names a method, dataset or metric. Offering a sharper restatement is fine; ranking one on the strength of a method the answer supplies for it is not.</li>
+</ol>
+<p>FAIL if any of #3, #5, #7, #10 is ranked above the bottom third without being set aside or returned for restatement, or if any of those four is demoted on a bare quality label with no fact behind it ("数据不好搞", "太重了", "太宽泛", "不够 novel", "偏工程，风险高").</p>
+<p>Ignore everything else: ordering among the rest, formatting, table versus prose, language, length, which candidate it ranks first, whether it uses any particular scoring scheme, whether it merges candidates into fewer projects, and whether it ends by asking the user to choose.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">skill-fired</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Skill&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\&quot;skill\&quot;\\s*:\\s*\&quot;(?:[\\w-]+:)?idea\&quot;&quot;</code></div></div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>
