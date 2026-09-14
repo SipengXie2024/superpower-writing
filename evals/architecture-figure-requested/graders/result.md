@@ -1,0 +1,7 @@
+---
+type: llm
+---
+
+The user pasted the structure of an EVM JIT execution engine and asked for `figure.tex` for his paper's Section 4, adding "别一上来先跟我讨论布局" (don't discuss layout first). This run has no Bash and no Write tool, so nothing can be compiled and the figure has to arrive as code in the reply.
+
+One question decides this case: did a written layout plan for this particular figure come before the drawing code? PASS if, ahead of the first `tikzpicture` body, the answer says in words where things go — the flow direction, how the canvas splits into zones, rows, columns or lanes, which of this system's own modules sits in each (block executor, dispatcher, code cache, interpreter, profiler, the SSA IR and its three passes, the ORC JIT, the host interface), and which zone carries the interpreter slow path, the JIT fast path and the background compile path. FAIL if the code is introduced by intent alone ("here is your figure") or by a plan so generic it would fit any architecture figure, leaving every placement decision to happen inside the coordinates. That plan may be a comment block at the head of `figure.tex`, an ASCII sketch, or ordinary prose, in either language. Its position is the whole question, so a plan that appears only after the drawing code, or only as a caption or explanation following it, does not count. Nothing else bears on the verdict: not the answer's length, not how dense the figure is, not whether it offers layout alternatives or admits the code is still uncompiled.
