@@ -1,6 +1,6 @@
 ---
 name: archiving
-description: Snapshots a finished paper's .writing/ directory (outline, claims, findings, progress) into a dated archive, consolidates project memory, and resets .writing/ for the next paper. Use when a paper is submitted or abandoned, when starting a new paper in the same repo, or when .writing/ holds stale state from a previous project, including "归档这篇", "这篇投完了", "开始写新的".
+description: Snapshots a finished paper's .writing/ directory into a dated archive, consolidates project memory, and resets .writing/ for the next paper. Use when a paper is submitted or abandoned, when starting a new paper in the same repo, or when .writing/ holds stale state from a previous project, including "归档这篇", "这篇投完了", "开始写新的". Skipping the archive to edit the old paper's state in place is still this skill ("先别归档", "两篇差不多，我在旧文件上改就行").
 ---
 
 # Archiving Completed Plans
