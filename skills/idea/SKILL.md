@@ -1,6 +1,6 @@
 ---
 name: idea
-description: Turns a chosen research area into publishable directions through three internal phases. It generates candidates with named lenses and FINER scoring, adjudicates novelty per technical claim against prior work, then evaluates against a top-venue bar with a fatal-flaw short-circuit. All verdicts stay advisory. Use when a research direction is undecided, when choosing a topic, when evaluating an idea, or when checking novelty (查新).
+description: Turns a research area into publishable directions. It generates candidates with named lenses and FINER scoring, adjudicates novelty per technical claim against prior work, then evaluates against a top-venue bar with a fatal-flaw short-circuit. All verdicts stay advisory. Use when a research direction is undecided, when choosing a topic, when evaluating an idea, when checking novelty (查新), or when someone brings a slate of candidates already written down and wants it triaged or ranked (组会上甩出来的一堆方向, 帮我排个序, 这几条哪个值得做).
 ---
 
 # Idea
@@ -34,6 +34,7 @@ That skill routes academic queries to scholarly backends and Zotero, and saves r
 - The user has chosen a research area but has not decided the contribution ("brainstorm ideas", "find a research idea", "what can we work on", "选题").
 - The user asks whether an idea is novel ("is this novel", "查新", "has anyone done this", "check novelty").
 - The user asks to evaluate, score, or sanity-check an idea before committing scope ("evaluate this idea", "is this a good direction", "would a reviewer buy this").
+- The user brings a slate he already wrote down and wants it triaged ("组会上这 16 条帮我排个序", "哪几条值得做"). Enter at Step 4 and score the slate he brought; do not regenerate candidates he did not ask for. His stated resources, manpower, and deadline are the facts each placement is argued from, and a candidate that names no method, dataset, or metric is returned for restatement rather than ranked on its topic.
 - Outlining was invoked but the core contribution is still a vague one-liner, so it routed back here.
 
 Do NOT use this skill for:
