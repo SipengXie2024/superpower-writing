@@ -2,6 +2,7 @@
 description: User pastes three-backend EVM benchmark numbers and asks for a grouped bar chart script for a USENIX ATC submission, prescribing default colors, error bars everywhere, and a 300 dpi PNG.
 tags: [writing]
 max_turns: 12
+timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

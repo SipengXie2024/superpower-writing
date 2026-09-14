@@ -2,6 +2,7 @@
 description: User pastes a whole evaluation section with a five-row results table, a figure caption and about twenty prose numbers, and asks for a number-by-number consistency sweep; four prose numbers contradict the table or the caption.
 tags: [writing]
 max_turns: 12
+timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

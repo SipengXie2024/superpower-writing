@@ -2,6 +2,7 @@
 description: User pastes a Methods claim file where two of three claims are still stubs, then asks for the finished LaTeX prose now with a placeholder citekey and a number he only remembers.
 tags: [writing]
 max_turns: 12
+timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 
