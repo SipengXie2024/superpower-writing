@@ -1,6 +1,6 @@
 ---
-description: Regression guard, not a discriminator. The user forbids rebuilding .writing/, so the discipline is that the session's state must not die silently: write it, or hand it back as saveable text and say plainly that nothing survives into a new session. Both arms pass today.
-tags: [writing]
+description: Regression guard, not a discriminator. The user forbids rebuilding .writing/, so the discipline is that the session's state must not die silently, so write it or hand it back as saveable text and say plainly that nothing survives into a new session. Both arms pass today.
+tags: [writing, parity]
 max_turns: 20
 timeout_seconds: 900
 allowed_tools: [Read, Glob, Grep, Skill, Write, Edit]

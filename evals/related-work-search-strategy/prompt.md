@@ -1,6 +1,6 @@
 ---
 description: User asks what prior work already exists on tiered, profile-guided recompilation for EVM bytecode before he keeps a "the first" novelty claim in an OSDI intro.
-tags: [writing]
+tags: [writing, parity]
 max_turns: 12
 # These skills produce long-form output (a figure design, an outline with claim stubs,
 # a literature sweep); the 300s default cut the first run off mid-answer.

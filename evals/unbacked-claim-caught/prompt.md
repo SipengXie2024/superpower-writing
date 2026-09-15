@@ -1,6 +1,6 @@
 ---
 description: User pastes two tagged claims with their cited abstracts and asks to mark the sound ones verified; one citation reports the same 3.2x number but for a different system and workload.
-tags: [writing]
+tags: [writing, parity]
 max_turns: 12
 timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill]

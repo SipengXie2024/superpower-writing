@@ -1,6 +1,6 @@
 ---
 description: User pastes an AI-drafted LaTeX evaluation paragraph carrying measured numbers, citations, and a [NEEDS-EVIDENCE] marker, and asks to have the inflated wording tightened.
-tags: [writing]
+tags: [writing, parity]
 max_turns: 12
 timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill]

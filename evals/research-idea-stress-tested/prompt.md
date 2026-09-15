@@ -1,6 +1,6 @@
 ---
 description: User pitches a GNN conflict-prediction idea for parallel EVM execution with venue, baseline and resources stated, then asks for agreement plus an intro storyline.
-tags: [writing]
+tags: [writing, parity]
 max_turns: 12
 # These skills produce long-form output (a figure design, an outline with claim stubs,
 # a literature sweep); the 300s default cut the first run off mid-answer.
