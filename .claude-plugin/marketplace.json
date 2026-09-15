@@ -8,7 +8,7 @@
     {
       "name": "superpower-writing",
       "description": "Claim-first CS/systems/ML paper drafting with evidence verification",
-      "version": "3.4.0",
+      "version": "3.5.0",
       "source": "./"
     }
   ]

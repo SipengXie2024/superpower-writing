@@ -7,6 +7,43 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [3.5.0] - 2026-09-15
+
+Measurement-driven rework. Every skill fix below was found by a two-arm eval
+(plugin vs. no plugin, Opus 5 under test) and verified by re-measurement.
+
+### Fixed
+
+- Nine skills now fire when the user waves their own discipline away — "先别归档", "别建那个目录", "DOI 回头补", "方案老板过了直接写 intro", "误差棒按别的行估一个", "gate 昨天绿的别再跑" — which is exactly when they matter. Descriptions had covered only the cooperative request.
+- claim-first: the ban on prose against a `stub` claim is on the prose itself, not on the editing tool, so no write permission no longer means no rule; a citekey or number the user hands over does not resolve a stub. (Δ 0 → +1.00)
+- domain-glossary: filing generic terms under their own subheading is still putting them in the glossary. (Δ 0 → +1.00)
+- archiving: skipping the archive to edit the old paper's state in place is still this skill. (Δ 0 → +0.67)
+- releasing: the pre-release gate runs before the `gh` login check, so a red gate is found even when the publish step cannot happen here; being asked to skip the gate is not a reason to skip it.
+- literature: an entry that takes no value on the table's axes leaves the table when the user rejects a dash too; the reserve tier never offers a cut the user already ruled out; a figure recalled from memory counts as invented.
+- outlining / drafting: a request for one section's prose with no outline routes to outlining; drafting's Preconditions is now a stop-and-route rule.
+- claim-verification: narrative numbers with no table counterpart are closed out in one line, not handed back as work.
+- tikz-figures: a no-shell, no-write fallback delivers the figure as code instead of probing for a TeX toolchain; SKILL.md split under 500 lines.
+- Seven fallback sections now forbid routing around a missing tool through a subagent, which inherits the same permissions.
+- claim-verification, literature and idea describe capabilities their bodies already had (numeric sweep, cuts under a page budget, triaging a supplied slate); rebuttal, releasing and scientific-visualization gained Chinese triggers.
+- drafting's frontmatter was not parseable YAML (a backtick colon in the description); quoted.
+- unique-filename.sh created every archive directory as `<name>.md` when asked for no extension.
+
+### Added
+
+- Linter rules: an unquoted `: ` in a description (breaks YAML while the tolerant reader hides it); a trigger clause accepting `Use when/whenever/on/after/for`; a skill whose body lays down a hard rule must have a description covering the user waving it off.
+- Smoke test validates every eval case's frontmatter (prompt.md and case.yaml).
+- Eval suite grown from 10 to 21 cases, including five that separate the arms (red-gate release, glossary non-terms, next paper on old state, commit-reveal proof, encrypted-mempool leakage), write-enabled cases, and a pdf-explore guard; cases that cannot distinguish the arms are tagged `parity`.
+- evals/README.md: how to read a two-arm result, why `claude -p` cannot reproduce the judge, the echo technique, the three limits on grading written files, and the scaffold-leak rule.
+
+### Changed
+
+- Em-dash lint scoped to templates/, the only tree that reaches the manuscript; 38 standing warnings with zero true positives removed.
+- Eval commands pinned to `--judge-model sonnet --model opus` so results stay comparable.
+
+### Removed
+
+- An orphaned 80K LaTeX kit and a 411-line PRISMA template outside the plugin's scope.
+
 ## [3.4.0] — 2026-09-10
 
 One senior co-author's editing conventions become the plugin default, so every draft, polish, review, and figure follows them in any paper repo instead of only where a project rulebook happens to carry them.
