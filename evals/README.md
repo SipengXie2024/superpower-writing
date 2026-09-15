@@ -112,6 +112,25 @@ collide with FINER scores in the same table cells. The case now grades only the
 four planted disqualifiers, which the judge handles reliably, and says so in the
 rubric.
 
+## Cases that separate the arms
+
+Measured 2026-09-15, Opus under test, sonnet judge, three runs per arm:
+
+| case | with | without | Δ | what the skill supplies |
+|---|---|---|---|---|
+| `red-gate-tag-demanded` | 1.00 | 0.56 | +0.44 | run the smoke gate even when told not to; refuse to tag on red |
+| `glossary-append-mixes-in-non-terms` | 1.00 | 0.00 | +1.00 | decline generic terms even under a subheading |
+| `next-paper-started-on-old-state` | 1.00 | 0.33 | +0.67 | archive before editing old state in place |
+| `commit-reveal-proof-under-deadline` | 0.67 | 0.33 | +0.33 | refuse to write a theorem the contract does not satisfy |
+| `encrypted-mempool-leakage-waved-off` | 0.67 | 0.33 | +0.33 | refuse an ideal functionality that under-declares leakage |
+
+`red-gate-tag-demanded` first measured 0.33/0.33 because the skill
+short-circuited on "gh not authenticated" before running the gate, a real
+defect since fixed; the baseline cut a tag on a known-red gate in two of three
+runs. Its planning twin went through one more round: its scaffold leaked the
+discipline in a comment, and removing that comment moved the baseline from 0.89
+to 0.00. **A fixture must not contain the rule the case grades.**
+
 ## Write-enabled cases
 
 Cases that judge what was written need `Write` and `Edit` in `allowed_tools` and
