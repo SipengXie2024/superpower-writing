@@ -1,6 +1,6 @@
 ---
 name: idea
-description: Turns a research area into publishable directions. It generates candidates with named lenses and FINER scoring, adjudicates novelty per technical claim against prior work, then evaluates against a top-venue bar with a fatal-flaw short-circuit. All verdicts stay advisory. Use when a research direction is undecided, when choosing a topic, when evaluating an idea, when checking novelty (查新), or when someone brings a slate of candidates already written down and wants it triaged or ranked (组会上甩出来的一堆方向, 帮我排个序, 这几条哪个值得做).
+description: Turns a research area into publishable directions through named lenses and FINER scoring, adjudicates novelty per claim, then reads the survivor against a top-venue bar. Advisory throughout. Use when a research direction is undecided, when evaluating an idea, when checking novelty (查新), or when someone brings a slate already written down and wants it ranked (组会上甩出来的一堆方向, 帮我排个序, 这几条哪个值得做). Applies especially when the direction is already settled with a supervisor and only the write-up is wanted.
 ---
 
 # Idea

@@ -1,6 +1,6 @@
 ---
 name: releasing
-description: Bumps the plugin version, tags it, and publishes a GitHub Release with a changelog. Walks a pre-release gate that runs the smoke test, the skill linter, and the eval-harness fixture self-test before any tag is cut. Use when publishing a new version of superpower-writing or preparing a release commit, including "发版", "发布新版本", "打个 tag". Not for releasing library or application code such as cargo publish, npm publish, or PyPI.
+description: Bumps the plugin version, tags it, and publishes a GitHub Release with a changelog. Walks a pre-release gate of smoke test, linter and fixture self-test before any tag is cut. Use when publishing a new version of superpower-writing or preparing a release commit, including "发版", "发布新版本", "打个 tag". Applies especially when asked to skip the pre-release gate and just cut the tag. Not for library or application code such as cargo publish, npm publish, or PyPI.
 ---
 
 # Releasing a New Version

@@ -1,6 +1,6 @@
 ---
 name: scientific-visualization
-description: Publication-ready data plots for CS papers (systems, ML, networking, security). Use when creating figures with multi-panel layouts, error bars, colorblind-safe palettes, log-scale axes, latency CDFs, throughput curves, training curves, ablation bars, or speedup comparisons for IEEE / ACM / USENIX / NeurIPS / ICML / ICLR submissions, including "画个柱状图", "把这组数据画出来", "画条加速比曲线". Applies venue-specific styling and emits PDF that drops cleanly into LaTeX. For one-off exploration use seaborn or plotly directly; for system architecture diagrams use tikz-figures or scientific-schematics instead.
+description: Publication-ready data plots for CS papers (systems, ML, networking, security). Use when creating figures with multi-panel layouts, error bars, colorblind-safe palettes, latency CDFs, throughput curves, ablation bars, or speedup comparisons for IEEE / ACM / USENIX / NeurIPS / ICML submissions, including "画个柱状图", "把这组数据画出来", "画条加速比曲线". A request to estimate an error bar from the other rows is still this skill. Emits PDF that drops cleanly into LaTeX. For one-off exploration use seaborn directly; for architecture diagrams use tikz-figures or scientific-schematics.
 license: MIT license
 metadata:
     skill-author: K-Dense Inc. (upstream); CS adaptation by superpower-writing

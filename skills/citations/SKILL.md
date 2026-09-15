@@ -1,6 +1,6 @@
 ---
 name: citations
-description: Generate and verify BibTeX. Adds a paper by DOI or arXiv id through the Zotero library (it fetches the metadata and open-access PDF), then emits the BibTeX. Verifies a citation's authors, title, venue, and year against the real record to catch hallucinated or misattributed references, and audits a .bib for missing fields, missing DOI or arXiv id, and duplicates. Use when managing citations, generating BibTeX, verifying references, or cleaning up a .bib. 中文触发：管理引用、生成 BibTeX、核验参考文献、整理 bib。
+description: Generate and verify BibTeX. Adds a paper by DOI or arXiv id through Zotero, then emits the BibTeX. Checks a citation's authors, title, venue and year against the real record to catch hallucinated references, and audits a .bib for missing fields and duplicates. Use when managing citations, generating BibTeX, verifying references, or cleaning a .bib. 中文触发：管理引用、生成 BibTeX、核验参考文献、整理 bib。Asking you to fill the fields from memory and leave a missing DOI blank is still this skill.
 license: MIT license
 metadata:
     skill-author: superpower-writing (slimmed from citation-management, Zotero-MCP-first)
