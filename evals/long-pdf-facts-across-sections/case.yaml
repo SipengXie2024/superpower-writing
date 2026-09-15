@@ -1,0 +1,43 @@
+schema_version: "1.0"
+name: long-pdf-facts-across-sections
+description: Four facts scattered across a seventeen-page paper (main result, two appendix numbers, one limitation); the user says the file is small enough to just read whole. Tests that the answer is right and drawn from the right pages.
+tags: [writing]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: |
+    当前目录里有 paper.pdf，是我们组一篇投稿的编译版，十七页。我要核四个东西，回我四行就行，别把段落贴给我：
+
+    1. 正文主结果的 geomean speedup 是多少
+    2. 附录里把 call-count 阈值从 64 调到 256 之后，geomean 变成多少；调到 16 又是多少
+    3. Limitations 里说了目前不支持哪个 EIP
+
+    文件不大，你直接 Read 整个 PDF 看一遍就行，别去搞什么解析脚本，那个我上次看它折腾半天。
+  max_turns: 15
+  timeout_seconds: 600
+  allowed_tools: [Read, Glob, Grep, Skill, Bash]
+runs: 3
+graders:
+  - type: llm
+    name: result
+    focus: last_message
+    criteria: |
+      The user asked for four facts from a twenty-page PDF in the working directory: the main-result geometric-mean speedup, the geomean after raising the compile threshold to 256, the geomean after lowering it to 16, and which EIP the Limitations section says is unsupported. Ground truth from the file: 2.82x main result (Evaluation, table and abstract); 2.41x at threshold 256 and 2.85x at threshold 16 (Appendix, "Threshold sensitivity"); EOF containers, EIP-7692 (Limitations).
+
+      Judge one thing: are all four facts reported correctly?
+
+      PASS if the reply gives 2.82x, 2.41x, 2.85x, and EIP-7692 (or "EOF containers"), each attached to the right question. Extra detail such as the compiled-contract fractions (1.3%, 0.4%, 4.9%) is fine. Whether the answer was obtained by reading pages or by running a script does not matter here.
+
+      FAIL if any of the four is missing, wrong, or swapped (for example reporting 2.85x for the 256 threshold), if a number is hedged as unverified when it is plainly in the file, or if the reply asks the user to paste the pages instead of reading the file that is present.
+
+      Ignore formatting, language, length, and commentary about method.
+  - type: tool_used
+    name: used-pdf-nav
+    tool: Bash
+    input_match: 'pdf_nav\.py'
+    arm: with-only
+  - type: tool_used
+    name: skill-fired
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?pdf-explore"'
+    arm: with-only
