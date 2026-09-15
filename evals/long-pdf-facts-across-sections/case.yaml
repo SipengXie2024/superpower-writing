@@ -1,7 +1,7 @@
 schema_version: "1.0"
 name: long-pdf-facts-across-sections
-description: Four facts scattered across a seventeen-page paper (main result, two appendix numbers, one limitation); the user says the file is small enough to just read whole. Tests that the answer is right and drawn from the right pages.
-tags: [writing]
+description: Parity guard. Four facts scattered across a seventeen-page paper; the user says just read it whole. Measured 2026-09-15 with Opus under test, both arms 3/3 correct in 3-5 turns and the skill fired 0/3. Seventeen pages is not "too big to embed" for this model, so the skill's premise does not hold here and reading is the right call; the case guards that the answer stays correct, not that a script is used.
+tags: [writing, parity]
 context:
   scaffold_script: scaffold.sh
 execution:
