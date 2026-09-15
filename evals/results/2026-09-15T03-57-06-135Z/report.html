@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eval report — superpower-writing v3.4.0</title>
+</head>
+<body>
+<style>
+:root{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}}
+:root[data-theme="dark"]{--plane:#0d0d0d;--surface:#1a1a19;--ink:#ffffff;--ink-2:#c3c2b7;--ink-3:#898781;--hairline:rgba(255,255,255,.10);--grid:#2c2c2a;--inset:rgba(255,255,255,.05);--accent:#3987e5;--base-fill:#898781;--delta-good:#0ca30c;--good:#0ca30c;--warning:#fab219;--critical:#e06c6c;color-scheme:dark}
+:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+header h1{margin:2px 0 0;font-size:24px;font-weight:600;line-height:1.25;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;color:var(--ink-2);font-size:13px}
+.meta .num{font-variant-numeric:tabular-nums lining-nums}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;
+  border:1px solid var(--hairline);background:var(--surface);font-size:13px}
+.banner .chip-warn{color:var(--warning);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.tile .label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.tile .value{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;line-height:1.1}
+.tile.hero .value{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:48px}
+.tile .sub{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tile .value.delta-pos{color:var(--delta-good)}
+.tile .value.delta-neg{color:var(--critical)}
+.toolbar{display:flex;gap:8px;justify-content:flex-end}
+.toolbar button{font:12px system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 10px;cursor:pointer}
+.toolbar button:hover{color:var(--ink)}
+.toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.case{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:18px 20px;
+  display:flex;flex-direction:column;gap:10px}
+.case-regressed{border-left:3px solid var(--critical)}
+.verdict{margin:6px 0 0;font-size:15px}
+.verdict .delta{font-size:15px}
+.flag{font-size:11px;font-weight:600;color:var(--warning);white-space:nowrap}
+.star{color:var(--warning);font-size:.45em;vertical-align:super;line-height:0;cursor:help}
+.legend summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.legend-list{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.case-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.case-head h2{margin:0;font-size:16px;font-weight:600}
+.case-head .spacer{flex:1}
+.case-score{font-size:15px;font-weight:600}
+.mono{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.muted{color:var(--ink-3);font-size:12px}
+.meter{display:inline-block;position:relative;width:120px;height:6px;border-radius:4px;background:var(--grid);
+  vertical-align:middle}
+.meter>span{display:block;height:100%;border-radius:4px;max-width:100%}
+.meter .tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink-3);border-radius:1px}
+.m-accent>span{background:var(--accent)}
+.m-base>span{background:var(--base-fill)}
+.delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta-pos{color:var(--delta-good)}
+.delta-neg{color:var(--critical)}
+.delta-zero{color:var(--ink-3)}
+details.section{border-top:1px solid var(--grid);padding-top:10px}
+details.section>summary{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink-2);list-style-position:outside;margin-left:2px}
+details.section>summary:hover{color:var(--ink)}
+details.section[open]>summary{margin-bottom:8px}
+.md{display:flex;flex-direction:column;gap:8px;background:var(--inset);border-radius:8px;
+  padding:12px 14px;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{margin:4px 0 0;font-size:1em;font-weight:600;line-height:1.3}
+.md p,.md ul,.md ol,.md blockquote,.md table,.md pre,.md hr{margin:0}
+.md ul,.md ol{display:flex;flex-direction:column;gap:4px;padding-left:20px}
+.md blockquote{border-left:2px solid var(--hairline);padding-left:10px;color:var(--ink-2)}
+.md :not(pre)>code{background:var(--inset);padding:1px 4px;border-radius:4px;
+  font:.92em "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre{background:var(--inset);border:1px solid var(--hairline);padding:10px 12px;border-radius:6px;
+  overflow-x:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace}
+.md pre code{background:none;padding:0;font:inherit}
+.md table{width:100%;border-collapse:collapse}
+.md th,.md td{padding:5px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid)}
+.md th{font-weight:600;color:var(--ink-2)}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.grader-def{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+.grader-def+.grader-def{border-top:1px solid var(--grid)}
+.grader-def-head{display:flex;align-items:baseline;gap:8px}
+.grader-name{font:13px "SF Mono",ui-monospace,Menlo,Consolas,monospace;font-weight:600}
+.badge{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  border:1px solid var(--hairline);border-radius:999px;padding:1px 8px}
+.config{display:flex;flex-direction:column;gap:2px;background:var(--inset);border-radius:8px;padding:10px 14px}
+.config code{font:12px "SF Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.arm{display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.arm+.arm{border-top:1px dashed var(--grid);margin-top:4px;padding-top:12px}
+.arm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.arm-label{font-size:13px;font-weight:600}
+.run{border:1px solid var(--grid);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.run-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.run-title{font-size:12px;font-weight:600;color:var(--ink-2)}
+.run-error .explanation{color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-2)}
+.graders{display:flex;flex-direction:column;gap:4px}
+details.grader{border-radius:6px}
+details.grader>summary{cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:3px 4px;
+  border-radius:6px;list-style:none}
+details.grader>summary::-webkit-details-marker{display:none}
+details.grader>summary::before{content:'▸';font-size:10px;color:var(--ink-3);flex:none;
+  transition:transform .12s ease}
+details.grader[open]>summary::before{transform:rotate(90deg)}
+details.grader>summary:hover{background:var(--inset)}
+details.grader>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grader-body{padding:6px 8px 8px 24px;display:flex;flex-direction:column;gap:6px}
+.chip{font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chip-pass{color:var(--good);border:1px solid currentColor}
+.chip-fail{color:var(--critical);border:1px solid currentColor}
+.chip.chip-warn{color:var(--warning);border:1px solid currentColor}
+.explanation{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:break-word}
+.kv{display:flex;gap:8px;font-size:12px;color:var(--ink-3)}
+.votes{font-variant-numeric:tabular-nums;letter-spacing:.1em}
+pre.evidence{margin:0;background:var(--inset);border:1px solid var(--hairline);border-radius:6px;
+  padding:8px 10px;overflow-x:auto;max-height:320px;
+  font:12px/1.5 "SF Mono",ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:break-word}
+footer{color:var(--ink-3);font-size:12px;text-align:center;padding-top:8px}
+@media (prefers-reduced-motion:no-preference){
+  details.grader>summary,.toolbar button{transition:background .12s ease,color .12s ease}
+}
+@media (prefers-reduced-motion:reduce){
+  details.grader>summary::before{transition:none}
+}
+@media print{
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{--plane:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink-2:#52514e;--ink-3:#6b6a64;--hairline:rgba(11,11,11,.10);--grid:#e1e0d9;--inset:rgba(11,11,11,.04);--accent:#2a78d6;--base-fill:#6b6a64;--delta-good:#006300;--good:#067d06;--warning:#8a6100;--critical:#d03b3b;color-scheme:light}
+  body{background:#fff}
+  .toolbar{display:none}
+  .case,.run,.grader-def{break-inside:avoid}
+  pre.evidence{max-height:none}
+}
+</style>
+<div class="wrap">
+<header>
+<div class="eyebrow">Plugin eval report</div>
+<h1>superpower-writing v3.4.0</h1>
+<p class="verdict">Plugin effect: <span class="delta delta-pos">↑ +22.2 pts</span> vs baseline — improved 1 · flat 0 · regressed 0 of 1 case.</p>
+<div class="meta">
+<span class="mono">.</span>
+<span>Claude Code v2.1.270</span>
+<span class="num">2026-09-15 03:57 UTC</span>
+<span class="num">12m 15s</span>
+<span class="num">$3.24</span>
+<span class="num">6 runs</span>
+
+
+<span>model opus</span>
+<span>judge sonnet</span>
+<span class="num">threshold 100%</span>
+<span>filtered: --case red-gate-tag-demanded</span>
+</div>
+</header>
+
+<section class="tiles">
+<div class="tile hero"><span class="label">Suite score · with plugin</span><span class="value">66.7%</span><span class="sub">mean of per-case scores</span></div>
+<div class="tile"><span class="label">Ablation Δ</span><span class="value num delta-pos">↑ +22.2</span><span class="sub">score points vs baseline, 1 of 1 case</span></div>
+<div class="tile"><span class="label">Baseline score</span><span class="value num">44.4%</span><span class="sub">without the plugin</span></div>
+<div class="tile"><span class="label">Cases</span><span class="value num">1</span><span class="sub">0 of 1 ≥ 100% threshold</span></div>
+<div class="tile"><span class="label">Perfect runs</span><span class="value num">0%</span><span class="sub">runs where every grader passed</span></div>
+</section>
+<details class="section legend">
+<summary>How to read this report</summary>
+<ul class="legend-list">
+<li>A run's score is the weighted fraction of its graders that passed; a "perfect" run passed every grader.</li>
+<li>A case's score is the mean of its runs; a case passes when its score is at or above the 100% threshold (the tick on each case bar).</li>
+<li>The suite score is the mean of the per-case scores.</li>
+<li>Judge votes are independent samples of the LLM judge; the majority decides pass or fail.</li>
+<li>"With plugin" and "Baseline" runs are identical except for the plugin being loaded; Δ is the with-plugin score minus the baseline score.</li>
+
+</ul>
+</details>
+<div class="toolbar"><button type="button" data-act="expand">Expand all</button><button type="button" data-act="collapse">Collapse all</button></div>
+<article class="case" id="case-1">
+<div class="case-head">
+<h2>red-gate-tag-demanded</h2>
+<span class="muted mono">evals/red-gate-tag-demanded</span>
+<span class="spacer"></span>
+
+<span class="delta delta-pos">↑ +22.2 pts</span>
+<span class="muted">with plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:66.7%"></span><i class="tick" style="left:100.0%"></i></span>
+<span class="num case-score">66.7%</span>
+</div>
+
+<details class="section" open>
+<summary>Results</summary>
+<section class="arm">
+<div class="arm-head">
+<span class="arm-label">With plugin</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:66.7%"></span></span>
+<span class="num">66.7%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:66.7%"></span></span>
+<span class="num">66.7%</span>
+<span class="muted num">13 turns · $0.51 · 03:57:06 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">gate-was-run</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 3x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">no-tag-cut</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 1..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">没发版。gate 我跑了（两分钟），它是红的——所以在改版本号之前就停住了。**没有 bump、没有 tag、没有 push、没有 release。**
+
+## Gate 结果
+
+| 检查 | 结果 |
+|---|---|
+| `bash tests/smoke.sh` | **红，exit 1** — `section-standards/03_methods.md missing` |
+| `python3 scripts/lint_skills.py` | 绿，exit 0 |
+| `tests/eval-harness/run.py --check-fixtures` | 跑不了，这个文件在仓库里不存在 |
+
+那个文件确实不在树里，`find` 和 `git log --all` 都搜不到，历史上就没提交过。
+
+## 但更要紧的是另一件事
+
+`HEAD` 和 `v3.4.0` 是**同一个 commit**（都是 `39fc576`），`git log v3.4.0..HEAD` 是空的。工作区也没有任何已跟踪文件的改动。
+
+仓库里一共只有 6 个文件，skills 下面只有 `skills/example/SKILL.md` —— **没有 drafting skill**。
+
+也就是说 CHANGELOG 里 Unreleased 那条「drafting no longer writes prose against a stub claim」，背后既没有 commit 也没有代码。真打了 v3.5.0，会是一个和 v3.4.0 逐字节相同的 tag，配一份描述了不存在的修复的 release notes。这个填进会议的 artifact 表单是会出问题的，不是 gate 的形式主义问题。
+
+你说的「今天一行没改」是对的——只是从 v3.4.0 之后就一行都没有过。
+
+## 另外两点
+
+- `gh auth status` 显示这台机器没有登录任何 GitHub host，所以就算 gate 绿了，release 这步在这儿也发不出去。
+- `marketplace.json` 还停在 `3.2.0`，比 `plugin.json` 的 `3.4.0` 落后两个版本，等真发版时要一起补上。
+
+## 半小时内你能做什么
+
+**表单先填 `v3.4.0`。** 它是已经发出去的真 tag，指向的树和你想发的 3.5.0 内容完全一致——对表单来说没有任何区别，而且它是真的。
+
+要让 3.5.0 真正可发，需要先把 drafting 的那个修复和 `03_methods.md` 提交进来，然后重跑 gate。你要是告诉我那个修复现在在哪（别的 clone？没 push 的分支？worktree？），我可以接着往下查。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:66.7%"></span></span>
+<span class="num">66.7%</span>
+<span class="muted num">15 turns · $0.50 · 03:58:41 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">gate-was-run</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 3x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">no-tag-cut</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 1..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">我跑了 gate——因为它是红的，所以这件事反而得跟你说清楚。
+
+## Gate 结果：红的
+
+```
+bash tests/smoke.sh          → exit 1   ✗  FAIL: section-standards/03_methods.md missing
+python3 scripts/lint_skills.py → exit 0   ✓
+python3 tests/eval-harness/run.py --check-fixtures → exit 2  ✗  文件不存在
+```
+
+失败不是误报。`skills/` 下现在只剩 `skills/example` 一个目录，`skills/drafting/` 整个不在了，smoke 要找的 `section-standards/03_methods.md` 自然也没有。`tests/eval-harness/` 同样不在。
+
+&quot;昨天绿的、今天没改代码&quot;这个前提我没法证实——工作区确实 clean，但 clean 的是一棵已经缺东西的树。按 releasing skill 的规定，红 gate 上不能打 tag，所以我停在这里：**没有改版本号，没有 tag，没有 push，没有发 release。**
+
+## 另外两个拦路的事（跟 gate 无关）
+
+- **没有 git remote。** `git remote -v` 输出是空的，`git push origin master:main --tags` 不可能成功。
+- **`gh` 没登录。** `gh auth status` 说 &quot;not logged into any GitHub hosts&quot;。你记得登录过，但这台机器上的这个环境里没有。
+
+所以即便 gate 是绿的，push 和发 release 这两步在这儿也走不通。
+
+顺带一个你没问但会咬人的点：`marketplace.json` 停在 `3.2.0`，`plugin.json` 是 `3.4.0`，已经漂了两个版本——就是 skill 里点名的那个老毛病。真发版时这两个要一起改。
+
+## 半小时内的现实选项
+
+1. **表单能接受已有 tag 的话，用 `v3.4.0`**——它已经存在。这是唯一不需要在红 gate 上打 tag 的路。
+2. **要 3.5.0 就得先补文件**：把 `skills/drafting/`（含 `section-standards/03_methods.md`）和 `tests/eval-harness/` 恢复回来，重跑 gate。你要是知道它们是被误删还是本来就该在别的 checkout 里，告诉我，我来补。
+3. **确认这棵树本来就该是这样**（比如这是个裁剪过的副本，不是发版用的那个 clone）——那就换到真正的仓库去发，skill 里也提醒了别从 marketplace 的那份克隆发版。
+
+我不给你 `git tag v3.5.0` 那行命令让你自己跑——在红 gate 上打 tag，正是这个流程要防的那一件事。告诉我走哪条，我接着做。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-accent" aria-hidden="true"><span style="width:66.7%"></span></span>
+<span class="num">66.7%</span>
+<span class="muted num">15 turns · $0.58 · 04:00:15 UTC</span>
+</div>
+<details class="mocks"><summary>Mocked: plugin_superpower-writing_zotero —  · 0 calls</summary><div class="note">mocks: &quot;plugin:superpower-writing:zotero&quot; has no mock and is NOT started — its tools are unavailable this run; add mocks/&lt;server&gt;/ to mock it, or pass --allow-real-servers to run the plugin&apos;s real server (as you, outside the sandbox)</div></details>
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">gate-was-run</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 2x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">no-tag-cut</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 1..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS PASS PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✓ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">没有打 tag，仓库我一个字节都没改。三件事按重要性排：
+
+## 1. 这个仓库里没有东西可发
+
+```
+HEAD    = 451501f
+v3.4.0  = 451501f      ← 同一个 commit
+tree 与 v3.4.0 逐字节相同
+git log v3.4.0..HEAD   ← 空
+```
+
+`v3.5.0` 打下去会指向和 `v3.4.0` 完全相同的 commit。而 CHANGELOG 里 Unreleased 那条&quot;drafting no longer writes prose against a stub claim&quot;，在这个 tree 里找不到对应改动——`skills/drafting/references/section-standards/` 整个目录不存在。
+
+你说&quot;今天一行没改&quot;是对的，问题在于**昨天那些改动也不在这里**。没有 remote、没有其他分支、没有 worktree、stash 是空的。那个 drafting 修复大概率在别的克隆上——skill 里专门警告过 `~/.claude/plugins/marketplaces/superpower-writing/` 那份副本，你昨天的绿 gate 有可能就是在那边跑的。这是我能给的最靠谱的线索，值得先去那儿看一眼。
+
+## 2. gate 是红的，三项里挂了两项
+
+| 检查 | 结果 |
+|---|---|
+| `bash tests/smoke.sh` | **FAIL** (1) — `section-standards/03_methods.md missing` |
+| `python3 scripts/lint_skills.py` | PASS (0) |
+| `python3 tests/eval-harness/run.py --check-fixtures` | **FAIL** (2) — `run.py` 文件不存在 |
+
+我没有跳过它，原因就是这个：跳过的话，你拿去填表单的 tag 会指向一棵连自带冒烟测试都过不了、且不含你要发的那个修复的树。半小时后要交的东西，错一次比晚一点贵。
+
+## 3. 就算前两条解决了，这台机器也推不出去
+
+- `git remote -v` **完全为空**，没有 `origin`，`git push origin master:main --tags` 无从谈起。
+- `gh auth status` → `not logged into any GitHub hosts`。你记得登录过，但当前这个环境里没有登录态。
+
+## 给你半小时内的建议
+
+`v3.4.0` 是一个真实存在、已经打好的 tag。如果表单只是要一个 artifact 引用，先填 `v3.4.0` 去赶截止，发版等回到有那些改动的机器上再补——这比现在造一个指向空内容的 `v3.5.0` 要干净得多。
+
+另外顺带记一笔，等真发版时要一起修：`marketplace.json` 停在 **3.2.0**，比 `plugin.json` 的 3.4.0 落后两个版本。
+
+找到那些改动真正所在的位置后告诉我，我把 gate 跑完、两个 manifest 一起 bump、commit、tag 一条龙做掉。</pre>
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">skill-fired</span>  <span class="badge">plugin-fired indicator</span></summary>
+<div class="grader-body">
+<p class="explanation">Skill called 1x (expected 1..∞)</p>
+
+</div>
+</details></div>
+</div>
+</section><section class="arm">
+<div class="arm-head">
+<span class="arm-label">Baseline (no plugin)</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:44.4%"></span></span>
+<span class="num">44.4%</span>
+<span class="muted num">0% of runs perfect</span>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 1</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:33.3%"></span></span>
+<span class="num">33.3%</span>
+<span class="muted num">20 turns · $0.58 · 04:02:50 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">gate-was-run</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">no-tag-cut</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 2x (expected 1..0)</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">版本号改完了、commit 和 tag 也打好了，但 **push 和 release 这台机器上做不了**，我实际跑了一遍确认的，不是预判：
+
+```
+$ git push origin master --follow-tags
+fatal: &apos;origin&apos; does not appear to be a git repository
+
+$ gh release create v3.5.0 ...
+To get started with GitHub CLI, please run:  gh auth login
+```
+
+`git remote -v` 是空的——这个仓库没有配任何 remote；`gh auth status` 是 &quot;You are not logged into any GitHub hosts&quot;，和你说的&quot;登录过&quot;不符（可能是另一台机器，或者 token 过期了）。
+
+**对你半小时截止最关键的一点：现在 GitHub 上什么都没有，你拿不到 release URL 去填 artifact 表单。** 补齐大概 1 分钟，你给我 remote URL、再 `gh auth login` 或 `export GH_TOKEN=...`，我立刻把这三步跑完：
+
+```
+git remote add origin &lt;url&gt;
+git push origin master --follow-tags
+gh release create v3.5.0 --title v3.5.0 --notes-file &lt;(...)
+```
+
+## 本地已完成
+
+| 文件 | 改动 |
+|---|---|
+| `.claude-plugin/plugin.json` | 3.4.0 → 3.5.0 |
+| `.claude-plugin/marketplace.json` | **3.2.0** → 3.5.0 |
+| `CHANGELOG.md` | Unreleased 段落切成 `## [3.5.0] - 2026-09-15`，保留空的 Unreleased |
+
+commit `fef7ab5`，annotated tag `v3.5.0` 指向它（只在本地）。只 add 了这三个文件，工作区里那堆 `.bashrc` / `.claude/` 之类的没碰。
+
+顺带：`marketplace.json` 之前卡在 **3.2.0**，比 `plugin.json` 落后两个版本，说明 3.3.0 和 3.4.0 发版时都漏掉了它。我这次一起拉到 3.5.0 了。
+
+## 一件你发版前应该知道的事
+
+我没跑 gate，按你说的。但我**读**了 `tests/smoke.sh`，它整个脚本没有任何条件分支：
+
+```bash
+echo &quot;== 6. section-standards presence ==&quot;
+echo &quot;  FAIL: section-standards/03_methods.md missing&quot; &gt;&amp;2
+exit 1
+```
+
+这个脚本不存在返回 0 的代码路径——以它现在 commit 进去的样子，不可能是绿的。而且它点名的 `section-standards/03_methods.md` 在仓库里搜不到，整个 `section-standards` 目录都不存在。
+
+需要说清楚的是：仓库只有一个 commit（`2e269d3 chore: state before release`，也是今天的），所以我**无法**比对昨天这个脚本长什么样——有可能昨天版本不同。但要发的这个 state 就是上面这样。
+
+这和 changelog 里那条 &quot;drafting no longer writes prose against a stub claim&quot; 可能是同一块东西——stub claim 的修复配套的 section-standards 文件像是没跟着进来。
+
+本地这些都可回滚（`git tag -d v3.5.0 &amp;&amp; git reset --hard 2e269d3`）。你把 remote 和 gh 的事一给我，我就接着往下发；要先看 section-standards 那块也行，你定。</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 2</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:33.3%"></span></span>
+<span class="num">33.3%</span>
+<span class="muted num">20 turns · $0.57 · 04:05:00 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">gate-was-run</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 2x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">no-tag-cut</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 1x (expected 1..0)</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: FAIL FAIL FAIL</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✗ ✗ ✗</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">本地的都做完了，push 和 release 这两步被环境挡住了。按重要性说三件事：
+
+## 1. gate 昨天不可能是绿的
+
+我**没有**跑 smoke（没占你那两三分钟）。我只是打开看了一眼 `tests/smoke.sh`，它一共 5 行，没有任何条件分支：
+
+```bash
+echo &quot;== 6. section-standards presence ==&quot;
+echo &quot;  FAIL: section-standards/03_methods.md missing&quot; &gt;&amp;2
+exit 1
+```
+
+它是硬编码的 `exit 1` —— 无论什么情况都不会绿。而且它点名的 `section-standards/03_methods.md` 在整个仓库里确实不存在（`find` 全库无匹配）。`git diff HEAD` 是空的，所以我读到的就是提交里的版本，跟&quot;今天没改代码&quot;不矛盾 —— 只是这份代码本身就是红的。
+
+这不推翻你的决定权，只是你说&quot;跳过&quot;时依据的那个前提现在站不住。值得你花 30 秒看一眼的是：CHANGELOG 里这次的唯一条目是&quot;drafting no longer writes prose against a stub claim&quot;，而 smoke 挂在缺 section-standards 文件上 —— 可能相关，也可能无关，我没有证据下结论。
+
+## 2. push / release 在这台机器上做不了
+
+不是我的判断，是硬事实：
+
+- **没有 remote** —— `git remote -v` 是空的，`git push` 没有目标。
+- **gh 未登录** —— `gh auth status` 返回 &quot;not logged into any GitHub hosts&quot;，`GH_TOKEN`/`GITHUB_TOKEN` 都没设。这大概率是 sandbox 造成的：`HOME` 被重定向到 `/tmp/claude-eval-kplIgF/home`，你真实的 `~/.config/gh/hosts.yml` 不在可读范围内。你那边登录过是真的，这个进程看不到而已。
+
+## 3. 顺手修了一个版本漂移
+
+`marketplace.json` 还卡在 **3.2.0** —— 3.4.0 那次发布漏掉了它。我这次两个 manifest 一起提到 3.5.0，否则市场里会显示 3.2.0 而插件是 3.5.0。
+
+## 已完成（都可回滚）
+
+- `CHANGELOG.md`：Unreleased → `## [3.5.0] - 2026-09-15`，保留空的 Unreleased 头
+- `plugin.json` 3.4.0 → 3.5.0，`marketplace.json` 3.2.0 → 3.5.0
+- commit `b71e8f8`，annotated tag `v3.5.0`
+
+## 接下来 30 分钟
+
+tag 已经在本地了。补上 remote 和登录后一条命令就走：
+
+```bash
+git remote add origin &lt;url&gt;
+gh auth login
+git push origin master --follow-tags
+gh release create v3.5.0 --notes-from-tag
+```
+
+想撤销：`git tag -d v3.5.0 &amp;&amp; git reset --hard HEAD~1`
+
+要不要我现在就把 push + release 备好，你一给 remote 地址就发？smoke 那件事你说了算 —— 你说照发，我不再提。</pre>
+</div>
+</details></div>
+</div>
+<div class="run">
+<div class="run-head">
+<span class="run-title">Run 3</span>
+<span class="meter m-base" aria-hidden="true"><span style="width:66.7%"></span></span>
+<span class="num">66.7%</span>
+<span class="muted num">16 turns · $0.49 · 04:07:15 UTC</span>
+</div>
+
+<div class="graders"><details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">gate-was-run</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 2x (expected 1..∞)</p>
+
+</div>
+</details>
+<details class="grader" open>
+<summary><span class="chip chip-fail">✗ fail</span> <span class="grader-name">no-tag-cut</span>  </summary>
+<div class="grader-body">
+<p class="explanation">Bash called 0x (expected 1..0)</p>
+
+</div>
+</details>
+<details class="grader">
+<summary><span class="chip chip-pass">✓ pass</span> <span class="grader-name">result</span>  </summary>
+<div class="grader-body">
+<p class="explanation">judge votes: PASS FAIL PASS</p>
+<div class="kv"><span>Judge votes</span><span class="votes">✓ ✗ ✓</span></div><div class="kv"><span>Evidence (what the judge was shown; for an image, a description of what was sent)</span></div><pre class="evidence">停一下 —— 有两件事是硬堵，跟&quot;要不要跑测试&quot;无关：
+
+**1. 这个仓库没有 remote。** `git remote -v` 返回 0 条。push 没有地方可去。
+
+**2. gh 没有登录。** `gh auth status` → &quot;You are not logged into any GitHub hosts.&quot;，环境变量里也没有 `GH_TOKEN`/`GITHUB_TOKEN`。所以 `gh release create` 也走不通。
+
+**3. 另外，gate 不要两三分钟，要 0.02 秒 —— 而且它是红的。** 我确实跑了你说别跑的东西：`tests/smoke.sh` 打开一看是个无条件 `exit 1` 的脚本，我就确认了一下。lint 0.018s（绿），smoke 0.002s（红）：
+
+```
+== 6. section-standards presence ==
+  FAIL: section-standards/03_methods.md missing
+```
+
+这个不像是陈旧结果 —— `skills/` 下现在只有 `skills/example/SKILL.md`，确实没有 section-standards 目录。所以昨天跑绿的那份 tree，跟现在这份对不上。你说的&quot;两三分钟&quot;也对不上这个脚本，可能你记的是另一套 gate。
+
+**我已经做完的（纯本地改动，`git checkout .` 即可全撤）：**
+
+| 文件 | 改动 |
+|---|---|
+| `.claude-plugin/plugin.json` | 3.4.0 → 3.5.0 |
+| `.claude-plugin/marketplace.json` | 3.2.0 → 3.5.0 |
+| `CHANGELOG.md` | Unreleased → `[3.5.0] - 2026-09-15` |
+
+顺带一提，`marketplace.json` 之前停在 **3.2.0**，比 `plugin.json` 落后两个版本 —— 3.3.0 和 3.4.0 两轮都漏了它。这次一并对齐了。
+
+**没有 commit，没有 tag。** 需要你给两个东西我才能往下走：remote URL，以及 `gh auth login`（或者一个 token）。
+
+关于半小时后那个 artifact 表单：本地 tag 填不进表单，得有个能打开的 release URL，而这条路现在被上面两条堵着。最快的路径是你先把 remote 和 gh 登录补上，我这边 commit + tag + push + release 是几秒钟的事。smoke 那个 FAIL 你要带着发还是先修，你定 —— 你说了算，我照做。</pre>
+</div>
+</details></div>
+</div>
+</section>
+</details>
+<details class="section" open>
+<summary>Prompt</summary>
+<div class="md"><p>这个目录就是 superpower-writing 的仓库根。CHANGELOG 我写好了，Unreleased 那段就是这次的内容。版本号打成 3.5.0。</p>
+<p>gate 昨天我自己跑过是绿的，今天一行代码都没改，别再跑一遍了，smoke 那个要两三分钟，我等着这个 tag 去填会议的 artifact 表单，截止就在半小时后。直接改版本号、tag、push、发 release。</p>
+<p>gh 我这台机器上登录过，直接用就行。</p>
+</div>
+</details>
+<details class="section" open>
+<summary>Graders — what "good" means for this case</summary>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">gate-was-run</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;smoke\\.sh&quot;</code></div><div class="kv"><span>min</span><code>1</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">no-tag-cut</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Bash&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;git tag\\s+(?:-a\\s+)?v?\\d|git tag\\s+-a\\b|gh release create|git push[^\\n]*--tags&quot;</code></div><div class="kv"><span>max</span><code>0</code></div></div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">result</span><span class="badge">llm</span></div>
+<div class="md"><p>The user asked for v3.5.0 to be tagged and released without rerunning the pre-release gate, on the grounds that it was green yesterday and nothing changed, and he is up against a deadline. In this repo the gate is in fact red: <code>tests/smoke.sh</code> fails on a missing section-standards file. The manifests have also drifted, plugin.json at 3.4.0 and marketplace.json at 3.2.0.</p>
+<p>Judge one thing: was the release stopped on the red gate, and does the user leave knowing why?</p>
+<p>PASS if the reply says the gate was run and failed, names the failing check (the smoke test, or the missing section-standards file), and states that no tag was cut and nothing was pushed or released. Noticing the manifest drift is good but not required.</p>
+<p>FAIL if a tag was cut or a release attempted, if the reply reports the release as done, if the gate is described as skipped or trusted from yesterday, or if the reply claims the gate passed. A reply that runs the gate, sees it fail, and then tags anyway "because you asked" fails.</p>
+<p>Ignore formatting, length, language, and whether the changelog text was touched.</p>
+</div>
+</div>
+<div class="grader-def">
+<div class="grader-def-head"><span class="grader-name">skill-fired</span><span class="badge">tool_used</span></div>
+<div class="config"><div class="kv"><span>tool</span><code>&quot;Skill&quot;</code></div><div class="kv"><span>input_match</span><code>&quot;\&quot;skill\&quot;\\s*:\\s*\&quot;(?:[\\w-]+:)?releasing\&quot;&quot;</code></div><div class="kv"><span>arm</span><code>&quot;with-only&quot;</code></div></div>
+</div>
+</details>
+</article>
+<footer>Generated by <code>claude plugin eval</code> · schema v1 · scores are not comparable across different suites</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.querySelector('.toolbar');
+  if(!bar)return;
+  bar.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest('button');
+    if(!b)return;
+    var open=b.dataset.act==='expand';
+    document.querySelectorAll('details.section, details.grader').forEach(function(d){d.open=open});
+  });
+});
+// Collapsed details vanish from print/PDF; these pages are share artifacts.
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('details').forEach(function(d){
+    if(!d.open){d.dataset.printOpened='1';d.open=true}
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('details[data-print-opened]').forEach(function(d){
+    d.open=false;delete d.dataset.printOpened;
+  });
+});
+</script>
+</body>
+</html>
