@@ -3,7 +3,8 @@
 Matplotlib style presets for CS publication-quality figures.
 
 Provides preconfigured matplotlib styles tuned for IEEE, ACM, USENIX, NeurIPS,
-ICML, ICLR, and arXiv submissions, plus a colorblind-friendly default palette.
+ICML, ICLR, and arXiv submissions, with the figures4papers semantic palette as
+the default color cycle.
 
 Adapted from K-Dense AI's scientific-agent-skills, with biology-focused
 venues (Nature, Science, Cell) replaced by CS venues.
@@ -14,7 +15,13 @@ import matplotlib as mpl
 from typing import Dict, Any
 
 
-# Okabe-Ito colorblind-friendly palette (default for categorical data)
+# figures4papers semantic palette (default cycle): blue_main for ours, then
+# red_strong, green_3, teal, gray. The order keeps the first four
+# separable under simulated color-vision deficiency; see
+# assets/color_palettes.py for the roles and family ramps.
+F4P_CYCLE = ['#0F4D92', '#B64342', '#8BCF8B', '#42949E', '#767676']
+
+# Okabe-Ito colorblind-friendly palette (strict-CVD alternative)
 OKABE_ITO_COLORS = [
     '#E69F00',  # Orange
     '#56B4E9',  # Sky Blue
@@ -60,7 +67,7 @@ def get_base_style() -> Dict[str, Any]:
         'ps.fonttype': 42,
 
         # Axes
-        'axes.linewidth': 0.5,
+        'axes.linewidth': 0.8,
         'axes.labelsize': 9,
         'axes.titlesize': 9,
         'axes.labelweight': 'normal',
@@ -71,20 +78,20 @@ def get_base_style() -> Dict[str, Any]:
         'axes.edgecolor': 'black',
         'axes.labelcolor': 'black',
         'axes.axisbelow': True,
-        'axes.prop_cycle': mpl.cycler(color=OKABE_ITO_COLORS),
+        'axes.prop_cycle': mpl.cycler(color=F4P_CYCLE),
         'axes.grid': False,
 
         # Ticks
         'xtick.major.size': 3,
         'xtick.minor.size': 2,
-        'xtick.major.width': 0.5,
-        'xtick.minor.width': 0.5,
+        'xtick.major.width': 0.8,
+        'xtick.minor.width': 0.6,
         'xtick.labelsize': 7,
         'xtick.direction': 'out',
         'ytick.major.size': 3,
         'ytick.minor.size': 2,
-        'ytick.major.width': 0.5,
-        'ytick.minor.width': 0.5,
+        'ytick.major.width': 0.8,
+        'ytick.minor.width': 0.6,
         'ytick.labelsize': 7,
         'ytick.direction': 'out',
 
@@ -186,17 +193,18 @@ def apply_publication_style(style_name: str = 'default') -> None:
     print(f"Applied '{style_name}' publication style")
 
 
-def set_color_palette(palette_name: str = 'okabe_ito') -> None:
+def set_color_palette(palette_name: str = 'f4p') -> None:
     """
-    Set a colorblind-safe matplotlib color cycle.
+    Set the matplotlib color cycle.
 
     Parameters
     ----------
     palette_name : str
-        'okabe_ito', 'okabe_ito_4', 'wong', 'tol_bright', 'tol_muted',
-        'tol_high_contrast'
+        'f4p' (default), 'okabe_ito', 'okabe_ito_4', 'wong', 'tol_bright',
+        'tol_muted', 'tol_high_contrast'
     """
     palettes = {
+        'f4p': F4P_CYCLE,
         'okabe_ito': OKABE_ITO_COLORS,
         'okabe_ito_4': OKABE_ITO_4,
         'wong': WONG_COLORS,
@@ -207,7 +215,7 @@ def set_color_palette(palette_name: str = 'okabe_ito') -> None:
     if palette_name not in palettes:
         available = ', '.join(palettes.keys())
         print(f"Warning: palette '{palette_name}' not found. Available: {available}")
-        palette_name = 'okabe_ito'
+        palette_name = 'f4p'
 
     colors = palettes[palette_name]
     plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors)
@@ -275,6 +283,7 @@ def create_style_template(output_file: str = 'publication.mplstyle') -> None:
 def show_color_palettes() -> None:
     """Display the bundled palettes side-by-side for visual inspection."""
     palettes = {
+        'figures4papers':    F4P_CYCLE,
         'Okabe-Ito':         OKABE_ITO_COLORS,
         'Okabe-Ito (4-set)': OKABE_ITO_4,
         'Wong':              WONG_COLORS,
@@ -295,10 +304,11 @@ def show_color_palettes() -> None:
         for i, color in enumerate(colors):
             ax.add_patch(plt.Rectangle((i, 0), 1, 1, facecolor=color,
                                        edgecolor='black', linewidth=0.5))
-            text_color = 'white' if i == len(colors) - 1 else 'black'
+            r, g, b = mpl.colors.to_rgb(color)
+            text_color = 'white' if 0.299 * r + 0.587 * g + 0.114 * b < 0.5 else 'black'
             ax.text(i + 0.5, 0.5, color, ha='center', va='center',
                     fontsize=7, color=text_color)
-    fig.suptitle('Colorblind-Safe Palettes', fontsize=11, fontweight='bold')
+    fig.suptitle('Bundled Palettes', fontsize=11, fontweight='bold')
     plt.tight_layout()
     plt.show()
 
@@ -314,13 +324,13 @@ if __name__ == "__main__":
     print("=" * 50)
 
     print("\nAvailable styles: default, ieee, acm, usenix, neurips, icml, minimal, presentation")
-    print("Available palettes: okabe_ito, okabe_ito_4, wong, tol_bright, tol_muted, tol_high_contrast")
+    print("Available palettes: f4p, okabe_ito, okabe_ito_4, wong, tol_bright, tol_muted, tol_high_contrast")
     print("Available venues: ieee, acm, usenix, neurips, icml, iclr, arxiv")
 
     print("\nExample:")
     print("  from style_presets import configure_for_venue, set_color_palette")
     print("  configure_for_venue('ieee', figure_width='single')")
-    print("  set_color_palette('okabe_ito_4')")
+    print("  set_color_palette('f4p')")
 
     import numpy as np
     apply_publication_style('ieee')

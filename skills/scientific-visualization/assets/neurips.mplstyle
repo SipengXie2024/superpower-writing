@@ -28,7 +28,7 @@ axes.spines.right: False
 axes.edgecolor: black
 axes.axisbelow: True
 axes.grid: False
-axes.prop_cycle: cycler('color', ['0072B2', 'D55E00', '009E73', 'CC79A7', 'E69F00', '56B4E9', 'F0E442', '000000'])
+axes.prop_cycle: cycler('color', ['0F4D92', 'B64342', '8BCF8B', '42949E', '767676'])
 
 # Ticks
 xtick.major.size: 3.5

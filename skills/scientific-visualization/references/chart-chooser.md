@@ -8,7 +8,9 @@ replacement to use instead.
 
 Adapted in part from a public "experiment plot recommendation" prompt (19 chart
 types in six groups); the venue cautions, the systems families, and the scale
-rule are this plugin's.
+rule are this plugin's. Patterns 13 to 19 and the ablation, radar, timeline,
+and concept rows come from the figures4papers repository
+(https://github.com/ChenLiu-1996/figures4papers).
 
 ## Contents
 
@@ -20,6 +22,7 @@ rule are this plugin's.
 - Matrices and relationships
 - Composition and share
 - Composite layouts
+- Concept and illustration plots
 - Scale remedies when groups differ by a lot
 - Orientation, series count, statistical elements
 - Charts to avoid or justify
@@ -42,13 +45,16 @@ figures.
 
 | Question | Chart | Notes |
 |---|---|---|
-| Which method wins on one metric across a few benchmarks? | Grouped vertical bars | Up to about 8 groups with short labels. Start at zero. Group by benchmark, color by method, method order fixed across the paper. |
+| Which method wins on one metric across a few benchmarks? | Grouped vertical bars | Up to about 8 groups with short labels. Start at zero or a named meaningful floor. Group by benchmark, color by method, method order fixed across the paper. |
+| How do many baselines (6 to 10) compare with ours on 3 or 4 metrics? | Family-shaded comparison row | One panel per metric plus one legend-only panel; baselines of one family share a hue light to dark, ours dark blue at the right end; x ticks dropped only when colors are unique and legend order equals bar order. Pattern 15. |
 | Same, but method names are long or there are many items? | Horizontal bars | Long labels read left to right without rotation; sort by value unless the text introduces a fixed order. |
 | How much faster than the baseline, per benchmark? | Speedup bars | Baseline at `1.0x` as a reference line; log y when speedups span more than one order of magnitude. Pattern 3 in `matplotlib_examples.md`. |
 | Which model is best on two competing metrics (accuracy vs cost)? | Pareto front | Scatter of all models, frontier drawn through the non-dominated points, your models highlighted. Annotate the frontier, not every point. Pattern 5. |
 | Where does the time, memory, or energy go? | Stacked bars (`breakdown-bars`) | Only when components add to a meaningful total; fixed segment order; hatch or outline for grayscale. Grouped bars when components do not sum. |
 | Which component contributes the gain (ablation)? | Grouped bars or a table | Bars when there are 3 to 6 variants and one metric; a table when several metrics or exact values matter. Pattern 12. |
-| Is the model strong on every axis with no weak spot? | Radar (caution) | Enclosed area changes with axis order and scale, and reviewers know it. Prefer a small-multiples row of bars, one panel per metric, or a table with per-metric best in bold. |
+| How much does removing each component cost? | Ablation drop arrows | Full model first, dashed line at its score, one arrow per removed component down to its bar with the `−Δ` printed at the line. The gap is the claim, so draw it. Pattern 13. |
+| Which of many component combinations (8 or more) matters? | Cumulative ablation ramp | Horizontal bars labeled "A + B + C", ordered from fewest to most components, one blue at alpha rising from 0.2 to 1.0; one panel per metric sharing the row labels. Pattern 14. |
+| Is the model strong on every axis with no weak spot? | Radar (caution) | Enclosed area changes with axis order and scale, and reviewers know it. Prefer a small-multiples row of bars, one panel per metric, or a table with per-metric best in bold. When the venue or co-author expects a radar, draw it as Pattern 17: per-spoke tick labels, every spoke's range set by one written rule, vertices marked, fills at alpha 0.05 to 0.1. |
 
 ## Trends, scaling, and convergence
 
@@ -57,6 +63,7 @@ figures.
 | Does training converge, and how fast? | Line with shaded band | Mean over seeds, band is std or a 95 percent CI, stated in the caption; log y for loss. Pattern 4. |
 | Curves end almost together; who wins at the end? | Line plus an inset zoom | Inset the final segment of the x range at larger scale; draw the inset's extent on the main axes; do not truncate the main y axis instead. |
 | How does throughput or latency change with load? | Throughput vs concurrency | Log x; mark the saturation knee; pair with median latency. Pattern 2. |
+| Does ours match a baseline with less data, compute, or time? | Line plot with a claim line | A dotted horizontal line from ours at the smaller budget across to where the baseline reaches the same score; a gray dashed line for the shared floor (e.g., "SFT only"). Pattern 15, second block. |
 | How do methods scale across models, workloads, or machine counts? | Small multiples (`scaling-small-multiples`) | One panel per workload, shared axes and legend, same method encoding everywhere; never extend a line past the measured range. |
 | How does cost grow across orders of magnitude? | Log-cost curve (`log-cost-curve`) | State the log axis and base; markers on measured points; a fitted slope is labeled as a fit, never as data. |
 | Is there a relationship in a cloud of points? | Scatter with a fitted curve | Keep the points visible; state the model of the fit and its R squared in the caption; never let the fit replace the points. |
@@ -91,15 +98,28 @@ figures.
 | Question | Chart | Notes |
 |---|---|---|
 | What fraction of errors falls in each category? | Sorted horizontal bars | Percentages on the axis and the counts in the caption. Pie and donut charts (caution) hide small differences and waste column width; use them only when a venue's template shows them and there are at most four slices. |
+| How does a share split by two categorical factors (method × outcome type)? | Color × hatch stacked bars | Color names the method and the tick labels repeat it, hatch names the second factor with its own legend (add a color legend only when the ticks are dropped); print the key segment's value where it stays legible (dark text on light fills, never yellow). Pattern 16. |
+| How did a count grow over time, and what events line up with the jumps? | Event-annotated timeline | Cumulative stacked area with a dark outline per layer; arrows with short event names (model releases, policy changes) above the curve; a second panel with hatching for a second population. Pattern 18. |
 
 ## Composite layouts
 
 | Question | Chart | Notes |
 |---|---|---|
-| Two quantities with different units against the same x? | Two stacked panels sharing x | A dual y-axis (caution) invites reading meaning into where the lines cross; stacked panels keep both scales honest. Use twin axes only when the venue template does and the caption explains both scales. |
+| Two quantities with different units against the same x? | Two stacked panels sharing x | A dual y-axis (caution) invites reading meaning into where the lines cross; stacked panels keep both scales honest. Use twin axes only when the venue template does and the caption explains both scales; then color each axis label and its ticks like its curve, and give the two curves distinct legend entries. |
 | A metric against a long-tailed class distribution? | Two stacked panels: counts above, metric below | The bar plus line overlay (caution) has the same twin-axis problem; stacked panels with a shared x show the long tail and the metric without a second axis. |
 | Too many series or conditions for one panel? | Facet grid (small multiples) | More than six series on one axes is the trigger. Shared axes, one legend, panel titles that name the condition. Patterns 10 and 11. |
 | Is the kernel compute bound or memory bound? | Roofline | Log-log; ridge at peak FLOPS. Pattern 7. |
+
+## Concept and illustration plots
+
+| Question | Chart | Notes |
+|---|---|---|
+| What does the mechanism or failure mode look like? | Concept plot from idealized data | Analytic curves or sampled point clouds that show the phenomenon, not a measurement: two distributions with the gap marked by an arrow, a trajectory crossing between two density manifolds, vectors on a shaded sphere. Same palette and fonts as the result figures; no numeric claims read off it; the caption says it is illustrative. Pattern 19. |
+
+Boxes-and-arrows architecture diagrams go to `tikz-figures` or
+`scientific-schematics`. A concept plot belongs here when its content is a
+curve, a density, a geometric picture, or a path through a space, because
+matplotlib then draws it exactly and it shares the result figures' styling.
 
 ## Scale remedies when groups differ by a lot
 
@@ -109,6 +129,10 @@ pick one remedy from what the reader must take away:
 - **The raw magnitudes matter** (the reader should feel that one method is at
   5 and another at 75): keep a linear axis and use a broken axis with explicit
   break marks on the axis line. Never a silent non-zero baseline on a bar chart.
+- **The metric has a meaningful floor** (AUROC 0.5 is chance, k-way accuracy
+  1/k): start the axis at that floor and name it once, on the axis, as a
+  reference line, or in the caption. A floor picked only to enlarge the gap is
+  not meaningful.
 - **The values span orders of magnitude** or grow exponentially: use a log
   axis, labeled with its base, with minor ticks at each decade. No zeros or
   negatives on a log axis; report excluded values in the caption.
@@ -123,7 +147,14 @@ the figure is carrying two claims.
 
 - **Orientation.** Long category names or more than about eight categories:
   horizontal bars. Short labels and few categories: vertical bars. Never rotate
-  x labels 45 degrees as the fix for long names.
+  x labels 45 degrees as the fix for long names. A comparison row may drop the
+  x tick labels in favor of one legend panel when colors are unique, method
+  order is the same in every panel, and legend order equals bar order.
+- **Direction marks.** When panels mix higher-is-better and lower-is-better
+  metrics, append `↑` or `↓` to each metric label.
+- **Panel count.** A grid whose panels print below about 1.2 in wide (17
+  category panels in one figure) is unreadable at column width; merge into
+  one grouped bar chart or a table.
 - **Series count.** At most six series on one axes, distinguished by line style
   and marker as well as color. Beyond six, facet.
 - **Error indication.** Repeated runs or seeds: error bars or a shaded band,
@@ -138,7 +169,7 @@ the figure is carrying two claims.
 
 | Chart | Why reviewers object | Use instead |
 |---|---|---|
-| Radar or spider | Area depends on axis order and per-axis scaling; suggests a "balanced" model regardless of the data | Small multiples of bars, or a table |
+| Radar or spider | Area depends on axis order and per-axis scaling; suggests a "balanced" model regardless of the data | Small multiples of bars, or a table; if kept, Pattern 17 with one written range rule |
 | Pie or donut | Angles and arcs are misread; small slices vanish; wastes width | Sorted horizontal bars |
 | Dual y-axis | Line crossings mean nothing; either axis can be scaled to tell any story | Two stacked panels sharing x |
 | Bar plus line overlay | Same twin-axis problem in disguise | Two stacked panels sharing x |

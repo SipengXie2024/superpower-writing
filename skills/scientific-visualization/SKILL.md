@@ -1,6 +1,6 @@
 ---
 name: scientific-visualization
-description: Publication-ready data plots for CS papers (systems, ML, networking, security). Use when creating figures with multi-panel layouts, error bars, colorblind-safe palettes, latency CDFs, throughput curves, ablation bars, or speedup comparisons for IEEE / ACM / USENIX / NeurIPS / ICML submissions, including "画个柱状图", "把这组数据画出来", "画条加速比曲线". A request to estimate an error bar from the other rows is still this skill. Emits PDF that drops cleanly into LaTeX. For one-off exploration use seaborn directly; for architecture diagrams use tikz-figures or scientific-schematics.
+description: Publication-ready data plots for CS papers (systems, ML, networking, security). Use for multi-panel layouts, error bars, colorblind-safe palettes, latency CDFs, throughput curves, ablation bars, radar or speedup comparisons, and matplotlib concept plots of a mechanism, for IEEE / ACM / USENIX / NeurIPS / ICML submissions, including "画个柱状图", "把这组数据画出来", "画条加速比曲线". A request to estimate an error bar from the other rows is still this skill. Emits PDF for LaTeX. For exploration use seaborn; for architecture diagrams use tikz-figures or scientific-schematics.
 license: MIT license
 metadata:
     skill-author: K-Dense Inc. (upstream); CS adaptation by superpower-writing
@@ -21,12 +21,13 @@ Use this skill when:
 - Creating plots for a CS paper (latency, throughput, accuracy, loss, memory, F1, CDF, etc.)
 - Targeting IEEE Transactions, an ACM conference (`acmart`), a USENIX venue, NeurIPS / ICML / ICLR, or arXiv
 - Building multi-panel figures with consistent styling
+- Drawing a concept plot: idealized curves, distributions, or point clouds that illustrate a mechanism or a failure mode, made in matplotlib so its axes and colors match the result figures (Pattern 19 in `references/matplotlib_examples.md`)
 - Ensuring figures stay readable in grayscale and for colorblind reviewers
 - Exporting at the right resolution and format for LaTeX inclusion
 
 Do not use this skill for:
 
-- Architecture / data-flow / pipeline schematics — use `superpower-writing:tikz-figures` (vector) or `superpower-writing:scientific-schematics` (image-model PNG)
+- Architecture / data-flow / pipeline schematics — use `superpower-writing:tikz-figures` (vector) or `superpower-writing:scientific-schematics` (image-model PNG). The split: boxes and arrows between named components go to those skills; a concept whose content is a curve, a distribution, a geometric picture, or a trajectory through a space stays here.
 - Ad-hoc exploratory plots in a notebook — just import seaborn / plotly directly
 - Tables — use LaTeX `booktabs` directly; no Python needed
 
@@ -38,19 +39,18 @@ Do not use this skill for:
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Apply IEEE-tuned publication style (sets fonts, sizes, colorblind palette)
+# Apply IEEE-tuned publication style (sets fonts, sizes, default palette)
 plt.rcParams.update({
     'figure.dpi': 100, 'savefig.dpi': 600,
-    'font.family': 'sans-serif', 'font.sans-serif': ['Arial', 'Helvetica'],
+    'font.family': 'sans-serif', 'font.sans-serif': ['Arial', 'Helvetica', 'DejaVu Sans'],
     'font.size': 8, 'axes.labelsize': 9, 'axes.titlesize': 9,
     'xtick.labelsize': 7, 'ytick.labelsize': 7, 'legend.fontsize': 7,
     'axes.linewidth': 0.5, 'lines.linewidth': 1.5,
     'axes.spines.top': False, 'axes.spines.right': False,
     'savefig.format': 'pdf', 'savefig.bbox': 'tight',
 })
-plt.rcParams['axes.prop_cycle'] = plt.cycler(color=[
-    '#0072B2', '#D55E00', '#009E73', '#CC79A7', '#E69F00', '#56B4E9'
-])  # Okabe-Ito subset, colorblind-safe
+# figures4papers semantic palette: colors carry roles, not cycle order
+OURS, BASELINE = '#0F4D92', '#B64342'   # blue_main, red_strong
 
 # IEEE single-column = 3.5 inches
 fig, ax = plt.subplots(figsize=(3.5, 2.4))
@@ -59,8 +59,8 @@ x = np.array([1, 2, 4, 8, 16, 32])
 baseline_p99 = np.array([12.4, 13.1, 14.8, 18.6, 27.3, 49.5])
 proposed_p99 = np.array([10.2, 10.4, 11.1, 12.7, 16.4, 24.0])
 
-ax.plot(x, baseline_p99, marker='o', label='Baseline')
-ax.plot(x, proposed_p99, marker='s', label='Ours')
+ax.plot(x, baseline_p99, marker='o', linestyle='--', color=BASELINE, label='Baseline')
+ax.plot(x, proposed_p99, marker='s', color=OURS, label='Ours')
 
 ax.set_xlabel('Concurrent clients')
 ax.set_ylabel(r'p99 latency (ms)')
@@ -99,18 +99,22 @@ plt.rcParams['pdf.fonttype'] = 42  # TrueType, embedded
 plt.rcParams['ps.fonttype'] = 42
 ```
 
-### 2. Color: colorblind-safe by default
+### 2. Color: semantic palette by default
 
-Roughly 8 % of male readers have a red-green color-vision deficiency. Reviewers, area chairs, and ML conference attendees in dim halls fail to distinguish poorly chosen palettes. Default to **Okabe-Ito** for categorical data and **viridis** / **cividis** for continuous data.
+The default categorical palette comes from figures4papers (Chen Liu's figures for Nature Machine Intelligence, ICML, NeurIPS, and ECCV papers). Colors carry **roles**, and the reader learns them from the first figure:
 
 ```python
-# Okabe-Ito (8 distinguishable categories under all common CVD types)
-okabe_ito = ['#E69F00', '#56B4E9', '#009E73', '#F0E442',
-             '#0072B2', '#D55E00', '#CC79A7', '#000000']
-plt.rcParams['axes.prop_cycle'] = plt.cycler(color=okabe_ito)
+OURS       = '#0F4D92'                         # blue_main: the proposed method, nothing else
+ABLATION   = '#3775BA'                         # blue_secondary at alpha 0.2 -> 1.0 for variants of ours
+GREENS     = ['#DDF3DE', '#AADCA9', '#8BCF8B'] # related family, light to dark
+REDS       = ['#F6CFCB', '#E9A6A1', '#B64342'] # contrasting family, light to dark
+NEUTRAL, GRAY = '#CFCECE', '#767676'           # reference fill, reference line
+F4P_CYCLE  = ['#0F4D92', '#B64342', '#8BCF8B', '#42949E', '#767676']  # when roles are not hand-assigned
 ```
 
-For categorical 3 – 4-series plots, prefer the high-contrast subset `['#0072B2', '#D55E00', '#009E73', '#CC79A7']` (blue / vermillion / green / pink) — it stays distinguishable in B/W print.
+- **Color a family, shade a variant.** Methods from one family share a hue and step light to dark, strongest member nearest to ours.
+- **Colorblind limits are measured, not assumed.** The first four cycle colors stay at least 21 CAM02-UCS units apart under simulated deuteranopia, protanopia, and tritanopia. The light reds (`red_1`, `red_2`, `red_mid`) fall to 4 to 8 against greens under deuteranopia. **When a light red appears next to any green, hatch (bars) or dash (lines) the reds**, unless a tick or direct label names every bar or line. `red_strong` stays 28 or more from every green. From the fifth series on, markers and line styles carry the distinction.
+- **Okabe-Ito is the strict alternative** for figures that must separate more than four series by color alone, or when a co-author or venue names a palette. `references/color_palettes.md` has the role rules, the measured pair table, and a checker for a project's own `METHOD_COLORS`.
 
 For heatmaps:
 
@@ -122,13 +126,15 @@ Always add **redundant encoding** beyond color: line styles (`'-'`, `'--'`, `':'
 
 ### 3. Typography
 
-- Sans-serif at the final printed size: Arial, Helvetica, or DejaVu Sans (the matplotlib default fallback).
+- Sans-serif at the final printed size. Always give a fallback list, `['Arial', 'Helvetica', 'DejaVu Sans']`: Linux machines usually lack Helvetica, and a bare `font.family = 'helvetica'` warns and falls back to an arbitrary font.
+- **Stroke weight in proportion.** Spines, lines, and error bars thin enough to vanish make a figure look like a matplotlib default. At column width use axis lines of 0.6 to 0.8 pt and data lines of 1.2 to 1.5 pt; the heavier strokes are what make the figures4papers plots read as finished.
 - Minimums **at the size that lands on the page**:
   - Axis labels: 8 pt
   - Tick labels: 7 pt
   - Legend: 7 pt
   - Panel labels (a, b, c): 9 – 10 pt bold
 - Embed fonts. Use `pdf.fonttype: 42` so TrueType fonts ship inside the PDF.
+- One size hierarchy per figure: tick labels ≤ legend ≤ axis labels < panel labels, and in-figure annotations no larger than tick labels. An axis label at twice the tick size, or a value label bigger than the axis label, reads as unfinished.
 - Sentence case: `Throughput (req/s)` not `THROUGHPUT (REQ/S)`.
 - Always include units in parentheses. Use SI / IEC prefixes consistently (`KB`, `MiB`, `μs`, not `K`, `M`, `us`).
 
@@ -143,6 +149,8 @@ Always add **redundant encoding** beyond color: line styles (`'-'`, `'--'`, `':'
 | arXiv | follow target venue | follow target venue | venue style |
 
 **Match `\columnwidth` exactly** when you use `\includegraphics[width=\columnwidth]`. Set `figsize=(3.5, ...)` for IEEE single-column figures and let LaTeX scale only when the figure spans both columns.
+
+Drawing on a larger canvas and letting LaTeX shrink it is also valid (figures4papers draws at 28 in with 24 pt text, which lands near 6 pt at 7 in), provided **every figure in the paper uses the same scale factor** and the text lands at or above the minimums above after scaling. Mixed factors are what make one figure's labels twice the size of the next one's. Compute the printed size as `font_pt * printed_width / figsize_width` before committing.
 
 See `references/venue_requirements.md` for the full per-venue spec, including `\figcomp` / `\columnsep` quirks and ACM's two-class width difference.
 
@@ -185,7 +193,7 @@ Common redundancy traps and the fix:
 
 When a panel shows absolute values, a good companion panel shows **what is atypical** (a signed deviation from a baseline or mean, on a diverging colormap like `RdBu_r`) rather than the same absolutes again. A third panel that reveals **co-variation** between two of the quantities (a scatter or bubble plot, with reference lines at the medians) adds a dimension the first two lack.
 
-#### Three generalizable multi-panel techniques
+#### Generalizable multi-panel techniques
 
 These transfer to almost any CS composite:
 
@@ -208,7 +216,7 @@ These transfer to almost any CS composite:
   ax.set_ylim(lo - margin, hi + margin)
   ```
 
-  For a bar chart this trades off against the "bars must start at zero" rule (see Common pitfalls): if you tighten a bar-chart axis, add a broken-axis indicator so the truncation is honest.
+  For a bar chart, the lower limit must be a **meaningful floor**: zero, the chance level (0.5 for AUROC, 1/k for k-way accuracy), or the baseline's score, named on the axis, a reference line, or in the caption. A floor picked to make the gap look large (0.15 for an AUPRC panel because the worst method scores 0.2) is a silent truncation; use a broken-axis indicator or start at zero.
 
 - **Dedicated legend-only subplot.** For a multi-axis figure where one shared legend serves all panels, reserve the last cell for the legend alone instead of crowding one panel or repeating legends:
 
@@ -219,6 +227,12 @@ These transfer to almost any CS composite:
   ```
 
   Prefer one shared legend strip (or direct labels on stable regions) over repeating a legend inside every axis.
+
+- **Bars identified by the legend alone.** With one legend panel, the x ticks of a method-comparison bar row can go (`ax.set_xticks([])`) instead of repeating nine rotated method names under every metric. Do this only when every method has a unique color, method order is identical in every panel, and legend order equals bar order (ours last in both). Otherwise keep tick labels, or switch to horizontal bars.
+
+- **Direction marks in axis labels.** Append `↑` or `↓` to a metric label (`AUROC ↑`, `p99 latency (ms) ↓`) when panels mix metrics where higher is better and lower is better. The reader stops checking the caption to learn which way is good.
+
+- **Reference lines that state the claim.** A reference line is worth drawing when it is the claim: the full model's score across an ablation (Pattern 13), "SFT only" as the floor every method must clear, or a dotted line from ours at 25 percent data to where a baseline needs 100 percent (Pattern 15). Label each reference line in place or in the legend.
 
 ## Common CS Figure Patterns
 
@@ -236,6 +250,13 @@ Reference implementations live in `references/matplotlib_examples.md`. To choose
 | Heatmap (cache miss / attention) | 2D intensity | viridis or cividis; never jet |
 | Box / violin (per-seed variability) | Multi-run distribution | Overlay individual seeds as strip plot |
 | Significance bars | A / B / ablation comparison | Optional in CS — only when stats are central to the claim |
+| Ablation drop arrows | How much each removed component costs | Dashed line at the full model; one arrow and `−Δ` per variant (Pattern 13) |
+| Cumulative ablation ramp | Many component combinations | Horizontal bars, "A + B + C" labels, one blue at rising alpha (Pattern 14) |
+| Family-shaded comparison row | Many baselines across 3 to 4 metrics | Family hues, ours in blue at the right, one legend panel, meaningful floors (Pattern 15) |
+| Color × hatch composition | Two categorical factors in one stacked bar | Color and tick labels name the method, hatch the second factor with its own legend (Pattern 16) |
+| Radar with per-spoke scales | Many benchmarks × few methods, venue expects radar | Per-spoke ticks from one range rule; vertices marked (Pattern 17) |
+| Event-annotated timeline | Cumulative counts against dated events | Stacked area, arrows naming each event (Pattern 18) |
+| Concept plot | Illustrate a mechanism, not report a measurement | Idealized curves, labeled as illustrative (Pattern 19) |
 
 ### Statistical rigor (CS-specific)
 
@@ -279,7 +300,7 @@ Then proceed:
 ## Common pitfalls (CS-specific)
 
 1. **Y-axis in milliseconds for tail latency.** A linear axis hides the long tail. Use log y for p99 / p99.9 plots.
-2. **Bar chart starting non-zero.** Misleading. Either start at zero or annotate clearly with a broken-axis indicator.
+2. **Bar chart starting at an arbitrary non-zero value.** Misleading. Start at zero, at a named meaningful floor (chance level, baseline score), or mark a broken axis.
 3. **One color per algorithm but identical line style.** Fails in grayscale. Add markers + line styles.
 4. **Legend over data.** Use `loc='upper left'` and verify visually; or place outside with `bbox_to_anchor`.
 5. **Default matplotlib font rendering.** Matplotlib's default `mathtext` uses computer-modern italics; mixed with Arial body text it looks broken. Either set `text.usetex: True` (slow) or use `mathtext.fontset: 'cm'` only when you need real LaTeX math.
@@ -296,13 +317,13 @@ Then proceed:
 | `_shared/core/house-style.md` | The plugin's default house style. §9 fixes what each structural figure shows and how floats land; §8.4 and §8.18 fix caption length, the one-palette-one-entity rule, panel stacking, and the no-`\resizebox` table rule. A project `.claude/CLAUDE.md` overrides it. |
 | `references/publication_guidelines.md` | Universal best practices: typography, layout, axes, accessibility, grayscale tests |
 | `references/venue_requirements.md` | Per-venue specs (IEEE, ACM, USENIX, NeurIPS, ICML, ICLR, arXiv) with exact widths, font sizes, and class-file gotchas |
-| `references/color_palettes.md` | Categorical (Okabe-Ito, Wong, Tol Bright/Muted), sequential (viridis family), diverging (RdBu, PuOr, BrBG); with grayscale and colorblind testing recipes |
+| `references/color_palettes.md` | Default figures4papers semantic palette with role rules and measured colorblind limits; strict alternatives (Okabe-Ito, Wong, Tol Bright/Muted), sequential (viridis family), diverging (RdBu, PuOr, BrBG); grayscale and colorblind pair checker |
 | `references/chart-chooser.md` | Question-to-chart table (systems patterns plus standard ML charts), scale remedies (broken axis / log / normalized), orientation and series-count rules, and the charts reviewers object to with their replacements |
-| `references/matplotlib_examples.md` | Twelve runnable patterns — CDF, throughput, training curve, Pareto, ablation, stacked-bar breakdown, heatmap, roofline, box+strip, multi-panel composition, `\columnwidth` IEEE template, `\textwidth` ACM template |
+| `references/matplotlib_examples.md` | Nineteen runnable patterns — CDF, throughput, training curve, Pareto, ablation, stacked-bar breakdown, heatmap, roofline, box+strip, multi-panel composition, `\columnwidth` IEEE template, `\textwidth` ACM template, plus the figures4papers patterns: ablation drop arrows, cumulative ablation ramp, family-shaded comparison row, color × hatch composition, per-spoke radar, event timeline, concept plot |
 | `scripts/style_presets.py` | `apply_publication_style(name)`, `set_color_palette(name)`, `configure_for_venue('ieee' / 'acm' / 'usenix' / 'neurips' / 'icml' / 'iclr' / 'arxiv')`. Copy into a project to pin the rcParams. |
 | `scripts/figure_export.py` | `save_publication_figure()` (multi-format), `save_for_venue()` (per-venue defaults), `check_figure_size()` (warns when figsize doesn't match the venue's column width). |
 | `scripts/verify_layout.py` | `verify(fig)`: geometric self-check (text/text + text/spine overlap, off-canvas text) plus per-panel crops for the perceptual pass. Call at the end of a generator script before committing the PDF. |
-| `assets/color_palettes.py` | Importable color constants and `apply_palette('okabe_ito' / 'wong' / 'tol_bright' / …)`. |
+| `assets/color_palettes.py` | Importable color constants (`F4P`, `F4P_CYCLE`, `F4P_GREENS`, `F4P_REDS`, Okabe-Ito, Tol) and `apply_palette('f4p' / 'okabe_ito' / 'tol_bright' / …)`. |
 | `assets/publication.mplstyle` | Generic CS publication baseline. Use when no specific venue style applies. |
 | `assets/ieee.mplstyle` | IEEE Transactions / conferences (3.5 in single column, 8 pt body). |
 | `assets/acm.mplstyle` | ACM `acmart` sigconf / acmsmall (3.33 in single, 7.0 in two-column). |
@@ -322,11 +343,12 @@ camera-ready figure or overwrite it.
 `high`: misleads the reader or makes the figure look broken:
 
 - Non-PDF vector output where vector was expected, or a PNG below 300 DPI going to camera-ready.
-- A truncated / non-zero-baseline axis that exaggerates the gain with no broken-axis indicator.
+- A truncated / non-zero-baseline axis that exaggerates the gain, with neither a broken-axis indicator nor a named meaningful floor (chance level, baseline score).
 - Fabricated or unsupported data: invented error bars, a synthesized trend, zero-width error bars standing in for "single run".
-- Colorblind-unsafe palette or color-only encoding (jet / rainbow, red-green pairs); figure unreadable in grayscale.
+- Colorblind-unsafe palette or color-only encoding (jet / rainbow, a light red beside a green with no hatch, dash, or direct label, five or more series told apart by color alone); figure unreadable in grayscale.
+- A concept plot drawn from idealized curves but presented or captioned as measured data.
 - Key labels or tick labels illegible at print size, or text clipped.
-- A `figsize` that does not match the target column width, so LaTeX rescales and distorts fonts.
+- A `figsize` whose scale factor to the printed width differs from the other figures in the paper, or leaves text below the minimums once LaTeX scales it.
 - An excluded or failed run (crashed, diverged, OOM'd, cold-start outlier) silently folded into a mean, bar, or error band, or silently dropped with no caption note. Excluded data is omitted or drawn with a distinct marker, never averaged in with the runs you kept.
 - The same quantity carrying two canonical values across figures, caption, and abstract (2.4× in one place, 2.6× in another for "the speedup"). One number per claim, everywhere. See `references/publication_guidelines.md` → Data Fidelity and Self-Consistency for both of these.
 

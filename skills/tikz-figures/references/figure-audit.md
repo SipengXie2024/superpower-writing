@@ -16,7 +16,7 @@
    - 先用 Read 工具读图片（vision），在跑任何规则之前。这是本路径的前提
    - 读完后，亲眼审下面四类 vision-only 信号（文字描述给不出，必须看图）：
      * font legibility（字号可读性）：最小标签在成图尺寸下能否读清；轴标题/刻度是否过小
-     * palette（配色）：是否 colorblind-safe（Okabe-Ito 类）；是否冗余编码（形状加颜色，不只靠颜色）；灰度下是否仍可区分
+     * palette（配色）：是否 colorblind-safe（Okabe-Ito 类，或默认的 figures4papers 配色且浅红与绿色并存时已加图案或虚线）；是否冗余编码（形状加颜色，不只靠颜色）；灰度下是否仍可区分
      * raster-vs-vector tells（栅格/矢量判别）：放大有无锯齿/像素块/JPEG 振铃即栅格；论文图应是矢量（PDF/SVG/TikZ），栅格成图要提醒用户换矢量或提高 DPI
      * chartjunk：3D 效果 / 渐变 / 阴影 / 装饰网格 / jet 配色 / 截断 y 轴误导，逐个标出位置
    - 然后走规则审查（见 Ψ.3），每条 vision 检查写一句"我在图中看到…"的证据

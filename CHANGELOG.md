@@ -7,6 +7,17 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [3.6.0] - 2026-09-23
+
+### Changed
+
+- scientific-visualization: the default categorical palette is now the figures4papers semantic palette (https://github.com/ChenLiu-1996/figures4papers). Deep blue is always ours, green and red families shade related and contrasting methods, grays are references; Okabe-Ito stays as the strict colorblind alternative. Every bundled `.mplstyle`, `style_presets.py`, `color_palettes.py` and all examples use it. Measured with `colorspacious`: the first four cycle colors stay ≥ 21 CAM02-UCS apart under simulated deuteranopia, protanopia and tritanopia; violet is left out of the cycle (8.7 from ours); light reds next to greens (4.4 to 8.1) must be hatched or dashed.
+- scientific-visualization: bar charts may start at a named meaningful floor (chance level, positive rate, baseline score) instead of only zero or a broken axis; drawing large and letting LaTeX shrink is allowed when every figure shares one scale factor; axis strokes rise from 0.5 to 0.8 pt; font lists always carry a fallback.
+
+### Added
+
+- scientific-visualization: seven figures4papers patterns, resized to real column widths and runnable — ablation drop arrows, cumulative ablation ramp, family-shaded comparison row with a legend panel and a data-budget claim line, color × hatch composition, radar with per-spoke scales from one written range rule, event-annotated timeline, and concept plots (distribution gap, shaded sphere). chart-chooser gains the matching rows, a concept-plot section, direction marks (↑/↓), a panel-count limit, and the conditions for dropping x ticks in favor of a legend panel.
+
 ## [3.5.0] - 2026-09-15
 
 Measurement-driven rework. Every skill fix below was found by a two-arm eval

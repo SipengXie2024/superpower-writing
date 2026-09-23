@@ -353,8 +353,10 @@ deficiency. Design accordingly:
 - Test every figure in greyscale; if two series become indistinguishable, add
   patterns or shapes.
 
-Recommended palettes: Okabe-Ito, ColorBrewer2 qualitative schemes, viridis
-family for heatmaps.
+Recommended palettes: the figures4papers semantic palette that
+`scientific-visualization` uses by default (hatch or dash its light reds next
+to greens), Okabe-Ito when color alone must separate the series, ColorBrewer2
+qualitative schemes, viridis family for heatmaps.
 
 ### Contrast and Readability
 

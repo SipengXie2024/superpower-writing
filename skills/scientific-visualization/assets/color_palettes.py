@@ -1,13 +1,56 @@
 """
-Colorblind-friendly color palettes for CS publications.
+Color palettes for CS publications.
+
+The default is the semantic palette from figures4papers
+(https://github.com/ChenLiu-1996/figures4papers): deep blue for the proposed
+method, green and red families for related and contrasting baselines, grays
+for references. Okabe-Ito and the Tol sets stay available for figures that
+need strict colorblind safety without redundant encoding.
 
 Drops biology-specific palettes (fluorophores, DNA bases, microscopy channels)
 from the upstream skill — those don't apply to CS figures.
 
 Usage:
-    from color_palettes import OKABE_ITO_LIST, apply_palette
-    apply_palette('okabe_ito')
+    from color_palettes import F4P, F4P_CYCLE, apply_palette
+    apply_palette('f4p')
 """
+
+# figures4papers semantic palette (default). Roles, not a free cycle:
+# blue = ours, green family = related methods / positive variants,
+# red family = contrasting baselines, grays = references and background.
+F4P = {
+    'blue_main':      '#0F4D92',  # the proposed method
+    'blue_secondary': '#3775BA',  # ablation ramps of the proposed method
+    'green_1':        '#DDF3DE',
+    'green_2':        '#AADCA9',
+    'green_3':        '#8BCF8B',
+    'red_1':          '#F6CFCB',
+    'red_2':          '#E9A6A1',
+    'red_mid':        '#D88F8A',
+    'red_strong':     '#B64342',
+    'teal':           '#42949E',
+    'violet':         '#9A4D8E',
+    'neutral':        '#CFCECE',  # bar fill only; too light for lines
+    'gray':           '#767676',
+    'gray_dark':      '#4D4D4D',
+    'highlight':      '#FFD700',  # a single callout, never a series
+}
+
+# Line/marker cycle ordered by colorblind separation. Under simulated
+# deuteranopia, protanopia and tritanopia the first four keep a pairwise
+# CAM02-UCS distance >= 21; gray as the fifth drops the minimum to 12.8, so
+# from the fifth series on the marker and line style must carry the
+# distinction. Violet is left out: it sits 8.7 from blue_main under
+# protanopia, too close to the color that means "ours".
+F4P_CYCLE = ['#0F4D92', '#B64342', '#8BCF8B', '#42949E', '#767676']
+
+# Family ramps, light to dark. Put the strongest member of a family nearest to
+# the proposed method. Under deuteranopia the light reds (red_1, red_2,
+# red_mid) sit 4.4-8.1 from greens of similar lightness, so a figure that
+# shows a light red next to any green hatches or dashes the reds. red_strong
+# stays >= 28 from every green.
+F4P_GREENS = ['#DDF3DE', '#AADCA9', '#8BCF8B']
+F4P_REDS = ['#F6CFCB', '#E9A6A1', '#B64342']
 
 # Okabe-Ito palette (Okabe & Ito, 2008): the most widely-recommended
 # colorblind-safe categorical palette. Distinguishable under deuteranopia,
@@ -75,14 +118,14 @@ DIVERGING_COLORMAPS_AVOID = [
 ]
 
 
-def apply_palette(palette_name='okabe_ito'):
+def apply_palette(palette_name='f4p'):
     """
-    Apply a colorblind-safe palette to matplotlib's default color cycle.
+    Apply a palette to matplotlib's default color cycle.
 
     Parameters
     ----------
     palette_name : str
-        'okabe_ito' (default), 'okabe_ito_4', 'okabe_ito_2', 'wong',
+        'f4p' (default), 'okabe_ito', 'okabe_ito_4', 'okabe_ito_2', 'wong',
         'tol_bright', 'tol_muted', 'tol_light', 'tol_high_contrast'
 
     Returns
@@ -97,6 +140,7 @@ def apply_palette(palette_name='okabe_ito'):
         return None
 
     palettes = {
+        'f4p':               F4P_CYCLE,
         'okabe_ito':         OKABE_ITO_LIST,
         'okabe_ito_4':       OKABE_ITO_4,
         'okabe_ito_2':       OKABE_ITO_2,
@@ -115,9 +159,10 @@ def apply_palette(palette_name='okabe_ito'):
     return colors
 
 
-def get_palette(palette_name='okabe_ito'):
+def get_palette(palette_name='f4p'):
     """Return a palette as a list of hex codes (without applying it)."""
     palettes = {
+        'f4p':               F4P_CYCLE,
         'okabe_ito':         OKABE_ITO_LIST,
         'okabe_ito_4':       OKABE_ITO_4,
         'okabe_ito_2':       OKABE_ITO_2,
@@ -134,7 +179,8 @@ def get_palette(palette_name='okabe_ito'):
 
 
 if __name__ == "__main__":
-    print("Colorblind-friendly palettes for CS figures:")
+    print("Palettes for CS figures:")
+    print(f"  figures4papers:      {len(F4P_CYCLE)} colors (default cycle)")
     print(f"  Okabe-Ito:           {len(OKABE_ITO_LIST)} colors")
     print(f"  Okabe-Ito 4-subset:  {len(OKABE_ITO_4)} colors (B/W-friendly)")
     print(f"  Okabe-Ito 2-subset:  {len(OKABE_ITO_2)} colors (baseline vs ours)")
@@ -143,6 +189,6 @@ if __name__ == "__main__":
     print(f"  Tol Muted:           {len(TOL_MUTED)} colors")
     print(f"  Tol Light:           {len(TOL_LIGHT)} colors")
     print(f"  Tol High Contrast:   {len(TOL_HIGH_CONTRAST)} colors")
-    print("\nOkabe-Ito (recommended default):")
-    for name, hexv in OKABE_ITO.items():
+    print("\nfigures4papers roles (default):")
+    for name, hexv in F4P.items():
         print(f"  {name:15s}: {hexv}")

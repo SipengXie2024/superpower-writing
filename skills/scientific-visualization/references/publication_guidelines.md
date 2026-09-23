@@ -59,13 +59,13 @@ Universal best practices for plots that go into a CS paper, independent of the s
 
 ### Font Family
 
-- Sans-serif. Arial, Helvetica, or DejaVu Sans (matplotlib's open-source fallback that ships everywhere).
+- Sans-serif. Arial, Helvetica, or DejaVu Sans (matplotlib's open-source fallback that ships everywhere). Set them as a list, `['Arial', 'Helvetica', 'DejaVu Sans']`, never a single name: a machine without Helvetica warns and substitutes.
 - Match the body text family of the LaTeX class when possible — `acmart` uses Linux Libertine for body and Helvetica-equivalent for figures, so Arial in figures is fine.
 - Avoid serif fonts in figures. They look mismatched against the LaTeX class and reduce readability at small sizes.
 
 ### Font Size at Final Print Size
 
-The numbers below assume the figure fills the column width exactly. If you produce a figure at `figsize=(7,5)` and let LaTeX shrink it to `\columnwidth=3.33in`, all your text gets ~half size — usually too small.
+The numbers below assume the figure fills the column width exactly. If you produce a figure at `figsize=(7,5)` and let LaTeX shrink it to `\columnwidth=3.33in`, all your text gets ~half size — usually too small. Drawing large on purpose is fine when the text is sized for the shrink and every figure in the paper shares one scale factor; the printed size is `font_pt * printed_width / figsize_width`.
 
 | Element | Minimum | Recommended |
 |---------|---------|-------------|
@@ -88,7 +88,8 @@ Set `font.size: 8` as a default; matplotlib uses it for everything that doesn't 
 
 `color_palettes.md` holds the full reference (hex codes, colormap recipes, grayscale checks). Summary:
 
-- Default categorical: Okabe-Ito (8 colors, colorblind-safe).
+- Default categorical: the figures4papers semantic palette. Blue `#0F4D92` is ours, green and red families shade related and contrasting methods, grays are references. When a light red appears next to a green, hatch or dash the reds (they collapse under deuteranopia).
+- Strict alternative: Okabe-Ito (8 colors, colorblind-safe by color alone).
 - Sequential: viridis or cividis (perceptually uniform, grayscale-safe).
 - Diverging: RdBu_r, PuOr, BrBG centered on the neutral value.
 - Forbidden: jet, rainbow, RdGn, RdYlGn.
@@ -96,16 +97,16 @@ Set `font.size: 8` as a default; matplotlib uses it for everything that doesn't 
 
 ### Method-to-color consistency
 
-Pin one color to one method across **every figure in the paper**. Reviewers internalize "blue = baseline, orange = ours" by the second figure; breaking it on figure five forces a re-orientation.
+Pin one color to one method across **every figure in the paper**. Reviewers internalize "dark blue = ours, red = the baseline" by the second figure; breaking it on figure five forces a re-orientation.
 
 ```python
 # .writing/figures/src/_palette.py
 METHOD_COLORS = {
-    'baseline':   '#56B4E9',  # sky blue
-    'ours':       '#D55E00',  # vermillion
-    'ablation_a': '#009E73',  # green
-    'ablation_b': '#CC79A7',  # pink
-    'ideal':      '#000000',  # black
+    'ours':       '#0F4D92',  # blue_main
+    'related_a':  '#8BCF8B',  # green_3, strongest of the related family
+    'related_b':  '#AADCA9',  # green_2
+    'baseline':   '#B64342',  # red_strong, stays distinct from every green
+    'ideal':      '#767676',  # gray reference
 }
 ```
 
@@ -127,11 +128,11 @@ ax.plot(x, y_baseline, color=METHOD_COLORS['baseline'], label='Baseline')
 
 ### Axes
 
-- Axis line width: 0.5 pt for IEEE / ACM, 0.8 pt for slide / poster.
+- Axis line width: 0.8 pt for IEEE / ACM (0.6 pt at the thinnest), 1.5 pt for slide / poster. Thinner spines make a figure look unfinished next to 1.5 pt data lines.
 - Tick direction: `out`. Inward ticks collide with data points.
 - Tick frequency: 4 – 7 major ticks. More than that and labels overlap; fewer and the scale is hard to read.
 - Always label both axes with units. The only exception is panel labels in a multi-panel where the convention is shared (and then it's stated in the caption).
-- Start bar charts at zero. If you must use a non-zero baseline (e.g., showing tiny relative differences), explicitly indicate the broken axis with `\\` marks.
+- Start bar charts at zero or at a named meaningful floor: the chance level (0.5 for AUROC), or the baseline's score drawn as a reference line. Any other non-zero start needs explicit broken-axis `\\` marks.
 - Log scales: label clearly (`log`, `log10`, `log2`). Use minor ticks at every decade. For latency, log y is almost always right. For throughput vs concurrency, log x is almost always right.
 
 ### Lines, Markers, Bars
@@ -147,7 +148,7 @@ ax.plot(x, y_baseline, color=METHOD_COLORS['baseline'], label='Baseline')
 
 - Inside the plot when there's empty quadrant space; outside (`bbox_to_anchor`) when the data fills the box.
 - No frame for a clean look: `legend(frameon=False)`. Add a subtle frame only if the legend overlaps data.
-- Order entries by visual prominence (top to bottom = top-most line to bottom-most line) or by importance (your method first).
+- Order entries by visual prominence (top to bottom = top-most line to bottom-most line), by importance (your method first), or to mirror bar order left to right (your method last in both) when the bars have no tick labels.
 - Keep entries short. Move full descriptions into the caption.
 
 ## Statistical Conventions for CS
