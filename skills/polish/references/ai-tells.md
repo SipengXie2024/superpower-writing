@@ -205,6 +205,32 @@ vibrant.
 `utilize` → `use`; `leverage` → `use` or `apply`; `facilitate` → the concrete verb
 (`build`, `run`, `let`).
 
+**Measured vocabulary (systems papers).** Rates per 10,000 words in the title,
+abstract, and introduction (first 300 extracted lines) of 93 systems papers from
+1985 to 2023 against 109 from 2025 and 2026, about 256,000 words each. The
+recent group's 3 papers from 2023 and 2024 are left out of this count so that
+the two groups do not overlap in time:
+
+| Word | 1985–2023 | 2025–2026 | Ratio |
+|---|---|---|---|
+| comprehensive | 0.27 | 2.54 | 9.3 |
+| crucial | 0.59 | 2.07 | 3.5 |
+| extensive | 0.47 | 1.60 | 3.4 |
+| notably | 0.39 | 1.13 | 2.9 |
+| leverage | 0.66 | 1.37 | 2.1 |
+| pivotal | 0.04 | 0.74 | used by 1 vs 6 papers |
+| delve | 0.04 | 0.16 | used by 1 vs 4 papers |
+| novel | 4.10 | 4.96 | 1.2 |
+| significantly | 3.09 | 3.71 | 1.2 |
+| robust | 0.90 | 1.06 | 1.2 |
+
+Treat the top block as the strongest era markers in this genre; question each
+use. `novel`, `significantly`, and `robust` are old academic habits rather than
+LLM markers, so judge them by the evidence rule (a number or a named
+difference must follow), not by vocabulary. Caveat: the two groups differ in
+topic (databases and concurrency against mostly blockchain), so part of the gap
+may be field vocabulary.
+
 ### 8. Avoidance of "is" / "are" (copula avoidance)
 **Watch:** serves as / stands as / marks / represents [a], boasts / features /
 offers [a].

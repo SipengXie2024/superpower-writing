@@ -31,7 +31,11 @@ Polish runs four passes over a piece of prose, in this order:
    over the abstract, keep related words together. Read `references/strunk.md`.
 3. **Evidence-led wording**, for research and systems-paper prose, hold every
    comparison, magnitude word, and novelty claim to its evidence, and preserve
-   unresolved-evidence markers. Read `references/evidence-led-wording.md`.
+   unresolved-evidence markers. Read `references/evidence-led-wording.md`,
+   then apply the checks in
+   [`../_shared/core/classic-moves.md`](../_shared/core/classic-moves.md)
+   (absolute words against the evaluation, claims labelled by evidence type,
+   losses reported next to wins).
 4. **House style**, apply the standing conventions for reviewer-facing prose:
    punctuation, reviewer self-containment, argument form, section
    responsibility, term economy, and the senior co-author's editing
@@ -128,6 +132,9 @@ Three layers, checked in this order before you change a word:
 2. **The house style**, [`../_shared/core/house-style.md`](../_shared/core/house-style.md).
    The plugin default for reviewer-facing prose, and pass 4 above. Inside it, §8
    (the senior co-author's conventions) beats §1 through §7.
+   [`../_shared/core/classic-moves.md`](../_shared/core/classic-moves.md) sits
+   between them: it relaxes house style §3.2, §3.4 and style-cautions Lesson 2
+   on three named points, and yields to §8 everywhere.
 3. **The de-AI and Strunk heuristics** in this skill's other references.
 
 The evidence rules are outside the hierarchy. No layer may relax the preservation

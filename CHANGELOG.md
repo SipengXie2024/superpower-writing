@@ -7,6 +7,19 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [3.7.0] - 2026-10-09
+
+### Added
+
+- `skills/_shared/core/classic-moves.md`: twelve checkable body-level writing moves distilled from 16 close-read classics and 93 extension papers (1978–2023), each with verbatim quotes from the papers. Covers reporting losses next to wins, giving the expectation before a measurement, refuting the reader's obvious alternative, carrying one running example, stating what a comparison can show, checking absolute words in the abstract against the paper's own evaluation, and labelling claims by evidence type. It records why "write like pre-2023 papers" is the wrong rule: trend openers and missing limitation sections are about as common in the older group.
+- polish `ai-tells.md`: a measured vocabulary table for systems papers (title, abstract, introduction; 93 papers from 1985–2023 against 109 from 2025–2026). `comprehensive`, `crucial`, `extensive`, `notably`, `pivotal` separate the eras; `novel`, `significantly`, `robust` do not and are judged by the evidence rule instead.
+- house style §8.20–§8.28: the senior co-author's conventions for the evaluation section, introduction, system and method sections, guarantees, discussion and related work, and handover rounds.
+
+### Changed
+
+- drafting reads `classic-moves.md` after the house style; polish applies its checks in pass 3. The file relaxes house style §3.2, §3.4 and style-cautions Lesson 2 on three named points (a belief with a stated reason, a plain negative scope statement, the design's cost in the abstract) and yields to house style §8 everywhere.
+- style-cautions Lesson 2 now states that naming the workload where the design pays is a property of the design, not a dataset pre-hedge.
+
 ## [3.6.0] - 2026-09-23
 
 ### Changed

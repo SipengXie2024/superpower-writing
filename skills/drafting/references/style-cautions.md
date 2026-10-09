@@ -60,6 +60,8 @@ Dataset naming is allowed at exactly two places:
 
 Elsewhere — intros, theses, claim sentences, contribution lists — prose is dataset-agnostic.
 
+This rule is about dataset names, not about costs. Naming the failure scenario or workload class where the design pays (Dynamo's "sacrifices consistency under certain failure scenarios") is a property of the design and belongs in the abstract; see `skills/_shared/core/classic-moves.md`, override O3.
+
 ## Lesson 3 — Section intros foreground claims, not roadmaps
 
 *Canonical rule: house style §5, section openings synthesize rather than enumerate.*

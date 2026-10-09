@@ -424,6 +424,105 @@ He replaced an abstract wholesale and left the draft version commented out above
 
 Read the pair as one lesson: the problem paragraph names competitors and ends on a challenge sentence, the solution paragraph explains the mechanism causally, and the evidence paragraph gives corpus scale, the fairness condition, and the honest end-to-end number.
 
+### 8.20 Evaluation Section Shape
+
+From his wholesale rewrite of a results section (2026-09-16), the layout he expects:
+
+- **The section is named `Evaluation` and opens with one orienting sentence** (`We evaluate \sys's cost and performance.`), then the setup, then the research questions. `Evaluation` is the field-standard name, so 8.1's narrative-role rename does not apply to it.
+- **The setup is its own subsection, placed before the research questions, and split into run-in paragraphs**: `\noindent\textbf{Platform/workloads.}`, `\textbf{Experiments.}`, `\textbf{Baselines.}`, `\textbf{Metrics and timing.}`, separated by `\smallskip` and left in sentence case (8.1). Everything a later number depends on lives here: host and corpus, the sweep grid with its repetition count, what each baseline was given, how each ratio is computed and aggregated, and what the reported spread does not mean (`these ranges are not confidence intervals or significance thresholds`).
+- **The research-question list closes the setup subsection**, after a `\smallskip` and a lead-in sentence (`We address the following four questions.`, per 8.3). It gets no subsection of its own, and it is set in a tight list environment he adds to `main.tex`:
+
+```latex
+\newenvironment{packeditemize}{
+  \begin{list}{$\bullet$}{
+      \setlength{\labelwidth}{4pt}
+      \setlength{\itemsep}{0pt}
+      \setlength{\leftmargin}{\labelwidth}
+      \addtolength{\leftmargin}{\labelsep}
+      \setlength{\parindent}{0pt}
+      \setlength{\listparindent}{\parindent}
+      \setlength{\parsep}{0pt}
+      \setlength{\topsep}{1pt}}}{\end{list}}
+```
+
+- **Each research question is a plain question about a measured quantity**, opening with How or What and naming no construct the reader must look up. `Is the bound reachable by the design, which variant reaches it most cheaply, and does that cost hold at scale?` became `How good are the plans that \sys produces, and how much time does planning take?`
+- **Their subsection titles are neutral noun phrases naming what was measured**, Title Case with the `RQN:` prefix kept. `RQ1: Reaching the Bound Cheaply` became `RQ1: Plan Quality and Cost`, and `RQ3: Against the Baselines` became `RQ3: Comparison with Other Systems`. This is the one place 8.1 inverts: a top-level section title states its narrative role, a research-question subsection title does not.
+- **A long research-question subsection carries run-in labels of its own**, the same `\noindent\textbf{}` plus `\smallskip` shape as the setup (`Input reduction.`, `Model versus execution.`, `Stage overlap.`, `Static versus dynamic dispatch.`).
+
+### 8.21 Evaluation Prose Is a Measurement Report
+
+He replaced the evaluation prose wholesale rather than editing it, so the register was the problem, not the individual sentences. Across the rewrite the mean sentence fell from about 20 words to about 12, and the word `We` went from 3 occurrences to 34 in one section.
+
+- **`We` is the subject and the verb reports an action taken**: we measure, find, observe, compare, run, calculate, estimate, give, see. A paragraph reports what was done and what came out, in that order.
+- **Every comparison is stated in measured numbers, never as a ratio in words.** `<Baseline> ... runs four times slower` became `<Baseline> takes a median X\,ms to plan, compared with \sys's Y\,ms`, and `Stage B dominates at roughly two thirds, while the serial Stage A ... is about one third` became `Stage A takes about Z percent of the total`. Units take a thin space, and a bound the prose asserts is written as a formula (`the lower bound on completion time is $\max(\ldots)$`, with every term defined).
+- **Aphorisms and verdicts go.** `The ceiling belongs to the workload, not to the machine.` became `The workload limits the available parallelism.` `Reaching the bound is a property of the plan, not of execution, and RQ2 asks whether it becomes speedup.` became `We next test how these plans affect execution time.` A `Takeaways` subsection that tied the findings into one argument was deleted outright, since synthesis belongs to the discussion.
+- **An estimate is labelled an estimate, with its assumptions and its scope in the same paragraph**: `a steady-state throughput estimate of N times the same serial reference ... The estimate assumes that overlap adds no resource contention. It describes throughput, not a measured reduction in one request's latency.` Paragraphs whose numbers sit near the noise close the same way (`Variation across repeated runs limits what we can conclude from the smaller gaps.`).
+- **Panel labels name the comparison, captions name the figure.** A panel label is a bare noun-phrase comparison using `vs.` (`(a) Plan quality against core count.` became `(a) Plan quality vs. core count.`), while prose and run-in labels spell `versus` out. A caption loses its methodology (`Plan quality against cost, medians over the input sweep. In (b) the dashed line is the Pareto frontier and the shaded region is dominated by \sys.` became `Plan quality and planning time.`), and a legend gloss the reader cannot do without survives as a colon-tagged fragment (`Band: repeated-run variation.`). Whatever a caption drops reappears in the body or in the setup's metrics paragraph (8.4).
+- **This overrides §6.3 and §6.4 inside an evaluation section.** Numbers move out of captions into the body, so the body does not stay qualitative just because a figure carries the detail. Topic sentences are methodology-framed by design (`We measure how much time each pipeline stage takes.`), and a paragraph closes on a scope limit rather than on a design implication. Everywhere outside the evaluation, §6.4's answer-first topic sentence still holds.
+
+### 8.22 Handover Housekeeping
+
+What he does to the source tree when he takes a file over, worth knowing so the next pass neither undoes it nor loses work:
+
+- **He backs the pre-edit manuscript up into a dated `bkp<yymmdd>/` directory, writes the rewritten file into `man-done/`, and repoints `main.tex` at it** (`\input{man-done/04_results}`). The `manuscript/` copy of that file is gone from the tree. Read `bkp<yymmdd>/` for the prior text, treat anything under `man-done/` as his, and leave the split alone until the round closes.
+- **Assume no source comment survives him.** Claim tags, the provenance blocks recording how each number was computed, the guidance comments in `main.tex`, and a float-steering note in a neighbouring section all went. Keep provenance in the project's evidence notes rather than in the manuscript, and expect to re-add steering comments after he has passed through. He adds his own banner rules in their place (`%=======================` above and below the section command).
+- **Cross-references become a parenthetical tail.** `the adaptive placement of Section~\ref{sec:method:core}` became `the sub-quadratic \textsc{Abc} method (\S\ref{sec:method:core})`.
+- **He applies 8.15 to `refs.bib` himself** rather than asking, which is cheap to do before he arrives. He also put `\newpage` before `\bibliography` once and removed it two commits later, so do not treat the fresh-page bibliography as settled (§8.28).
+
+### 8.23 Introduction Shape: Question, Challenges, Solution
+
+From his rewrite of an entire paper body (2026-09-16), the introduction he builds:
+
+- **The motivation closes on one boxed italic question and the positioning table follows immediately**, so the table (§8.18) reads as its answer sheet. The question is the premise turned interrogative, set in `\fbox{\parbox{...}}` with `\itshape`: `If accurate <input> is already known before <operation>, how can a system use this information to avoid <the two costs the paper targets>?`
+- **The survey of prior systems moves into the introduction, split by one discriminating axis and set as a two-item packed list.** The axis word is bolded and italicised in the lead-in: `A key difference among existing systems is \textbf{\textit{when}} this information becomes available.`
+- **The gap gets its own subsection, then numbered technical challenges each close on their own challenge sentence.** `\subsection{Why Existing Approaches Fall Short}` says in three sentences what the premise does not give you; `\textit{\underline{TC-I:}}` through `TC-III` then run two short paragraphs each and end `The challenge is therefore to ...`. Every member of the run gets the same shape (§8.7).
+- **The solution subsection answers the challenges by number.** `\subsection{Our Solution: \sys}` (§8.1) gives one paragraph per challenge, each closing `(addressing \textit{TC-I})`, plus an unnumbered paragraph for run-time behaviour. Contributions then carry both a section reference and the headline numbers.
+- **The introduction's own figure goes.** This overrides the default figure plan in which the introduction carries a small problem-only figure: with a full-width positioning table already there he keeps one, not both, and nothing is cited before the design figure.
+
+### 8.24 The System Section Answers What Before How
+
+He deleted the background section and replaced it with a system-model section, moving all mechanism out into a separate pipeline section.
+
+- **The section is titled `What Is \sys` and no background section survives.** Prior-executor material lives in the introduction's list (§8.23) and in related work. This is §8.1 carried one step further: the title states what the reader gets, not which genre the section belongs to.
+- **The overview is three short paragraphs, then a named component list.** The paragraphs answer what the system decides, how it decides it, and what happens at run time, two to four sentences each. The list sits inside `\begin{samepage}`, takes a lead-in sentence (§8.3), and gives each component a one-line job. One subsection per component follows, in list order and under the list's names.
+- **An `Inputs and Execution Contract` subsection states what the input must contain and which part of it correctness rests on**, as a sentence rather than by implication: `\sys relies on this input for correctness, whereas cost estimates affect only performance.` It also names each candidate source of the input and why it does not yet supply it.
+- **Notation arrives one symbol per sentence in prose, not display math** (`Let $p(v)$ be the latest predecessor of $v$ under $\prec$.`). Seven such sentences carry the whole model; the numbered formulas wait for the method section.
+- **Old `\label`s stack unchanged on the new subsections** so no cross-reference in an untouched section dangles. Four of ours sit on one of his. Do this yourself when you move a section.
+
+### 8.25 Method Prose: Component Subjects, Imperative Labels, Numbered Formulas
+
+The method section is where his register differs most from prose that reads like a model wrote it. Against our version: mean sentence 14.6 words against 20.7, `, so` causal tails 6 against 14, `X, not Y` scaffolds 0 against 3, `we` twice in 1,800 words against six.
+
+- **The subject of a method sentence is the component, not the authors.** `The builder`, `The scheduler`, `The worker`, and phase names used as bare nouns (`Prepare returns an execution plan ...`) open most sentences; `we` survives only where a symbol is being stipulated. This is the exact inverse of the evaluation register in §8.21, where `we` is the subject almost everywhere. The split is by section, not by paper.
+- **Phases are subsections, steps are run-in bold imperative verb phrases.** `\subsection{Phase I: Prepare}` through `Phase III: Finalize`, with eight labels of the form `Normalize the input.`, `Derive the two edge sets.`, `Rank and place nodes.` A label names the step's action, never its topic.
+- **Every mechanism lands as a displayed formula the later text cites by number.** Ten displays in his method section, nine of them numbered, where our draft had none; the analysis section and the appendix proofs point back with `\eqref` instead of restating. Pseudocode references travel in a parenthetical tail (`(Algorithm~\ref{alg:main}, lines~\ref{ln:rank}--\ref{ln:rank-order})`), per §8.10.
+- **A subsection ends by walking the running example with real identifiers and arithmetic** (`The longest path has weight $20+30+25=75$.`). The mechanism paragraphs above it carry no numbers.
+- **Contrast is a positive clause plus `but`, and cause moves inside the sentence as `therefore`.** `Workers follow the planned order, but they wait for actual predecessor completion before starting a task.` His `, so` tails fall to 9 from our 23 while `therefore` rises to 13 from 9, so the connector is relocated, not deleted.
+- **Metaphor nouns go outright**, `lever`, `axis`, `regime`, `surface`, and `ceiling` appearing nowhere in his rewrite. Our `What it contributes is set by the control regime, not by the storage layout.` became a sentence that names the component and states exactly what it allocates (`The \emph{<Component> (<ABBR>)} allocates a separate slot for every task that writes a location $s$.`). A modelling boundary gets its own two-clause sentence: `Planned costs describe the model; they do not include synchronization or hardware overhead.`
+- **With two algorithms, the one the prose walks through stays in the body and the complete listing becomes Appendix A**, introduced by one `\paragraph{}` per phase. §8.18's main-algorithm-as-spine still holds; the full listing is not the spine.
+
+### 8.26 Guarantees Get a Section, Proofs Get the Appendix
+
+He inserted an `Analysis` section between the method and the evaluation that our draft did not have.
+
+- **Theorem and proposition statements sit in the body, every proof in the appendix.** The section opens by naming the guarantees in two sentences, says where the proofs are, and bounds what they cover (`The bounds refer to planned costs and do not predict runtime overhead.`).
+- **Each formal statement is followed by one plain paragraph saying what the guarantee depends on and what it does not**: `It does not depend on the accuracy of $w$: incorrect estimates can delay execution but cannot change its result.` A proof sketch is not this paragraph; he deleted ours and wrote the dependency reading instead. Bounds are `\paragraph{}` run-ins, each closing on its exclusion (`These bounds exclude input preparation.`).
+- **He supplies unprompted the formal furniture he expects a systems paper to have**: a feasibility condition defining a legal output, an existence lemma for the search space, a liveness lemma ruling out deadlock when estimates are wrong, an equivalence proposition for two implementations of one operation, an input contract, and a sentence isolating which inputs correctness depends on. Write these before he asks. A prose paragraph contrasting the proposed design with a competitor's runtime mechanism is not wanted, though; that one he cut.
+
+### 8.27 Discussion Hedges, Related Work Runs One Sentence per System
+
+- **A discussion run-in label is a full claim sentence and the paragraph under it argues that claim**: `Input quality and planner quality are separate bottlenecks.` Later subsections fall back to topic labels (`Input sources.`, `Larger inputs.`), so the claim-sentence form marks the implications subsection only.
+- **The discussion carries no measured numbers except the one an appendix owns**, one percentage across 690 words where ours had ten in 610. **Implications are hedged and each conclusion states where it stops**: `Our results suggest`, `may`, and `could` appear sixteen times against once in ours, and a paragraph ends by naming its scope limit (`Such settings ... fall outside the equivalence result proved for the current model.`). Epigram closers go with the numbers.
+- **Related work loses its subsections and becomes bold-labelled paragraph groups by area.** Inside each, one sentence says what a system does and the next says how the paper differs, one system at a time; comma-chained lists of systems are broken apart. Mean sentence 14.5 words against our 25.4.
+- **Exactly one closest precedent and one direct comparison are named as such** (`<System X> is the closest precedent for <component>`, `<System Y> is a direct comparison`). He adds the citations his rewrite needs, already in §8.15 format, so expect `refs.bib` to grow under him.
+
+### 8.28 Restructure and Handover, Second Round
+
+- **A takeover round can move every body file at once and renumber the sections under fixed filenames.** All nine sections were backed up to `bkp<yymmdd>/` and his rewrites landed in `man-done/` (§8.22); our one method section became his system section, his pipeline section, and a new analysis section, with the `02`, `03`, `04` filenames left as they were. Read the section titles, not the filenames.
+- **Source comments survive only where he edited in place**: twelve of the appendix's seventeen claim tags are still there after his revision of it, while all thirty-five in the six body files he replaced wholesale are gone.
+- **The Overleaf sync deletes repository dotfiles.** `.gitignore` disappeared in his commit with no mention of it. Check for the file after every pull and restore it before committing.
+- **He reverses his own layout tweaks between rounds, so a single-round formatting observation is provisional.** Amending §8.22: he put `\newpage` before `\bibliography` in one commit and removed it two commits later, so do not treat the fresh-page bibliography as settled.
+
 ---
 
 ## 9. The Paper's Figure Pattern
