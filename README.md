@@ -171,23 +171,6 @@ Other skills (`idea`, `literature`, `citations`, `pdf-explore`,
 skills) self-route by description; ask for what you want ("check novelty",
 "polish this section", "find baselines") and the matching skill triggers.
 
-## Output style
-
-This plugin ships an **Academic Research Assistant** output style
-(`output-styles/academic-research-assistant.md`): a rigorous research persona
-that puts argument before prose, stays evidence-driven, tags critique by
-severity, writes plain language inside a formal academic register, and never
-fabricates citations. When it talks to you it switches to plain reporting:
-technical terms get a one-clause gloss in parentheses at first use, the
-conclusion comes first, multi-step tasks open every turn with a "step N of M"
-line, and errors are reported as where, what, why (only with evidence), and
-fix. It keeps Claude Code's built-in coding instructions
-(`keep-coding-instructions: true`), so builds, scripts, and git work behave as
-in the default style. Enable it with `/config` -> Output style -> "Academic
-Research Assistant", or set `"outputStyle": "Academic Research Assistant"` in
-your project `.claude/settings.local.json`. It pairs with the claim-first
-contract in `skills/_shared/core/claim-first-protocol.md`.
-
 ## The house style (default for reviewer-facing prose)
 
 `skills/_shared/core/house-style.md` is the plugin's standing style guide for
@@ -325,8 +308,6 @@ hooks/
   hooks.json             # SessionStart wiring
   session-start.sh       # reminds to start CONTEXT.md in writing projects that lack one
 commands/                # /writing:outline  /writing:draft  /writing:archive
-output-styles/
-  academic-research-assistant.md   # rigorous academic-research persona (see ## Output style)
 templates/               # findings.md, glossary.md, metadata.yaml, progress.md (copied into .writing/ on init)
 skills/
   _shared/core/          # claim-first-protocol.md, terminology-ledger.md, house-style.md (cross-skill contracts)

@@ -56,11 +56,8 @@ python3 "$PLUGIN_ROOT/skills/scientific-schematics/scripts/imagegen.py" --help >
   && pass "scientific-schematics/scripts/imagegen.py --help" \
   || fail "scientific-schematics/scripts/imagegen.py missing or --help failed"
 
-echo "== 5b. output style + deletion audit =="
-[[ -f "$PLUGIN_ROOT/output-styles/academic-research-assistant.md" ]] \
-  && pass "output-styles/academic-research-assistant.md" \
-  || fail "missing output-styles/academic-research-assistant.md"
-for gone in skills/submission skills/revision skills/peer-review skills/verification \
+echo "== 5b. deletion audit =="
+for gone in output-styles skills/submission skills/revision skills/peer-review skills/verification \
             skills/finishing-branch skills/lightweight-execute skills/subagent-driven \
             skills/team-driven commands/submit.md commands/revise.md agents/rebuttal-auditor.md \
             skills/collaborating-with-codex skills/collaborating-with-hermes \

@@ -7,6 +7,12 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-10-09
+
+### Removed
+
+- The `academic-research-assistant` output style and the `output-styles/` directory. The output style decides how Claude talks to the user, so it no longer carries academic judgment; keep a general-purpose style such as Plain and add academic rules to the system prompt by other means. Settings that name `Academic Research Assistant` as `outputStyle` must be changed.
+
 ## [3.7.0] - 2026-10-09
 
 ### Added
