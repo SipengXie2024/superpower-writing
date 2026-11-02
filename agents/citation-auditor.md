@@ -27,7 +27,7 @@ You are a Citation Auditor. You review how a manuscript uses its citations — t
    - No citation from the last three or four years in a paper on an active field. Judge this against the paper's own submission year, not a fixed cutoff.
 
 5. **Relevance drift**
-   - Cited paper's abstract does not actually support the sentence it's attached to. (Cross-reference the Zotero/network-resolved abstract against the claim text.)
+   - The cited paper's body does not support the sentence it's attached to. Judge from the quoted passage and page recorded in the claim's EVIDENCE entry and `.writing/verify-cache.json`, re-reading the passage in `.writing/papers/<citekey>.txt` (`skills/citations/scripts/find_passages.py`). A citation with no recorded passage is flagged as unchecked, not as drift. Procedure: `skills/citations/references/fulltext-relevance.md`.
    - Citations inherited from an earlier draft whose surrounding claim has since changed.
 
 6. **Seminal-work omissions**
@@ -37,7 +37,7 @@ You are a Citation Auditor. You review how a manuscript uses its citations — t
 
 - All `% claim: id` tagged paragraphs in `.writing/manuscript/*.tex` (LaTeX line comments).
 - Corresponding claims YAML from `.writing/claims/section_*.md` with EVIDENCE entries.
-- `.writing/verify-cache.json` for abstracts already resolved by claim-verification.
+- `.writing/verify-cache.json` for the records, full-text paths, quotes and verdicts claim-verification already produced.
 - When metadata.yaml has `zotero.enabled: true`, also cross-check against the configured Zotero collection: call the `zotero_get_collection_items` MCP tool (from the `zotero` server in `.mcp.json`) with `collection_key=<key>` and a sufficient `limit`, extract the set of `data.DOI` values, and flag any cited DOI not in that set as "potentially not-yet-read by the author".
 
 ## What you do NOT check

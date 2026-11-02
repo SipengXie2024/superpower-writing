@@ -7,6 +7,13 @@
 # Results-versus-Discussion boundary; leave it unset for a general CS paper.
 writing_profile: systems
 
+# Target venue. literature uses pc_url to find the program committee whose
+# relevant papers the manuscript should cite.
+venue:
+  name: TODO      # e.g. OSDI
+  year: TODO
+  pc_url: ""      # committee page; literature fills it when empty
+
 authors: []
 # - name: Sipeng Xie
 #   affil: Institution name

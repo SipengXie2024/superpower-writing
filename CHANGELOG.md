@@ -7,6 +7,22 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-11-02
+
+### Added
+
+- `citations/scripts/fetch_fulltext.py`: downloads a cited paper's open-access PDF (published version from OpenAlex first, then the arXiv preprint) or takes a local PDF, and writes page-delimited text to `.writing/papers/`, which `init-writing-dir.sh` now ignores.
+- `citations/scripts/find_passages.py`: ranks a paper's paragraphs against the citing sentence, and confirms a quote occurs in the paper with its page; matching survives line wrapping, hyphenation and ligatures.
+- `citations/references/fulltext-relevance.md`: the shared procedure and record for judging a citation on a quoted passage from the paper's body.
+- `literature/scripts/pc_works.py` and `literature/references/pc-aware-citations.md`: shortlist the target venue's program-committee papers by citation-graph links to the manuscript's references and by topic, resolving members to OpenAlex records by name and affiliation (55 of the 58 SOSP 2024 members resolve automatically; the rest take a hand-checked id in a third TSV column, and reruns resume); admitted only where a sentence needs them and after the full-text check.
+- Downloads a server cannot make (ACM Digital Library PDFs and USENIX pages return 403 to cloud machines) go through a desktop browser on the user's own machine; `fetch_fulltext.py` lists those URLs under `blocked_for_scripts` and takes the saved file through `--pdf`.
+- `metadata.yaml` gains a `venue` block (`name`, `year`, `pc_url`); outlining writes the venue.
+
+### Changed
+
+- claim-verification Pass 2c judges each citation on a verbatim passage from the cited paper's body, confirmed present by script and judged by a fresh-context reviewer. Abstract agreement no longer passes; a paper with no obtainable full text is reported `UNVERIFIED-RELEVANCE` and blocks the `verified` flip until the PDF is supplied or the user overrides.
+- literature Job C verifiers and the citation-auditor's relevance-drift check use the same full-text record.
+
 ## [4.0.0] - 2026-10-09
 
 ### Removed

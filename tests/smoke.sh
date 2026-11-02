@@ -52,6 +52,12 @@ for a in citation-auditor; do
     || fail "missing agents/$a.md"
 done
 
+for script in citations/scripts/fetch_fulltext.py citations/scripts/find_passages.py literature/scripts/pc_works.py; do
+  python3 "$PLUGIN_ROOT/skills/$script" --help >/dev/null 2>&1 \
+    && pass "skills/$script --help" \
+    || fail "skills/$script --help failed"
+done
+
 python3 "$PLUGIN_ROOT/skills/scientific-schematics/scripts/imagegen.py" --help >/dev/null 2>&1 \
   && pass "scientific-schematics/scripts/imagegen.py --help" \
   || fail "scientific-schematics/scripts/imagegen.py missing or --help failed"

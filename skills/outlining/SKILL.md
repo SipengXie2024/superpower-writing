@@ -37,7 +37,7 @@ A project `.claude/CLAUDE.md` or `AGENTS.md` in the paper repo overrides the hou
 Lock down three things and write them to `.writing/findings.md`:
 
 - **Core contribution** in one sentence. Everything downstream anchors to this.
-- **Target venue or venue class**, which sets the reporting guideline and structural norms.
+- **Target venue or venue class**, which sets the reporting guideline and structural norms. When a specific venue is chosen, also write its name and year to `venue` in `metadata.yaml`.
 - **Unit of evidence** (dataset, trace, benchmark, proof), what counts as EVIDENCE later.
 
 The contribution sentence usually names the system or method. Those names are domain terms: record them in the repo-root `CONTEXT.md` as they are decided (`superpower-writing:domain-glossary`).

@@ -41,6 +41,8 @@ add_ignore_line() {
 }
 add_ignore_line ".writing/verify-cache.json"
 add_ignore_line ".writing/stash/"
+# Downloaded full texts of cited papers (copyrighted PDFs)
+add_ignore_line ".writing/papers/"
 # LaTeX compile artifacts
 add_ignore_line ".writing/main.aux"
 add_ignore_line ".writing/main.log"

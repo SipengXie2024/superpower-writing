@@ -1,6 +1,6 @@
 ---
 name: citations
-description: Generate and verify BibTeX. Adds a paper by DOI or arXiv id through Zotero, then emits the BibTeX. Checks a citation's authors, title, venue and year against the real record to catch hallucinated references, and audits a .bib for missing fields and duplicates. Use when managing citations, generating BibTeX, verifying references, or cleaning a .bib. 中文触发：管理引用、生成 BibTeX、核验参考文献、整理 bib。Asking you to fill the fields from memory and leave a missing DOI blank is still this skill.
+description: Generate and verify BibTeX from a DOI or arXiv id through Zotero. Checks authors, title, venue and year against the real record, quotes the passage in the cited paper's full text that supports the citing sentence, and audits a .bib for missing fields and duplicates. Use when managing citations, generating BibTeX, verifying references, or cleaning a .bib. 中文触发：管理引用、生成 BibTeX、核验参考文献、读原文确认引用相关、整理 bib。Asking you to fill the fields from memory and leave a missing DOI blank is still this skill.
 license: MIT license
 metadata:
     skill-author: superpower-writing (slimmed from citation-management, Zotero-MCP-first)
@@ -8,7 +8,7 @@ metadata:
 
 # Citations: BibTeX generation and reference verification
 
-Turn a paper into a correct BibTeX entry, and prove an existing entry is real and accurate. A strong model still fabricates references and swaps authors, venues, and years between real papers, so the verification here is a mechanical check, not a matter of care.
+Turn a paper into a correct BibTeX entry, and prove an existing entry is real, accurate, and relevant to the sentence that cites it. A strong model still fabricates references and swaps authors, venues, and years between real papers, so the verification here is a mechanical check, not a matter of care.
 
 Metadata comes from the Zotero library over the MCP connection (configured in `.mcp.json`), which pulls from CrossRef and arXiv. Web search is the fallback. The old skill's hand-scraping of Google Scholar, CrossRef, arXiv, and DBLP web pages is gone; do not reconstruct it.
 
@@ -91,7 +91,19 @@ For each reference, pull the authoritative record and compare field by field. Th
 2. Compare against the entry: **authors** (same people, same order), **title** (verbatim), **venue** (`journal` or `booktitle`), **year**, **DOI**. A mismatch is an error, not a warning.
 3. If the reference will not resolve anywhere, treat it as likely fabricated until proven otherwise, and tell the user.
 
-For the harder "does this work actually exist and say what the sentence claims" adversarial search (independent re-search, per-candidate existence checks), use the `literature` skill's citation-verification workflow. This skill owns the metadata-accuracy half; that skill owns the existence-and-relevance half.
+### Per citation: does the paper say what our sentence uses it for?
+
+Correct metadata proves the paper exists, not that it supports us. Read the cited paper's body, find the passage our sentence relies on, and quote it. The full procedure, shared with claim-verification and the literature verifiers, is in `references/fulltext-relevance.md`; the short form:
+
+```bash
+python3 scripts/fetch_fulltext.py --doi 10.1145/3600006.3613165 --key Kwon2023vllm --out-dir .writing/papers
+python3 scripts/find_passages.py .writing/papers/Kwon2023vllm.txt --query "<the citing sentence>" --top 5
+python3 scripts/find_passages.py .writing/papers/Kwon2023vllm.txt --quote "<passage copied from the paper>" --json
+```
+
+A citation passes only with a verbatim quote that the script found in the paper, its page, and a support verdict from a reviewer other than the agent that chose the citation. An abstract that agrees with the sentence is a note, never a pass. When the full text is paywalled and no preprint exists, ask the user once to attach the PDF in Zotero or pass `--pdf`; until then the citation is reported as `unverified-relevance`.
+
+For finding new citations and the adversarial existence search (independent re-search, per-candidate verifiers), use the `literature` skill's Job C, whose verifiers run this same full-text check.
 
 ### Whole .bib: batch mechanical check
 
@@ -121,6 +133,9 @@ It fixes common issues by default; add `--no-fix` to only reformat. Without `--o
 - `scripts/validate_citations.py` runs the batch metadata and format check, the mechanical defense above.
 - `scripts/format_bibtex.py` formats, sorts, and deduplicates a .bib.
 - `scripts/extract_metadata.py` converts a DOI or arXiv id to BibTeX offline, the no-Zotero fallback.
+- `scripts/fetch_fulltext.py` downloads a cited paper's open-access PDF (or takes a local one) and writes page-delimited text to `.writing/papers/`.
+- `scripts/find_passages.py` ranks a paper's paragraphs against a sentence and confirms that a quote occurs in the paper, with its page.
+- `references/fulltext-relevance.md` is the full-text relevance procedure and the citation record it produces.
 - `assets/bibtex_template.bib` holds correct worked examples for every entry type.
 
-The scripts need `requests` (`pip install requests`). The Zotero path needs the `zotero` MCP server from `.mcp.json` running.
+The scripts need `requests` (`pip install requests`); `fetch_fulltext.py` also needs `pdftotext` (poppler-utils). The Zotero path needs the `zotero` MCP server from `.mcp.json` running.

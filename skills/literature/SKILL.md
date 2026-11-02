@@ -2,13 +2,13 @@
 name: literature
 description: >-
   Find and review academic literature. Use when the user wants to search
-  papers, survey a research direction, look up a paper or dataset, find
-  baselines or related work, fill or prune a related-work section or
-  comparison table, screen weak citations, or verify that cited works
-  exist. Choosing which references to cut when over a page budget, and
-  refusing to invent numbers for an empty comparison-table row, both
-  belong here. Chinese triggers: 搜文献, 综述某方向, 查论文或数据集,
-  找 baseline, 补充对比表, 文献核验, 超页数砍引用, 对比表有几行没数据.
+  papers, survey a direction, look up a paper, find baselines,
+  fill or prune related work or a comparison table, screen weak citations,
+  verify cited works exist, or find the target venue's program-committee
+  papers worth citing. Also covers cutting references over a page budget
+  and refusing to invent numbers for an empty table row. Chinese triggers: 搜文献,
+  综述某方向, 查论文或数据集, 找 baseline, 补充对比表, 文献核验,
+  超页数砍引用, 对比表有几行没数据, 引用 PC 的论文, 审稿人可能是谁.
 allowed-tools: Read Write Edit Bash
 ---
 
@@ -182,6 +182,11 @@ then synthesis.
   Each verifier checks four things: the work exists with the claimed
   title/venue/year; it actually does what the summary claims; it genuinely
   fits the claim or table row it would support; the BibTeX metadata is correct.
+  "Does what it claims" and "fits" are judged on the paper's body: the
+  verifier fetches the full text, finds the passage, and returns a verbatim
+  quote with its page that `find_passages.py --quote` confirms, following
+  `../citations/references/fulltext-relevance.md`. A candidate whose full text
+  cannot be obtained is returned as `unverified-relevance`, never `keep=true`.
   Have verifiers also audit the surrounding existing content while they are
   there, since independent verifiers catch the paper's own pre-existing errors
   for free.
@@ -255,6 +260,32 @@ from memory is an invented value here as much as a guessed one, however confiden
 the recollection: only numbers the user supplied, or a source open in front of
 you states, may fill a cell.
 
+### Candidates from the target venue's program committee
+
+The PC of the target venue reviews the paper, so the PC's own relevant work is
+the related work most likely to be checked by its authors. Treat the PC as one
+more candidate source for the pipeline above. A PC paper
+enters the manuscript only where a sentence needed a citation anyway or the
+related-work section has a real gap, and only after passing the same verifier
+and full-text check as any other candidate. Steps, admission rule and
+pitfalls are in `references/pc-aware-citations.md`; in short:
+
+1. Fetch the venue's committee page (`venue.pc_url` in `.writing/metadata.yaml`)
+   and save it under `.writing/sources/`. Members come only from that saved
+   page.
+2. Copy the members into a TSV and run
+   `python3 scripts/pc_works.py pc.tsv --refs .writing/refs.bib --topic "<the
+   paper's topic>" --out .writing/sources/pc-shortlist.json`. It resolves each
+   member to an OpenAlex author record by name and affiliation and scores their
+   recent papers by citation-graph links to the manuscript's references and by
+   topic. Resolve the members it reports as unresolved by hand from the listed
+   nearest records.
+3. Read the shortlist, drop what is off-topic, and send the rest to the
+   verifiers. Members whose work the manuscript already cites need nothing.
+4. A PC paper that overlaps the manuscript's contribution goes to the
+   novelty-risk scan below, and its description in the paper is checked
+   against its body with special care: its author may be the reviewer.
+
 ### Novelty-risk scanning
 
 Every literature search doubles as competitor discovery. When a found system
@@ -278,6 +309,9 @@ this check is mechanical, not a matter of care. Every DOI you emit either
 resolves to a real paper that says what you claim or it is a fabrication, and
 the difference is checkable in seconds.
 
+- **Full text.** Every citation that supports a claim needs a verbatim
+  passage from the cited paper's body; see
+  `../citations/references/fulltext-relevance.md`.
 - **Zotero MCP path (preferred).** `zotero_add_by_doi(doi=<DOI>,
   collection_key=<key>)` auto-fetches correct metadata and an open-access PDF,
   and dedupes by DOI. To confirm a paper is genuinely in the library despite a
@@ -355,3 +389,7 @@ gate.
 - `references/synthesis-writing.md`: turning a search into a synthesis that
   argues rather than lists.
 - `references/citation-styles.md`: APA, ACM, IEEE, and Chicago formatting.
+- `references/pc-aware-citations.md`: finding and admitting the target venue's
+  PC papers.
+- `scripts/pc_works.py`: PC member list + `.bib` → shortlist of each member's
+  recent papers linked to the manuscript.
