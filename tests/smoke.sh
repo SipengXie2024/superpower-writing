@@ -36,7 +36,7 @@ python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/plugin.json
 python3 -c "import json; json.load(open('$PLUGIN_ROOT/.claude-plugin/marketplace.json'))" && pass "marketplace.json valid"
 
 echo "== 5. skill + command + agent presence =="
-for name in outlining drafting claim-verification polish rebuttal idea literature citations scientific-visualization scientific-schematics domain-glossary wait-what; do
+for name in outlining drafting claim-verification polish rebuttal idea literature citations scientific-visualization scientific-schematics domain-glossary wait-what formalize-and-substitute; do
   [[ -f "$PLUGIN_ROOT/skills/$name/SKILL.md" ]] \
     && pass "skills/$name/SKILL.md" \
     || fail "missing skills/$name/SKILL.md"
@@ -61,6 +61,21 @@ done
 python3 "$PLUGIN_ROOT/skills/scientific-schematics/scripts/imagegen.py" --help >/dev/null 2>&1 \
   && pass "scientific-schematics/scripts/imagegen.py --help" \
   || fail "scientific-schematics/scripts/imagegen.py missing or --help failed"
+
+SEP="$PLUGIN_ROOT/skills/formalize-and-substitute/scripts/check_separable.py"
+python3 "$SEP" --help >/dev/null 2>&1 \
+  && pass "formalize-and-substitute/scripts/check_separable.py --help" \
+  || fail "formalize-and-substitute/scripts/check_separable.py --help failed"
+python3 "$SEP" --example randomize-combine >/dev/null 2>&1 \
+  && pass "check_separable accepts a separable aggregator" \
+  || fail "check_separable rejected randomize-combine"
+set +e
+python3 "$SEP" --example merkle >/dev/null 2>&1
+rc=$?
+set -e
+[[ $rc -eq 1 ]] \
+  && pass "check_separable rejects a Merkle root (exit 1)" \
+  || fail "check_separable on merkle exited $rc, expected 1"
 
 echo "== 5b. deletion audit =="
 for gone in output-styles skills/submission skills/revision skills/peer-review skills/verification \

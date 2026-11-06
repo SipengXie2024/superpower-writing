@@ -7,6 +7,13 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [4.2.0] - 2026-11-06
+
+### Added
+
+- `formalize-and-substitute`: designs or improves a cryptographic construction by equations. It writes the required behaviour as functional equations, derives the canonical form `r = r(0) + Σ f_i(x_i)` with its premises named (separability is the only load-bearing one), substitutes it into each candidate scheme's requirement equation, reads off algebraic, security and instantiation conditions (with soundness and completeness roles of every bound separated), and ends with a required novelty check routed through `idea`. It ships `scripts/check_separable.py`, which brute-forces a toy aggregator and prints a counterexample when the canonical form does not exist, and a worked example on homomorphic aggregators, function commitments and authenticated trees. Its description routes it into any cryptographic design or improvement discussion; two fresh sessions whose prompts did not name it both invoked it first.
+- Eval case `additive-tree-pitched-as-first`, not yet measured. Before the move into the plugin, four design questions were run with and without the skill (Opus, one run per arm, blind grader): 30/30 against 27/30 assertions. All three baseline misses were about stating the premise or the requirement equation; both arms reached the same conclusions, since both could read the same paper library.
+
 ## [4.1.0] - 2026-11-02
 
 ### Added

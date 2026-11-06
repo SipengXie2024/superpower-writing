@@ -69,7 +69,9 @@ rebuttal      grounded R-A-C response after reviews arrive
 `tikz-figures` (vector), `scientific-schematics` (image-model PNG through the
 local Codex CLI), and `scientific-visualization` (data plots).
 Cryptographic proofs come from
-`game-based-security-proof` and `simulation-security-proofs`. `domain-glossary`
+`game-based-security-proof` and `simulation-security-proofs`;
+`formalize-and-substitute` explores a new or improved cryptographic
+construction by equations before any proof is written. `domain-glossary`
 keeps the project's ubiquitous language in a repo-root `CONTEXT.md` that
 outlives any single paper, and `/wait-what` re-pitches the last message in
 controlled plain language when it did not land. Skills discover each other by
@@ -326,6 +328,7 @@ skills/
   scientific-visualization/  # publication-ready matplotlib / seaborn / plotly data plots with venue styling
   game-based-security-proof/ # game-hopping reduction proofs for cryptographic primitives
   simulation-security-proofs/ # simulation-based and UC proofs for MPC, ZK, OT, commitments
+  formalize-and-substitute/ # crypto design by equations: canonical form + premises, requirement equations, residual conditions, novelty check
   planning-foundation/   # persistent .writing/ working memory across context resets; initialize it first
   domain-glossary/       # project ubiquitous language in repo-root CONTEXT.md; pairs with the terminology ledger
   wait-what/             # user-invoked: re-pitch the last message in controlled plain language with CONTEXT.md terms
